@@ -1,0 +1,10 @@
+todo
+ Bugs: Find out why the joysticks are kind of choppy, and make it a circle, rather than an oval
+ make the loading of spawner textures smoother, also textures for enemies and attacks, overall its just bad. Most likely make it static
+ Sometimes crashes due to null pointer(mainly for plateaus?), seems like going slowly solves it?? For now I just put a conditional in the draw of Plateau, but i need further solution
+ fix the game environment scaling
+ For stuff that have isTextureLoaded() that derive from textured REct, delete the sub classes method
+todo:
+ Features: Make TextBox more easy on the eyes
+ Get sprite Sheets
+ Home/pause button for in game + tutorial button
