@@ -3,14 +3,12 @@ package enigmadux2d.core.shapes;
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
-import android.graphics.Canvas;
-import android.graphics.Paint;
-import android.opengl.GLES10;
 import android.opengl.GLUtils;
 import android.support.annotation.NonNull;
-import android.util.Log;
 import android.view.MotionEvent;
 
+
+import com.enigmadux.craterguardians.MathOps;
 
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
@@ -26,6 +24,8 @@ import enigmadux2d.core.EnigmaduxComponent;
  * @version BETA
  */
 public class TexturedRect extends EnigmaduxComponent {
+    //used as a buffer for the vertex and texture buffers
+    private ByteBuffer byteBuffer;
     // buffer holding the vertices
     private FloatBuffer vertexBuffer;
     //vertices used for open gl
@@ -39,8 +39,7 @@ public class TexturedRect extends EnigmaduxComponent {
     private float deltaX = 0;
     //how much to translate it by in the y direction
     private float deltaY = 0;
-    //how much to translate it by in the z direction
-    private float deltaZ = 0;
+
     //how much to scale it by in the x direction
     private float scaleX = 1;
     //how much to scale it by in the y direction;
@@ -48,13 +47,9 @@ public class TexturedRect extends EnigmaduxComponent {
     //how much to rotate it along the 0,0,1 axis
     private float angle = 0;
 
-    //original width and height before padding
-    protected int orgW,orgH;
-    //width and height of the bitmap after padding
-    protected int afterW,afterH;
 
-    //sees if the texture has been loaded or not
-    protected boolean isTextureLoaded;
+    //a value of 1,1,1,1 would mean draw the object directly, the shader alters the color of the texture, by multiplying each
+    protected float[] shader = new float[] {1,1,1,1};
 
 
 
@@ -69,7 +64,7 @@ public class TexturedRect extends EnigmaduxComponent {
      * @param h the height of the rect (distance from top edge to bottom edge) in open gl coordinate terms e.g (1.0f, 1.5f) should be positive
      */
     public TexturedRect( float x, float y, float w, float h) {
-        super(x,y,w,h);
+        super(x, y, w, h);
 
 
         this.x = x;
@@ -78,31 +73,33 @@ public class TexturedRect extends EnigmaduxComponent {
         this.h = h;
 
 
-        vertices = new float[] {
-            x,y,0,
-            x,y+h,0,
-            x+w,y,0,
-            x+w,y+h,0
+        vertices = new float[]{
+                x, y, 0,
+                x, y + h, 0,
+                x + w, y, 0,
+                x + w, y + h, 0
         };
+        this.byteBuffer = ByteBuffer.allocateDirect(vertices.length * 4);
+        this.byteBuffer.order(ByteOrder.nativeOrder());
 
-
-        ByteBuffer byteBuffer = ByteBuffer.allocateDirect(vertices.length * 4);
-        byteBuffer.order(ByteOrder.nativeOrder());
-
-        vertexBuffer = byteBuffer.asFloatBuffer();
+        vertexBuffer = this.byteBuffer.asFloatBuffer();
         vertexBuffer.put(vertices);
         vertexBuffer.position(0);
+
+
+        this.byteBuffer = ByteBuffer.allocateDirect(vertices.length * 8/3);
+        this.byteBuffer.order(ByteOrder.nativeOrder());
+
+        textureBuffer = byteBuffer.asFloatBuffer();
     }
+
 
     /** Loads the vertices from a float[] to a buffer
      *
      * @param vertices the vertices, should be in the form of {x1,y1,z1,x2,y2,z2 ...}, bottom right, top right, bottom left, top left
      */
-    protected void loadVertexBuffer(float[] vertices){
-        ByteBuffer byteBuffer = ByteBuffer.allocateDirect(vertices.length * 4);
-        byteBuffer.order(ByteOrder.nativeOrder());
+    public void loadVertexBuffer(float[] vertices){
 
-        vertexBuffer = byteBuffer.asFloatBuffer();
         vertexBuffer.put(vertices);
         vertexBuffer.position(0);
     }
@@ -112,11 +109,8 @@ public class TexturedRect extends EnigmaduxComponent {
      *
      * @param texture the texture represented as a float[]. All sub values should be 0 to 1f
      */
-    protected void loadTextureBuffer(float[] texture){
+    public void loadTextureBuffer(float[] texture){
 
-        ByteBuffer byteBuffer = ByteBuffer.allocateDirect(texture.length * 4);
-        byteBuffer.order(ByteOrder.nativeOrder());
-        textureBuffer = byteBuffer.asFloatBuffer();
         textureBuffer.put(texture);
         textureBuffer.position(0);
     }
@@ -144,36 +138,30 @@ public class TexturedRect extends EnigmaduxComponent {
      * @param bitmap The bitmap that defines the texture of the rect
      */
     public void loadGLTexture(@NonNull GL10 gl,Bitmap bitmap){
-        this.isTextureLoaded = true;
-
-        this.orgW = bitmap.getWidth();//original width
-        this.orgH = bitmap.getHeight();//original height
-
-        //if (orgW/orgH != this.w/this.h)
-        //    throw new IllegalArgumentException("Image Dimensions (" + bitmap.getWidth() + "," + bitmap.getHeight() +  ") not mappable to TexturedRect Dimensions (" + (vertices[6]-vertices[0]) +"," + (vertices[4]-vertices[1]) + ")");
 
 
 
 
-        this.afterW = TexturedRect.nextPowerTwo(this.orgW);
-        this.afterH = TexturedRect.nextPowerTwo(this.orgH);
-        bitmap = TexturedRect.padBitmap(bitmap, 0, afterW - bitmap.getWidth(), 0,afterH - bitmap.getHeight());
+        int afterW = MathOps.nextPowerTwo(bitmap.getWidth());
+        int afterH = MathOps.nextPowerTwo(bitmap.getHeight());
+        bitmap = Bitmap.createScaledBitmap(bitmap,afterW,afterH,false);
+        //bitmap = TexturedRect.padBitmap(bitmap, 0, afterW - bitmap.getWidth(), 0,afterH - bitmap.getHeight());
 
 
-        loadTextureBuffer(new float[] {
+        /*loadTextureBuffer(new float[] {
                 0.0f,1,//bottom left
                 0.0f,(float) (afterH - this.orgH)/afterH,//top left
                 (float) this.orgW/afterW,1,//bottom right
                 (float) this.orgW/afterW,(float) (afterH - orgH)/afterH//top right
                 }
-        );
+        );*/
 
-        /*loadTextureBuffer(new float[]{
-                0.0f,1f,
+        loadTextureBuffer(new float[]{
+                0,1,
                 0,0,
-                0.5f,1f,
-                0.5f,0
-        });*/
+                1,1,
+                1,0
+        });
 
 
         // generate one texture pointer
@@ -210,13 +198,17 @@ public class TexturedRect extends EnigmaduxComponent {
      * @param parentMatrix matrix that represents how to manipulate it to the world coordinates
      */
     public void draw(GL10 gl,float[] parentMatrix) {
-        if (! this.visible || ! this.isTextureLoaded){
+        if (! this.visible){
             return;
         }
+
         gl.glLoadMatrixf(parentMatrix,0);
-        gl.glTranslatef(this.deltaX,this.deltaY,this.deltaZ);
-        gl.glRotatef(this.angle,0,0,1);
+
+
+        gl.glTranslatef(this.deltaX,this.deltaY,0);
         gl.glScalef(this.scaleX,this.scaleY,1);
+        gl.glRotatef(this.angle,0,0,1);
+
         // bind the previously generated texture
         gl.glEnable(GL10.GL_TEXTURE_2D);
         gl.glBindTexture(GL10.GL_TEXTURE_2D, textures[0]);
@@ -233,23 +225,12 @@ public class TexturedRect extends EnigmaduxComponent {
         gl.glTexCoordPointer(2, GL10.GL_FLOAT, 0, textureBuffer);
 
         // Draw the vertices as triangle strip
+        gl.glColor4f(shader[0],shader[1],shader[2],shader[3]); // This is where the magic does happen
         gl.glDrawArrays(GL10.GL_TRIANGLE_STRIP, 0, vertices.length / 3);
-
+        gl.glColor4f(1.0f, 1.0f, 1.0f, 1.0f); // Low mana, stop the magic
         //Disable the client state before leaving
         gl.glDisableClientState(GL10.GL_VERTEX_ARRAY);
         gl.glDisableClientState(GL10.GL_TEXTURE_COORD_ARRAY);
-    }
-
-    /** Sees whether two TexturedRect objects share any space together
-     *
-     * @param otherRect the rect you want to compare this one too
-     * @return Whether or not the two TexturedRect objects collide (true = collision, false = no collision)
-     */
-    public boolean collidesWith(TexturedRect otherRect){
-        return this.x <  otherRect.getX() + otherRect.getW() &&
-                this.x + this.w > otherRect.getX() &&
-                this.y < otherRect.getY() + otherRect.getH() &&
-                this.y + this.h < otherRect.getY();
     }
 
     /**
@@ -295,75 +276,9 @@ public class TexturedRect extends EnigmaduxComponent {
         return this.h;
     }
 
-    /** Given a number input, returns the first power of two to be higher or equal to it
-     * retrieved from https://www.geeksforgeeks.org/smallest-power-of-2-greater-than-or-equal-to-n/
-     *
-     * @param n the minimum threshold of the output
-     * @return the first integer power of two to be greater than or equal to input
-     */
-    private static int nextPowerTwo(int n){
-        int count = 0;
 
-        // First n in the below
-        // condition is for the
-        // case where n is 0
-        if (n > 0 && (n & (n - 1)) == 0)
-            return n;
 
-        while(n != 0)
-        {
-            n >>= 1;
-            count += 1;
-        }
 
-        return 1 << count;
-    }
-
-    /** Slightly expensive. In essence creates a large bitmap of white space, and draws the src on top of that.
-     * Therefore there will be a white margin around the outside of the image. (method retrieved from
-     * https://stackoverflow.com/questions/6957032/android-padding-left-a-bitmap-with-white-color)
-     *
-     * @param src The source bitmap of which you want to get padded
-     * @return A bitmap which has the the source at the exact same dimensions, however there is white space along the edges
-     */
-    private static Bitmap padBitmap(Bitmap src,int paddingL,int paddingR,int paddingB,int paddingT){
-        Bitmap outputImage = Bitmap.createBitmap(src.getWidth() + paddingL + paddingR,src.getHeight() + paddingT + paddingB, Bitmap.Config.ARGB_8888);
-        Canvas can = new Canvas(outputImage);
-        can.drawARGB(0,0,0,0); //This represents White color
-        can.drawBitmap(src, paddingL, paddingT, null);
-        return outputImage;
-    }
-
-    /** sees if a number is an integer power of two
-     *
-     * @param n the number to check
-     * @return whether there exists an integer a such that 2^a == n.
-     */
-    private static boolean isPowerTwo(int n){
-        if(n==0)
-            return false;
-
-        return (int)(Math.ceil((Math.log(n) / Math.log(2)))) ==
-                (int)(Math.floor(((Math.log(n) / Math.log(2)))));
-
-    }
-
-    /** Unlike setTranslate, this moves the rectangle from it's current position
-     *
-     * @param deltaX how much to translate in the x direction from the current position
-     * @param deltaY how much to translate in the y direction from the current position
-     */
-    public void translateFromPos(float deltaX,float deltaY){
-        this.setTranslate(this.deltaX +deltaX,this.deltaY + deltaY);
-    }
-
-    /** Sets the change in z
-     *
-     * @param deltaZ how much too translate it in the z direction from 0
-     */
-    public void setDeltaZ(float deltaZ) {
-        this.deltaZ = deltaZ;
-    }
 
     /** Sets the angle around the axis 0,0,1
      *
@@ -378,40 +293,9 @@ public class TexturedRect extends EnigmaduxComponent {
      * @return the angle around axis 0,0,1
      */
     public float getAngle() {
-        return angle;
+        return this.angle;
     }
 
-    /** Gets how much it is translated by in the x direction
-     *
-     * @return deltaX;gets how much it is translated by in the x direction
-     */
-    public float getDeltaX(){
-        return this.deltaX;
-    }
-
-    /** Gets how much it is translated by in the y direction
-     *
-     * @return deltaY; how much it is translated by in the y direction
-     */
-    public float getDeltaY() {
-        return this.deltaY;
-    }
-
-    /** Gets how much it is translated by in the z direction
-     *
-     * @return deltaZ; how much it is translated by in the z direction
-     */
-    public float getDeltaZ() {
-        return this.deltaZ;
-    }
-
-    /** Sees if the texture has been loaded as too not prematurely draw it
-     *
-     * @return whether or not the texture has been loaded
-     */
-    public boolean isTextureLoaded() {
-        return this.isTextureLoaded;
-    }
 
     /** Scales the textured rect. (before rotating and before translating)
      *
@@ -421,5 +305,27 @@ public class TexturedRect extends EnigmaduxComponent {
     public void setScale(float scaleX,float scaleY){
         this.scaleX = scaleX;
         this.scaleY = scaleY;
+    }
+
+    /** Sets the shader, which modifies the color of the texture
+     *
+     * @param r the red value of the filter, 1.0 is full red
+     * @param g the green value of the filter, 1.0 is full red
+     * @param b the blue value of the filter, 1.0 is full red
+     * @param a the alpha value of the filter, 1.0 is full alpha
+     */
+    public void setShader(float r,float g,float b,float a){
+        this.shader[0] = r;
+        this.shader[1] = g;
+        this.shader[2] = b;
+        this.shader[3] = a;
+    }
+
+    /** Gets the array representing the shader
+     *
+     * @return an array representing the shader in rgba, with 0 being no power, 1 being full
+     */
+    public float[] getShader() {
+        return shader;
     }
 }

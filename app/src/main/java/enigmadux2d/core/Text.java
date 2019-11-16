@@ -3,7 +3,6 @@ package enigmadux2d.core;
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
-import android.graphics.Color;
 import android.graphics.Paint;
 import android.support.annotation.NonNull;
 import android.support.v4.content.res.ResourcesCompat;
@@ -26,32 +25,40 @@ public class Text extends  EnigmaduxComponent{
     //tag used for logging
     private static final String TAG = "ENIGMADUX_TEXT";
     //The actual text to draw. Can be digits words, letters, etc (but as a String object of course)
-    private String text;
+    protected String text;
     //The pointer to the font in the res directory (how to draw the text) Should be a pointer to a *.ttf file
-    private int fontId;
+    protected int fontId;
 
     //a color in hex e.g. 0xFFFF0000 is full alpha full red
-    private int color;
+    protected int color;
     //The formulated and textured TexturedRect after the processing of the input text and font. This is whats used for drawing
-    private TexturedRect texturedRect;
+    protected TexturedRect texturedRect;
+
+    //todo this is temporary
+    protected static int width = 1440;
+    protected static int height = 720;
+
 
     /** Default constructor
      *
-     *
-     * @param text The actual text to draw. Can be digits, words, letters, etc (but as a String object of course)
+     *  @param text The actual text to draw. Can be digits, words, letters, etc (but as a String object of course)
      * @param fontID The pointer to the font in the res directory (how to draw the text) Should be a pointer to a *.ttf file
      * @param x the open gl coordinate of the rect, left most edge x coordinate e.g. (1.0f, -0.5f, 0.0f ,0.1f)
      * @param y the open gl coordinate of the rect, bottom most y coordinate e.g. (1.0f,-0.5f, 0.0f, 0.1f)
-     * @param w the width of the rect (distance from left edge to right edge) in open gl coordinate terms e.g (1.0f, 1.5f) Should be positive
      * @param h the height of the rect (distance from top edge to bottom edge) in open gl coordinate terms e.g (1.0f, 1.5f) should be positive
      * @param color a color in hex e.g. 0xFFFF0000 is full alpha full red 0 green 0 blue
      */
 
-    public Text(String text,int fontID,float x,float y,float w,float h,int color){
-        super(x,y,w,h);
+    public Text(String text, int fontID, float x, float y, float h, int color){
+        super(x,y,0,h);
         this.text = text;
         this.fontId = fontID;
         this.color = color;
+    }
+
+    public static void setDimensions(int w,int h){
+        Text.width = w;
+        Text.height = h;
     }
 
     /** Binds the given image to the rect
@@ -64,9 +71,21 @@ public class Text extends  EnigmaduxComponent{
         tv.setText(this.text);
         tv.setTypeface(ResourcesCompat.getFont(context,this.fontId));
         tv.setTextColor(this.color);
-        //tv.setTextSize(this.h );
+        tv.setAlpha(1.0f);
+        //tv.getPaint().setAntiAlias(false);
+        //tv.setBackgroundColor(0xFF00FFFF);
+        tv.measure(LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT);
+
+        tv.setTextSize(14f);
+        Log.d("RENDERER"," " + (this.h*height/2));
+
+        this.w = this.h * (float) tv.getMeasuredWidth()/tv.getMeasuredHeight() * height/width;
+        this.x = this.x - this.w/2;
+        this.y = this.y - this.h/2;
+
+
         texturedRect = new TexturedRect(this.x,this.y,this.w,this.h);
-        texturedRect.loadGLTexture(gl,this.loadBitmapFromView(tv));
+        texturedRect.loadGLTexture(gl,loadBitmapFromView(tv));
         texturedRect.show();
     }
 
@@ -87,13 +106,20 @@ public class Text extends  EnigmaduxComponent{
      * @param v The original view you want saved to a bitmap.
      * @return The bitmap that has the same visual content as the view, only as a Bitmap object
      */
-    private Bitmap loadBitmapFromView(View v) {
-        v.measure(LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT);
+    private static Bitmap loadBitmapFromView(View v) {
+        //v.measure(LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT);
+        //slight padding
         Bitmap b = Bitmap.createBitmap(v.getMeasuredWidth(),v.getMeasuredHeight(), Bitmap.Config.ARGB_8888);
         Canvas c = new Canvas(b);
+
         v.layout(0, 0, v.getMeasuredWidth(),v.getMeasuredHeight());
+
         v.draw(c);
-        return Bitmap.createScaledBitmap(b,b.getWidth(),(int) (b.getWidth() * this.h/this.w),false);
+
+
+
+        return b;
+        //return Bitmap.createScaledBitmap(b,b.getWidth(),(int) (b.getWidth() * this.h/this.w),false);
 
     }
     /**
@@ -106,6 +132,7 @@ public class Text extends  EnigmaduxComponent{
     public boolean onTouch(MotionEvent e) {
         return false;
     }
+
 
 
 }

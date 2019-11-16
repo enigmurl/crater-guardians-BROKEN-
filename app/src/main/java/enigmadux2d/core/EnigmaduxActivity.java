@@ -13,6 +13,7 @@ import android.view.View;
 public abstract class EnigmaduxActivity extends AppCompatActivity{
     protected EnigmaduxGLSurfaceView enigmaduxGLSurfaceView;
 
+
     protected void onCreate(Bundle savedInstanceState){
         super.onCreate(savedInstanceState);
 

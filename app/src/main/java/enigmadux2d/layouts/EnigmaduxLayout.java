@@ -31,7 +31,7 @@ public abstract class EnigmaduxLayout extends EnigmaduxComponent{
      */
     public boolean onTouch(MotionEvent e){
         for (EnigmaduxComponent cmp: components){
-            cmp.onTouch(e);
+            if (cmp.onTouch(e)) return true;
         }
         return false;//change this later to actually match it
     }

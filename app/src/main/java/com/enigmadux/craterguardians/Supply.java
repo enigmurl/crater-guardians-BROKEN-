@@ -1,0 +1,128 @@
+package com.enigmadux.craterguardians;
+
+import android.content.Context;
+import android.opengl.Matrix;
+
+import javax.microedition.khronos.opengles.GL10;
+
+import enigmadux2d.core.shapes.TexturedRect;
+
+/** This is what the robots are trying to steal
+ *
+ * @author Manu Bhat
+ * @version BETA
+ */
+public class Supply {
+
+    //visual is shared by all objects as they all have the same sprite,
+    private static final TexturedRect VISUAL_REPRESENTATION = new TexturedRect(-0.5f,-0.5f,1,1);
+
+    //the center x position in openGL terms
+    private float x;
+    //the center y position in openGL terms
+    private float y;
+    //the radius in openGL terms
+    private float r;
+    //the amount of damage it can take dieing
+    private int health;
+    //visually display the heatlth
+    private ProgressBar healthDisplay;
+
+    //matrices
+    //final matrix = parentMatrix*translationScalarMatrix
+    private final float[] finalMatrix = new float[16];
+    //scalar matrix scales it according to the radius
+    private final float[] translationScalarMatrix = new float[16];
+
+    /**  Default constructor
+     *
+     * @param x the center x position in openGL terms
+     * @param y the center y position in openGL terms
+     * @param r the radius in openGL terms
+     * @param health the amount of damage it can take dieing
+     */
+    public Supply(float x,float y,float r,int health){
+        this.x = x;
+        this.y = y;
+        this.r = r;
+        this.health = health;
+
+        this.healthDisplay = new ProgressBar(health,r,r/5, true, true);
+        this.healthDisplay.update(this.health,this.x-this.r/2,this.y + r );
+
+        Matrix.setIdentityM(translationScalarMatrix,0);
+        Matrix.scaleM(translationScalarMatrix,0,2*r,2*r,1);
+        Matrix.translateM(translationScalarMatrix,0,x,y,0);
+    }
+
+    /** Loads the texture of the sprite
+     *
+     * @param gl a GL10 object used to access openGL
+     * @param context context used to grab the actual image from res
+     */
+    public static void loadGLTexture(GL10 gl, Context context) {
+        VISUAL_REPRESENTATION.loadGLTexture(gl,context,R.drawable.supply_top_view);
+    }
+
+    /** Draws the enemy, and all sub components
+     *
+     * @param gl used to access openGL
+     * @param parentMatrix used to translate from model to world space
+     */
+    public void draw(GL10 gl,float[] parentMatrix){
+        Matrix.multiplyMM(finalMatrix,0,parentMatrix,0,translationScalarMatrix,0);
+        VISUAL_REPRESENTATION.draw(gl,finalMatrix);
+
+        this.healthDisplay.draw(gl,parentMatrix);
+    }
+
+    /** Sees if the supply has been killed
+     *
+     * @return whether it has more than 0 health or not
+     */
+    public boolean isAlive(){
+        if (health > 0){
+            return true;
+        } else {
+            SoundLib.playSupplyDeathSoundEffect();
+            return false;
+        }
+    }
+
+    /** When an enemy attack hits the supply, this method is called as to decrease the health (or increase if damage is negative)
+     *
+     * @param damage the amount to decrease the health by
+     */
+    public void damage(int damage){
+        this.health -= damage;
+        this.healthDisplay.update(this.health,this.x-this.r/2,this.y + r );
+    }
+
+    /** Sees if a line intersects this hitbox
+     *
+     * @param x0 p1 x
+     * @param y0 p1 y
+     * @param x1 p2 x
+     * @param y1 p2 y
+     * @return whether or not the line intersects this hitbox.
+     */
+    public boolean collidesWithLine(float x0,float y0,float x1,float y1){
+        return MathOps.segmentIntersectsCircle(this.x,this.y,this.r,x0,y0,x1,y1);
+    }
+
+    /** Gets the x value
+     *
+     * @return the center x value in openGL terms
+     */
+    public float getX() {
+        return this.x;
+    }
+
+    /** Gets the y value
+     *
+     * @return the center y value in openGL terms
+     */
+    public float getY() {
+        return this.y;
+    }
+}

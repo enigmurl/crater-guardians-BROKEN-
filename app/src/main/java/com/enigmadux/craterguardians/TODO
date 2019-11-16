@@ -1,0 +1,38 @@
+todo
+ Bugs:
+ there is slight delay between scaling of the stuff
+ Dont show the attack until power is a certain amount
+ App is crashing when play button is played for some reason
+ when messenger notification looks like it bugs out
+ enemys ai
+ make the characters and players have guns that are separate from the bodies
+todo:
+ , smoother transitions in general
+ make animations like death animations
+
+todo:
+    CODE + CONVENTIONS:
+        finish javadoc
+        group functions
+        Make coordinates consistent (either center or bottom left)
+
+todo:
+    NON CODE:
+    - for lobby music trim it, as there is blank at the end (lots of musics)
+    - fix sound effects
+    - fix the text so it looks nice (make it anti aliased)x
+
+
+CODE FORMATTING:
+    Methods:
+        (non getters/issers/setters abstract methods)
+
+        main public methods (draw update,attack, loadGlTexture, mainly overriden not getter/setters/isers )
+        main private methods
+
+        public helper methods
+        private helper methods
+
+        "is"ers (even if it's abstract)
+        getters (even if it's abstract)
+        setters (even if it's abstract)
