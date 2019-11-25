@@ -108,6 +108,42 @@ public class MathOps {
         return (o4 == 0 && onSegment(x01,y01,x11,y11,x10,y10));
     }
 
+    /** Gets the t value where x = t(x10 - x00) + x00 y = t(y10 - y00) + y00 where (x,y) is the intersection point of the two lines
+     * even if 0<t<1, there may not be an intersection because it may be only on line 1 but not line segment 2, so use the lineIntersectsLineFunction
+     * https://stackoverflow.com/a/1968345/10030086, todo look at "Qwertie"'s optimizations and implement them
+     *
+     *
+     * @param x00 line 1 point 1 x
+     * @param y00 line 1 point 1 y
+     * @param x10 line 1 point 2 x
+     * @param y10 line 1 point 2 y
+     * @param x01 line 2 point 1 x
+     * @param y01 line 2 point 1 y
+     * @param x11 line 2 point 2 x
+     * @param y11 line 2 point 2 y
+     * @return  Gets the t value where x = t(x10 - x00) + x00 y = t(y10 - y00) + y00 where (x,y) is the intersection point of the two lines, -1 if they don't intersect/are collinear
+     */
+    public static float tValueSegmentIntersection(float x00,float y00,float x10,float y10,float x01,float y01,float x11,float y11){
+        float s1_x, s1_y, s2_x, s2_y;
+        s1_x = x10 - x00;
+        s1_y = y10 - y00;
+        s2_x = x11 - x01;
+        s2_y = y11 - y01;
+
+        float divisor = (-s2_x * s1_y + s1_x * s2_y);
+        float t;//,s;
+
+        if (divisor == 0){
+            return -1;
+        }
+
+        //s = (-s1_y * (x00 - x01) + s1_x * (y00 - y01)) / divisor;
+        t = ( s2_x * (y00 - y01) - s2_y * (x00 - x01)) / divisor;
+
+        return t;
+
+    }
+
     /** Given a circle and line segment, see if they intersect. Algorithm borrowed from https://math.stackexchange.com/questions/2193720/find-a-point-on-a-line-segment-which-is-the-closest-to-other-point-not-on-the-li
      *
      * @param x center x coordinate of the circle

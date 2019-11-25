@@ -7,7 +7,6 @@ import com.enigmadux.craterguardians.AngleAimers.AngleAimer;
 import com.enigmadux.craterguardians.AngleAimers.TriangleAimer;
 import com.enigmadux.craterguardians.Attacks.KaiserE1Attack;
 import com.enigmadux.craterguardians.Attacks.KaiserE2Attack;
-import com.enigmadux.craterguardians.BaseCharacter;
 import com.enigmadux.craterguardians.MathOps;
 import com.enigmadux.craterguardians.ProgressBar;
 import com.enigmadux.craterguardians.R;
@@ -41,12 +40,18 @@ public class Kaiser extends Player {
     //this says how much damage is needed to be dealt, in order to charge an evolution
     private static final int NUM_ATTACKS_FOR_EVOLUTION = 20;
 
+    //this says the height of the gun of kaiser
+    private static final float GUN_HEIGHT = 0.15f;
+    //this says the width of the gun of kaiser
+    private static final float GUN_WIDTH = 0.3f;
+
 
     //visual is shared by all objects as they all have the same sprite, this is the basic state (gen 0)
-    private static TexturedRect VISUAL_REPRESENTATION_E1 = new TexturedRect(-BaseCharacter.CHARACTER_WIDTH/2,-BaseCharacter.CHARACTER_HEIGHT/2,BaseCharacter.CHARACTER_WIDTH,BaseCharacter.CHARACTER_HEIGHT);
+    private static TexturedRect VISUAL_REPRESENTATION_E1 = new TexturedRect(-Player.CHARACTER_WIDTH/2,-Player.CHARACTER_HEIGHT/2,Player.CHARACTER_WIDTH,Player.CHARACTER_HEIGHT);
     //visual is shared by all objects as they all have the same sprite, this is the secondary state (gen 1)
-    private static TexturedRect VISUAL_REPRESENTATION_E2 = new TexturedRect(-BaseCharacter.CHARACTER_WIDTH/2,-BaseCharacter.CHARACTER_HEIGHT/2,BaseCharacter.CHARACTER_WIDTH,BaseCharacter.CHARACTER_HEIGHT);
-
+    private static TexturedRect VISUAL_REPRESENTATION_E2 = new TexturedRect(-Player.CHARACTER_WIDTH/2,-Player.CHARACTER_HEIGHT/2,Player.CHARACTER_WIDTH,Player.CHARACTER_HEIGHT);
+    //visual is share by all objects as they all have the same gun, for now same gun for both evolutions, when player is looking to right, the gun
+    private static TexturedRect VISUAL_REPRESENTATION_GUN = new TexturedRect(0,-Player.CHARACTER_HEIGHT/2,Kaiser.GUN_WIDTH,Kaiser.GUN_HEIGHT);
 
     //translates the Character according to delta x and delta y. And rotates it based on the offsetAngle
     private float[] translationRotationMatrix = new float[16];
@@ -94,7 +99,7 @@ public class Kaiser extends Player {
      */
     @Override
     protected ProgressBar createAttackChargeUp() {
-        return new ProgressBar(2000 * NUM_ATTACKS,BaseCharacter.CHARACTER_WIDTH,0.1f, false, true);
+        return new ProgressBar(2000 * NUM_ATTACKS,this.getW(),0.1f, false, true);
     }
 
     /** Loads the texture of the sprite sheet
@@ -105,6 +110,7 @@ public class Kaiser extends Player {
     public static void loadGLTexture(GL10 gl, Context context) {
         VISUAL_REPRESENTATION_E1.loadGLTexture(gl,context,R.drawable.kaiser_sprite_sheet_e1);
         VISUAL_REPRESENTATION_E2.loadGLTexture(gl,context,R.drawable.kaiser_sprite_sheet_e2);
+        VISUAL_REPRESENTATION_GUN.loadGLTexture(gl,context,R.drawable.kaiser_gun);
     }
 
 
@@ -174,6 +180,8 @@ public class Kaiser extends Player {
 
 
         Matrix.multiplyMM(finalMatrix,0,parentMatrix,0,translationRotationMatrix,0);
+        VISUAL_REPRESENTATION_GUN.draw(gl,finalMatrix);
+
         if (this.evolveGen == 0) {
             VISUAL_REPRESENTATION_E1.draw(gl, finalMatrix);
         } else if (this.evolveGen == 1){

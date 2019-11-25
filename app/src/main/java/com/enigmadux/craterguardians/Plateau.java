@@ -82,6 +82,14 @@ public class Plateau{
 
     }
 
+    /** Gets the points that make up the vertices
+     *
+     * @return Gets the points in the format of (p1,p2,p3,p4) (bottom left top left bottom right top right)
+     */
+    public float[][] getPoints() {
+        return points;
+    }
+
     /** Draws the plateau onto the screen, rotated
      *
      * @param gl the GL10 object used to communicate with open gl
@@ -135,8 +143,8 @@ public class Plateau{
         float pt2Y = pt2y - cy;
 
         // Get the semi major and semi minor axes.
-        float a = character.CHARACTER_WIDTH / 2;
-        float b = character.CHARACTER_HEIGHT / 2;
+        float a = character.getW() / 2;
+        float b = character.getH() / 2;
 
         // Calculate the quadratic parameters.
         float A = (pt2X - pt1X) * (pt2X - pt1X) / (a*a) +

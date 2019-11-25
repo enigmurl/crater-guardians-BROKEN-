@@ -28,6 +28,15 @@ public abstract class Player extends BaseCharacter {
     //the angle from start to finish of the shield (radians)
     private static final float SHIELD_SWEEP = 0.5f;
 
+    /** The width in openGL terms of any character
+     *
+     */
+    public static final float CHARACTER_WIDTH = 0.3f;
+    /** The height in openGL terms of any character
+     *
+     */
+    public static final float CHARACTER_HEIGHT = 0.3f;
+
     //the amount of attacks it can hold maximum (think of it as the amount of bullets in a magazine)
     private int maxAttacks;
     //the amount of milliseconds it takes to reload
@@ -93,7 +102,7 @@ public abstract class Player extends BaseCharacter {
     public Player(int numRotationOrientations, int framesPerRotation,float fps){
         super(numRotationOrientations, framesPerRotation, fps);
 
-        this.defenseAngleAimer = new TriangleAimer(0,0,SHIELD_SWEEP,0,BaseCharacter.CHARACTER_HEIGHT *2);
+        this.defenseAngleAimer = new TriangleAimer(0,0,SHIELD_SWEEP,0,this.getH() *2);
         this.defenseAngleAimer.hide();
 
         this.attackAngleAimer = this.createAngleAimer();
@@ -105,7 +114,7 @@ public abstract class Player extends BaseCharacter {
         this.reloadTime = this.getReloadTime();
 
         Matrix.setIdentityM(scalarMatrix,0);
-        Matrix.scaleM(scalarMatrix,0,BaseCharacter.CHARACTER_WIDTH/maxAttacks,0.1f,1);
+        Matrix.scaleM(scalarMatrix,0,this.getW()/maxAttacks,0.1f,1);
     }
 
 
@@ -169,7 +178,7 @@ public abstract class Player extends BaseCharacter {
 
         for (int i = 0;i < numAttacks;i++){
             Matrix.setIdentityM(translationMatrix,0);
-            Matrix.translateM(translationMatrix,0,this.getDeltaX() + BaseCharacter.CHARACTER_WIDTH * ((float) i/maxAttacks  -0.5f),this.getDeltaY() + BaseCharacter.CHARACTER_HEIGHT/2,0 );//0.05 is half of the
+            Matrix.translateM(translationMatrix,0,this.getDeltaX() + this.getW() * ((float) i/maxAttacks  -0.5f),this.getDeltaY() + this.getH()/2,0 );//0.05 is half of the
             Matrix.multiplyMM(scalarTranslationMatrix,0,translationMatrix,0,scalarMatrix,0);
             Matrix.multiplyMM(finalMatrix,0,parentMatrix,0,scalarTranslationMatrix,0);
 
@@ -180,7 +189,7 @@ public abstract class Player extends BaseCharacter {
         if (this.numAttacks == 0){
             for (int i = 0;i < maxAttacks;i++){
                 Matrix.setIdentityM(translationMatrix,0);
-                Matrix.translateM(translationMatrix,0,this.getDeltaX() + BaseCharacter.CHARACTER_WIDTH * ((float) i/maxAttacks  -0.5f),this.getDeltaY() + BaseCharacter.CHARACTER_HEIGHT/2,0 );//0.05 is half of the
+                Matrix.translateM(translationMatrix,0,this.getDeltaX() + this.getW() * ((float) i/maxAttacks  -0.5f),this.getDeltaY() + this.getH()/2,0 );//0.05 is half of the
                 Matrix.multiplyMM(scalarTranslationMatrix,0,translationMatrix,0,scalarMatrix,0);
                 Matrix.multiplyMM(finalMatrix,0,parentMatrix,0,scalarTranslationMatrix,0);
 
@@ -197,7 +206,7 @@ public abstract class Player extends BaseCharacter {
         this.defenseAngleAimer.setPosition(this.getDeltaX(),this.getDeltaY());
         this.defenseAngleAimer.draw(gl,parentMatrix);
 
-        this.attackChargeUp.update(this.attackChargeUp.getCurrentHitPoints(),this.getDeltaX()-BaseCharacter.CHARACTER_WIDTH/2,this.getDeltaY() + BaseCharacter.CHARACTER_HEIGHT/2 + 0.1f);
+        this.attackChargeUp.update(this.attackChargeUp.getCurrentHitPoints(),this.getDeltaX()-this.getW()/2,this.getDeltaY() + this.getH()/2 + 0.1f);
         this.attackChargeUp.draw(gl,parentMatrix);
 
     }
@@ -397,7 +406,7 @@ public abstract class Player extends BaseCharacter {
         this.shieldRadians = angle;
 
         this.hideDefenseAngleAimer();
-        this.shield = new Shield(2*BaseCharacter.CHARACTER_WIDTH,2*BaseCharacter.CHARACTER_HEIGHT,angle);
+        this.shield = new Shield(2*this.getW(),2*this.getH(),angle);
     }
 
     /** Whether or not the health is greater than 0, also plays sound effect if it's dead
@@ -419,7 +428,24 @@ public abstract class Player extends BaseCharacter {
      * @return gets the angle in radians at which the player is currently moving at, if it's stationary it returns the last moving angle
      */
     public float getRotation() {
-        return rotation;
+        return this.rotation;
+    }
+
+    /** Gets the width of the players
+     *
+     * @return the width of any player
+     */
+    @Override
+    public float getW() {
+        return Player.CHARACTER_WIDTH;
+    }
+    /** Gets the height of the players
+     *
+     * @return the height of any player
+     */
+    @Override
+    public float getH() {
+        return Player.CHARACTER_HEIGHT;
     }
 
     /** Tries to attack if there are any, it also plays sound effects if it can attack

@@ -1,15 +1,13 @@
 todo
  Bugs:
- there is slight delay between scaling of the stuff
  Dont show the attack until power is a certain amount
- App is crashing when play button is played for some reason
  when messenger notification looks like it bugs out
  enemys ai
- make the characters and players have guns that are separate from the bodies
+ for tutorial if lost and press play again the "exit" sign goes away problem is because it makes the gamestate
 todo:
- , smoother transitions in general
- make animations like death animations
-
+ make animations, smoother transitions in general
+  enemys ai plan: find all triangles and perform ray cast, if it intersects add a "stop" to the closest vertice, and recast
+ TODAY: fix the bug where enemy's target position is somewhere it can't fit
 todo:
     CODE + CONVENTIONS:
         finish javadoc

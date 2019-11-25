@@ -25,11 +25,11 @@ public abstract class BaseCharacter extends EnigmaduxComponent {
     /** The width in openGL terms of any character
      *
      */
-    public static final float CHARACTER_WIDTH = 0.3f;
+    //public static final float CHARACTER_WIDTH = 0.3f;
     /** The height in openGL terms of any character
      *
      */
-    public static final float CHARACTER_HEIGHT = 0.3f;
+    //public static final float CHARACTER_HEIGHT = 0.3f;
 
 
     //the amount of angles that the character is rendered at e.g 4 would mean 0,90,180,270
@@ -67,7 +67,12 @@ public abstract class BaseCharacter extends EnigmaduxComponent {
      * @param fps the amount of frames displayed in a single second
      */
     public BaseCharacter(int numRotationOrientations, int framesPerRotation,float fps){
-        super(-BaseCharacter.CHARACTER_WIDTH/2,-BaseCharacter.CHARACTER_HEIGHT/2,BaseCharacter.CHARACTER_WIDTH,BaseCharacter.CHARACTER_HEIGHT);
+        super(-1,-1,-1,-1);//todo the sub classes should change it
+        this.w = this.getW();
+        this.h = this.getH();
+        this.x = -this.getW()/2;
+        this.y = -this.getH()/2;
+
         this.numRotationOrientations = numRotationOrientations;
         this.framesPerRotation = framesPerRotation;
         this.fps = fps;
@@ -160,8 +165,8 @@ public abstract class BaseCharacter extends EnigmaduxComponent {
         float pt2Y = y2 - cy;
 
         // Get the semi major and semi minor axes.
-        float a = CHARACTER_WIDTH / 2;
-        float b = CHARACTER_HEIGHT / 2;
+        float a = this.getW()/ 2;
+        float b = this.getH()/ 2;
 
         // Calculate the quadratic parameters.
         float A = (pt2X - pt1X) * (pt2X - pt1X) / (a*a) +
@@ -201,8 +206,8 @@ public abstract class BaseCharacter extends EnigmaduxComponent {
         float pt2Y = y2 - cy;
 
         // Get the semi major and semi minor axes.
-        float a = CHARACTER_WIDTH / 2;
-        float b = CHARACTER_HEIGHT / 2;
+        float a = this.getW()/ 2;
+        float b = this.getH()/ 2;
 
         // Calculate the quadratic parameters.
         float A = (pt2X - pt1X) * (pt2X - pt1X) / (a * a) +
@@ -294,4 +299,16 @@ public abstract class BaseCharacter extends EnigmaduxComponent {
      * @return the maximum health of the character
      */
     public abstract int getMaxHealth();
+
+    /** Gets what the width should be, should be "static" as in it references a static variable
+     *
+     * @return the width of the character
+     */
+    public abstract float getW();
+
+    /** Gets what the height should be, should be "static" as in it references a static variable
+     *
+     * @return the height of the character
+     */
+    public abstract float getH();
 }

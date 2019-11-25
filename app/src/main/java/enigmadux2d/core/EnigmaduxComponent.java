@@ -40,6 +40,37 @@ public abstract class EnigmaduxComponent {
         this.h = h;
     }
 
+    /** Gets the current w value, this might not be the true width
+     *
+     * @return the current w value
+     */
+    public float getWidth(){
+        return this.w;
+    }
+    /** Gets the current h value, this might not be the true height
+     *
+     * @return the current h value
+     */
+    public float getHeight(){
+        return this.h;
+    }
+
+    /** Gets the bottom edge y
+     *
+     * @return bottom edge openGL
+     */
+    public float getY() {
+        return y;
+    }
+
+    /** Gets the left edge x
+     *
+     * @return left edge openGL
+     */
+    public float getX() {
+        return x;
+    }
+
     /** Sets the position of the x and y in open gl coordinates. NOTE DOES NOT DO ANYTHING VISUALLY UNLESS TEXTURE IS RELOADED
      *
      * @param x the open gl coordinate of the component, left most edge x coordinate e.g. (1.0f, -0.5f, 0.0f ,0.1f)

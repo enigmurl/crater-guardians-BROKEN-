@@ -8,6 +8,7 @@ import com.enigmadux.craterguardians.Attacks.Attack;
 import com.enigmadux.craterguardians.Attacks.Enemy1Attack;
 import com.enigmadux.craterguardians.BaseCharacter;
 import com.enigmadux.craterguardians.MathOps;
+import com.enigmadux.craterguardians.Plateau;
 import com.enigmadux.craterguardians.R;
 import com.enigmadux.craterguardians.Supply;
 
@@ -34,8 +35,16 @@ public class Enemy1 extends Enemy {
     private static final int MAXIMUM_HEALTH = 10;
 
 
+    /** The width in openGL terms of any enemy
+     *
+     */
+    public static final float CHARACTER_WIDTH = 0.3f;
+    /** The height in openGL terms of any enemy
+     *
+     */
+    public static final float CHARACTER_HEIGHT = 0.3f;
     //visual is shared by all objects as they all have the same sprite
-    private static TexturedRect VISUAL_REPRESENTATION = new TexturedRect(-BaseCharacter.CHARACTER_WIDTH/2,-BaseCharacter.CHARACTER_HEIGHT/2,BaseCharacter.CHARACTER_WIDTH,BaseCharacter.CHARACTER_HEIGHT);
+    private static TexturedRect VISUAL_REPRESENTATION = new TexturedRect(-Enemy1.CHARACTER_WIDTH/2,-Enemy1.CHARACTER_HEIGHT/2,Enemy1.CHARACTER_WIDTH,Enemy1.CHARACTER_HEIGHT);
 
 
     //translates the Character according to delta x and delta y
@@ -84,47 +93,9 @@ public class Enemy1 extends Enemy {
      * @param player the current character the player is using.
      */
     @Override
-    public void update(long dt, BaseCharacter player, List<Supply> supplies){
-        super.update(dt, player,supplies);
-        float minLength = Math.max(0.01f,(float) Math.hypot(this.getDeltaX() - player.getDeltaX(),this.getDeltaY()-player.getDeltaY()));
-        int supplyIndex = -1;//if it's negative 1 that refers to the player
+    public void update(long dt, BaseCharacter player, List<Supply> supplies, List<Plateau> plateaus){
+        super.update(dt, player,supplies,plateaus);
 
-
-        for (int i = 0;i<supplies.size();i++) {
-
-            float hypotenuse = Math.max(0.01f,(float) Math.hypot(this.getDeltaX() - supplies.get(i).getX(),this.getDeltaY()-supplies.get(i).getY()));
-            if (hypotenuse < minLength){
-                minLength = hypotenuse;
-                supplyIndex = i;
-            }
-
-        }
-
-        float clippedLength = (minLength >dt/1000f) ? dt/1000f:minLength;
-
-        if (supplyIndex == -1){
-            if (minLength < 1 && attacks.size() < 1) {//todo this is hardcoded
-                this.attack(MathOps.getAngle((player.getDeltaX()-this.getDeltaX())/minLength,(player.getDeltaY()-this.getDeltaY())/minLength));
-            }
-            //Log.d("PLAYER","X: " +this.getDeltaX() + " px " + player.getDeltaX() + " Y: " + this.getDeltaY() + " py " + player.getDeltaY() +  " len " + minLength + " cl "  +clippedLength);
-            this.translateFromPos((player.getDeltaX()-this.getDeltaX()) * clippedLength,(player.getDeltaY()-this.getDeltaY()) * clippedLength);
-            this.update(dt,180/(float) Math.PI * MathOps.getAngle((player.getDeltaX()-this.getDeltaX())/minLength,(player.getDeltaY()-this.getDeltaY())/minLength));
-
-        }else {
-
-            if (minLength < 1 && attacks.size() < 1) {//todo this is hardcoded
-                this.attack(MathOps.getAngle((supplies.get(supplyIndex).getX() - this.getDeltaX()) / minLength, (supplies.get(supplyIndex).getY() - this.getDeltaX()) / minLength));
-            }
-            this.translateFromPos((supplies.get(supplyIndex).getX()-this.getDeltaX()) * clippedLength,(supplies.get(supplyIndex).getY()-this.getDeltaY()) * clippedLength);
-            this.update(dt,180/(float) Math.PI * MathOps.getAngle((supplies.get(supplyIndex).getX()-this.getDeltaX())/minLength,(supplies.get(supplyIndex).getY()-this.getDeltaY())/minLength));
-        }
-
-
-
-
-        for (Attack attack: this.attacks){
-            attack.attemptAttack(player);
-        }
 
     }
 
@@ -151,5 +122,23 @@ public class Enemy1 extends Enemy {
     @Override
     public int getMaxHealth() {
         return Enemy1.MAXIMUM_HEALTH;
+    }
+
+    /** Gets the width of this enemy
+     *
+     * @return the width of this enemy
+     */
+    @Override
+    public float getW() {
+        return Enemy1.CHARACTER_WIDTH;
+    }
+
+    /** Gets the height of this enemy
+     *
+     * @return the height of this type of enemy
+     */
+    @Override
+    public float getH() {
+        return Enemy1.CHARACTER_HEIGHT;
     }
 }

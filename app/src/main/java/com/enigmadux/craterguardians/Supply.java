@@ -2,9 +2,11 @@ package com.enigmadux.craterguardians;
 
 import android.content.Context;
 import android.opengl.Matrix;
+import android.view.MotionEvent;
 
 import javax.microedition.khronos.opengles.GL10;
 
+import enigmadux2d.core.EnigmaduxComponent;
 import enigmadux2d.core.shapes.TexturedRect;
 
 /** This is what the robots are trying to steal
@@ -12,7 +14,7 @@ import enigmadux2d.core.shapes.TexturedRect;
  * @author Manu Bhat
  * @version BETA
  */
-public class Supply {
+public class Supply extends EnigmaduxComponent {
 
     //visual is shared by all objects as they all have the same sprite,
     private static final TexturedRect VISUAL_REPRESENTATION = new TexturedRect(-0.5f,-0.5f,1,1);
@@ -42,6 +44,8 @@ public class Supply {
      * @param health the amount of damage it can take dieing
      */
     public Supply(float x,float y,float r,int health){
+        super(x-r,y-r,2*r,2*r);
+
         this.x = x;
         this.y = y;
         this.r = r;
@@ -124,5 +128,15 @@ public class Supply {
      */
     public float getY() {
         return this.y;
+    }
+
+    /** used to implement the method, has no purpose
+     *
+     * @param e the MotionEvent describing how the user interacted with the screen
+     * @return false all the time
+     */
+    @Override
+    public boolean onTouch(MotionEvent e) {
+        return false;
     }
 }
