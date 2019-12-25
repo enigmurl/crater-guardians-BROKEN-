@@ -4,8 +4,7 @@ import android.content.Context;
 import android.opengl.Matrix;
 import android.support.annotation.NonNull;
 
-import com.enigmadux.craterguardians.Attacks.Attack;
-import com.enigmadux.craterguardians.Attacks.Enemy1Attack;
+import com.enigmadux.craterguardians.Attacks.Enemy2Attack;
 import com.enigmadux.craterguardians.BaseCharacter;
 import com.enigmadux.craterguardians.MathOps;
 import com.enigmadux.craterguardians.Plateau;
@@ -22,29 +21,29 @@ import enigmadux2d.core.shapes.TexturedRect;
  * @author Manu Bhat
  * @version BETA
  */
-public class Enemy1 extends Enemy {
+public class Enemy2 extends Enemy {
     //a constant that represents how fast the character is, right now there aren't any particular units which needs to change (see todo)
-    private static final float CHARACTER_SPEED = 5f;
+    private static final float CHARACTER_SPEED = 2.5f;
     //a constant that represents how many rows the sprite sheet has (how many orientations of rotations
     private static final int NUM_ROTATION_ORIENTATIONS = 8;
     //a constant that represents how many columns the sprite sheet has (how many frames in a single rotation animation)
     private static final int FRAMES_PER_ROTATION = 16;
     //a constant that represents how fast to play the animation in frames per second
     private static final float FPS = 16;
-    //a constant that represents the maximum health of Enemy1
-    private static final int MAXIMUM_HEALTH = 10;
+    //a constant that represents the maximum health of Enemy2
+    private static final int MAXIMUM_HEALTH = 20;
 
 
     /** The width in openGL terms of any enemy
      *
      */
-    public static final float CHARACTER_WIDTH = 0.3f;
+    public static final float CHARACTER_WIDTH = 0.6f;
     /** The height in openGL terms of any enemy
      *
      */
-    public static final float CHARACTER_HEIGHT = 0.3f;
+    public static final float CHARACTER_HEIGHT = 0.6f;
     //visual is shared by all objects as they all have the same sprite
-    private static TexturedRect VISUAL_REPRESENTATION = new TexturedRect(-Enemy1.CHARACTER_WIDTH/2,-Enemy1.CHARACTER_HEIGHT/2,Enemy1.CHARACTER_WIDTH,Enemy1.CHARACTER_HEIGHT);
+    private static TexturedRect VISUAL_REPRESENTATION = new TexturedRect(-Enemy2.CHARACTER_WIDTH/2,-Enemy2.CHARACTER_HEIGHT/2,Enemy2.CHARACTER_WIDTH,Enemy2.CHARACTER_HEIGHT);
 
 
     //translates the Character according to delta x and delta y
@@ -56,7 +55,7 @@ public class Enemy1 extends Enemy {
     /** Default Constructor
      *
      */
-    public Enemy1(){
+    public Enemy2(){
         super(NUM_ROTATION_ORIENTATIONS,FRAMES_PER_ROTATION,FPS);
     }
 
@@ -66,7 +65,7 @@ public class Enemy1 extends Enemy {
      * @param context context used to grab the actual image from res
      */
     public static void loadGLTexture(@NonNull GL10 gl, Context context) {
-        VISUAL_REPRESENTATION.loadGLTexture(gl,context,R.drawable.enemy1_sprite_sheet);
+        VISUAL_REPRESENTATION.loadGLTexture(gl,context,R.drawable.enemy1_sprite_sheet);//todo
 
     }
 
@@ -78,12 +77,12 @@ public class Enemy1 extends Enemy {
 
     @Override
     public void attack(float angle) {
-        this.attacks.add(new Enemy1Attack(this.getDeltaX(),this.getDeltaY(),5, angle,0.7f,0.1f,250,this));
+        this.attacks.add(new Enemy2Attack(this.getDeltaX(),this.getDeltaY(),25, angle,0.5f + Enemy2.CHARACTER_WIDTH,0.2f,1000,this));
     }
 
     @Override
     public float getCharacterSpeed() {
-        return Enemy1.CHARACTER_SPEED;
+        return Enemy2.CHARACTER_SPEED;
     }
 
 
@@ -94,6 +93,12 @@ public class Enemy1 extends Enemy {
      */
     @Override
     public void update(long dt, BaseCharacter player, List<Supply> supplies, List<Plateau> plateaus){
+        if (this.attacks.size() == 0){
+            this.canMove = true;
+        } else {
+            this.canMove = this.attacks.get(0).isFinished();
+        }
+
         super.update(dt, player,supplies,plateaus);
 
 
@@ -121,7 +126,7 @@ public class Enemy1 extends Enemy {
      */
     @Override
     public int getMaxHealth() {
-        return Enemy1.MAXIMUM_HEALTH;
+        return Enemy2.MAXIMUM_HEALTH;
     }
 
     /** Gets the width of this enemy
@@ -130,7 +135,7 @@ public class Enemy1 extends Enemy {
      */
     @Override
     public float getW() {
-        return Enemy1.CHARACTER_WIDTH;
+        return Enemy2.CHARACTER_WIDTH;
     }
 
     /** Gets the height of this enemy
@@ -139,6 +144,6 @@ public class Enemy1 extends Enemy {
      */
     @Override
     public float getH() {
-        return Enemy1.CHARACTER_HEIGHT;
+        return Enemy2.CHARACTER_HEIGHT;
     }
 }

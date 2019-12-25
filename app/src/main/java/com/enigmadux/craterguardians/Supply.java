@@ -2,6 +2,7 @@ package com.enigmadux.craterguardians;
 
 import android.content.Context;
 import android.opengl.Matrix;
+import android.util.Log;
 import android.view.MotionEvent;
 
 import javax.microedition.khronos.opengles.GL10;
@@ -20,9 +21,9 @@ public class Supply extends EnigmaduxComponent {
     private static final TexturedRect VISUAL_REPRESENTATION = new TexturedRect(-0.5f,-0.5f,1,1);
 
     //the center x position in openGL terms
-    private float x;
+    private float dx;
     //the center y position in openGL terms
-    private float y;
+    private float dy;
     //the radius in openGL terms
     private float r;
     //the amount of damage it can take dieing
@@ -46,17 +47,17 @@ public class Supply extends EnigmaduxComponent {
     public Supply(float x,float y,float r,int health){
         super(x-r,y-r,2*r,2*r);
 
-        this.x = x;
-        this.y = y;
+        this.dx = x;
+        this.dy = y;
         this.r = r;
         this.health = health;
 
-        this.healthDisplay = new ProgressBar(health,r,r/5, true, true);
-        this.healthDisplay.update(this.health,this.x-this.r/2,this.y + r );
+        this.healthDisplay = new ProgressBar(health,this.r,r/5, true, true);
+        this.healthDisplay.update(this.health,this.dx-this.r/2,this.dy + r );
 
         Matrix.setIdentityM(translationScalarMatrix,0);
+        Matrix.translateM(translationScalarMatrix,0,this.dx,this.dy,0);
         Matrix.scaleM(translationScalarMatrix,0,2*r,2*r,1);
-        Matrix.translateM(translationScalarMatrix,0,x,y,0);
     }
 
     /** Loads the texture of the sprite
@@ -99,7 +100,7 @@ public class Supply extends EnigmaduxComponent {
      */
     public void damage(int damage){
         this.health -= damage;
-        this.healthDisplay.update(this.health,this.x-this.r/2,this.y + r );
+        this.healthDisplay.update(this.health,this.dx-this.r/2,this.dy + r );
     }
 
     /** Sees if a line intersects this hitbox
@@ -111,7 +112,7 @@ public class Supply extends EnigmaduxComponent {
      * @return whether or not the line intersects this hitbox.
      */
     public boolean collidesWithLine(float x0,float y0,float x1,float y1){
-        return MathOps.segmentIntersectsCircle(this.x,this.y,this.r,x0,y0,x1,y1);
+        return MathOps.segmentIntersectsCircle(this.dx,this.dy,this.r,x0,y0,x1,y1);
     }
 
     /** Gets the x value
@@ -119,7 +120,7 @@ public class Supply extends EnigmaduxComponent {
      * @return the center x value in openGL terms
      */
     public float getX() {
-        return this.x;
+        return this.dx;
     }
 
     /** Gets the y value
@@ -127,7 +128,7 @@ public class Supply extends EnigmaduxComponent {
      * @return the center y value in openGL terms
      */
     public float getY() {
-        return this.y;
+        return this.dy;
     }
 
     /** used to implement the method, has no purpose

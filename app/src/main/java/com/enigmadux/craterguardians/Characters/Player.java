@@ -166,6 +166,7 @@ public abstract class Player extends BaseCharacter {
             return;
         }
 
+        //TODO Concurrent modification happening here sometimes
         for (Attack attack: this.attacks){
             attack.draw(gl,parentMatrix);
         }
@@ -299,6 +300,7 @@ public abstract class Player extends BaseCharacter {
 
         Iterator itr = attacks.iterator();
 
+        //todo this is throwing exceptions
         while (itr.hasNext()){
             Attack attack = (Attack) itr.next();
             if (attack.isFinished()){

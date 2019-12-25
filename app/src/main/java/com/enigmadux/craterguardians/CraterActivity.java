@@ -35,6 +35,7 @@ public class CraterActivity extends EnigmaduxActivity {
     @Override
     public void onPause(){
         super.onPause();
+        this.enigmaduxGLSurfaceView.onPause();
     }
 
     /** Loads all media

@@ -69,6 +69,7 @@ public class KaiserE2Attack extends Attack {
      * @param millis how long the attack takes to finish
      * @param initializer the Enemy or player who summoned the attack
      */
+
     public KaiserE2Attack(float x, float y, int damage, float angleRadians, float length, long millis, Kaiser initializer){
         super(x,y,0,0,5,millis,initializer);
 

@@ -22,11 +22,18 @@ import javax.microedition.khronos.opengles.GL10;
 import enigmadux2d.core.shapes.TexturedRect;
 
 /** this whole subdirectory needs javadoc //TODO
+ * This attack is a hammer swing, it only deals damage at the last swing
+ *
  *
  */
-public class Enemy1Attack extends Attack {
+public class Enemy2Attack extends Attack {
+
+    //after 80% of the animation is finished only then will the release affect it = the last frame as of now
+    private static final float DAMAGE_RELEASE_TIME = 0.8f;
+
 
     //matrix used to scale the default to the desired
+
     private final float[] finalMatrix = new float[16];
 
     private final float[] scalarMatrix = new float[16];
@@ -47,7 +54,7 @@ public class Enemy1Attack extends Attack {
     /** The actual visual component is shared between all instances to save memory
      *
      */
-    private static final TexturedRect VISUAL_REPRESENTATION = new TexturedRect(0,-0.5f,1,1);
+    private static final TexturedRect VISUAL_REPRESENTATION = new TexturedRect(0,-1,1,1);
 
 
     /** Default constructor
@@ -60,7 +67,7 @@ public class Enemy1Attack extends Attack {
      * @param millis how long the attack takes to finish
      * @param initializer the Enemy or player who summoned the attack
      */
-    public Enemy1Attack(float x, float y, int damage, float angleRadians, float length,float width, long millis,BaseCharacter initializer){
+    public Enemy2Attack(float x, float y, int damage, float angleRadians, float length,float width, long millis,BaseCharacter initializer){
         super(x,y,0,0,5,millis,initializer);
 
 
@@ -114,29 +121,27 @@ public class Enemy1Attack extends Attack {
      * @param context used to access resources
      */
     public static void loadGLTexture(@NonNull GL10 gl, Context context) {
-        VISUAL_REPRESENTATION.loadGLTexture(gl,context,R.drawable.kaiser_attack_spritesheet);//todo needs work
+        VISUAL_REPRESENTATION.loadGLTexture(gl,context,R.drawable.enemy2_attack_spritesheet);//todo needs work
     }
 
 
 
     @Override
     public boolean isHit(BaseCharacter character) {
-        if (this.hits.contains(character)){
+        if (this.hits.contains(character) || (float) finishedMillis/millis < Enemy2Attack.DAMAGE_RELEASE_TIME){
             return false;
         }
 
         float originalXvalue = length * (float) finishedMillis/millis;
-        float originalYValue = width/2f;
+        float originalYValue = -width;
 
         float cos = (float) Math.cos(angleRadians);
         float sin = (float) Math.sin(angleRadians);
 
-        float x1 = this.x + cos * originalXvalue - sin * originalYValue;
-        float y1 = this.y + sin * originalXvalue + cos * originalYValue;
-        float x2 = this.x + cos * originalXvalue + sin * originalYValue;
-        float y2 = this.y + sin * originalXvalue - cos * originalYValue;
-
-
+        float x1 = this.x + cos * originalXvalue;
+        float y1 = this.y + sin * originalXvalue ;
+        float x2 = this.x + cos * originalXvalue - sin * originalYValue;
+        float y2 = this.y + sin * originalXvalue + cos * originalYValue;
 
         if (character.collidesWithLine(x1,y1,x2,y2)){
             this.hits.add(character);
@@ -148,37 +153,23 @@ public class Enemy1Attack extends Attack {
     @Override
     public boolean isHit(Spawner spawner) {
         return false;//because nothing is done, it doesn't matter whether it's true or false, so we just return true to reduce calculations
-        /*if (this.hits.contains(spawner)){
-            return false;
-        }
-
-        float x1 = this.x + (float) Math.cos(angleRadians + SWEEP_ANGLE/2) * length * (float) finishedMillis/millis;
-        float y1 = this.y + (float) Math.sin(angleRadians + SWEEP_ANGLE/2) * length * (float) finishedMillis/millis;
-        float x2 = this.x + (float) Math.cos(angleRadians - SWEEP_ANGLE/2) * length * (float) finishedMillis/millis;
-        float y2 = this.y + (float) Math.sin(angleRadians - SWEEP_ANGLE/2) * length * (float) finishedMillis/millis;
-
-        if (spawner.collidesWithLine(x1,y1,x2,y2)){
-            this.hits.add(spawner);
-            return true;
-        }
-        return false; */
     }
 
     @Override
     public boolean isHit(Supply supply) {
-        if (this.hits.contains(supply)){
+        if (this.hits.contains(supply)  || (float) finishedMillis/millis < Enemy2Attack.DAMAGE_RELEASE_TIME){
             return false;
         }
         float originalXvalue = length * (float) finishedMillis/millis;
-        float originalYValue = width/2f;
+        float originalYValue = -width;
 
         float cos = (float) Math.cos(angleRadians);
         float sin = (float) Math.sin(angleRadians);
 
-        float x1 = this.x + cos * originalXvalue - sin * originalYValue;
-        float y1 = this.y + sin * originalXvalue + cos * originalYValue;
-        float x2 = this.x + cos * originalXvalue + sin * originalYValue;
-        float y2 = this.y + sin * originalXvalue - cos * originalYValue;
+        float x1 = this.x + cos * originalXvalue;
+        float y1 = this.y + sin * originalXvalue ;
+        float x2 = this.x + cos * originalXvalue - sin * originalYValue;
+        float y2 = this.y + sin * originalXvalue + cos * originalYValue;
 
         //(oX + oYi) * (cos + sinI) = oxCos - oYSin + cosOYI + sinIOX
         //(oX - oYi) * (cos + sinI) = oxCos + oYSin - cosOYI + sinIOX

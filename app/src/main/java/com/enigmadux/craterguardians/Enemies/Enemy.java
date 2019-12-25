@@ -23,6 +23,10 @@ import enigmadux2d.core.EnigmaduxComponent;
 public abstract class Enemy extends BaseCharacter {
     //health display of the player
     private ProgressBar healthDisplay;
+    //whether or not it can move, it may not be able to move because it's attacking (Enemy 2)
+    protected boolean canMove = true;
+
+
 
     /** Default Constructor
      *
@@ -59,7 +63,7 @@ public abstract class Enemy extends BaseCharacter {
      * @param plateaus all plateaus on the game map
      * @return vertices that represent the triangles
      */
-    public float[] getTargetPosition(float x,float y,List<Plateau> plateaus) {
+    private float[] getTargetPosition(float x,float y,List<Plateau> plateaus) {
         float maxDimension = Math.max(this.getW(),this.getH());
         float epsilon = 0.001f;
 
@@ -166,61 +170,63 @@ public abstract class Enemy extends BaseCharacter {
      * @param dt amount of milliseconds since last call
      * @param player the current character the player is using.
      */
-    public void update(long dt, BaseCharacter player, List<Supply> supplies,List<Plateau> plateaus){
+    public void update(long dt, BaseCharacter player, List<Supply> supplies,List<Plateau> plateaus) {
         Iterator itr = attacks.iterator();
 
 
-        while (itr.hasNext()){
+        while (itr.hasNext()) {
             Attack attack = (Attack) itr.next();
-            if (attack.isFinished()){
+            if (attack.isFinished()) {
                 itr.remove();
             }
             attack.update(dt);
             attack.attemptAttack(player);
 
-            for (Supply supply:supplies){
+            for (Supply supply : supplies) {
                 attack.attemptAttack(supply);
             }
         }
 
         //updates the position todo current this decides which one to go to by the euclidean distance, whereas it should be the distance using the algorithm, it shouldnt affect it too much, but this way is easier and less expensive
         //find the path of each one
-        healthDisplay.update(this.health,this.getDeltaX() - this.getW()/2,this.getDeltaY() + this.getH()/2);
+        healthDisplay.update(this.health, this.getDeltaX() - this.getW() / 2, this.getDeltaY() + this.getH() / 2);
+        if (this.canMove) {
+            float minLength = Math.max(0.01f, (float) Math.hypot(this.getDeltaX() - player.getDeltaX(), this.getDeltaY() - player.getDeltaY()));
+            int supplyIndex = -1;//if it's negative 1 that refers to the player
 
-        float minLength = Math.max(0.01f,(float) Math.hypot(this.getDeltaX() - player.getDeltaX(),this.getDeltaY()-player.getDeltaY()));
-        int supplyIndex = -1;//if it's negative 1 that refers to the player
 
+            for (int i = 0; i < supplies.size(); i++) {
 
-        for (int i = 0;i<supplies.size();i++) {
+                float hypotenuse = Math.max(0.01f, (float) Math.hypot(this.getDeltaX() - supplies.get(i).getX(), this.getDeltaY() - supplies.get(i).getY()));
+                if (hypotenuse < minLength) {
+                    minLength = hypotenuse;
+                    supplyIndex = i;
+                }
 
-            float hypotenuse = Math.max(0.01f,(float) Math.hypot(this.getDeltaX() - supplies.get(i).getX(),this.getDeltaY()-supplies.get(i).getY()));
-            if (hypotenuse < minLength){
-                minLength = hypotenuse;
-                supplyIndex = i;
             }
 
-        }
+            //this may be wrong
+            float clippedLength = (minLength > dt / 1000f) ? dt / 1000f : minLength;
 
-        float clippedLength = (minLength >dt/1000f) ? dt/1000f:minLength;
+            if (supplyIndex == -1) {
+                if (minLength < 1 && attacks.size() < 1) {//todo this is hardcoded
+                    this.attack(MathOps.getAngle((player.getDeltaX() - this.getDeltaX()) / minLength, (player.getDeltaY() - this.getDeltaY()) / minLength));
+                }
+                float[] nextPos = getTargetPosition(player.getDeltaX(), player.getDeltaY(), plateaus);
+                //Log.d("PLAYER","X: " +this.getDeltaX() + " px " + player.getDeltaX() + " Y: " + this.getDeltaY() + " py " + player.getDeltaY() +  " len " + minLength + " cl "  +clippedLength);
+                this.translateFromPos((nextPos[0] - this.getDeltaX()) * clippedLength, (nextPos[1] - this.getDeltaY()) * clippedLength);
+                this.update(dt, 180 / (float) Math.PI * MathOps.getAngle((nextPos[0] - this.getDeltaX()) / minLength, (nextPos[1] - this.getDeltaY()) / minLength));
 
-        if (supplyIndex == -1){
-            if (minLength < 1 && attacks.size() < 1) {//todo this is hardcoded
-                this.attack(MathOps.getAngle((player.getDeltaX()-this.getDeltaX())/minLength,(player.getDeltaY()-this.getDeltaY())/minLength));
+            } else {
+
+                if (minLength < 1 && attacks.size() < 1) {//todo this is hardcoded
+                    this.attack(MathOps.getAngle((supplies.get(supplyIndex).getX() - this.getDeltaX()) / minLength, (supplies.get(supplyIndex).getY() - this.getDeltaY()) / minLength));
+                }
+                float[] nextPos = getTargetPosition(supplies.get(supplyIndex).getX(), supplies.get(supplyIndex).getY(), plateaus);
+                //Log.d("PLAYER","X: " +this.getDeltaX() + " px " + player.getDeltaX() + " Y: " + this.getDeltaY() + " py " + player.getDeltaY() +  " len " + minLength + " cl "  +clippedLength);
+                this.translateFromPos((nextPos[0] - this.getDeltaX()) * clippedLength, (nextPos[1] - this.getDeltaY()) * clippedLength);
+                this.update(dt, 180 / (float) Math.PI * MathOps.getAngle((nextPos[0] - this.getDeltaX()) / minLength, (nextPos[1] - this.getDeltaY()) / minLength));
             }
-            float[] nextPos = getTargetPosition(player.getDeltaX(),player.getDeltaY(),plateaus);
-            //Log.d("PLAYER","X: " +this.getDeltaX() + " px " + player.getDeltaX() + " Y: " + this.getDeltaY() + " py " + player.getDeltaY() +  " len " + minLength + " cl "  +clippedLength);
-            this.translateFromPos((nextPos[0]-this.getDeltaX()) * clippedLength,(nextPos[1]-this.getDeltaY()) * clippedLength);
-            this.update(dt,180/(float) Math.PI * MathOps.getAngle((nextPos[0]-this.getDeltaX())/minLength,(nextPos[1]-this.getDeltaY())/minLength));
-
-        }else {
-
-            if (minLength < 1 && attacks.size() < 1) {//todo this is hardcoded
-                this.attack(MathOps.getAngle((supplies.get(supplyIndex).getX() - this.getDeltaX()) / minLength, (supplies.get(supplyIndex).getY() - this.getDeltaX()) / minLength));
-            }
-            float[] nextPos = getTargetPosition(supplies.get(supplyIndex).getX(),supplies.get(supplyIndex).getY(),plateaus);
-            //Log.d("PLAYER","X: " +this.getDeltaX() + " px " + player.getDeltaX() + " Y: " + this.getDeltaY() + " py " + player.getDeltaY() +  " len " + minLength + " cl "  +clippedLength);
-            this.translateFromPos((nextPos[0]-this.getDeltaX()) * clippedLength,(nextPos[1]-this.getDeltaY()) * clippedLength);
-            this.update(dt,180/(float) Math.PI * MathOps.getAngle((nextPos[0]-this.getDeltaX())/minLength,(nextPos[1]-this.getDeltaY())/minLength));
         }
 
         for (Attack attack: this.attacks){

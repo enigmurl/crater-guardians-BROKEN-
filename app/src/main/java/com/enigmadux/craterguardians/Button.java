@@ -27,19 +27,21 @@ public abstract class Button extends EnigmaduxComponent {
     //when the button is selected is should be smaller
     private static final float BUTTON_SELECTED_SCALE = 0.9f;
 
-    /** the margin between all the edges and the text, in openGL coordinates*/
-    private static final float MIN_PADDING = 0.15f;
+    /** the margin between all the edges and the text, in openGL coordinates, for a font size of 1 its 0.5, for a font size of 0.5 its 0.25*/
+    private static final float MIN_PADDING = 0.5f;
 
     //static paint used to color bitmaps for anti aliasing
     private static Paint bitmapPainter = new Paint();
 
-    //todo make these passed in as a parameter at some point
-    private static int width = 1440;
-    private static int height = 720;
+    private static int width = LayoutConsts.SCREEN_WIDTH;
+    private static int height = LayoutConsts.SCREEN_HEIGHT;
 
 
     /**Visual representation of the background of the button*/
     private static final TexturedRect BUTTON_BACKGROUND = new TexturedRect(0,0,1,1);
+    /** For level buttons the visual representation is different*/
+    private static final TexturedRect LEVEL_BUTTON_BACKGROUND = new TexturedRect(0,0,1,1);
+
 
     //parentMatrix * scalarTranslationMatrix
     private final float[] finalMatrix = new float[16];
@@ -66,6 +68,8 @@ public abstract class Button extends EnigmaduxComponent {
 
     //whether or not its an image button or text button
     private boolean isImageButton = false;
+    //whether or not its a levelButton
+    private boolean isLevelButton = false;
 
     //an array representing the current shader
 
@@ -79,14 +83,17 @@ public abstract class Button extends EnigmaduxComponent {
      * @param boxHeight the height of the actual box in openGL coordinates
      * @param fontHeight the height of the text (distance from top edge to bottom edge) in open gl coordinate terms e.g (1.0f, 1.5f) should be positive
      * @param color a color in hex e.g. 0xFFFF0000 is full alpha full red 0 green 0 blue
+     * @param isLevelButton whether it's a level button or not
      */
-    public Button(String text, float x, float y, float boxWidth, float boxHeight, float fontHeight, int color){
+    public Button(String text, float x, float y, float boxWidth, float boxHeight, float fontHeight, int color, boolean isLevelButton){
         super(x,y,-1,fontHeight);//w inited later
         this.boxWidth = boxWidth;
         this.boxHeight = boxHeight;
 
         this.text = text;
         this.color = color;
+
+        this.isLevelButton = isLevelButton;
 
     }
 
@@ -108,6 +115,7 @@ public abstract class Button extends EnigmaduxComponent {
      */
     public static void loadButtonGLTexture(GL10 gl, Context context) {
         Button.BUTTON_BACKGROUND.loadGLTexture(gl,context,R.drawable.button_background);
+        Button.LEVEL_BUTTON_BACKGROUND.loadGLTexture(gl,context,R.drawable.level_button_background);
 
         Button.bitmapPainter.setTypeface(ResourcesCompat.getFont(context,R.font.baloobhaina));
     }
@@ -125,16 +133,17 @@ public abstract class Button extends EnigmaduxComponent {
 
         this.w = 2* bitmapPainter.measureText(this.text)/(width);
 
-
-        texturedRect = new TexturedRect(-this.w/2,- (3*this.h/(2)),this.w,this.h*2);//the extra layer
+        this.texturedRect = new TexturedRect(-this.w / 2, -(3 * this.h / (2)), this.w, this.h * 2);//the extra layer
 
         this.texturedRect.setTranslate(this.x,this.y);
 
         texturedRect.loadGLTexture(gl,loadBitmap());
         texturedRect.show();
 
-        this.w = Math.max(this.w + 2*Button.MIN_PADDING,this.boxWidth);
-        this.h = Math.max(this.h + 2*Button.MIN_PADDING,this.boxHeight);
+        float textMinPadding = Button.MIN_PADDING * this.h;
+
+        this.w = Math.max(this.w + 2*textMinPadding,this.boxWidth);
+        this.h = Math.max(this.h + 2*textMinPadding,this.boxHeight);
         this.x = this.x - this.w/2;
         this.y = this.y - this.h/2;
     }
@@ -172,7 +181,21 @@ public abstract class Button extends EnigmaduxComponent {
                 }
                 Matrix.multiplyMM(finalMatrix, 0, parentMatrix, 0, scalarTranslationMatrix, 0);
 
-                BUTTON_BACKGROUND.draw(gl, finalMatrix);
+                if (this.isLevelButton){
+                    LEVEL_BUTTON_BACKGROUND.setShader(
+                            this.texturedRect.getShader()[0],
+                            this.texturedRect.getShader()[1],
+                            this.texturedRect.getShader()[2],
+                            this.texturedRect.getShader()[3]);
+                    LEVEL_BUTTON_BACKGROUND.draw(gl, finalMatrix);
+                } else {
+                    BUTTON_BACKGROUND.setShader(
+                            this.texturedRect.getShader()[0],
+                            this.texturedRect.getShader()[1],
+                            this.texturedRect.getShader()[2],
+                            this.texturedRect.getShader()[3]);
+                    BUTTON_BACKGROUND.draw(gl, finalMatrix);
+                }
             }
             if (this.isImageButton && this.down){
                 Matrix.setIdentityM(scalarTranslationMatrix, 0);
@@ -289,5 +312,16 @@ public abstract class Button extends EnigmaduxComponent {
         return false;
     }
 
+    /** Sets the pos of the background and text
+     *
+     * @param x the open gl coordinate of the component, left most edge x coordinate e.g. (1.0f, -0.5f, 0.0f ,0.1f)
+     * @param y the open gl coordinate of the component, bottom most y coordinate e.g. (1.0f,-0.5f, 0.0f, 0.1f)
+     */
+    @Override
+    public void setPos(float x, float y) {
+        super.setPos(x , y);
+        this.texturedRect.setTranslate(x-this.texturedRect.getX() + this.w/2 - this.texturedRect.getW()/2,
+                y-this.texturedRect.getY()+this.h/2 - this.texturedRect.getH()/2);
+    }
 
 }

@@ -8,7 +8,7 @@ import javax.microedition.khronos.opengles.GL10;
  * @version BETA
  */
 public abstract class AngleAimer {
-    /**the angle between the start of the sweep and the positive x axis in radians. Zero would mean that half the sweep is above the x axis, and half below */
+    /**the angle between the start of the sweep and the positive x axis in degrees. Zero would mean that half the sweep is above the x axis, and half below */
     protected float midAngle;
 
     /** whether or not its going to be drawn to the screen, the actual functionality must be implemented by child class */

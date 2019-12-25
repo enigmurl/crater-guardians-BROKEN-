@@ -156,6 +156,17 @@ public class MathOps {
      * @return if the line segment intersects the circle (or if it is fully enclosed by it
      */
     public static boolean segmentIntersectsCircle(float x,float y,float r,float x0,float y0,float x1,float y1){
+        float dX1 = x0 - x;
+        float dY1 = y0 - y;
+        if (dX1 * dX1 + dY1*dY1 < r*r ){
+            return true;
+        }
+        float dX2 = x1 - x;
+        float dY2 = y1 - y;
+        if (dX2 * dX2  + dY2*dY2 < r* r){
+            return  true;
+        }
+
         float vu = ((x1-x0) * (x0 - x))  + ((y1 - y0) * (y0 - y));
         float vv  = (x1-x0) * (x1-x0)  + (y1-y0) * (y1-y0);
 

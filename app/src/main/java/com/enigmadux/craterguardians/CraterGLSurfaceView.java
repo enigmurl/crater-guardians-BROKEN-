@@ -47,4 +47,13 @@ public class CraterGLSurfaceView extends EnigmaduxGLSurfaceView {
         return mRenderer.onTouch(e);
     }
 
+
+    /** Called whenever the app is paused
+     *
+     */
+    @Override
+    public void onPause() {
+        super.onPause();
+        mRenderer.onPause();
+    }
 }

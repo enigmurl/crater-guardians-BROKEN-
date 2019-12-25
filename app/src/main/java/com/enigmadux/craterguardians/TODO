@@ -1,8 +1,41 @@
+todo PRIORITY:
+    1) finalize Kaiser + Enemy1 attacks (mostly done)
+    2) Create a new character +  New enemy + New enemy spawner  + for each character add an info button
+    3) Make levels
+        - make enemy1 less op, but spawn more frequenety
+        - add the level buttons to the level select button (also add a home button)
+    4) make the Level select layout neater, level buttons more random, use the textures array for the animations
+    12/21-22: Heres the plan for level select, have a giant home button to the left (like now), then have a rounded rect frame
+         to the right. In there it will be a scroll
+         Toxic Lake Bublle animation
+    12/23: Level select mostly done, work on getting levels I thnik 25 - 30 for first release is good enough
+           start getting sound effects done: Tommorow get up to level 15 done. From level 12 and onwards maps should be bigger + more complex
+           for tutorial make the times better,
+           Completed: Levels 15, still have to fix tutorial
+    12/24: GOALS: (first two are more long term:)
+                  1) nerf attack rate/balance stuff in general
+                  2) fix enemy's AI
+                  3) Get up to level 20,(a little less is fine, lets target getting all levels done by end of the year = around 30 levels)
+               levelIDEAS a level like the spider one (12 i think) but with like 6 arms, each with 1 hp spawner
+
+
+
+    nerf attack rate, just balance stuff in general, fix enemy's AI
+
+     FIRST UPDATE: add a character who has two nunchunks, resulting in  two circles
+                    add personalized character attack noises
+
+
+
 todo
  Bugs:
+ the level select layout sometimes is unresponsive to touches, also appears when it's not supposed too
+ enemy's ai doesn't really work on level 2, when heading for hte supply
+ pause button needs to be multi touch like evolve button, evolve button itself is hard to unselect
+ shield in player doesnt compltely work
  Dont show the attack until power is a certain amount
- when messenger notification looks like it bugs out
- enemys ai
+ when messenger notification looks like it bugs out sometime
+ when going to the navigation bar and going to the place where all apps are shown, app should only be paused, but the whole game restarts
  for tutorial if lost and press play again the "exit" sign goes away problem is because it makes the gamestate
 todo:
  make animations, smoother transitions in general

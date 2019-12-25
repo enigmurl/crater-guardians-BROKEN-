@@ -10,6 +10,11 @@ public class LayoutConsts {
      *
      */
     public static final int CRATER_TEXT_COLOR = 0xFFFFFFAA;// 0xFF99462D;
+    /** Serves as the color of the level buttons, the color is black
+     *
+     */
+    public static final int LEVEL_TEXT_COLOR = 0xFF000000;// 0xFF99462D;
+
     /** The width of the screen in pixels, it is set by the Renderer
      *
      */

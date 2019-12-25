@@ -6,6 +6,7 @@ import android.support.annotation.NonNull;
 
 import com.enigmadux.craterguardians.Enemies.Enemy;
 import com.enigmadux.craterguardians.Enemies.Enemy1;
+import com.enigmadux.craterguardians.Enemies.Enemy2;
 import com.enigmadux.craterguardians.R;
 
 import javax.microedition.khronos.opengles.GL10;
@@ -16,7 +17,7 @@ import enigmadux2d.core.shapes.TexturedRect;
  * @author Manu Bhat
  * @version BETA
  */
-public class Enemy1Spawner extends Spawner {
+public class Enemy2Spawner extends Spawner {
     //parentMatrix*translationScalarMatrix
     private final float[] finalMatrix = new float[16];
     //translationMatrix*scalarMatrix
@@ -37,7 +38,7 @@ public class Enemy1Spawner extends Spawner {
      * @param h the height of the spawner (distance from top edge to bottom edge) in open gl coordinate terms e.g (1.0f, 1.5f) should be positive
      * @param health the amount of damage this can take before dieing
      */
-    public Enemy1Spawner(float x, float y, float w, float h, long millisPerSpawn,int health) {
+    public Enemy2Spawner(float x, float y, float w, float h, long millisPerSpawn,int health) {
         super(x, y, w, h,millisPerSpawn,health);
         //translates to appropriate coordinates
         final float[] translationMatrix = new float[16];
@@ -74,7 +75,7 @@ public class Enemy1Spawner extends Spawner {
      * @return always returns type of enemy1, as this is an enemy1 spawner
      */
     public Enemy instantiateSingleEnemy() {
-        Enemy1 e = new Enemy1();
+        Enemy2 e = new Enemy2();
         e.setTranslate(this.x+this.w/2,this.y+this.h/2);
         return e;
     }

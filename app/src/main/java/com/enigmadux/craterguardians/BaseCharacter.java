@@ -148,6 +148,7 @@ public abstract class BaseCharacter extends EnigmaduxComponent {
     }
 
     /** Sees if it collides with a line, but does not indicate where
+     * It will return true if both points are withing the ellipse
      *
      * @param x1 openGL x of first point
      * @param y1 openGL y of first point
@@ -156,6 +157,18 @@ public abstract class BaseCharacter extends EnigmaduxComponent {
      * @return whether or not they collide
      */
     public boolean collidesWithLine(float x1, float y1, float x2, float y2){
+        float dX1 = x1 - this.getDeltaX();
+        float dY1 = y1 - this.getDeltaY();
+        if (dX1 * dX1/(this.getW()*this.getW()/4) + dY1*dY1/(this.getH() *this.getH())/4 < 1 ){
+            return true;
+        }
+        float dX2 = x2 - this.getDeltaX();
+        float dY2 = y2 - this.getDeltaY();
+        if (dX2 * dX2/(this.getW()*this.getW()/4) + dY2 * dY2/(this.getH() *this.getH()/4) < 1){
+            return  true;
+        }
+
+
         float cx = this.getDeltaX();
         float cy = this.getDeltaY();
 

@@ -30,10 +30,11 @@ public abstract class EnigmaduxLayout extends EnigmaduxComponent{
      * @return whether or not you are interested in the rest of that event (everything from ACTION_DOWN to ACTION_UP or ACTION_CANCEL) (true means interested, false means not, other views get to read the event)
      */
     public boolean onTouch(MotionEvent e){
-        for (EnigmaduxComponent cmp: components){
+        for (int i = this.components.length-1;i>=0;i--){
+            EnigmaduxComponent cmp = this.components[i];
             if (cmp.onTouch(e)) return true;
         }
-        return false;//change this later to actually match it
+        return false;
     }
 
     /** Shows the component, and all sub components are shown as well. All of them are no longer exempt from drawing operations

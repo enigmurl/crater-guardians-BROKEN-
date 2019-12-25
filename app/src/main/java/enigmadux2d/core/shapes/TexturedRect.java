@@ -33,7 +33,9 @@ public class TexturedRect extends EnigmaduxComponent {
     // buffer holding the texture coordinates
     private FloatBuffer textureBuffer;
     //the pointers to the textures used for open gl
-    private int[] textures = new int[1];
+    private int[] textures ;
+    //whether or not textures has been initialized
+    private boolean texturesInitialized = false;
 
     //how much to translate it by in the x direction
     private float deltaX = 0;
@@ -49,14 +51,11 @@ public class TexturedRect extends EnigmaduxComponent {
 
 
     //a value of 1,1,1,1 would mean draw the object directly, the shader alters the color of the texture, by multiplying each
-    protected float[] shader = new float[] {1,1,1,1};
+    private float[] shader = new float[] {1,1,1,1};
 
 
 
-
-
-
-    /** Default Constructor
+    /** Default Constructor, defaults to 1 texture
      *
      * @param x the open gl coordinate of the rect, left most edge x coordinate e.g. (1.0f, -0.5f, 0.0f ,0.1f)
      * @param y the open gl coordinate of the rect, bottom most y coordinate e.g. (1.0f,-0.5f, 0.0f, 0.1f)
@@ -64,14 +63,26 @@ public class TexturedRect extends EnigmaduxComponent {
      * @param h the height of the rect (distance from top edge to bottom edge) in open gl coordinate terms e.g (1.0f, 1.5f) should be positive
      */
     public TexturedRect( float x, float y, float w, float h) {
-        super(x, y, w, h);
+        this(x,y,w,h,1);
+    }
 
+    /** Default Constructor
+     *
+     * @param x the open gl coordinate of the rect, left most edge x coordinate e.g. (1.0f, -0.5f, 0.0f ,0.1f)
+     * @param y the open gl coordinate of the rect, bottom most y coordinate e.g. (1.0f,-0.5f, 0.0f, 0.1f)
+     * @param w the width of the rect (distance from left edge to right edge) in open gl coordinate terms e.g (1.0f, 1.5f) Should be positive
+     * @param h the height of the rect (distance from top edge to bottom edge) in open gl coordinate terms e.g (1.0f, 1.5f) should be positive
+     * @param numTextures the amount of textures that this can be bind too, think of it as the number of frames in an animation
+     */
+    public TexturedRect( float x, float y, float w, float h,int numTextures) {
+        super(x, y, w, h);
 
         this.x = x;
         this.y = y;
         this.w = w;
         this.h = h;
 
+        this.textures = new int[numTextures];
 
         vertices = new float[]{
                 x, y, 0,
@@ -79,6 +90,9 @@ public class TexturedRect extends EnigmaduxComponent {
                 x + w, y, 0,
                 x + w, y + h, 0
         };
+
+
+        //floats are 4 bytes
         this.byteBuffer = ByteBuffer.allocateDirect(vertices.length * 4);
         this.byteBuffer.order(ByteOrder.nativeOrder());
 
@@ -91,6 +105,8 @@ public class TexturedRect extends EnigmaduxComponent {
         this.byteBuffer.order(ByteOrder.nativeOrder());
 
         textureBuffer = byteBuffer.asFloatBuffer();
+
+
     }
 
 
@@ -115,22 +131,33 @@ public class TexturedRect extends EnigmaduxComponent {
         textureBuffer.position(0);
     }
 
-    /** Binds the given image to the rect
+    /** Binds the given image to the rect. Defaults to save at the 0th position in the texture array
      *
      * @param gl an instance of GL10 used to access open gl
      * @param context any android context use to get the resources (this is subject to change)
      * @param textureID the android reference to the R.drawable.* image
      */
     public void loadGLTexture(@NonNull GL10 gl, Context context,int textureID) {
+        this.loadGLTexture(gl,context,textureID,0);
+    }
+
+    /** Binds the given image to the rect
+     *
+     * @param gl an instance of GL10 used to access open gl
+     * @param context any android context use to get the resources (this is subject to change)
+     * @param textureID the android reference to the R.drawable.* image
+     * @param index corresponds to the position in the textures array
+     */
+    public void loadGLTexture(@NonNull GL10 gl, Context context,int textureID, int index) {
         Bitmap bitmap = BitmapFactory.decodeResource(context.getResources(),textureID);
 
-        this.loadGLTexture(gl,bitmap);
+        this.loadGLTexture(gl,bitmap,index);
 
     }
 
 
 
-    /** Binds the given bitmap image to the rect.
+    /** Binds the given bitmap image to the rect. Defaults to save at the first position in the texture array
      *
      * (possible optimizations: don't recreate the bitmap if it's already fine. And make it so you can pass in the texture possibly separate method
      *
@@ -138,23 +165,21 @@ public class TexturedRect extends EnigmaduxComponent {
      * @param bitmap The bitmap that defines the texture of the rect
      */
     public void loadGLTexture(@NonNull GL10 gl,Bitmap bitmap){
+        this.loadGLTexture(gl,bitmap,0);
+    }
 
-
-
-
+    /** Binds the given bitmap image to the rect.
+     *
+     * (possible optimizations: don't recreate the bitmap if it's already fine. And make it so you can pass in the texture possibly separate method
+     *
+     * @param gl an instance of GL10 used to access open gl
+     * @param bitmap The bitmap that defines the texture of the rect
+     * @param index corresponds to the position in the textures array
+     */
+    public void loadGLTexture(@NonNull GL10 gl,Bitmap bitmap,int index){
         int afterW = MathOps.nextPowerTwo(bitmap.getWidth());
         int afterH = MathOps.nextPowerTwo(bitmap.getHeight());
         bitmap = Bitmap.createScaledBitmap(bitmap,afterW,afterH,false);
-        //bitmap = TexturedRect.padBitmap(bitmap, 0, afterW - bitmap.getWidth(), 0,afterH - bitmap.getHeight());
-
-
-        /*loadTextureBuffer(new float[] {
-                0.0f,1,//bottom left
-                0.0f,(float) (afterH - this.orgH)/afterH,//top left
-                (float) this.orgW/afterW,1,//bottom right
-                (float) this.orgW/afterW,(float) (afterH - orgH)/afterH//top right
-                }
-        );*/
 
         loadTextureBuffer(new float[]{
                 0,1,
@@ -165,9 +190,13 @@ public class TexturedRect extends EnigmaduxComponent {
 
 
         // generate one texture pointer
-        gl.glGenTextures(1, textures, 0);
+        if (! this.texturesInitialized) {
+            gl.glGenTextures(textures.length, textures, 0);
+            this.texturesInitialized = true;
+        }
+
         // ...and bind it to our array
-        gl.glBindTexture(GL10.GL_TEXTURE_2D, textures[0]);
+        gl.glBindTexture(GL10.GL_TEXTURE_2D, textures[index]);
 
         // create nearest filtered texture
         gl.glTexParameterf(GL10.GL_TEXTURE_2D, GL10.GL_TEXTURE_MIN_FILTER, GL10.GL_NEAREST);
@@ -192,12 +221,22 @@ public class TexturedRect extends EnigmaduxComponent {
     }
 
 
-    /** The draw method for the TexturedRect with the GL context. Draws the TexturedRect with the texture given.
+    /** The draw method for the TexturedRect with the GL context. Draws the TexturedRect with the texture given at pos 0
      *
      * @param gl the GL10 object used to communicate with open gl
      * @param parentMatrix matrix that represents how to manipulate it to the world coordinates
      */
     public void draw(GL10 gl,float[] parentMatrix) {
+        this.draw(gl,parentMatrix,0);
+    }
+
+    /** The draw method for the TexturedRect with the GL context. Draws the TexturedRect with the texture given.
+     *
+     * @param gl the GL10 object used to communicate with open gl
+     * @param parentMatrix matrix that represents how to manipulate it to the world coordinates
+     * @param frameNum refers to which texture to bind too
+     */
+    public void draw(GL10 gl,float[] parentMatrix,int frameNum) {
         if (! this.visible){
             return;
         }
@@ -211,7 +250,7 @@ public class TexturedRect extends EnigmaduxComponent {
 
         // bind the previously generated texture
         gl.glEnable(GL10.GL_TEXTURE_2D);
-        gl.glBindTexture(GL10.GL_TEXTURE_2D, textures[0]);
+        gl.glBindTexture(GL10.GL_TEXTURE_2D, textures[frameNum]);
 
         // Point to our buffers
         gl.glEnableClientState(GL10.GL_VERTEX_ARRAY);

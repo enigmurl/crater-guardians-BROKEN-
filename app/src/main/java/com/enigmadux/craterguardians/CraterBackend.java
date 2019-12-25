@@ -4,17 +4,24 @@ import android.content.Context;
 import android.util.Log;
 import android.view.MotionEvent;
 
+import com.enigmadux.craterguardians.AngleAimers.TriRectAimer;
 import com.enigmadux.craterguardians.AngleAimers.TriangleAimer;
 import com.enigmadux.craterguardians.Animations.Animation;
 import com.enigmadux.craterguardians.Animations.DeathAnim;
+import com.enigmadux.craterguardians.Animations.ToxicBubble;
 import com.enigmadux.craterguardians.Attacks.Enemy1Attack;
+import com.enigmadux.craterguardians.Attacks.Enemy2Attack;
 import com.enigmadux.craterguardians.Attacks.KaiserE1Attack;
 import com.enigmadux.craterguardians.Attacks.KaiserE2Attack;
+import com.enigmadux.craterguardians.Attacks.RyzeAttack;
 import com.enigmadux.craterguardians.Characters.Kaiser;
 import com.enigmadux.craterguardians.Characters.Player;
+import com.enigmadux.craterguardians.Characters.Ryze;
 import com.enigmadux.craterguardians.Enemies.Enemy;
 import com.enigmadux.craterguardians.Enemies.Enemy1;
+import com.enigmadux.craterguardians.Enemies.Enemy2;
 import com.enigmadux.craterguardians.Spawners.Enemy1Spawner;
+import com.enigmadux.craterguardians.Spawners.Enemy2Spawner;
 import com.enigmadux.craterguardians.Spawners.Spawner;
 
 import java.io.FileNotFoundException;
@@ -22,8 +29,10 @@ import java.io.IOException;
 import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
+import java.util.NoSuchElementException;
 import java.util.Scanner;
 
 import javax.microedition.khronos.opengles.GL10;
@@ -39,7 +48,7 @@ import enigmadux2d.core.shapes.TexturedRect;
  */
 public class CraterBackend {
     //the amount of levels
-    public static final int NUM_LEVELS = 2;
+    public static final int NUM_LEVELS = 19;
     //the path to the level file
     private static final String LEVEL_FILE_PATH = "level_data";
 
@@ -89,6 +98,9 @@ public class CraterBackend {
     public static final long ENEMIES_INTRODUCTION = 50000;
     //the amount of millis a tutorial is
     private static final long TUTORIAL_MILLIS = 60000;
+
+    //used to lock threads
+    public static final Object lock = new Object();
 
 
     //used for getting more information about device
@@ -147,6 +159,8 @@ public class CraterBackend {
 
     //what levels are unlocked
     private boolean[] unlockedLevels = new boolean[CraterBackend.NUM_LEVELS];
+    //what levels have been completed
+    private boolean[] completedLevels = new boolean[CraterBackend.NUM_LEVELS];
     //what level number
     private int levelNum = 0;
 
@@ -157,17 +171,17 @@ public class CraterBackend {
     //the current player on the map
     private Player player;
     //all enemies on the map
-    private List<Enemy> enemies = new ArrayList<>();
+    private final List<Enemy> enemies = new ArrayList<>();
     //all spawner on the map
-    private List<Spawner> spawners = new ArrayList<>();
+    private final List<Spawner> spawners = new ArrayList<>();
     //all plateaus on the map
-    private List<Plateau> plateaus = new ArrayList<>();
+    private final List<Plateau> plateaus = new ArrayList<>();
     //all active toxic lakes on the map
-    private List<ToxicLake> toxicLakes = new ArrayList<>();
+    private final List<ToxicLake> toxicLakes = new ArrayList<>();
     //all active supplies on the map
-    private List<Supply> supplies = new ArrayList<>();
+    private final List<Supply> supplies = new ArrayList<>();
     //all active animations
-    private List<Animation> animations = new ArrayList<>();
+    private final List<Animation> animations = new ArrayList<>();
 
     //after the game is lost or won there is small pause
     private boolean inEndGamePausePeriod;
@@ -331,60 +345,144 @@ public class CraterBackend {
      *
      */
     public void loadLayouts(GL10 gl){
+        this.loadTextures(gl);
+
+        float scaleX = (float) LayoutConsts.SCREEN_HEIGHT/LayoutConsts.SCREEN_WIDTH;
         craterVisual = new TexturedRect(-1f,-1f,2f,2f);
 
 
-        TexturedRect levelBackground = new TexturedRect(-1,-1,2,2);
+        final EnigmaduxComponent[] levelButtons = new EnigmaduxComponent[CraterBackend.NUM_LEVELS+2];
 
-        Button level1PlayButton = new Button("Level 1", -0.38f,0.3f, 0.5f, 0.2f, 0.2f, LayoutConsts.CRATER_TEXT_COLOR){
+        TexturedRect levelBackground = new TexturedRect(-1,-1,2,2) {
+            //the previous y of the touch event
+            private float prevY;
+
+            //whether we're in a scrolling session
+            private boolean inScroll = false;
+
+            //the id of the current pointer
+            private int pointerID;
 
             @Override
-            public boolean isSelect(MotionEvent e) {
-                return this.visible && this.isInside(MathOps.getOpenGLX(e.getRawX()),MathOps.getOpenGLY(e.getRawY())) && unlockedLevels[0];
-            }
+            public boolean onTouch(MotionEvent e) {
+                if (! this.visible){
+                    return false;
+                }
 
+                if (e.getActionMasked() == MotionEvent.ACTION_DOWN){
+                    this.pointerID = e.getPointerId(e.getActionIndex());
+                    this.prevY = MathOps.getOpenGLY(e.getY());
+                    this.inScroll = true;
+                    return true;
+                } else if (e.getActionMasked() == MotionEvent.ACTION_UP || e.getActionMasked() == MotionEvent.ACTION_CANCEL){
+                    this.inScroll = false;
+                    return true;
+                }
+                if (e.getActionMasked() == MotionEvent.ACTION_MOVE && this.inScroll && e.getPointerId(e.getActionIndex()) == this.pointerID){
+
+                    float deltaY = MathOps.getOpenGLY(e.getY()) - prevY;
+                    for (int i = 0;i<NUM_LEVELS;i++){
+                        int offset = levelButtons.length - NUM_LEVELS;
+                        EnigmaduxComponent comp = levelButtons[i+offset];
+                        comp.setPos(comp.getX(),comp.getY() + deltaY);
+
+                        float a = getLevelButtonAlpha(comp.getY() + comp.getHeight()/2);
+
+                        if (! unlockedLevels[i]) {
+                            ((Button) comp).setShader(1, 0.25f, 0.25f, a);
+                        } else if (completedLevels[i]){
+                            ((Button) comp).setShader(0.75f, 1, 0.75f, a);
+                        } else {
+                            ((Button) comp).setShader(1, 1, 1, a);
+                        }
+
+                        if (a <= 0){
+                            comp.hide();
+                        } else {
+                            comp.show();
+                        }
+                    }
+
+                    this.prevY = MathOps.getOpenGLY(e.getY());
+                    return true;
+                }
+                return false;
+            }
+        };
+
+        Button levelSelect_homeButton = new Button(new TexturedRect(-0.8f,-0.25f,0.5f * scaleX,0.5f )){
+            @Override
+            public boolean isSelect(MotionEvent e) {
+                return this.visible && this.isInside(MathOps.getOpenGLX(e.getRawX()),MathOps.getOpenGLY(e.getRawY()));
+            }
 
             @Override
             public void onRelease() {
                 super.onRelease();
 
-                levelNum = 1;
-                loadLevel();
-                levelSelectLayout.hide();
-                gameScreenLayout.show();
-                setCurrentGameState(CraterBackend.GAME_STATE_INGAME);
+                resetLevelButtons();
 
-                SoundLib.setStateLobbyMusic(false);
-                SoundLib.setStateGameMusic(true);
+
+                renderer.exitGame();
+                killEndGamePausePeriod();
+
+                setCurrentGameState(CraterBackend.GAME_STATE_HOMESCREEN);
+
+                SoundLib.setStateLobbyMusic(true);
+                SoundLib.setStateVictoryMusic(false);
+                SoundLib.setStateLossMusic(false);
+                SoundLib.setStateGameMusic(false);
             }
 
         };
 
-        Button level2PlayButton = new Button("Level 2", 0.55f,-0.15f, 0.5f, 0.2f, 0.15f, LayoutConsts.CRATER_TEXT_COLOR){
-            @Override
-            public boolean isSelect(MotionEvent e) {
-                return this.visible && this.isInside(MathOps.getOpenGLX(e.getRawX()),MathOps.getOpenGLY(e.getRawY())) && unlockedLevels[1];
-            }
-
-            @Override
-            public void onRelease() {
-                super.onRelease();
-
-                levelNum = 2;
-                loadLevel();
-                levelSelectLayout.hide();
-                gameScreenLayout.show();
-                setCurrentGameState(CraterBackend.GAME_STATE_INGAME);
-
-                SoundLib.setStateLobbyMusic(false);
-                SoundLib.setStateGameMusic(true);
-            }
 
 
-        };
+        levelButtons[0] = levelBackground;
+        levelButtons[1] = levelSelect_homeButton;
 
-        //todo make this "replay" if lost, "next level" if won
-        Button playButton = new Button("Play", 0f,0.5f, 1f, 0.2f, 0.3f,LayoutConsts.CRATER_TEXT_COLOR){
+        float h = 0.5f;
+        for (int i = 1;i<CraterBackend.NUM_LEVELS+1;i++){
+
+            final int currentLevelNumber = i;
+
+            Button levelPlayButton = new Button("Level " + i,0,1-h*(i) ,0.5f*scaleX,0.5f,0.1f,LayoutConsts.LEVEL_TEXT_COLOR, true) {
+                @Override
+                public boolean isSelect(MotionEvent e) {
+                    return this.visible && this.isInside(MathOps.getOpenGLX(e.getRawX()),MathOps.getOpenGLY(e.getRawY())) && unlockedLevels[currentLevelNumber - 1];
+                }
+
+                @Override
+                public void onRelease() {
+                    super.onRelease();
+
+                    levelNum = currentLevelNumber;
+                    loadLevel();
+                    levelSelectLayout.hide();
+                    gameScreenLayout.show();
+                    setCurrentGameState(CraterBackend.GAME_STATE_INGAME);
+
+                    SoundLib.setStateLobbyMusic(false);
+                    SoundLib.setStateGameMusic(true);
+                }
+
+                @Override
+                public void show() {
+                    if (this.texturedRect.getShader()[3] > 0) {
+                        super.show();
+                    }
+                }
+            };
+
+            levelPlayButton.loadGLTexture(gl);
+
+            levelButtons[i+1] = levelPlayButton;
+        }
+
+
+
+          //todo make this "replay" if lost, "next level" if won
+        Button playButton = new Button("Play", 0f,0.5f, 1f, 0.2f, 0.3f,LayoutConsts.CRATER_TEXT_COLOR, false){
             @Override
             public boolean isSelect(MotionEvent e) {
                 return this.visible && this.isInside(MathOps.getOpenGLX(e.getRawX()),MathOps.getOpenGLY(e.getRawY()));
@@ -406,7 +504,7 @@ public class CraterBackend {
 
         };
 
-        Button levelSelectButton = new Button("Levels",0,-0.1f,0.75f,0.2f,0.2f,LayoutConsts.CRATER_TEXT_COLOR) {
+        Button levelSelectButton = new Button("Levels",0,-0.1f,0.75f,0.2f,0.2f,LayoutConsts.CRATER_TEXT_COLOR, false) {
 
             @Override
             public boolean isSelect(MotionEvent e) {
@@ -417,7 +515,7 @@ public class CraterBackend {
             public void onRelease() {
                 super.onRelease();
 
-
+                //resetLevelButtons();
                 renderer.exitGameLoadLevelSelect();
 
                 setCurrentGameState(CraterBackend.GAME_STATE_LEVELSELECT);
@@ -429,7 +527,8 @@ public class CraterBackend {
                 SoundLib.setStateGameMusic(false);
             }
         };
-        Button homeButton = new Button("Home",0,-0.65f,0.75f,0.2f,0.2f,LayoutConsts.CRATER_TEXT_COLOR) {
+
+        Button homeButton = new Button("Home",0,-0.65f,0.75f,0.2f,0.2f,LayoutConsts.CRATER_TEXT_COLOR, false) {
 
             @Override
             public boolean isSelect(MotionEvent e) {
@@ -461,13 +560,13 @@ public class CraterBackend {
                 craterVisual,
         },-1.0f,-1.0f,2.0f,2.0f);
 
-        this.levelSelectLayout = new CraterLayout(new EnigmaduxComponent[]{
-                levelBackground,
-                level1PlayButton,
-                level2PlayButton,
-
-
-        },-1.0f,1.0f,2.0f,2.0f);
+        this.levelSelectLayout = new CraterLayout(levelButtons,-1.0f,1.0f,2.0f,2.0f) {
+            @Override
+            public void show() {
+                resetLevelButtons();
+                super.show();
+            }
+        };
 
         this.loadLevelLayout = new CraterLayout(new EnigmaduxComponent[]{
                 levelSelectButton,
@@ -476,10 +575,10 @@ public class CraterBackend {
 
         },-0.5f,-0.5f,1.0f,1.0f);
 
+        this.resetLevelButtons();
 
 
 
-        this.loadTextures(gl);
 
 
 
@@ -492,16 +591,13 @@ public class CraterBackend {
         levelSelectButton.loadGLTexture(gl);
 
         levelBackground.loadGLTexture(gl,this.context,R.drawable.level_select_example);
-        level1PlayButton.loadGLTexture(gl);
-        level2PlayButton.loadGLTexture(gl);
+        levelSelect_homeButton.loadGLTexture(gl,this.context,R.drawable.home_button);
 
-        level1PlayButton.setDrawBackground(false);
-        level2PlayButton.setDrawBackground(false);
 
         craterVisual.loadGLTexture(gl,this.context,R.drawable.level_background_crater);
 
 
-
+        //todo bad solution to whats happening (the text starts at one place, but after being moved it gets offset)
         this.loadTutorialLayouts(gl);
         this.loadLevelData();
 
@@ -510,7 +606,7 @@ public class CraterBackend {
      *
      */
     private void loadTutorialLayouts(GL10 gl){
-        exitButton = new Button("Exit",0,0.75f,0.4f,0.1f,0.1f,LayoutConsts.CRATER_TEXT_COLOR){
+        exitButton = new Button("Exit",0,0.75f,0.4f,0.1f,0.1f,LayoutConsts.CRATER_TEXT_COLOR, false){
             @Override
             public boolean isSelect(MotionEvent e) {
                 return this.visible && this.isInside(MathOps.getOpenGLX(e.getRawX()),MathOps.getOpenGLY(e.getRawY()));
@@ -678,18 +774,25 @@ public class CraterBackend {
         Player.loadGLTexture(gl,this.context);
 
         Kaiser.loadGLTexture(gl,this.context);
+        Ryze.loadGLTexture(gl,this.context);
         Enemy1.loadGLTexture(gl,this.context);
+        Enemy2.loadGLTexture(gl,this.context);
         //aimers
         TriangleAimer.loadGLTexture(gl,this.context);
+        TriRectAimer.loadGLTexture(gl,this.context);
         //spawners
         Enemy1Spawner.loadGLTexture(gl,this.context);
+        Enemy2Spawner.loadGLTexture(gl,this.context);
         //attacks
         Enemy1Attack.loadGLTexture(gl,this.context);
+        Enemy2Attack.loadGLTexture(gl,this.context);
         KaiserE1Attack.loadGLTexture(gl,this.context);
         KaiserE2Attack.loadGLTexture(gl,this.context);
+        RyzeAttack.loadGLTexture(gl,this.context);
 
         //animations
         DeathAnim.loadGLTexture(gl,this.context);
+        ToxicBubble.loadGLTexture(gl,this.context);
 
 
         //others (lakes + plateaus)
@@ -704,27 +807,64 @@ public class CraterBackend {
 
     }
 
+    /** Gets the alpha value of a level button given the y coordinate
+     *
+     * @param y the openGL y coordinate fo the button
+     * @return the alpha value from 0 to 1, 0 being transparent
+     *
+     */
+    private float getLevelButtonAlpha(float y){
+        return Math.min(1,4 - 4 * Math.abs(y));
+    }
+
+    /** Resets level buttons to their original positions
+     *
+     */
+    private void resetLevelButtons(){
+
+        EnigmaduxComponent[] levelButtons = this.levelSelectLayout.getComponents();
+        float h = 0.5f;
+
+        for (int i = 0;i<NUM_LEVELS;i++){
+            int offset = levelButtons.length - NUM_LEVELS;
+            EnigmaduxComponent comp = levelButtons[i+offset];
+            comp.setPos(-comp.getWidth()/2,1-h*(i+1) - comp.getHeight()/2);
+
+            float a = this.getLevelButtonAlpha(comp.getY() + comp.getHeight()/2);
+
+            if (! unlockedLevels[i]) {
+                ((Button) comp).setShader(1, 0.25f, 0.25f, a);
+            } else if (completedLevels[i]){
+                ((Button) comp).setShader(0.75f, 1, 0.75f, a);
+            } else {
+                ((Button) comp).setShader(1, 1, 1, a);
+            }
+
+            if (a <= 0){
+                comp.hide();
+            }
+
+        }
+    }
+
 
     /** Loads the data from level
      *
      */
-    private void loadLevelData(){
+    public void loadLevelData(){
         try {
             Scanner stdin = new Scanner(this.context.openFileInput(CraterBackend.LEVEL_FILE_PATH));
             for (int i = this.levelSelectLayout.getComponents().length - CraterBackend.NUM_LEVELS;i<this.levelSelectLayout.getComponents().length;i++){
                 this.unlockedLevels[i-  (this.levelSelectLayout.getComponents().length - CraterBackend.NUM_LEVELS)] = stdin.nextBoolean();
-
+                this.completedLevels[i-  (this.levelSelectLayout.getComponents().length - CraterBackend.NUM_LEVELS)] = stdin.nextBoolean();
             }
-            for (int i = this.levelSelectLayout.getComponents().length - CraterBackend.NUM_LEVELS; i < this.levelSelectLayout.getComponents().length; i++) {
-                if (this.unlockedLevels[i-  (this.levelSelectLayout.getComponents().length - CraterBackend.NUM_LEVELS)]) {
-                    ((Button) this.levelSelectLayout.getComponents()[i]).setShader(1,1,1,1);
-                } else {
-                    ((Button) this.levelSelectLayout.getComponents()[i]).setShader(1,0.5f,0.5f,1);
-                }
-            }
+            this.resetLevelButtons();
             stdin.close();
         } catch (FileNotFoundException e){
             Log.d("BACKEND","Error loading data file " ,e);
+            this.createLevelFiles();
+        } catch (NoSuchElementException e){
+            Log.d("BACKEND","Incorrect file format " ,e);
             this.createLevelFiles();
         }
 
@@ -739,21 +879,22 @@ public class CraterBackend {
             PrintWriter stdout = new PrintWriter(new OutputStreamWriter(this.context.openFileOutput (CraterBackend.LEVEL_FILE_PATH, Context.MODE_PRIVATE)));
 
             for (int i = 0;i<CraterBackend.NUM_LEVELS;i++){
-                stdout.println(this.unlockedLevels[i]);
+                stdout.print(this.unlockedLevels[i] + " ");
+                stdout.println(this.completedLevels[i] + " ");
+
+                //making sure there is always one available level
+                if (this.completedLevels[i] && i < CraterBackend.NUM_LEVELS-1){
+                    Log.d("BACKEND","Unlocked level:" + (i+2));
+                    this.unlockedLevels[i+1] = true;
+                }
             }
             stdout.close();
 
         } catch (IOException e){
             Log.d("BACKEND","File write failed",e);
-        } finally {
-            for (int i = this.levelSelectLayout.getComponents().length - CraterBackend.NUM_LEVELS; i < this.levelSelectLayout.getComponents().length; i++) {
-                if (this.unlockedLevels[i-  (this.levelSelectLayout.getComponents().length - CraterBackend.NUM_LEVELS)]) {
-                    ((Button) this.levelSelectLayout.getComponents()[i]).setShader(1,1,1,1);
-                } else {
-                    ((Button) this.levelSelectLayout.getComponents()[i]).setShader(1,0.5f,0.5f,1);
-                }
-            }
         }
+
+        Log.d("BACKEND","completedLEVELs: " + Arrays.toString(this.completedLevels));
 
     }
 
@@ -785,12 +926,57 @@ public class CraterBackend {
             case 2:
                 fileName = R.raw.level_2;
                 break;
-            /*case 3:
-                //fileName = R.raw.level_3;
+            case 3:
+                fileName = R.raw.level_3;
                 break;
             case 4:
-                //fileName = R.raw.level_4;
-                break;*/
+                fileName = R.raw.level_4;
+                break;
+            case 5:
+                fileName = R.raw.level_5;
+                break;
+            case 6:
+                fileName = R.raw.level_6;
+                break;
+            case 7:
+                fileName = R.raw.level_7;
+                break;
+            case 8:
+                fileName = R.raw.level_8;
+                break;
+            case 9:
+                fileName = R.raw.level_9;
+                break;
+            case 10:
+                fileName = R.raw.level_10;
+                break;
+            case 11:
+                fileName = R.raw.level_11;
+                break;
+            case 12:
+                fileName = R.raw.level_12;
+                break;
+            case 13:
+                fileName = R.raw.level_13;
+                break;
+            case 14:
+                fileName = R.raw.level_14;
+                break;
+            case 15:
+                fileName = R.raw.level_15;
+                break;
+            case 16:
+                fileName = R.raw.level_16;
+                break;
+            case 17:
+                fileName = R.raw.level_17;
+                break;
+            case 18:
+                fileName = R.raw.level_18;
+                break;
+            case 19:
+                fileName = R.raw.level_19;
+                break;
             default:
                 fileName = R.raw.level_tutorial;
                 this.levelNum = 0;
@@ -843,8 +1029,11 @@ public class CraterBackend {
             int hitPoints = level_data.nextInt();
 
             switch (type){
-                case "ENEMY_TYPE_1"://todo make the 0.5f (the width) in the file
+                case "ENEMY_TYPE_1":
                     spawners.add(new Enemy1Spawner(x,y,w,h,spawnTime,hitPoints));
+                    break;
+                case "ENEMY_TYPE_2":
+                    spawners.add(new Enemy2Spawner(x,y,w,h,spawnTime,hitPoints));
                     break;
             }
         }
@@ -1062,184 +1251,185 @@ public class CraterBackend {
             }
         }
 
+        synchronized (CraterBackend.lock) {
+            Iterator itr;
 
-        Iterator itr;
-
-        itr = this.animations.iterator();
-        while (itr.hasNext()){
-            Animation anim = (Animation) itr.next();
-            anim.update(dt);
-            if (anim.isFinished()){
-                itr.remove();
-            }
-        }
-
-
-        if (this.currentGameState == CraterBackend.GAME_STATE_INGAME){
-            this.tutorialCurrentMillis = CraterBackend.TUTORIAL_MILLIS+1;//this essentially is a clever way of enabling all items
-        } else if (this.currentGameState == CraterBackend.GAME_STATE_TUTORIAL){
-            this.tutorialCurrentMillis += dt;
-            this.displayTutorial();
-        }
-
-        float scaleX = 1;
-        float scaleY = 1;
-        if (LayoutConsts.SCREEN_WIDTH > LayoutConsts.SCREEN_HEIGHT){
-            scaleX = (float) (LayoutConsts.SCREEN_HEIGHT)/ (LayoutConsts.SCREEN_WIDTH);
-        } else {
-            scaleY = (float) (LayoutConsts.SCREEN_WIDTH)/LayoutConsts.SCREEN_HEIGHT;
-
-        }
-        
-        this.attackJoyStick.setTranslate(this.attackJoyStickX,this.attackJoyStickY);
-        this.defenseJoyStick.setTranslate(this.defenseJoyStickX,this.defenseJoyStickY);
-        this.movementJoyStick.setTranslate(this.movementJoyStickX,this.movementJoyStickY);
-
-
-        if (this.currentGameState == CraterBackend.GAME_STATE_INGAME || this.currentGameState == CraterBackend.GAME_STATE_TUTORIAL ) {
-
-            //setting color of evolve button based on charge, -1 means that there are no evolve left
-            if (this.tutorialCurrentMillis > CraterBackend.EVOLVE_INTRODUCTION) {
-                if (player.getEvolutionCharge() == -1) {
-                    evolveButton.setShader(0, 0, 0, 0);
-                }
-                //its available but not fully charge
-                else if (player.getEvolutionCharge() <= 1) {
-                    evolveButton.setShader(player.getEvolutionCharge(), player.getEvolutionCharge(), player.getEvolutionCharge(), 1);
-                }
-                //its fully charge
-                else {
-                    evolveButton.setShader(0, 1, 0, 1);
+            itr = this.animations.iterator();
+            while (itr.hasNext()) {
+                Animation anim = (Animation) itr.next();
+                anim.update(dt);
+                if (anim.isFinished()) {
+                    itr.remove();
                 }
             }
 
-            //player has lost the game
-            if (! this.inEndGamePausePeriod && this.tutorialCurrentMillis > CraterBackend.SUPPLIES_INTRODUCTION && (! this.player.isAlive() || this.supplies.size() == 0)) {
 
-                if (! player.isAlive()){
-                    this.animations.add(new DeathAnim(player.getDeltaX(),player.getDeltaY(),player.getW(),player.getH()));
-                    this.player.hide();
-                }
-
-                this.player.hideAngleAimer();
-
-
-                SoundLib.setStateGameMusic(false);
-                SoundLib.setStateLossMusic(true);
-                this.resetJoySticks();
-                this.inEndGamePausePeriod = true;
-                this.endGamePauseMillis = CraterBackend.PAUSE_MILLIS;
-                return;
+            if (this.currentGameState == CraterBackend.GAME_STATE_INGAME) {
+                this.tutorialCurrentMillis = CraterBackend.TUTORIAL_MILLIS + 1;//this essentially is a clever way of enabling all items
+            } else if (this.currentGameState == CraterBackend.GAME_STATE_TUTORIAL) {
+                this.tutorialCurrentMillis += dt;
+                this.displayTutorial();
             }
 
-            //translate player based on inputs from movement stick
-            if (this.tutorialCurrentMillis > CraterBackend.CHARACTER_INTRODUCTION) {
-                this.player.translateFromPos(dt * this.movementJoyStickX / (1000 * scaleX) * this.player.getCharacterSpeed(), dt * this.movementJoyStickY / (scaleY * 1000) * this.player.getCharacterSpeed());
-            }
-            //see if the player or enemies intersect with plateaus,there is not a tutorial time cap because then the player might get stuck
-            for (Plateau plateau : this.plateaus) {
-                plateau.clipCharacterPos(player);
-                for (Enemy enemy : this.enemies) {
-                    plateau.clipCharacterPos(enemy);
-                }
-            }
-
-            //if the player is outside the crater, put them back
-            if (this.tutorialCurrentMillis > CraterBackend.CHARACTER_INTRODUCTION) {
-                float hypotenuse = (float) Math.hypot(player.getDeltaX(), player.getDeltaY());
-                if (hypotenuse > craterRadius) {
-                    player.setTranslate(player.getDeltaX() * craterRadius / hypotenuse, player.getDeltaY() * craterRadius / hypotenuse);
-                }
-                //based on player's health update the health bar
-                this.healthDisplay.update(player.getCurrentHealth(),-0.15f,-0.8f);
-                //finds the angle at which the player is aiming movement stick
-                hypotenuse = (float) Math.hypot(this.movementJoyStickX/scaleX, this.movementJoyStickY/scaleY);
-                if (hypotenuse >0) {
-                    this.player.update(dt, 180f / (float) Math.PI * MathOps.getAngle(this.movementJoyStickX / (scaleX * hypotenuse), this.movementJoyStickY / (scaleX * hypotenuse)), this.enemies, spawners);//todo make the rotation the previous frame's rotation
-                } else {
-                    this.player.update(dt, this.player.getRotation(), this.enemies, spawners);//todo make the rotation the previous frame's rotation
-
-                }
+            float scaleX = 1;
+            float scaleY = 1;
+            if (LayoutConsts.SCREEN_WIDTH > LayoutConsts.SCREEN_HEIGHT) {
+                scaleX = (float) (LayoutConsts.SCREEN_HEIGHT) / (LayoutConsts.SCREEN_WIDTH);
+            } else {
+                scaleY = (float) (LayoutConsts.SCREEN_WIDTH) / LayoutConsts.SCREEN_HEIGHT;
 
             }
 
+            this.attackJoyStick.setTranslate(this.attackJoyStickX, this.attackJoyStickY);
+            this.defenseJoyStick.setTranslate(this.defenseJoyStickX, this.defenseJoyStickY);
+            this.movementJoyStick.setTranslate(this.movementJoyStickX, this.movementJoyStickY);
 
 
+            if (this.currentGameState == CraterBackend.GAME_STATE_INGAME || this.currentGameState == CraterBackend.GAME_STATE_TUTORIAL) {
 
-            //removes dead enemies
-            if (this.tutorialCurrentMillis > CraterBackend.ENEMIES_INTRODUCTION) {
-                itr = enemies.iterator();
-                while (itr.hasNext()) {
-                    Enemy enemy = (Enemy) itr.next();
-                    if (! this.inEndGamePausePeriod) {
-                        enemy.update(dt, this.player, this.supplies,this.plateaus);
+                //setting color of evolve button based on charge, -1 means that there are no evolve left
+                if (this.tutorialCurrentMillis > CraterBackend.EVOLVE_INTRODUCTION) {
+                    if (player.getEvolutionCharge() == -1) {
+                        evolveButton.setShader(0, 0, 0, 0);
                     }
-                    if (!enemy.isAlive()) {
-                        this.animations.add(new DeathAnim(enemy.getDeltaX(),enemy.getDeltaY(),enemy.getWidth(),enemy.getH()));
-                        itr.remove();
-                        SoundLib.playPlayerKillSoundEffect();
+                    //its available but not fully charge
+                    else if (player.getEvolutionCharge() <= 1) {
+                        evolveButton.setShader(player.getEvolutionCharge(), player.getEvolutionCharge(), player.getEvolutionCharge(), 1);
+                    }
+                    //its fully charge
+                    else {
+                        evolveButton.setShader(0, 1, 0, 1);
                     }
                 }
-            }
 
-            if (this.tutorialCurrentMillis > CraterBackend.PLATEAUS_TOXIC_LAKE_INTRODUCITON) {
-                //see if the players or enemies are in the toxic lakes, if so it damages them
-                for (ToxicLake toxicLake : this.toxicLakes) {
-                    toxicLake.update(dt, this.player, this.enemies);
-                }
-            }
+                //player has lost the game
+                if (!this.inEndGamePausePeriod && this.tutorialCurrentMillis > CraterBackend.SUPPLIES_INTRODUCTION && (!this.player.isAlive() || this.supplies.size() == 0)) {
 
-            if (!this.inEndGamePausePeriod && this.tutorialCurrentMillis > CraterBackend.ENEMIES_INTRODUCTION) {
-                //remove dead spawners otherwise update them as to not draw dead spawners
-                itr = this.spawners.iterator();
-                while (itr.hasNext()) {
-                    Spawner spawner = (Spawner) itr.next();
-                    if (!spawner.isAlive()) {
-                        itr.remove();
+                    if (!player.isAlive()) {
+                        this.animations.add(new DeathAnim(player.getDeltaX(), player.getDeltaY(), player.getW(), player.getH()));
+                        this.player.hide();
                     }
 
-                    Enemy e = spawner.trySpawnEnemy(dt);
-                    if (e != null) {
-                        this.enemies.add(e);
-                    }
-                }
-            }
-
-            if (this.tutorialCurrentMillis > CraterBackend.SUPPLIES_INTRODUCTION) {
-                //remove dead supplies
-                itr = this.supplies.iterator();
-                while (itr.hasNext()) {
-                    Supply supply = (Supply) itr.next();
-                    if (!supply.isAlive()) {
-                        this.animations.add(new DeathAnim(supply.getX(),supply.getY(),supply.getWidth(),supply.getHeight()));
-                        itr.remove();
-                    }
-                }
-            }
-
-            if (! this.inEndGamePausePeriod && this.tutorialCurrentMillis > CraterBackend.ENEMIES_INTRODUCTION) {
-                //level is complete as all spawners have been killed
-                if (spawners.size() == 0) {
-                    Log.i("BACKEND", "Level " + levelNum + " completed. Loading level " + (levelNum + 1));
-                    if (levelNum < CraterBackend.NUM_LEVELS) {
-                        this.unlockedLevels[levelNum] = true;
-                    }
-                    this.createLevelFiles();
-
-                    this.levelNum++;
+                    this.player.hideAngleAimer();
 
 
                     SoundLib.setStateGameMusic(false);
-                    SoundLib.setStateVictoryMusic(true);
-
+                    SoundLib.setStateLossMusic(true);
                     this.resetJoySticks();
                     this.inEndGamePausePeriod = true;
                     this.endGamePauseMillis = CraterBackend.PAUSE_MILLIS;
+                    return;
+                }
+
+                //translate player based on inputs from movement stick
+                if (this.tutorialCurrentMillis > CraterBackend.CHARACTER_INTRODUCTION) {
+                    this.player.translateFromPos(dt * this.movementJoyStickX / (1000 * scaleX) * this.player.getCharacterSpeed(), dt * this.movementJoyStickY / (scaleY * 1000) * this.player.getCharacterSpeed());
+                }
+                //see if the player or enemies intersect with plateaus,there is not a tutorial time cap because then the player might get stuck
+                for (Plateau plateau : this.plateaus) {
+                    plateau.clipCharacterPos(player);
+                    for (Enemy enemy : this.enemies) {
+                        plateau.clipCharacterPos(enemy);
+                    }
+                }
+
+                //if the player is outside the crater, put them back
+                if (this.tutorialCurrentMillis > CraterBackend.CHARACTER_INTRODUCTION) {
+                    float hypotenuse = (float) Math.hypot(player.getDeltaX(), player.getDeltaY());
+                    if (hypotenuse > craterRadius) {
+                        player.setTranslate(player.getDeltaX() * craterRadius / hypotenuse, player.getDeltaY() * craterRadius / hypotenuse);
+                    }
+                    //based on player's health update the health bar
+                    this.healthDisplay.update(player.getCurrentHealth(), -0.15f, -0.8f);
+                    //finds the angle at which the player is aiming movement stick
+                    hypotenuse = (float) Math.hypot(this.movementJoyStickX / scaleX, this.movementJoyStickY / scaleY);
+                    if (hypotenuse > 0) {
+                        this.player.update(dt, 180f / (float) Math.PI * MathOps.getAngle(this.movementJoyStickX / (scaleX * hypotenuse), this.movementJoyStickY / (scaleX * hypotenuse)), this.enemies, spawners);//todo make the rotation the previous frame's rotation
+                    } else {
+                        this.player.update(dt, this.player.getRotation(), this.enemies, spawners);//todo make the rotation the previous frame's rotation
+
+                    }
+
+                }
+
+
+                //removes dead enemies
+                if (this.tutorialCurrentMillis > CraterBackend.ENEMIES_INTRODUCTION) {
+                    itr = enemies.iterator();
+                    while (itr.hasNext()) {
+                        Enemy enemy = (Enemy) itr.next();
+                        if (!this.inEndGamePausePeriod) {
+                            enemy.update(dt, this.player, this.supplies, this.plateaus);
+                        }
+                        if (!enemy.isAlive()) {
+                            this.animations.add(new DeathAnim(enemy.getDeltaX(), enemy.getDeltaY(), enemy.getWidth(), enemy.getH()));
+                            itr.remove();
+                            SoundLib.playPlayerKillSoundEffect();
+                        }
+                    }
+                }
+
+                if (this.tutorialCurrentMillis > CraterBackend.PLATEAUS_TOXIC_LAKE_INTRODUCITON) {
+                    //see if the players or enemies are in the toxic lakes, if so it damages them
+                    for (ToxicLake toxicLake : this.toxicLakes) {
+                        toxicLake.update(dt, this.player, this.enemies);
+                    }
+                }
+
+                if (!this.inEndGamePausePeriod && this.tutorialCurrentMillis > CraterBackend.ENEMIES_INTRODUCTION) {
+                    //remove dead spawners otherwise update them as to not draw dead spawners
+                    itr = this.spawners.iterator();
+                    while (itr.hasNext()) {
+                        Spawner spawner = (Spawner) itr.next();
+                        if (!spawner.isAlive()) {
+                            itr.remove();
+                        }
+
+                        Enemy e = spawner.trySpawnEnemy(dt);
+                        if (e != null) {
+                            this.enemies.add(e);
+                        }
+                    }
+                }
+                if (this.tutorialCurrentMillis > CraterBackend.SUPPLIES_INTRODUCTION) {
+                    //remove dead supplies
+                    itr = this.supplies.iterator();
+                    while (itr.hasNext()) {
+                        Supply supply = (Supply) itr.next();
+                        if (!supply.isAlive()) {
+                            this.animations.add(new DeathAnim(supply.getX(), supply.getY(), supply.getWidth(), supply.getHeight()));
+                            itr.remove();
+                        }
+                    }
+                }
+
+
+                if (!this.inEndGamePausePeriod && this.tutorialCurrentMillis > CraterBackend.ENEMIES_INTRODUCTION) {
+                    //level is complete as all spawners have been killed
+                    if (spawners.size() == 0) {
+                        Log.i("BACKEND", "Level " + levelNum + " completed. Loading level " + (levelNum + 1));
+                        if (levelNum != 0) {
+                            this.completedLevels[levelNum - 1] = true;
+                            if (levelNum < CraterBackend.NUM_LEVELS) {
+                                this.unlockedLevels[levelNum] = true;
+                            }
+                        }
+                        this.createLevelFiles();
+
+                        this.levelNum++;
+
+
+                        SoundLib.setStateGameMusic(false);
+                        SoundLib.setStateVictoryMusic(true);
+
+                        this.resetJoySticks();
+                        this.inEndGamePausePeriod = true;
+                        this.endGamePauseMillis = CraterBackend.PAUSE_MILLIS;
+                    }
                 }
             }
+
         }
-
-
     }
 
     /** Returns the player; mainly used to get coordinates as to reposition the camera
