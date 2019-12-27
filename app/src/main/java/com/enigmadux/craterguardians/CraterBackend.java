@@ -22,6 +22,7 @@ import com.enigmadux.craterguardians.Enemies.Enemy1;
 import com.enigmadux.craterguardians.Enemies.Enemy2;
 import com.enigmadux.craterguardians.Spawners.Enemy1Spawner;
 import com.enigmadux.craterguardians.Spawners.Enemy2Spawner;
+import com.enigmadux.craterguardians.Spawners.Enemy3Spawner;
 import com.enigmadux.craterguardians.Spawners.Spawner;
 
 import java.io.FileNotFoundException;
@@ -48,7 +49,7 @@ import enigmadux2d.core.shapes.TexturedRect;
  */
 public class CraterBackend {
     //the amount of levels
-    public static final int NUM_LEVELS = 19;
+    public static final int NUM_LEVELS = 20;
     //the path to the level file
     private static final String LEVEL_FILE_PATH = "level_data";
 
@@ -977,11 +978,13 @@ public class CraterBackend {
             case 19:
                 fileName = R.raw.level_19;
                 break;
+            case 20:
+                fileName = R.raw.level_20;
+                break;
             default:
                 fileName = R.raw.level_tutorial;
                 this.levelNum = 0;
         }
-
 
         Scanner level_data = new Scanner(context.getResources().openRawResource(fileName));
 
@@ -1034,6 +1037,9 @@ public class CraterBackend {
                     break;
                 case "ENEMY_TYPE_2":
                     spawners.add(new Enemy2Spawner(x,y,w,h,spawnTime,hitPoints));
+                    break;
+                case "ENEMY_TYPE_#3":
+                    spawners.add(new Enemy3Spawner(x,y,w,h,spawnTime,hitPoints));
                     break;
             }
         }

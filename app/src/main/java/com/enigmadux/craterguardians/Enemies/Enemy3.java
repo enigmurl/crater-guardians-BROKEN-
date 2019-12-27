@@ -4,7 +4,7 @@ import android.content.Context;
 import android.opengl.Matrix;
 import android.support.annotation.NonNull;
 
-import com.enigmadux.craterguardians.Attacks.Enemy2Attack;
+import com.enigmadux.craterguardians.Attacks.Enemy3Attack;
 import com.enigmadux.craterguardians.BaseCharacter;
 import com.enigmadux.craterguardians.MathOps;
 import com.enigmadux.craterguardians.Plateau;
@@ -17,11 +17,11 @@ import javax.microedition.khronos.opengles.GL10;
 
 import enigmadux2d.core.shapes.TexturedRect;
 
-/** The second type of enemy. todo javadoc
+/** The second type of enemy. Is a sort of "Boss" todo javado
  * @author Manu Bhat
  * @version BETA
  */
-public class Enemy2 extends Enemy {
+public class Enemy3 extends Enemy {
     //a constant that represents how fast the character is, right now there aren't any particular units which needs to change (see todo)
     private static final float CHARACTER_SPEED = 2.5f;
     //a constant that represents how many rows the sprite sheet has (how many orientations of rotations
@@ -30,20 +30,20 @@ public class Enemy2 extends Enemy {
     private static final int FRAMES_PER_ROTATION = 16;
     //a constant that represents how fast to play the animation in frames per second
     private static final float FPS = 16;
-    //a constant that represents the maximum health of Enemy2
+    //a constant that represents the maximum health of Enemy3
     private static final int MAXIMUM_HEALTH = 20;
 
 
     /** The width in openGL terms of any enemy
      *
      */
-    public static final float CHARACTER_WIDTH = 0.6f;
+    public static final float CHARACTER_WIDTH = 1f;
     /** The height in openGL terms of any enemy
      *
      */
-    public static final float CHARACTER_HEIGHT = 0.6f;
+    public static final float CHARACTER_HEIGHT = 1f;
     //visual is shared by all objects as they all have the same sprite
-    private static TexturedRect VISUAL_REPRESENTATION = new TexturedRect(-Enemy2.CHARACTER_WIDTH/2,-Enemy2.CHARACTER_HEIGHT/2,Enemy2.CHARACTER_WIDTH,Enemy2.CHARACTER_HEIGHT);
+    private static TexturedRect VISUAL_REPRESENTATION = new TexturedRect(-Enemy3.CHARACTER_WIDTH/2,-Enemy3.CHARACTER_HEIGHT/2,Enemy3.CHARACTER_WIDTH,Enemy3.CHARACTER_HEIGHT);
 
 
     //translates the Character according to delta x and delta y
@@ -55,7 +55,7 @@ public class Enemy2 extends Enemy {
     /** Default Constructor
      *
      */
-    public Enemy2(){
+    public Enemy3(){
         super(NUM_ROTATION_ORIENTATIONS,FRAMES_PER_ROTATION,FPS);
     }
 
@@ -77,12 +77,12 @@ public class Enemy2 extends Enemy {
 
     @Override
     public void attack(float angle) {
-        this.attacks.add(new Enemy2Attack(this.getDeltaX(),this.getDeltaY(),25, angle,0.5f + Enemy2.CHARACTER_WIDTH,0.2f,1000,this));
+        this.attacks.add(new Enemy3Attack(this.getDeltaX(),this.getDeltaY(),99,angle,0.5f + Enemy3.CHARACTER_WIDTH,5000,this));
     }
 
     @Override
     public float getCharacterSpeed() {
-        return Enemy2.CHARACTER_SPEED;
+        return Enemy3.CHARACTER_SPEED;
     }
 
 
@@ -126,7 +126,7 @@ public class Enemy2 extends Enemy {
      */
     @Override
     public int getMaxHealth() {
-        return Enemy2.MAXIMUM_HEALTH;
+        return Enemy3.MAXIMUM_HEALTH;
     }
 
     /** Gets the width of this enemy
@@ -135,7 +135,7 @@ public class Enemy2 extends Enemy {
      */
     @Override
     public float getW() {
-        return Enemy2.CHARACTER_WIDTH;
+        return Enemy3.CHARACTER_WIDTH;
     }
 
     /** Gets the height of this enemy
@@ -144,6 +144,6 @@ public class Enemy2 extends Enemy {
      */
     @Override
     public float getH() {
-        return Enemy2.CHARACTER_HEIGHT;
+        return Enemy3.CHARACTER_HEIGHT;
     }
 }
