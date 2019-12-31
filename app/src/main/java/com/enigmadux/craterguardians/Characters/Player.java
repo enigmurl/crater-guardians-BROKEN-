@@ -23,19 +23,18 @@ import javax.microedition.khronos.opengles.GL10;
 import enigmadux2d.core.shapes.TexturedRect;
 
 public abstract class Player extends BaseCharacter {
-    //if an attack hits the player through the shield, how much of the total damage reaches
-    public static final float SHIELD_DAMAGE_ALLOWED = 0.5f;
-    //the angle from start to finish of the shield (radians)
-    private static final float SHIELD_SWEEP = 0.5f;
 
-    /** The width in openGL terms of any character
+
+    /** The maximum level a player can be, levels affect
      *
      */
-    public static final float CHARACTER_WIDTH = 0.3f;
-    /** The height in openGL terms of any character
+    private static final int MAX_LEVEL = 10;
+
+    /** The radius in openGL terms of any character
      *
      */
-    public static final float CHARACTER_HEIGHT = 0.3f;
+    public static final float CHARACTER_RADIUS = 0.15f;
+
 
     //the amount of attacks it can hold maximum (think of it as the amount of bullets in a magazine)
     private int maxAttacks;
@@ -81,17 +80,12 @@ public abstract class Player extends BaseCharacter {
     protected float evolutionCharge = 0f;
 
 
-    //shows the user the angle at which they plan to defensd
-    private AngleAimer defenseAngleAimer;
-    //visual shield shown when it's being use
-    private Shield shield;
-    //how long the active shield last for
-    private long shieldMillis = 0;
-    //the middle angle of the shield in radians
-    private float shieldRadians = 0;
 
     //the angle at which the player is moving
     private float rotation;
+
+    //the level of this character in upgradability
+    protected int level;
 
     /** Default constructor
      *
@@ -102,9 +96,6 @@ public abstract class Player extends BaseCharacter {
     public Player(int numRotationOrientations, int framesPerRotation,float fps){
         super(numRotationOrientations, framesPerRotation, fps);
 
-        this.defenseAngleAimer = new TriangleAimer(0,0,SHIELD_SWEEP,0,this.getH() *2);
-        this.defenseAngleAimer.hide();
-
         this.attackAngleAimer = this.createAngleAimer();
         this.attackAngleAimer.hide();
 
@@ -114,7 +105,7 @@ public abstract class Player extends BaseCharacter {
         this.reloadTime = this.getReloadTime();
 
         Matrix.setIdentityM(scalarMatrix,0);
-        Matrix.scaleM(scalarMatrix,0,this.getW()/maxAttacks,0.1f,1);
+        Matrix.scaleM(scalarMatrix,0,2*this.getRadius()/maxAttacks,0.1f,1);
     }
 
 
@@ -166,20 +157,17 @@ public abstract class Player extends BaseCharacter {
             return;
         }
 
-        //TODO Concurrent modification happening here sometimes
+        //TODO Concurrent modification happening here sometimes also on line 178 a null pointer was thrown
         for (Attack attack: this.attacks){
             attack.draw(gl,parentMatrix);
         }
         Matrix.setIdentityM(this.translationMatrix,0);
         Matrix.translateM(this.translationMatrix,0,this.getDeltaX(),this.getDeltaY(),0);
-        if (this.shieldMillis > 0){
-            Matrix.multiplyMM(finalMatrix,0,parentMatrix,0,translationMatrix,0);
-            this.shield.draw(gl,finalMatrix);
-        }
+
 
         for (int i = 0;i < numAttacks;i++){
             Matrix.setIdentityM(translationMatrix,0);
-            Matrix.translateM(translationMatrix,0,this.getDeltaX() + this.getW() * ((float) i/maxAttacks  -0.5f),this.getDeltaY() + this.getH()/2,0 );//0.05 is half of the
+            Matrix.translateM(translationMatrix,0,this.getDeltaX() + this.getRadius() * 2 * ((float) i/maxAttacks  -0.5f),this.getDeltaY() + this.getRadius(),0 );//0.05 is half of the
             Matrix.multiplyMM(scalarTranslationMatrix,0,translationMatrix,0,scalarMatrix,0);
             Matrix.multiplyMM(finalMatrix,0,parentMatrix,0,scalarTranslationMatrix,0);
 
@@ -190,7 +178,7 @@ public abstract class Player extends BaseCharacter {
         if (this.numAttacks == 0){
             for (int i = 0;i < maxAttacks;i++){
                 Matrix.setIdentityM(translationMatrix,0);
-                Matrix.translateM(translationMatrix,0,this.getDeltaX() + this.getW() * ((float) i/maxAttacks  -0.5f),this.getDeltaY() + this.getH()/2,0 );//0.05 is half of the
+                Matrix.translateM(translationMatrix,0,this.getDeltaX() + this.getRadius() * 2 * ((float) i/maxAttacks  -0.5f),this.getDeltaY() + this.getRadius(),0 );//0.05 is half of the
                 Matrix.multiplyMM(scalarTranslationMatrix,0,translationMatrix,0,scalarMatrix,0);
                 Matrix.multiplyMM(finalMatrix,0,parentMatrix,0,scalarTranslationMatrix,0);
 
@@ -203,11 +191,7 @@ public abstract class Player extends BaseCharacter {
 
         this.attackAngleAimer.setPosition(this.getDeltaX(),this.getDeltaY());
         this.attackAngleAimer.draw(gl,parentMatrix);
-
-        this.defenseAngleAimer.setPosition(this.getDeltaX(),this.getDeltaY());
-        this.defenseAngleAimer.draw(gl,parentMatrix);
-
-        this.attackChargeUp.update(this.attackChargeUp.getCurrentHitPoints(),this.getDeltaX()-this.getW()/2,this.getDeltaY() + this.getH()/2 + 0.1f);
+   this.attackChargeUp.update(this.attackChargeUp.getCurrentHitPoints(),this.getDeltaX()-this.getRadius(),this.getDeltaY() + this.getRadius() + 0.1f);
         this.attackChargeUp.draw(gl,parentMatrix);
 
     }
@@ -244,28 +228,6 @@ public abstract class Player extends BaseCharacter {
      */
     public void setAngleAimerAngle(float angle){
         this.attackAngleAimer.setMidAngle(angle);
-    }
-    /** shows the angle aimer
-     *
-     */
-    public void showDefenseAngleAimer(){
-        this.defenseAngleAimer.show();
-    }
-
-    /** Hides the angle aimer; it is not drawn to the screen
-     *
-     */
-
-    public void hideDefenseAngleAimer() {
-        this.defenseAngleAimer.hide();
-    }
-
-    /** Sets the angle of the angle aimer
-     *
-     * @param angle the angle of the angle aimer in degrees (open gl takes in degrees)
-     */
-    public void setDefenseAngleAimerAngle(float angle){
-        this.defenseAngleAimer.setMidAngle(angle);
     }
 
     /** Gets the health of the current player (amount of damage it can take before being considered dead)
@@ -325,12 +287,9 @@ public abstract class Player extends BaseCharacter {
             }
         }
 
-        if (this.shieldMillis > 0) {
-            shieldMillis -= dt;
-        }
 
 
-            this.speedEffectMillis -= dt;
+        this.speedEffectMillis -= dt;
         if (this.speedEffectMillis < 0){
             this.speedMultiplier = 1;
         }
@@ -381,34 +340,17 @@ public abstract class Player extends BaseCharacter {
         this.attackChargeUp.update(0,this.getDeltaX(),this.getDeltaY());
     }
 
-    /** When an attack wants to damage the player, it needs to see if it hits the shield todo because only the middle angle is taken into account, there are false positive and negatives
+    /** UPDATE: shield has been removed so it's just returning starting damage
+     *
+     * When an attack wants to damage the player, it needs to see if it hits the shield todo because only the middle angle is taken into account, there are false positive and negatives
      *
      * @param startingDamage how much damage it would do if there was no shield
      * @param angle the angle in radians, in relation to the player, as in, what angle does the enemy attack make with the player
      * @return the damage to be applied to the player depending on the shield
      */
     public int getAttackDamage(int startingDamage,float angle) {
-        if (this.shieldMillis > 0 && angle > shieldRadians - SHIELD_SWEEP && angle < shieldRadians + SHIELD_SWEEP) {
-            SoundLib.playPlayerShieldBlockSoundEffect();
-            return (int) (startingDamage * SHIELD_DAMAGE_ALLOWED);
-        }
+
         return startingDamage;
-    }
-
-    /** Spawns a shield for the specified duration at an angle, this reduces the damages for attacks coming at the angle
-     *
-     *
-     * @param duration length of the shield in millis
-     * @param angle middle angle of the shield in radians
-     */
-    public void spawnShield(long duration,float angle){
-        SoundLib.playPlayerSpawnShieldSoundEffect();
-
-        this.shieldMillis = duration;
-        this.shieldRadians = angle;
-
-        this.hideDefenseAngleAimer();
-        this.shield = new Shield(2*this.getW(),2*this.getH(),angle);
     }
 
     /** Whether or not the health is greater than 0, also plays sound effect if it's dead
@@ -438,16 +380,8 @@ public abstract class Player extends BaseCharacter {
      * @return the width of any player
      */
     @Override
-    public float getW() {
-        return Player.CHARACTER_WIDTH;
-    }
-    /** Gets the height of the players
-     *
-     * @return the height of any player
-     */
-    @Override
-    public float getH() {
-        return Player.CHARACTER_HEIGHT;
+    public float getRadius() {
+        return Player.CHARACTER_RADIUS;
     }
 
     /** Tries to attack if there are any, it also plays sound effects if it can attack
@@ -462,4 +396,17 @@ public abstract class Player extends BaseCharacter {
             //todo: make a ("no current attacks" sound effect/reloading)
         }
     }
+
+
+    /** Sets the level of this player. Child classes should make it a static variable
+     *
+     * @param level the level of this player starting from 0
+     */
+    public abstract void setPlayerLevel(int level);
+
+    /** Gets the level of this type of class, should be returning a static variable
+     *
+     * @return the level of this type of variable
+     */
+    public abstract int getPlayerLevel();
 }

@@ -122,6 +122,24 @@ public class Plateau{
 
     }
 
+
+    /** See if a circle intersects this polygon. Note if the circle is completely enclosed by the polygon
+     *
+     * @param x
+     * @param y the center y of the circle
+     * @param r the radius
+     * @return whether or not the two intersect
+     */
+    public boolean intersectsCircle(float x, float y, float r){
+        return MathOps.segmentIntersectsCircle(x,y,r,this.points[0][0],this.points[0][1],this.points[1][0],this.points[1][1]) ||
+                MathOps.segmentIntersectsCircle(x,y,r,this.points[3][0],this.points[3][1],this.points[1][0],this.points[1][1]) ||
+                MathOps.segmentIntersectsCircle(x,y,r,this.points[0][0],this.points[0][1],this.points[2][0],this.points[2][1]) ||
+                MathOps.segmentIntersectsCircle(x,y,r,this.points[2][0],this.points[2][1],this.points[3][0],this.points[3][1]);
+
+    }
+
+
+
     /** Makes sure a character doesn't pass an edge, if its in it, it moves it outside.
      * Portions of code borrowed from: http://csharphelper.com/blog/2017/08/calculate-where-a-line-segment-and-an-ellipse-intersect-in-c/
      * The clipping part (finding new position of player) I made myself though.
@@ -143,8 +161,8 @@ public class Plateau{
         float pt2Y = pt2y - cy;
 
         // Get the semi major and semi minor axes.
-        float a = character.getW() / 2;
-        float b = character.getH() / 2;
+        float a = character.getRadius();
+        float b = character.getRadius();
 
         // Calculate the quadratic parameters.
         float A = (pt2X - pt1X) * (pt2X - pt1X) / (a*a) +

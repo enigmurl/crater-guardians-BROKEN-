@@ -25,7 +25,7 @@ public abstract class BaseCharacter extends EnigmaduxComponent {
     /** The width in openGL terms of any character
      *
      */
-    //public static final float CHARACTER_WIDTH = 0.3f;
+    //public static final float CHARACTER_RADIUS = 0.3f;
     /** The height in openGL terms of any character
      *
      */
@@ -68,10 +68,10 @@ public abstract class BaseCharacter extends EnigmaduxComponent {
      */
     public BaseCharacter(int numRotationOrientations, int framesPerRotation,float fps){
         super(-1,-1,-1,-1);//todo the sub classes should change it
-        this.w = this.getW();
-        this.h = this.getH();
-        this.x = -this.getW()/2;
-        this.y = -this.getH()/2;
+        this.w = this.getRadius() * 2;
+        this.h = this.getRadius() * 2;
+        this.x = -this.getRadius();
+        this.y = -this.getRadius();
 
         this.numRotationOrientations = numRotationOrientations;
         this.framesPerRotation = framesPerRotation;
@@ -156,16 +156,16 @@ public abstract class BaseCharacter extends EnigmaduxComponent {
      * @param y2 openGL y of second point
      * @return whether or not they collide
      */
-    public boolean collidesWithLine(float x1, float y1, float x2, float y2){
+    public boolean collidesWithLine(float x1, float y1, float x2, float y2) {
         float dX1 = x1 - this.getDeltaX();
         float dY1 = y1 - this.getDeltaY();
-        if (dX1 * dX1/(this.getW()*this.getW()/4) + dY1*dY1/(this.getH() *this.getH())/4 < 1 ){
+        if (dX1 * dX1 / (this.getRadius() * this.getRadius()) + dY1 * dY1 / (this.getRadius() * this.getRadius()) < 1) {
             return true;
         }
         float dX2 = x2 - this.getDeltaX();
         float dY2 = y2 - this.getDeltaY();
-        if (dX2 * dX2/(this.getW()*this.getW()/4) + dY2 * dY2/(this.getH() *this.getH()/4) < 1){
-            return  true;
+        if (dX2 * dX2 / (this.getRadius() * this.getRadius()) + dY2 * dY2 / (this.getRadius() * this.getRadius()) < 1) {
+            return true;
         }
 
 
@@ -178,49 +178,8 @@ public abstract class BaseCharacter extends EnigmaduxComponent {
         float pt2Y = y2 - cy;
 
         // Get the semi major and semi minor axes.
-        float a = this.getW()/ 2;
-        float b = this.getH()/ 2;
-
-        // Calculate the quadratic parameters.
-        float A = (pt2X - pt1X) * (pt2X - pt1X) / (a*a) +
-                (pt2Y - pt1Y) * (pt2Y - pt1Y) /(b* b);
-        float B = 2 * pt1X * (pt2X - pt1X) /(a* a) +
-                2 * pt1Y * (pt2Y - pt1Y) /(b*b);
-        float C = pt1X * pt1X /(a*a)+ pt1Y * pt1Y /(b*b)- 1;
-
-
-        // Calculate the discriminant.
-        float discriminant = B * B - 4 * A * C;
-
-        if (discriminant >= 0){
-            float tValue1 = (float) (-B + Math.sqrt(discriminant)) /(2*A); //||
-            float tValue2 = (float) (-B - Math.sqrt(discriminant))/(2*A);
-
-            return  (tValue1 >= 0 && tValue1 <= 1) || (tValue2 >= 0 && tValue2 <= 1);
-        }
-        return false;
-    }
-
-    /** gets all the points where the hitbox and the line collide
-     *
-     * @param x1 openGL x of first point
-     * @param y1 openGL y of first point
-     * @param x2 openGL x of second point
-     * @param y2 openGL y of second point
-     * @return all the points where the hitbox and the line collide
-     */
-    public List<float[]> getCollisionsWithLine(float x1, float y1, float x2, float y2) {
-        float cx = this.getDeltaX();
-        float cy = this.getDeltaY();
-
-        float pt1X = x1 - cx;
-        float pt1Y = y1 - cy;
-        float pt2X = x2 - cx;
-        float pt2Y = y2 - cy;
-
-        // Get the semi major and semi minor axes.
-        float a = this.getW()/ 2;
-        float b = this.getH()/ 2;
+        float a = this.getRadius();
+        float b = this.getRadius();
 
         // Calculate the quadratic parameters.
         float A = (pt2X - pt1X) * (pt2X - pt1X) / (a * a) +
@@ -233,24 +192,13 @@ public abstract class BaseCharacter extends EnigmaduxComponent {
         // Calculate the discriminant.
         float discriminant = B * B - 4 * A * C;
 
-        List<float[]> returnList = new ArrayList<>();
-
         if (discriminant >= 0) {
             float tValue1 = (float) (-B + Math.sqrt(discriminant)) / (2 * A); //||
             float tValue2 = (float) (-B - Math.sqrt(discriminant)) / (2 * A);
 
-
-            if (tValue1 >= 0 && tValue1 <= 1) {
-                returnList.add(new float[]{x1 + tValue1 * (x2-x1),y1 + tValue1 * (y2-y1)});
-            }
-            if (tValue2 >= 0 && tValue2 <= 1 && discriminant != 0) {
-                returnList.add(new float[] {x1 + tValue2 * (x2-x1),y1 + tValue2 * (y2-y1)});
-            }
-
-
-            //((-B - Math.sqrt(discriminant)) /(2*A) >= 0 && (-B - Math.sqrt(discriminant))/(2*A) <= 1);
+            return (tValue1 >= 0 && tValue1 <= 1) || (tValue2 >= 0 && tValue2 <= 1);
         }
-        return returnList;
+        return false;
     }
 
     /** Respawn the character so it is alive again
@@ -313,15 +261,10 @@ public abstract class BaseCharacter extends EnigmaduxComponent {
      */
     public abstract int getMaxHealth();
 
-    /** Gets what the width should be, should be "static" as in it references a static variable
+    /** Gets what the radius should be, should be "static" as in it references a static variable
      *
-     * @return the width of the character
+     * @return the radius of the character
      */
-    public abstract float getW();
+    public abstract float getRadius();
 
-    /** Gets what the height should be, should be "static" as in it references a static variable
-     *
-     * @return the height of the character
-     */
-    public abstract float getH();
 }

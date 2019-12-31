@@ -36,8 +36,19 @@ public class CraterActivity extends EnigmaduxActivity {
     public void onPause(){
         super.onPause();
         this.enigmaduxGLSurfaceView.onPause();
+        SoundLib.pauseAllMedia();
     }
 
+
+    /** on resume
+     *
+     */
+    @Override
+    public void onResume(){
+        super.onResume();
+        this.enigmaduxGLSurfaceView.onResume();
+        SoundLib.resumeAllMedia();
+    }
     /** Loads all media
      *
      */
@@ -54,6 +65,5 @@ public class CraterActivity extends EnigmaduxActivity {
     @Override
     public void onStop(){
         super.onStop();
-        SoundLib.pauseAllMedia();
     }
 }

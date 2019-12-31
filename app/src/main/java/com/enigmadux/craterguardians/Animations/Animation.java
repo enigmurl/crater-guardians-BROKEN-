@@ -6,7 +6,7 @@ import javax.microedition.khronos.opengles.GL10;
 
 import enigmadux2d.core.EnigmaduxComponent;
 
-/** Used to play animations, such as death animations, todo looping animations
+/** Used to play animations, such as death animations, todo looping animations/ use textures right
  *
  * @author Manu Bhat
  * @version BETA

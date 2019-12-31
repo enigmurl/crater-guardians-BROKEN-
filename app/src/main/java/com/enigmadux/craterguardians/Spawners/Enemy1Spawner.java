@@ -34,6 +34,7 @@ public class Enemy1Spawner extends Spawner {
      * @param x the open gl coordinate of the spawner, left most edge x coordinate e.g. (1.0f, -0.5f, 0.0f ,0.1f)
      * @param y the open gl coordinate of the spawner, bottom most y coordinate e.g. (1.0f,-0.5f, 0.0f, 0.1f)
      * @param w the width of the spawner (distance from left edge to right edge) in open gl coordinate terms e.g (1.0f, 1.5f) Should be positive
+     * @param millisPerSpawn the milli seconds between spawns
      * @param h the height of the spawner (distance from top edge to bottom edge) in open gl coordinate terms e.g (1.0f, 1.5f) should be positive
      * @param health the amount of damage this can take before dieing
      */
@@ -52,6 +53,21 @@ public class Enemy1Spawner extends Spawner {
 
         Matrix.multiplyMM(translationScalarMatrix,0,translationMatrix,0,scalarMatrix,0);
 
+    }
+
+    /** Constructor used for waves, this is in future will be the only one TODO actually implement this
+     *
+     * @param x the open gl coordinate of the spawner, left most edge x coordinate e.g. (1.0f, -0.5f, 0.0f ,0.1f)
+     * @param y the open gl coordinate of the spawner, bottom most y coordinate e.g. (1.0f,-0.5f, 0.0f, 0.1f)
+     * @param w the width of the spawner (distance from left edge to right edge) in open gl coordinate terms e.g (1.0f, 1.5f) Should be positive
+     * @param h the height of the spawner (distance from top edge to bottom edge) in open gl coordinate terms e.g (1.0f, 1.5f) should be positive
+     * @param numSpawns for each spawn location specified by times: how many enemies are spawning
+     * @param times the milliseconds at which a spawn will happen
+     * @param totalWaveTime the total milli seconds of a wave, this means that after the sai amount of milliseconds, the cycle will repeat
+     * @param health the health of the spawner
+     */
+    public Enemy1Spawner(float x,float y,float w,float h,short[] numSpawns,long[] times,long totalWaveTime,int health){
+        super(x,y,w,h,0,health);
     }
 
 
@@ -90,3 +106,4 @@ public class Enemy1Spawner extends Spawner {
 
 
 }
+

@@ -6,6 +6,7 @@ import android.support.annotation.NonNull;
 
 import com.enigmadux.craterguardians.Attacks.Enemy3Attack;
 import com.enigmadux.craterguardians.BaseCharacter;
+import com.enigmadux.craterguardians.EnemyMap;
 import com.enigmadux.craterguardians.MathOps;
 import com.enigmadux.craterguardians.Plateau;
 import com.enigmadux.craterguardians.R;
@@ -34,16 +35,14 @@ public class Enemy3 extends Enemy {
     private static final int MAXIMUM_HEALTH = 20;
 
 
-    /** The width in openGL terms of any enemy
+
+    /** The radius in openGL terms of this enemy
      *
      */
-    public static final float CHARACTER_WIDTH = 1f;
-    /** The height in openGL terms of any enemy
-     *
-     */
-    public static final float CHARACTER_HEIGHT = 1f;
+    public static final float CHARACTER_RADIUS = 0.5f;
+
     //visual is shared by all objects as they all have the same sprite
-    private static TexturedRect VISUAL_REPRESENTATION = new TexturedRect(-Enemy3.CHARACTER_WIDTH/2,-Enemy3.CHARACTER_HEIGHT/2,Enemy3.CHARACTER_WIDTH,Enemy3.CHARACTER_HEIGHT);
+    private static TexturedRect VISUAL_REPRESENTATION = new TexturedRect(-Enemy3.CHARACTER_RADIUS,-Enemy3.CHARACTER_RADIUS,Enemy3.CHARACTER_RADIUS*2,Enemy3.CHARACTER_RADIUS*2);
 
 
     //translates the Character according to delta x and delta y
@@ -77,7 +76,7 @@ public class Enemy3 extends Enemy {
 
     @Override
     public void attack(float angle) {
-        this.attacks.add(new Enemy3Attack(this.getDeltaX(),this.getDeltaY(),99,angle,0.5f + Enemy3.CHARACTER_WIDTH,5000,this));
+        this.attacks.add(new Enemy3Attack(this.getDeltaX(),this.getDeltaY(),99,angle,0.5f + Enemy3.CHARACTER_RADIUS*2,5000,this));
     }
 
     @Override
@@ -86,20 +85,21 @@ public class Enemy3 extends Enemy {
     }
 
 
-    /** Updates the position
+    /** Updates the position, and other attributes
      *
      * @param dt amount of milliseconds since last call
      * @param player the current character the player is using.
+     * @param supplies  all alive supplies on the map
+     * @param enemyMap A map of where and how the enemy should go
      */
-    @Override
-    public void update(long dt, BaseCharacter player, List<Supply> supplies, List<Plateau> plateaus){
+    public void update(long dt, BaseCharacter player, List<Supply> supplies, EnemyMap enemyMap) {
         if (this.attacks.size() == 0){
             this.canMove = true;
         } else {
             this.canMove = this.attacks.get(0).isFinished();
         }
 
-        super.update(dt, player,supplies,plateaus);
+        super.update(dt, player,supplies,enemyMap);
 
 
     }
@@ -129,21 +129,12 @@ public class Enemy3 extends Enemy {
         return Enemy3.MAXIMUM_HEALTH;
     }
 
-    /** Gets the width of this enemy
+    /** Gets the radius of this enemy
      *
-     * @return the width of this enemy
+     * @return the radius of this enemy
      */
     @Override
-    public float getW() {
-        return Enemy3.CHARACTER_WIDTH;
-    }
-
-    /** Gets the height of this enemy
-     *
-     * @return the height of this type of enemy
-     */
-    @Override
-    public float getH() {
-        return Enemy3.CHARACTER_HEIGHT;
+    public float getRadius() {
+        return Enemy3.CHARACTER_RADIUS;
     }
 }

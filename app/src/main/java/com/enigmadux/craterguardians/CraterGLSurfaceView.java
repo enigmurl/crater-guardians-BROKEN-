@@ -50,10 +50,22 @@ public class CraterGLSurfaceView extends EnigmaduxGLSurfaceView {
 
     /** Called whenever the app is paused
      *
+     *  SUPER ON PAUSE IS NOT CALLED AS THIS DUMPS THE CONTEXT OUT OF MEMORY
+     *
      */
     @Override
     public void onPause() {
-        super.onPause();
         mRenderer.onPause();
+    }
+
+
+    /** Called whenever the app is resumed
+     *
+     *
+     * SUPER ON RESUME IS NOT CALLED AS THIS DUMPS THE CONTEXT OUT OF MEMORY
+     */
+    @Override
+    public void onResume() {
+        mRenderer.onResume();
     }
 }

@@ -46,12 +46,18 @@ public class Kaiser extends Player {
     private static final float GUN_WIDTH = 0.3f;
 
 
+
+
+    //the level of the this player
+    private static int PLAYER_LEVEL = 0;
+
+
     //visual is shared by all objects as they all have the same sprite, this is the basic state (gen 0)
-    private static TexturedRect VISUAL_REPRESENTATION_E1 = new TexturedRect(-Player.CHARACTER_WIDTH/2,-Player.CHARACTER_HEIGHT/2,Player.CHARACTER_WIDTH,Player.CHARACTER_HEIGHT);
+    private static TexturedRect VISUAL_REPRESENTATION_E1 = new TexturedRect(-Player.CHARACTER_RADIUS,-Player.CHARACTER_RADIUS,Player.CHARACTER_RADIUS*2,Player.CHARACTER_RADIUS*2);
     //visual is shared by all objects as they all have the same sprite, this is the secondary state (gen 1)
-    private static TexturedRect VISUAL_REPRESENTATION_E2 = new TexturedRect(-Player.CHARACTER_WIDTH/2,-Player.CHARACTER_HEIGHT/2,Player.CHARACTER_WIDTH,Player.CHARACTER_HEIGHT);
+    private static TexturedRect VISUAL_REPRESENTATION_E2  = new TexturedRect(-Player.CHARACTER_RADIUS,-Player.CHARACTER_RADIUS,Player.CHARACTER_RADIUS*2,Player.CHARACTER_RADIUS*2);
     //visual is share by all objects as they all have the same gun, for now same gun for both evolutions, when player is looking to right, the gun
-    private static TexturedRect VISUAL_REPRESENTATION_GUN = new TexturedRect(0,-Player.CHARACTER_HEIGHT/2,Kaiser.GUN_WIDTH,Kaiser.GUN_HEIGHT);
+    private static TexturedRect VISUAL_REPRESENTATION_GUN = new TexturedRect(0,-Player.CHARACTER_RADIUS,Kaiser.GUN_WIDTH,Kaiser.GUN_HEIGHT);
 
     //translates the Character according to delta x and delta y. And rotates it based on the offsetAngle
     private float[] translationRotationMatrix = new float[16];
@@ -99,7 +105,7 @@ public class Kaiser extends Player {
      */
     @Override
     protected ProgressBar createAttackChargeUp() {
-        return new ProgressBar(2000 * NUM_ATTACKS,this.getW(),0.1f, false, true);
+        return new ProgressBar(2000 * NUM_ATTACKS,this.getRadius()*2,0.1f, false, true);
     }
 
     /** Loads the texture of the sprite sheet
@@ -230,5 +236,23 @@ public class Kaiser extends Player {
         }
         this.attackChargeUp.update(Math.min(this.attackChargeUp.getCurrentHitPoints() + 2000,this.getNumAttacks() * 1000),0,0);
 
+    }
+
+    /** Sets the level of this class
+     *
+     * @param level the level of this player starting from 0
+     */
+    @Override
+    public void setPlayerLevel(int level){
+        Kaiser.PLAYER_LEVEL = level;
+    }
+
+    /** Gets the level of this type of player
+     *
+     * @return the level of this type of player
+     */
+    @Override
+    public int getPlayerLevel() {
+        return Kaiser.PLAYER_LEVEL;
     }
 }

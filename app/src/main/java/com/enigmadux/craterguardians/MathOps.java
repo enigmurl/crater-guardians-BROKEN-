@@ -182,6 +182,54 @@ public class MathOps {
 
         return Math.hypot(deltaX,deltaY) < r;
     }
+
+    /** Given a Point specified by px, py, see if it inside the rectangle (axis aligned or rotated)/  ALGO from https://stackoverflow.com/questions/17136084/checking-if-a-point-is-inside-a-rotated-rectangle
+     *  ABCD should be specified like so
+     *   A_____B
+     *   |     |
+     *   |_____|
+     *   C      D
+     * @param px target point x
+     * @param py target point y
+     * @param ax corner 1 x
+     * @param ay corner 1 y
+     * @param bx corner 2 x
+     * @param by corner 2 y
+     * @param cx corner 3 x
+     * @param cy corner 3 y
+     * @param dx corner 4 x
+     * @param dy corner 4 y
+     * @return whether or not the point is inside the rectangle
+     */
+    public static boolean pointInRect(float px,float py,float ax,float ay,float bx,float by,float cx,float cy,float dx,float dy){
+        double rectArea = Math.hypot(bx-ax,by-ay) * Math.hypot(cx - ax,cy - ay);
+
+        double apd = MathOps.triangleArea(ax,ay,px,py,dx,dy);
+        double dpc = MathOps.triangleArea(dx,dy,px,py,cx,cy);
+        double cpb = MathOps.triangleArea(cx,cy,px,py,bx,by);
+        double pba = MathOps.triangleArea(px,py,bx,by,ax,ay);
+
+
+        return rectArea >= apd + dpc + cpb + pba;
+    }
+
+    /** Given a triangle specified by a,b,c caclulate the area
+     *
+     * @param ax p1 x
+     * @param ay p1 y
+     * @param bx p2 x
+     * @param by p2 y
+     * @param cx p3 x
+     * @param cy p3 y
+     * @return the area of the triangle
+     */
+    public static double triangleArea(float ax,float ay, float bx,float by,float cx,float cy){
+        return Math.abs( ax * (by - cy)  + bx * (cy - ay) + cx * (ay -by) ) / 2;
+    }
+
+
+
+
     /** Given the sin and cosine, it can compute the angle, not limited to any quadrant
      *
      * @param cos cosine (value between -1,1) Sin^2 + cos^2 should be equal to 1

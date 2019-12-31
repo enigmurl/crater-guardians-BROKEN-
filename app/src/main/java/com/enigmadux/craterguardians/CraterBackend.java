@@ -8,9 +8,11 @@ import com.enigmadux.craterguardians.AngleAimers.TriRectAimer;
 import com.enigmadux.craterguardians.AngleAimers.TriangleAimer;
 import com.enigmadux.craterguardians.Animations.Animation;
 import com.enigmadux.craterguardians.Animations.DeathAnim;
+import com.enigmadux.craterguardians.Animations.DelayedHide;
 import com.enigmadux.craterguardians.Animations.ToxicBubble;
 import com.enigmadux.craterguardians.Attacks.Enemy1Attack;
 import com.enigmadux.craterguardians.Attacks.Enemy2Attack;
+import com.enigmadux.craterguardians.Attacks.Enemy3Attack;
 import com.enigmadux.craterguardians.Attacks.KaiserE1Attack;
 import com.enigmadux.craterguardians.Attacks.KaiserE2Attack;
 import com.enigmadux.craterguardians.Attacks.RyzeAttack;
@@ -20,6 +22,7 @@ import com.enigmadux.craterguardians.Characters.Ryze;
 import com.enigmadux.craterguardians.Enemies.Enemy;
 import com.enigmadux.craterguardians.Enemies.Enemy1;
 import com.enigmadux.craterguardians.Enemies.Enemy2;
+import com.enigmadux.craterguardians.Enemies.Enemy3;
 import com.enigmadux.craterguardians.Spawners.Enemy1Spawner;
 import com.enigmadux.craterguardians.Spawners.Enemy2Spawner;
 import com.enigmadux.craterguardians.Spawners.Enemy3Spawner;
@@ -43,18 +46,36 @@ import enigmadux2d.core.shapes.TexturedRect;
 
 /** Is in charge of all the backend activities
  *
+ * lolfat
+ *
+ *
  * @author Manu Bhat
  * @version BETA
  *
  */
 public class CraterBackend {
-    //the amount of levels
+    /*the amount of levels
+     */
     public static final int NUM_LEVELS = 20;
     //the path to the level file
     private static final String LEVEL_FILE_PATH = "level_data";
+    //the path to the player levels + xp file
+    private static final String PLAYER_DATA = "player_data";
+
+    //all character classes
+    private static final Player[] CHARACTERS = new Player[] {new Kaiser(),new Ryze()};
+
+
+
+
+
+    //because there is stuff a little outside the actual crater, we draw it slightly bigger
+    private static final float CRATER_VISUAL_SCALE = 1.25f;
 
     //how long the pause after a win or loss is for smooth transitions
     private static final long PAUSE_MILLIS  = 3000;
+    //how long the pre game period lasts
+    private static final long PRE_GAME_MILLIES = 1000;
 
 
     //Integer which represents that the game is still on the on the home screen
@@ -72,8 +93,6 @@ public class CraterBackend {
     private static final float[] MOVEMENT_JOY_STICK_CENTER = {-0.4f,-0.6f};
     //the center coordinate of attack joy stick (openGL coordinates)
     private static final float[] ATTACK_JOY_STICK_CENTER = {0.6f,-0.4f};
-    //the center coordinate of the defense joy stick (openGL coordinates)
-    private static final float[] DEFENSE_JOY_STICK_CENTER = {0.4f,-0.6f};
     //the diameter of the movement and attack joysticks
     private static final float JOY_STICK_IMAGE_WIDTH = 0.2f;
     //the maximum length they can extend too
@@ -94,14 +113,33 @@ public class CraterBackend {
     //the millis at which the supplies are introduced
     public static final long SUPPLIES_INTRODUCTION = 35000;
     //the millis at which the plateaus and toxic lakes are introduced
-    public static final long PLATEAUS_TOXIC_LAKE_INTRODUCITON = 40000;
+    public static final long PLATEAUS_TOXIC_LAKE_INTRODUCTION = 40000;
     //the millis at which the enemies and spawners are introduced, tutorial does not finish until spawner is killed, if the player loses there are sent back to enemies introduction
     public static final long ENEMIES_INTRODUCTION = 50000;
     //the amount of millis a tutorial is
     private static final long TUTORIAL_MILLIS = 60000;
 
-    //used to lock threads
-    public static final Object lock = new Object();
+    //the amount of xp gained for clearing a level todo in future make this part of the level data
+    private static final int XP_GAIN_PER_LEVEL = 10;
+
+    //the maximum amount of enemies possible;
+    private static final int MAX_ENEMIES = 100;
+
+    //used to lock threads as to prevent concurrent modification
+    //public static final Object lock = new Object();
+    //LOCKS
+    //plateau locks
+    //toxic lake
+    //supplies
+    //enemies
+    //animations
+    public static final Object PLATEAU_LOCK = new Object();
+    public static final Object TOXICLAKE_LOCK = new Object();
+    public static final Object SUPPLIES_LOCK = new Object();
+    public static final Object SPAWNER_LOCK = new Object();
+    public static final Object ENEMIES_LOCK = new Object();
+    public static final Object ANIMATIONS_LOCK = new Object();
+    public static final Object PLAYER_LOCK = new Object();
 
 
     //used for getting more information about device
@@ -117,17 +155,6 @@ public class CraterBackend {
     private Button evolveButton;
     //joystick information
 
-    //visual joystick
-    private TexturedRect defenseJoyStick;
-
-    //openGl x coordinate of the defense joystick
-    private float defenseJoyStickX;
-    //openGL y coordinate of the defense joystick
-    private float defenseJoyStickY;
-    //whether the defense joystick is being activated
-    private boolean defenseJoyStickDown = false;
-    //how to identify which pointer corresponds to the defense joystick
-    private int defenseJoyStickPointer;
 
 
     //visual joystick
@@ -172,8 +199,10 @@ public class CraterBackend {
     //the current player on the map
     private Player player;
     //all enemies on the map
+    //private final Enemy[] enemies = new Enemy[CraterBackend.MAX_ENEMIES];
     private final List<Enemy> enemies = new ArrayList<>();
     //all spawner on the map
+    //private final Spawner[] spawners = new Spawner[]
     private final List<Spawner> spawners = new ArrayList<>();
     //all plateaus on the map
     private final List<Plateau> plateaus = new ArrayList<>();
@@ -184,13 +213,36 @@ public class CraterBackend {
     //all active animations
     private final List<Animation> animations = new ArrayList<>();
 
+    //a map of where the enemy should go
+    private EnemyMap enemyMap;
+
+
     //after the game is lost or won there is small pause
     private boolean inEndGamePausePeriod;
     //the millis till the end of gamePausePeriod
     private long endGamePauseMillis = 0;
 
+    //before the game is loaded it's zoomed out
+    private boolean inPreGameZoomPeriod;
+    //the millies till the end of the preGameZoom is over;
+    private long preGameZoomMillis;
+
+    //if the last level was won
+    private boolean wonLastLevel = false;
+
+    //the amount of experience has
+    private int experience;
+
     //the crater
     private TexturedRect craterVisual;
+
+    //a textbox that is shown at the begginig of the game
+    private InGameTextbox battleStartIndicator;
+
+    //Tells the user if they won or not
+    private TexturedRect stateIndicator;
+
+
     /** The layout that is displayed while playing the game.
      * Includes the player sprite, all bots, the craterVisual (geography) Additionally trackers on score.
      * Otherwise we could have the level selector in the game, where its kind of like clash of clans war map, and player
@@ -205,7 +257,8 @@ public class CraterBackend {
     private CraterLayout levelSelectLayout;
 
     //this says for each joystick, if it has been tapped
-    private boolean[] joysticksTapped = new boolean[3];
+    private boolean[] joysticksTapped = new boolean[2];
+
     /** next Level. shown whenever a level is completed or needs to be redone (loss or victory)
      * Includes: play button.
      * Future: (todo) : implement a back to level select layout
@@ -220,6 +273,7 @@ public class CraterBackend {
      *  it contains all the layouts + textboxes below this that are stationary
      */
     private CraterLayout stationaryTutorialLayout;
+
     /** This is the grandmaster layout for stuff that are stuck on the game map, rather than having many getters/setters this makes it so only one is needed
      *  it contains all the layouts + textboxes below this that are stuck on the game map
      */
@@ -241,7 +295,6 @@ public class CraterBackend {
      */
     private InGameTextbox evolveTutorialInfo;
 
-
     /** There is only one textured rect needed to tell what the supplies are
      *
      */
@@ -257,16 +310,10 @@ public class CraterBackend {
      */
     private CraterLayout enemiesTutorialLayout;
 
-
-
-
-
     /** In the tutorial, it is set up sort of as a video, so this tells where we are in the video
      *
      */
     private long tutorialCurrentMillis = 0;
-
-
 
     /** Default Constructor
      *
@@ -288,7 +335,6 @@ public class CraterBackend {
 
 
         attackJoyStick = new TexturedRect(ATTACK_JOY_STICK_CENTER[0]-JOY_STICK_IMAGE_WIDTH/2, ATTACK_JOY_STICK_CENTER[1]-JOY_STICK_IMAGE_WIDTH/2,scaleX * JOY_STICK_IMAGE_WIDTH,scaleY * JOY_STICK_IMAGE_WIDTH);
-        defenseJoyStick = new TexturedRect(DEFENSE_JOY_STICK_CENTER[0] - JOY_STICK_IMAGE_WIDTH/2,DEFENSE_JOY_STICK_CENTER[1]-JOY_STICK_IMAGE_WIDTH/2,scaleX * JOY_STICK_IMAGE_WIDTH,scaleY * JOY_STICK_IMAGE_WIDTH);
         movementJoyStick = new TexturedRect(MOVEMENT_JOY_STICK_CENTER[0]-JOY_STICK_IMAGE_WIDTH/2, MOVEMENT_JOY_STICK_CENTER[1]-JOY_STICK_IMAGE_WIDTH/2,scaleX * JOY_STICK_IMAGE_WIDTH,scaleY* JOY_STICK_IMAGE_WIDTH);
 
 
@@ -330,8 +376,6 @@ public class CraterBackend {
         this.reset();
     }
 
-
-
     /** Sets the player that the player will use
      *
      * @param player the new player that is going to be played
@@ -341,7 +385,6 @@ public class CraterBackend {
         this.healthDisplay.setMaxHitPoints(player.getMaxHealth());
     }
 
-
     /** Initializes all layouts and their sub components;
      *
      */
@@ -349,7 +392,13 @@ public class CraterBackend {
         this.loadTextures(gl);
 
         float scaleX = (float) LayoutConsts.SCREEN_HEIGHT/LayoutConsts.SCREEN_WIDTH;
-        craterVisual = new TexturedRect(-1f,-1f,2f,2f);
+
+
+        this.craterVisual = new TexturedRect(-1f,-1f,2f,2f);
+
+        this.battleStartIndicator = new InGameTextbox("BATTLE!",0,0.5f,0.5f,LayoutConsts.CRATER_TEXT_COLOR,false);
+
+        this.stateIndicator = new TexturedRect(-scaleX/2,0.2f,scaleX,0.6f,2);
 
 
         final EnigmaduxComponent[] levelButtons = new EnigmaduxComponent[CraterBackend.NUM_LEVELS+2];
@@ -438,16 +487,22 @@ public class CraterBackend {
         };
 
 
-
         levelButtons[0] = levelBackground;
         levelButtons[1] = levelSelect_homeButton;
 
         float h = 0.5f;
+        float w = 0.5f;
+
+        int numPerRow = (int) (1f/(scaleX * (w+0.1f)));
+
+        Log.d("BACKEND","Num per row: " + numPerRow);
+
         for (int i = 1;i<CraterBackend.NUM_LEVELS+1;i++){
 
             final int currentLevelNumber = i;
 
-            Button levelPlayButton = new Button("Level " + i,0,1-h*(i) ,0.5f*scaleX,0.5f,0.1f,LayoutConsts.LEVEL_TEXT_COLOR, true) {
+            float x = (i-1)%numPerRow*scaleX * (w + 0.1f);
+            Button levelPlayButton = new Button("Level " + i,x,1-h*(i/numPerRow) ,w*scaleX,h,0.1f,LayoutConsts.LEVEL_TEXT_COLOR, true) {
                 @Override
                 public boolean isSelect(MotionEvent e) {
                     return this.visible && this.isInside(MathOps.getOpenGLX(e.getRawX()),MathOps.getOpenGLY(e.getRawY())) && unlockedLevels[currentLevelNumber - 1];
@@ -528,7 +583,7 @@ public class CraterBackend {
                 SoundLib.setStateGameMusic(false);
             }
         };
-
+        //TODO make this image BUtton
         Button homeButton = new Button("Home",0,-0.65f,0.75f,0.2f,0.2f,LayoutConsts.CRATER_TEXT_COLOR, false) {
 
             @Override
@@ -550,7 +605,6 @@ public class CraterBackend {
                 SoundLib.setStateGameMusic(false);
             }
         };
-
 
 
         //max health is initialized later in setPlayer() method
@@ -596,13 +650,19 @@ public class CraterBackend {
 
 
         craterVisual.loadGLTexture(gl,this.context,R.drawable.level_background_crater);
+        battleStartIndicator.loadGLTexture(gl);
+        battleStartIndicator.hide();
 
+        this.stateIndicator.loadGLTexture(gl,this.context,R.drawable.victory_sign,0);
+        this.stateIndicator.loadGLTexture(gl,this.context,R.drawable.loss_sign,1);
+        this.stateIndicator.hide();
 
         //todo bad solution to whats happening (the text starts at one place, but after being moved it gets offset)
         this.loadTutorialLayouts(gl);
         this.loadLevelData();
 
     }
+
     /** Initializes all tutorial layouts and their sub components;
      *
      */
@@ -631,10 +691,9 @@ public class CraterBackend {
         InGameTextbox attackBarCaption = new InGameTextbox("This shows how many attacks you have, \n after all are used it will automatically reload", 0.35f,0.2f,0.05f,LayoutConsts.CRATER_TEXT_COLOR,false);
         InGameTextbox attackChargeCaption = new InGameTextbox("The combo charge that adds to your attack damage, \n it's advanced and you need not worry for now", -0.4f,0.3f,0.05f,LayoutConsts.CRATER_TEXT_COLOR,false);
 
-        InGameTextbox joystickCaption = new InGameTextbox("Try all three joysticks to move on!",0,0.5f,0.1f,LayoutConsts.CRATER_TEXT_COLOR,false);
+        InGameTextbox joystickCaption = new InGameTextbox("Try both joysticks to move on!",0,0.5f,0.1f,LayoutConsts.CRATER_TEXT_COLOR,false);
         InGameTextbox movementCaption = new InGameTextbox("This is the movement joystick\n hold it to move in a direction",MOVEMENT_JOY_STICK_CENTER[0],MOVEMENT_JOY_STICK_CENTER[1]-0.2f,0.05f,LayoutConsts.CRATER_TEXT_COLOR,false);
         InGameTextbox attackCaption = new InGameTextbox("This is the attack joystick->\n drag and release to attack",ATTACK_JOY_STICK_CENTER[0]-0.3f,ATTACK_JOY_STICK_CENTER[1],0.05f,LayoutConsts.CRATER_TEXT_COLOR,false);
-        InGameTextbox defenseCaption = new InGameTextbox("<-This is the shield joystick\n drag and release to block enemies",DEFENSE_JOY_STICK_CENTER[0]+0.25f,DEFENSE_JOY_STICK_CENTER[1],0.05f,LayoutConsts.CRATER_TEXT_COLOR,false);
 
         this.evolveTutorialInfo = new InGameTextbox("This is the evolve button"  + /*(char) (193) + */ "\n charge it up by attacking enemies \n Activate it to evolve to a \n more powerful form  and gain health",EVOLVE_BUTTON_CENTER[0],EVOLVE_BUTTON_CENTER[1] + 0.35f,0.05f, LayoutConsts.CRATER_TEXT_COLOR,false);
         this.suppliesTutorialInfo = new InGameTextbox("These are your supplies. \n defend them from enemies, \n if all are destroyed you lose",0,-0.3f,0.05f, LayoutConsts.CRATER_TEXT_COLOR, true);
@@ -660,7 +719,6 @@ public class CraterBackend {
                 joystickCaption,
                 movementCaption,
                 attackCaption,
-                defenseCaption
         },-1.0f,-1.0f,2,2);
 
         this.plateausToxicLakeTutorialLayout = new CraterLayout(new EnigmaduxComponent[]{
@@ -699,7 +757,6 @@ public class CraterBackend {
         joystickCaption.loadGLTexture(gl);
         movementCaption.loadGLTexture(gl);
         attackCaption.loadGLTexture(gl);
-        defenseCaption.loadGLTexture(gl);
 
         this.evolveTutorialInfo.loadGLTexture(gl);
         this.suppliesTutorialInfo.loadGLTexture(gl);
@@ -752,12 +809,17 @@ public class CraterBackend {
         return this.currentGameState;
     }
 
+
     /** Sets the current game state.
      *
      * @param currentGameState the new game state. Recommended to use CraterBackend.GAME_STATE_* rather than hard coded literals, as for code readability.
      */
     public void setCurrentGameState(int currentGameState){
         this.currentGameState = currentGameState;
+        if (this.currentGameState == CraterBackend.GAME_STATE_INGAME){
+            this.inPreGameZoomPeriod = true;
+            this.preGameZoomMillis = CraterBackend.PRE_GAME_MILLIES;
+        }
     }
 
     /** loads textures for in game components, also loads fonts, but main purpose is to load textures
@@ -766,7 +828,6 @@ public class CraterBackend {
      */
     private void loadTextures(GL10 gl){
         //inputs
-        this.defenseJoyStick.loadGLTexture(gl,this.context,R.drawable.test);
         this.attackJoyStick.loadGLTexture(gl,this.context,R.drawable.test);
         this.movementJoyStick.loadGLTexture(gl,this.context,R.drawable.test);
         this.evolveButton.loadGLTexture(gl,this.context,R.drawable.evolve_button);
@@ -778,15 +839,18 @@ public class CraterBackend {
         Ryze.loadGLTexture(gl,this.context);
         Enemy1.loadGLTexture(gl,this.context);
         Enemy2.loadGLTexture(gl,this.context);
+        Enemy3.loadGLTexture(gl,this.context);
         //aimers
         TriangleAimer.loadGLTexture(gl,this.context);
         TriRectAimer.loadGLTexture(gl,this.context);
         //spawners
         Enemy1Spawner.loadGLTexture(gl,this.context);
         Enemy2Spawner.loadGLTexture(gl,this.context);
+        Enemy3Spawner.loadGLTexture(gl,this.context);
         //attacks
         Enemy1Attack.loadGLTexture(gl,this.context);
         Enemy2Attack.loadGLTexture(gl,this.context);
+        Enemy3Attack.loadGLTexture(gl,this.context);
         KaiserE1Attack.loadGLTexture(gl,this.context);
         KaiserE2Attack.loadGLTexture(gl,this.context);
         RyzeAttack.loadGLTexture(gl,this.context);
@@ -824,12 +888,23 @@ public class CraterBackend {
     private void resetLevelButtons(){
 
         EnigmaduxComponent[] levelButtons = this.levelSelectLayout.getComponents();
+
+        //scale it so its circles
+        float scaleX = 1;
+        if (LayoutConsts.SCREEN_WIDTH > LayoutConsts.SCREEN_HEIGHT){
+            scaleX = (float) (LayoutConsts.SCREEN_HEIGHT )/ (LayoutConsts.SCREEN_WIDTH);
+        }
+
         float h = 0.5f;
+        float w = 0.5f;
+
+
+        int numPerRow = (int) (1f/(scaleX * (w+0.1f)));
 
         for (int i = 0;i<NUM_LEVELS;i++){
             int offset = levelButtons.length - NUM_LEVELS;
             EnigmaduxComponent comp = levelButtons[i+offset];
-            comp.setPos(-comp.getWidth()/2,1-h*(i+1) - comp.getHeight()/2);
+            comp.setPos(comp.getX(),1-h*((i)/numPerRow +1) - comp.getHeight()/2);
 
             float a = this.getLevelButtonAlpha(comp.getY() + comp.getHeight()/2);
 
@@ -848,19 +923,16 @@ public class CraterBackend {
         }
     }
 
-
     /** Loads the data from level
      *
      */
     public void loadLevelData(){
-        try {
-            Scanner stdin = new Scanner(this.context.openFileInput(CraterBackend.LEVEL_FILE_PATH));
+        try (Scanner stdin = new Scanner(this.context.openFileInput(CraterBackend.LEVEL_FILE_PATH));) {
             for (int i = this.levelSelectLayout.getComponents().length - CraterBackend.NUM_LEVELS;i<this.levelSelectLayout.getComponents().length;i++){
                 this.unlockedLevels[i-  (this.levelSelectLayout.getComponents().length - CraterBackend.NUM_LEVELS)] = stdin.nextBoolean();
                 this.completedLevels[i-  (this.levelSelectLayout.getComponents().length - CraterBackend.NUM_LEVELS)] = stdin.nextBoolean();
             }
             this.resetLevelButtons();
-            stdin.close();
         } catch (FileNotFoundException e){
             Log.d("BACKEND","Error loading data file " ,e);
             this.createLevelFiles();
@@ -905,6 +977,56 @@ public class CraterBackend {
      */
     public void setLevelNum(int levelNum) {
         this.levelNum = levelNum;
+    }
+
+    /** Loads data about the player from a file,
+     * todo it may be possibly be bettter to hardcode this as opposed to using the deprecated newInstance method
+     *
+     *
+     */
+    public void loadPlayerData() {
+        try (Scanner stdin = new Scanner(this.context.openFileInput(CraterBackend.PLAYER_DATA))) {
+            int experience = stdin.nextInt();
+            int numLines = stdin.nextInt();
+            for (int i = 0;i<numLines;i++){
+                Class cls = Class.forName(stdin.next());
+                int level = stdin.nextInt();
+
+                Player player = (Player) cls.newInstance();
+                player.setPlayerLevel(level);
+            }
+
+        } catch (IOException e) {
+            Log.d("FRONTEND", "Error loading player data file ", e);
+            this.writePlayerData();
+        } catch (IllegalAccessException e){
+            Log.d("FRONTEND","PlayerData file read failed, most likely corrupted file structure",e);
+        } catch (InstantiationException e){
+            Log.d("FRONTEND","PlayerData file read failed, most likely corrupted file structure",e);
+        } catch (ClassNotFoundException e){
+            Log.d("FRONTEND","PlayerData file read failed, most likely corrupted file structure",e);
+        }
+    }
+
+    /** Writes player data to a file. Note the actual classes are hard coded, so anytime a player is added it must also be added to this
+     *
+     */
+    private void writePlayerData() {
+        try {
+            PrintWriter stdout = new PrintWriter(new OutputStreamWriter(this.context.openFileOutput (CraterBackend.PLAYER_DATA, Context.MODE_PRIVATE)));
+
+            stdout.println(this.experience);
+            stdout.println(CraterBackend.CHARACTERS.length);
+            for (Player playerClass: CraterBackend.CHARACTERS){
+                stdout.print(playerClass.getClass() + " ");
+                stdout.println(playerClass.getPlayerLevel());
+            }
+            stdout.close();
+
+        } catch (IOException e){
+            Log.d("BACKEND","File write failed",e);
+        }
+
     }
 
     /** Initializes a level
@@ -997,72 +1119,110 @@ public class CraterBackend {
         craterRadius = level_data.nextFloat();
 
 
-        craterVisual.setScale(craterRadius,craterRadius);
+        craterVisual.setScale(CRATER_VISUAL_SCALE * craterRadius,CRATER_VISUAL_SCALE * craterRadius);
 
-        int numSupplies = level_data.nextInt();
-        for (int i =0;i<numSupplies;i++){
-            float x = level_data.nextFloat();
-            float y = level_data.nextFloat();
-            float r = level_data.nextFloat();
-            int health = level_data.nextInt();
+        synchronized (SUPPLIES_LOCK) {
+            int numSupplies = level_data.nextInt();
+            for (int i = 0; i < numSupplies; i++) {
+                float x = level_data.nextFloat();
+                float y = level_data.nextFloat();
+                float r = level_data.nextFloat();
+                int health = level_data.nextInt();
 
-            supplies.add(new Supply(x,y,r,health));
+                supplies.add(new Supply(x, y, r, health));
+            }
         }
 
+
         int numToxicLakes = level_data.nextInt();
+        synchronized (TOXICLAKE_LOCK) {
+            for (int i = 0; i < numToxicLakes; i++) {
+                float x = level_data.nextFloat();
+                float y = level_data.nextFloat();
+                // here w is the width, not the radius, so we divide by two
+                float w = level_data.nextFloat();
 
-        for (int i = 0;i<numToxicLakes;i++){
-            float x = level_data.nextFloat();
-            float y = level_data.nextFloat();
-            float a = level_data.nextFloat();
-            float b = level_data.nextFloat();
 
-            toxicLakes.add(new ToxicLake(x,y,a,b));
+                toxicLakes.add(new ToxicLake(x, y, w / 2));
+            }
         }
 
         int numSpawners = level_data.nextInt();
+        synchronized (SPAWNER_LOCK) {
+            for (int i = 0; i < numSpawners; i++) {
+                float x = level_data.nextFloat();
+                float y = level_data.nextFloat();
+                float w = level_data.nextFloat();
+                float h = level_data.nextFloat();
+                String type = level_data.next();
+                long spawnTime = level_data.nextLong();
+                int hitPoints = level_data.nextInt();
 
-        for (int i = 0;i<numSpawners;i++){
-            float x = level_data.nextFloat();
-            float y = level_data.nextFloat();
-            float w = level_data.nextFloat();
-            float h = level_data.nextFloat();
-            String type = level_data.next();
-            long spawnTime = level_data.nextLong();
-            int hitPoints = level_data.nextInt();
-
-            switch (type){
-                case "ENEMY_TYPE_1":
-                    spawners.add(new Enemy1Spawner(x,y,w,h,spawnTime,hitPoints));
-                    break;
-                case "ENEMY_TYPE_2":
-                    spawners.add(new Enemy2Spawner(x,y,w,h,spawnTime,hitPoints));
-                    break;
-                case "ENEMY_TYPE_#3":
-                    spawners.add(new Enemy3Spawner(x,y,w,h,spawnTime,hitPoints));
-                    break;
+                switch (type) {
+                    case "ENEMY_TYPE_1":
+                        spawners.add(new Enemy1Spawner(x, y, w, h, spawnTime, hitPoints));
+                        break;
+                    case "ENEMY_TYPE_2":
+                        spawners.add(new Enemy2Spawner(x, y, w, h, spawnTime, hitPoints));
+                        break;
+                    case "ENEMY_TYPE_3":
+                        spawners.add(new Enemy3Spawner(x, y, w, h, spawnTime, hitPoints));
+                        break;
+                }
             }
         }
 
         int numPlateaus = level_data.nextInt();
 
-        for (int i = 0;i<numPlateaus;i++){
-            float x1 = level_data.nextFloat();
-            float y1 = level_data.nextFloat();
-            float x2 = level_data.nextFloat();
-            float y2 = level_data.nextFloat();
-            float x3 = level_data.nextFloat();
-            float y3 = level_data.nextFloat();
-            float x4 = level_data.nextFloat();
-            float y4 = level_data.nextFloat();
+        synchronized (PLATEAU_LOCK) {
+            for (int i = 0; i < numPlateaus; i++) {
+                float x1 = level_data.nextFloat();
+                float y1 = level_data.nextFloat();
+                float x2 = level_data.nextFloat();
+                float y2 = level_data.nextFloat();
+                float x3 = level_data.nextFloat();
+                float y3 = level_data.nextFloat();
+                float x4 = level_data.nextFloat();
+                float y4 = level_data.nextFloat();
 
-            plateaus.add(new Plateau(
-                    x1,y1,
-                    x2,y2,
-                    x3,y3,
-                    x4,y4
-            ));
+                plateaus.add(new Plateau(
+                        x1, y1,
+                        x2, y2,
+                        x3, y3,
+                        x4, y4
+                ));
+            }
         }
+
+        int numNodes = level_data.nextInt();
+        EnemyMap.Node[] nodes = new EnemyMap.Node[numNodes];
+        for (int i = 0;i<numNodes;i++){
+            float x = level_data.nextFloat();
+            float y = level_data.nextFloat();
+            nodes[i] = new EnemyMap.Node(x,y);
+        }
+
+        int numConnections = level_data.nextInt();
+        for (int i = 0;i<numConnections;i++){
+            int i1 = level_data.nextInt();
+            int i2 = level_data.nextInt();
+            float w = 0.1f;//HARD CODED
+            nodes[i1].addNeighbour(nodes[i2],w);
+            nodes[i2].addNeighbour(nodes[i1],w);
+        }
+
+//        nodes[1] = new EnemyMap.Node(0,0);
+//        nodes[2] = new EnemyMap.Node(-0.82f,-1.73f);
+//        nodes[3] = new EnemyMap.Node(0.82f,-1.73f);
+//
+//        nodes[2].addNeighbour(nodes[3],0.1f);
+//        nodes[3].addNeighbour(nodes[2],0.1f);
+
+        this.enemyMap = new EnemyMap(this.plateaus, this.toxicLakes,nodes);
+        level_data.close();
+
+
+        Log.d("BACKEND","ENEMYMAP " + enemyMap);
 
     }
 
@@ -1114,12 +1274,114 @@ public class CraterBackend {
         return this.animations;
     }
 
+
+    /** Returns the player; mainly used to get coordinates as to reposition the camera
+     *
+     * @return the current player object e.g Kaiser
+     */
+    public BaseCharacter getPlayer(){
+        return this.player;
+    }
+
+    /** Gets the attack joystick textured rect, so the frontend can draw it
+     *
+     * @return the visual representation of the attack joystick
+     */
+    public TexturedRect getAttackJoyStick() {
+        return this.attackJoyStick;
+    }
+
+    /** Gets the movement joystick textured rect, so the frontend can draw it
+     *
+     * @return the visual representation of the movement joystick
+     */
+    public TexturedRect getMovementJoyStick(){
+        return this.movementJoyStick;
+    }
+
+    /** Gets the battle start Indicator textbox
+     *
+     * @return the battle start indicator textbox that is displayed at the start of the battle
+     */
+    public InGameTextbox getBattleStartIndicator(){
+        return this.battleStartIndicator;
+    }
+
+    /** Gets the evolve button textured rect so the frontend can draw it.
+     *
+     * @return the visual representation of the evolve button
+     */
+    public Button getEvolveButton(){
+        return this.evolveButton;
+    }
+
+    /** Getter for the stationary tutorial layout
+     *
+     * @return components of the the tutorial layout that stay on the screen
+     */
+    public CraterLayout getStationaryTutorialLayout(){
+        return this.stationaryTutorialLayout;
+    }
+
+    /** Getter for game map tutorial layout
+     *
+     * @return components of the tutorial that move with the game map
+     */
+    public CraterLayout getGameMapTutorialLayout(){
+        return this.gameMapTutorialLayout;
+    }
+
+    /** Returns the state indicator that tells the user whether they won or loss
+     *
+     * @return the state indicator that tells the user whether they won or loss
+     */
+    public TexturedRect getStateIndicator(){
+        return this.stateIndicator;
+    }
+
+
+    /** Gets the amount of the experience the player has
+     *
+     * @return the amount of experience the player has
+     */
+    public int getExperience() {
+        return this.experience;
+    }
+
+    /** During the PRe game zoom period there is some extended zoom that has to be applied
+     *
+     * @return the amount the camera has to additionally zoom
+     */
+    public float getCameraZoom(){
+        if (! inPreGameZoomPeriod){
+            return 1;
+        } else {
+            //interpolate between the value needed to show the whole map, and the default camera zoom
+            float startTarget = this.craterRadius * CraterBackend.CRATER_VISUAL_SCALE;
+            float endTarget = this.renderer.getDefaultCameraZ() * LayoutConsts.SCREEN_HEIGHT/LayoutConsts.SCREEN_WIDTH;
+
+            //because at the beggining pre game zoom millies is at the max rather than at 0 it's inverted the squared is for acceleration
+            float currentRad = (float) Math.pow((float) this.preGameZoomMillis/CraterBackend.PRE_GAME_MILLIES,2) * (startTarget - endTarget) + endTarget;
+            return endTarget/currentRad;
+
+        }
+    }
+
+
     /** Sees if it's in the pause period between the end of a game and the load level layout showing
      *
      * @return if it's in the pause period at the end of the game
      */
     public boolean isInEndGamePausePeriod() {
         return inEndGamePausePeriod;
+    }
+
+    /** Tells whether or not he player won their last game
+     *
+     * @return whether or not he player won their last game
+     */
+    public boolean hasWonLastLevel(){
+        return this.wonLastLevel;
     }
 
 
@@ -1130,7 +1392,9 @@ public class CraterBackend {
         this.endGamePauseMillis = 0;
         this.inEndGamePausePeriod = false;
         this.player.show();
+        this.stateIndicator.hide();
     }
+
     /** Called when the period is finished, as in the whole period lived out
      *
      */
@@ -1140,23 +1404,38 @@ public class CraterBackend {
         setCurrentGameState(GAME_STATE_LEVELSELECT);
         loadLevelLayout.show();
         this.player.show();
+        this.stateIndicator.hide();
     }
 
     /** Kills all enemies; all enemies are removed from memory; reloads the game map
      *
      */
     private void reset() {
-        this.enemies.clear();
-        this.spawners.clear();
-        this.plateaus.clear();
-        this.toxicLakes.clear();
-        this.supplies.clear();
-        this.animations.clear();
+        synchronized (CraterBackend.ENEMIES_LOCK) {
+            this.enemies.clear();
+        }
+        synchronized (CraterBackend.SPAWNER_LOCK) {
+            this.spawners.clear();
+        }
+        synchronized (CraterBackend.PLATEAU_LOCK) {
+            this.plateaus.clear();
+        }
+        synchronized (CraterBackend.TOXICLAKE_LOCK) {
+            this.toxicLakes.clear();
+        }
+        synchronized (CraterBackend.SUPPLIES_LOCK) {
+            this.supplies.clear();
+        }
+        synchronized (CraterBackend.ANIMATIONS_LOCK) {
+            this.animations.clear();
+        }
 
-        if (this.player != null) {
-            this.player.setTranslate(this.spawnLocation[0],this.spawnLocation[1]);
-            this.player.spawn();
-            this.player.hideAngleAimer();
+        synchronized (CraterBackend.PLAYER_LOCK) {
+            if (this.player != null) {
+                this.player.setTranslate(this.spawnLocation[0], this.spawnLocation[1]);
+                this.player.spawn();
+                this.player.hideAngleAimer();
+            }
         }
         this.resetJoySticks();
 
@@ -1171,10 +1450,7 @@ public class CraterBackend {
         this.movementJoyStickY = 0;
         this.attackJoyStickX = 0;
         this.attackJoyStickY = 0;
-        this.defenseJoyStickX = 0;
-        this.defenseJoyStickY = 0;
         this.attackJoyStickDown = false;
-        this.defenseJoyStickDown = false;
         this.movementJoyStickDown = false;
     }
 
@@ -1205,7 +1481,7 @@ public class CraterBackend {
         this.exitButton.show();
 
         //makes sure it doesnt skip the joystick section
-        boolean joySticksFinished = this.joysticksTapped[0] && this.joysticksTapped[1] && this.joysticksTapped[2];
+        boolean joySticksFinished = this.joysticksTapped[0] && this.joysticksTapped[1];
         if (! joySticksFinished && this.tutorialCurrentMillis > CraterBackend.EVOLVE_INTRODUCTION){
             this.tutorialCurrentMillis = CraterBackend.EVOLVE_INTRODUCTION;
         }
@@ -1215,7 +1491,7 @@ public class CraterBackend {
             this.enemiesTutorialLayout.show();
             return;
         }
-        if (this.tutorialCurrentMillis > CraterBackend.PLATEAUS_TOXIC_LAKE_INTRODUCITON){
+        if (this.tutorialCurrentMillis > CraterBackend.PLATEAUS_TOXIC_LAKE_INTRODUCTION){
             this.plateausToxicLakeTutorialLayout.show();
             return;
         }
@@ -1245,21 +1521,50 @@ public class CraterBackend {
         this.joysticksTapped = new boolean[3];
     }
 
+
+    private long DEBUGtotalTime;
+    private long DEBUGsynchroTime;
+    private long DEBUGanimationsTime;
+    private long DEBUGplayerTime;
+    private long DEBUGplateauTime;
+    private long DEBUGenemyTime;
+    private long DEBUGtoxicLakeTime;
+    private long DEBUGspawnerTime;
+
     /** Updates the game state
      *
      * @param dt milliseconds since last call
      */
     public void update(long dt){
+        long totalStart = System.currentTimeMillis();
         if (inEndGamePausePeriod){
+            this.stateIndicator.show();
             this.endGamePauseMillis -= dt;
             if (this.endGamePauseMillis < 0){
                 this.finishEndGamePausePeriod();
             }
         }
 
-        synchronized (CraterBackend.lock) {
-            Iterator itr;
+        if (inPreGameZoomPeriod){
+            this.preGameZoomMillis -= dt;
+            if (this.preGameZoomMillis < 0){
+                this.battleStartIndicator.show();
+                this.inPreGameZoomPeriod = false;
 
+                //todo hardcoded value of 1000;
+                new DelayedHide(this.battleStartIndicator,1000);
+            }
+            //return;
+        }
+
+        long start = System.currentTimeMillis();
+
+        Iterator itr;
+
+        this.DEBUGsynchroTime += System.currentTimeMillis() - start;
+
+        start = System.currentTimeMillis();
+        synchronized (CraterBackend.ANIMATIONS_LOCK) {
             itr = this.animations.iterator();
             while (itr.hasNext()) {
                 Animation anim = (Animation) itr.next();
@@ -1268,78 +1573,91 @@ public class CraterBackend {
                     itr.remove();
                 }
             }
+        }
+        this.DEBUGanimationsTime += System.currentTimeMillis() - start;
 
 
-            if (this.currentGameState == CraterBackend.GAME_STATE_INGAME) {
-                this.tutorialCurrentMillis = CraterBackend.TUTORIAL_MILLIS + 1;//this essentially is a clever way of enabling all items
-            } else if (this.currentGameState == CraterBackend.GAME_STATE_TUTORIAL) {
-                this.tutorialCurrentMillis += dt;
-                this.displayTutorial();
-            }
+        if (this.currentGameState == CraterBackend.GAME_STATE_INGAME) {
+            this.tutorialCurrentMillis = CraterBackend.TUTORIAL_MILLIS + 1;//this essentially is a clever way of enabling all items
+        } else if (this.currentGameState == CraterBackend.GAME_STATE_TUTORIAL) {
+            this.tutorialCurrentMillis += dt;
+            this.displayTutorial();
+        }
 
-            float scaleX = 1;
-            float scaleY = 1;
-            if (LayoutConsts.SCREEN_WIDTH > LayoutConsts.SCREEN_HEIGHT) {
-                scaleX = (float) (LayoutConsts.SCREEN_HEIGHT) / (LayoutConsts.SCREEN_WIDTH);
-            } else {
-                scaleY = (float) (LayoutConsts.SCREEN_WIDTH) / LayoutConsts.SCREEN_HEIGHT;
+        float scaleX = 1;
+        float scaleY = 1;
+        if (LayoutConsts.SCREEN_WIDTH > LayoutConsts.SCREEN_HEIGHT) {
+            scaleX = (float) (LayoutConsts.SCREEN_HEIGHT) / (LayoutConsts.SCREEN_WIDTH);
+        } else {
+            scaleY = (float) (LayoutConsts.SCREEN_WIDTH) / LayoutConsts.SCREEN_HEIGHT;
 
-            }
+        }
 
-            this.attackJoyStick.setTranslate(this.attackJoyStickX, this.attackJoyStickY);
-            this.defenseJoyStick.setTranslate(this.defenseJoyStickX, this.defenseJoyStickY);
-            this.movementJoyStick.setTranslate(this.movementJoyStickX, this.movementJoyStickY);
+        this.attackJoyStick.setTranslate(this.attackJoyStickX, this.attackJoyStickY);
+        this.movementJoyStick.setTranslate(this.movementJoyStickX, this.movementJoyStickY);
 
 
-            if (this.currentGameState == CraterBackend.GAME_STATE_INGAME || this.currentGameState == CraterBackend.GAME_STATE_TUTORIAL) {
+        if (this.currentGameState == CraterBackend.GAME_STATE_INGAME || this.currentGameState == CraterBackend.GAME_STATE_TUTORIAL) {
 
-                //setting color of evolve button based on charge, -1 means that there are no evolve left
-                if (this.tutorialCurrentMillis > CraterBackend.EVOLVE_INTRODUCTION) {
-                    if (player.getEvolutionCharge() == -1) {
-                        evolveButton.setShader(0, 0, 0, 0);
-                    }
-                    //its available but not fully charge
-                    else if (player.getEvolutionCharge() <= 1) {
-                        evolveButton.setShader(player.getEvolutionCharge(), player.getEvolutionCharge(), player.getEvolutionCharge(), 1);
-                    }
-                    //its fully charge
-                    else {
-                        evolveButton.setShader(0, 1, 0, 1);
-                    }
+            //setting color of evolve button based on charge, -1 means that there are no evolve left
+            if (this.tutorialCurrentMillis > CraterBackend.EVOLVE_INTRODUCTION) {
+                if (player.getEvolutionCharge() == -1) {
+                    evolveButton.setShader(0, 0, 0, 0);
                 }
+                //its available but not fully charge
+                else if (player.getEvolutionCharge() <= 1) {
+                    evolveButton.setShader(player.getEvolutionCharge(), player.getEvolutionCharge(), player.getEvolutionCharge(), 1);
+                }
+                //its fully charge
+                else {
+                    evolveButton.setShader(0, 1, 0, 1);
+                }
+            }
 
-                //player has lost the game
-                if (!this.inEndGamePausePeriod && this.tutorialCurrentMillis > CraterBackend.SUPPLIES_INTRODUCTION && (!this.player.isAlive() || this.supplies.size() == 0)) {
+            //player has lost the game
+            if (!this.inEndGamePausePeriod && this.tutorialCurrentMillis > CraterBackend.SUPPLIES_INTRODUCTION && (!this.player.isAlive() || this.supplies.size() == 0)) {
 
-                    if (!player.isAlive()) {
-                        this.animations.add(new DeathAnim(player.getDeltaX(), player.getDeltaY(), player.getW(), player.getH()));
+                if (!player.isAlive()) {
+                    synchronized (CraterBackend.ANIMATIONS_LOCK) {
+                        this.animations.add(new DeathAnim(player.getDeltaX(), player.getDeltaY(), player.getRadius() * 2, player.getRadius() * 2));
                         this.player.hide();
                     }
-
-                    this.player.hideAngleAimer();
-
-
-                    SoundLib.setStateGameMusic(false);
-                    SoundLib.setStateLossMusic(true);
-                    this.resetJoySticks();
-                    this.inEndGamePausePeriod = true;
-                    this.endGamePauseMillis = CraterBackend.PAUSE_MILLIS;
-                    return;
                 }
 
-                //translate player based on inputs from movement stick
-                if (this.tutorialCurrentMillis > CraterBackend.CHARACTER_INTRODUCTION) {
-                    this.player.translateFromPos(dt * this.movementJoyStickX / (1000 * scaleX) * this.player.getCharacterSpeed(), dt * this.movementJoyStickY / (scaleY * 1000) * this.player.getCharacterSpeed());
-                }
-                //see if the player or enemies intersect with plateaus,there is not a tutorial time cap because then the player might get stuck
-                for (Plateau plateau : this.plateaus) {
-                    plateau.clipCharacterPos(player);
-                    for (Enemy enemy : this.enemies) {
-                        plateau.clipCharacterPos(enemy);
-                    }
-                }
+                this.player.hideAngleAimer();
 
-                //if the player is outside the crater, put them back
+
+                SoundLib.setStateGameMusic(false);
+                SoundLib.setStateLossMusic(true);
+                this.resetJoySticks();
+                this.inEndGamePausePeriod = true;
+                this.endGamePauseMillis = CraterBackend.PAUSE_MILLIS;
+                this.wonLastLevel = false;
+                return;
+            }
+
+            start = System.currentTimeMillis();
+            //translate player based on inputs from movement stick
+            if (this.tutorialCurrentMillis > CraterBackend.CHARACTER_INTRODUCTION) {
+                this.player.translateFromPos(dt * this.movementJoyStickX / (1000 * scaleX) * this.player.getCharacterSpeed(), dt * this.movementJoyStickY / (scaleY * 1000) * this.player.getCharacterSpeed());
+            }
+            this.DEBUGplayerTime += System.currentTimeMillis() - start;
+
+            start = System.currentTimeMillis();
+            //see if the player or enemies intersect with plateaus,there is not a tutorial time cap because then the player might get stuck
+            for (Plateau plateau : this.plateaus) {
+                plateau.clipCharacterPos(player);
+                for (Enemy enemy : this.enemies) {
+                    plateau.clipCharacterPos(enemy);
+                }
+            }
+            this.DEBUGplateauTime += System.currentTimeMillis() - start;
+
+
+            start = System.currentTimeMillis();
+            //if the player is outside the crater, put them back
+            //lock is needed for the added attacks
+            synchronized (CraterBackend.PLAYER_LOCK) {
                 if (this.tutorialCurrentMillis > CraterBackend.CHARACTER_INTRODUCTION) {
                     float hypotenuse = (float) Math.hypot(player.getDeltaX(), player.getDeltaY());
                     if (hypotenuse > craterRadius) {
@@ -1355,33 +1673,47 @@ public class CraterBackend {
                         this.player.update(dt, this.player.getRotation(), this.enemies, spawners);//todo make the rotation the previous frame's rotation
 
                     }
-
                 }
+            }
+            this.DEBUGplayerTime += System.currentTimeMillis() - start;
 
 
+            start = System.currentTimeMillis();
+            this.enemyMap.updatePlayerPosition(this.player);
+            synchronized (CraterBackend.ENEMIES_LOCK) {
                 //removes dead enemies
                 if (this.tutorialCurrentMillis > CraterBackend.ENEMIES_INTRODUCTION) {
                     itr = enemies.iterator();
                     while (itr.hasNext()) {
                         Enemy enemy = (Enemy) itr.next();
                         if (!this.inEndGamePausePeriod) {
-                            enemy.update(dt, this.player, this.supplies, this.plateaus);
+                            enemy.update(dt, this.player, this.supplies, this.enemyMap);
                         }
-                        if (!enemy.isAlive()) {
-                            this.animations.add(new DeathAnim(enemy.getDeltaX(), enemy.getDeltaY(), enemy.getWidth(), enemy.getH()));
-                            itr.remove();
-                            SoundLib.playPlayerKillSoundEffect();
-                        }
+                            if (!enemy.isAlive()) {
+                                synchronized (CraterBackend.ANIMATIONS_LOCK) {
+                                    this.animations.add(new DeathAnim(enemy.getDeltaX(), enemy.getDeltaY(), enemy.getWidth(), enemy.getHeight()));
+                                    itr.remove();
+                                    SoundLib.playPlayerKillSoundEffect();
+                                }
+                            }
                     }
                 }
+                this.DEBUGenemyTime += System.currentTimeMillis() - start;
+            }
 
-                if (this.tutorialCurrentMillis > CraterBackend.PLATEAUS_TOXIC_LAKE_INTRODUCITON) {
+            start = System.currentTimeMillis();
+            synchronized (CraterBackend.TOXICLAKE_LOCK) {
+                if (this.tutorialCurrentMillis > CraterBackend.PLATEAUS_TOXIC_LAKE_INTRODUCTION) {
                     //see if the players or enemies are in the toxic lakes, if so it damages them
                     for (ToxicLake toxicLake : this.toxicLakes) {
                         toxicLake.update(dt, this.player, this.enemies);
                     }
                 }
+            }
+            this.DEBUGtoxicLakeTime += System.currentTimeMillis() - start;
 
+            synchronized (CraterBackend.SPAWNER_LOCK) {
+                start = System.currentTimeMillis();
                 if (!this.inEndGamePausePeriod && this.tutorialCurrentMillis > CraterBackend.ENEMIES_INTRODUCTION) {
                     //remove dead spawners otherwise update them as to not draw dead spawners
                     itr = this.spawners.iterator();
@@ -1393,106 +1725,94 @@ public class CraterBackend {
 
                         Enemy e = spawner.trySpawnEnemy(dt);
                         if (e != null) {
-                            this.enemies.add(e);
+                            synchronized (CraterBackend.ENEMIES_LOCK){
+                                this.enemies.add(e);
+                            }
                         }
                     }
                 }
+            }
+            this.DEBUGspawnerTime += System.currentTimeMillis() - start;
+            synchronized (CraterBackend.SUPPLIES_LOCK) {
                 if (this.tutorialCurrentMillis > CraterBackend.SUPPLIES_INTRODUCTION) {
                     //remove dead supplies
                     itr = this.supplies.iterator();
                     while (itr.hasNext()) {
                         Supply supply = (Supply) itr.next();
                         if (!supply.isAlive()) {
-                            this.animations.add(new DeathAnim(supply.getX(), supply.getY(), supply.getWidth(), supply.getHeight()));
+                            synchronized (CraterBackend.ANIMATIONS_LOCK) {
+                                this.animations.add(new DeathAnim(supply.getX(), supply.getY(), supply.getWidth(), supply.getHeight()));
+                            }
                             itr.remove();
                         }
                     }
                 }
-
-
-                if (!this.inEndGamePausePeriod && this.tutorialCurrentMillis > CraterBackend.ENEMIES_INTRODUCTION) {
-                    //level is complete as all spawners have been killed
-                    if (spawners.size() == 0) {
-                        Log.i("BACKEND", "Level " + levelNum + " completed. Loading level " + (levelNum + 1));
-                        if (levelNum != 0) {
-                            this.completedLevels[levelNum - 1] = true;
-                            if (levelNum < CraterBackend.NUM_LEVELS) {
-                                this.unlockedLevels[levelNum] = true;
-                            }
-                        }
-                        this.createLevelFiles();
-
-                        this.levelNum++;
-
-
-                        SoundLib.setStateGameMusic(false);
-                        SoundLib.setStateVictoryMusic(true);
-
-                        this.resetJoySticks();
-                        this.inEndGamePausePeriod = true;
-                        this.endGamePauseMillis = CraterBackend.PAUSE_MILLIS;
-                    }
-                }
             }
 
+
+            if (! this.inEndGamePausePeriod && this.tutorialCurrentMillis > CraterBackend.ENEMIES_INTRODUCTION) {
+                //level is complete as all spawners have been killed
+                if (spawners.size() == 0) {
+                    this.completeLevelBeaten();
+
+                }
+            }
         }
+
+        this.DEBUGtotalTime += System.currentTimeMillis() - totalStart;
+
+        if (this.DEBUGtotalTime > 10000){
+            Log.d("TIMECONSUMPTION:","ANIMATION PERCENTAGE:"  + ((float) this.DEBUGanimationsTime)/this.DEBUGtotalTime);
+            Log.d("TIMECONSUMPTION:","PLAYER PERCENTAGE:"  + ((float) this.DEBUGplayerTime)/this.DEBUGtotalTime);
+            Log.d("TIMECONSUMPTION:","PLATEAU PERCENTAGE:"  + ((float) this.DEBUGplateauTime)/this.DEBUGtotalTime);
+            Log.d("TIMECONSUMPTION:","ENEMY PERCENTAGE:"  + ((float) this.DEBUGenemyTime)/this.DEBUGtotalTime);
+            Log.d("TIMECONSUMPTION:","TOXIC LAKE PERCENTAGE:"  + ((float) this.DEBUGtoxicLakeTime)/this.DEBUGtotalTime);
+            Log.d("TIMECONSUMPTION:","SPAWNER PERCENTAGE:"  + ((float) this.DEBUGspawnerTime)/this.DEBUGtotalTime);
+            Log.d("TIMECONSUMPTION:","SYNCHRO PERCENTAGE:"  + ((float) this.DEBUGsynchroTime)/this.DEBUGtotalTime);
+
+            this.DEBUGtotalTime = 0;
+            this.DEBUGanimationsTime = 0;
+            this.DEBUGplayerTime = 0;
+            this.DEBUGenemyTime = 0;
+            this.DEBUGtoxicLakeTime = 0;
+            this.DEBUGspawnerTime = 0;
+            this.DEBUGsynchroTime = 0;
+        }
+
+
     }
 
-    /** Returns the player; mainly used to get coordinates as to reposition the camera
+    /** Called whenever a level is beaten
      *
-     * @return the current player object e.g Kaiser
      */
-    public BaseCharacter getPlayer(){
-        return this.player;
+    private void completeLevelBeaten(){
+        Log.i("BACKEND", "Level " + levelNum + " completed. Loading level " + (levelNum + 1));
+
+        this.wonLastLevel = true;
+
+        if (levelNum != 0) {
+            this.completedLevels[levelNum - 1] = true;
+            if (levelNum < CraterBackend.NUM_LEVELS) {
+                this.unlockedLevels[levelNum] = true;
+            }
+        }
+        this.createLevelFiles();
+        this.writePlayerData();
+
+
+        this.experience += CraterBackend.XP_GAIN_PER_LEVEL;
+
+        this.levelNum++;
+
+
+        SoundLib.setStateGameMusic(false);
+        SoundLib.setStateVictoryMusic(true);
+
+        this.resetJoySticks();
+        this.inEndGamePausePeriod = true;
+        this.endGamePauseMillis = CraterBackend.PAUSE_MILLIS;
     }
 
-    /** Gets the attack joystick textured rect, so the frontend can draw it
-     *
-     * @return the visual representation of the attack joystick
-     */
-    public TexturedRect getAttackJoyStick() {
-        return this.attackJoyStick;
-    }
-
-    /** Gets the movement joystick textured rect, so the frontend can draw it
-     *
-     * @return the visual representation of the movement joystick
-     */
-    public TexturedRect getMovementJoyStick(){
-        return this.movementJoyStick;
-    }
-
-    /** Gets the defense joystick textured rect, so the frontend can draw it
-     *
-     * @return the visual representation of the defense joystick
-     */
-    public TexturedRect getDefenseJoyStick() {
-        return this.defenseJoyStick;
-    }
-
-    /** Gets the evolve button textured rect so the frontend can draw it.
-     *
-     * @return the visual representation of the evolve button
-     */
-    public Button getEvolveButton(){
-        return this.evolveButton;
-    }
-
-    /** Getter for the stationary tutorial layout
-     *
-     * @return components of the the tutorial layout that stay on the screen
-     */
-    public CraterLayout getStationaryTutorialLayout(){
-        return this.stationaryTutorialLayout;
-    }
-
-    /** Getter for gamemap tutorial layout
-     *
-     * @return components of the tutorial that move with the game map
-     */
-    public CraterLayout getGameMapTutorialLayout(){
-        return this.gameMapTutorialLayout;
-    }
     /** Called every time there is a touch event
      *
      * @param e the MotionEvent describing how the user interacted with the screen
@@ -1505,7 +1825,7 @@ public class CraterBackend {
             this.levelSelectLayout.onTouch(e);
             this.loadLevelLayout.onTouch(e);
         } else if (this.currentGameState == CraterBackend.GAME_STATE_INGAME || this.currentGameState == CraterBackend.GAME_STATE_TUTORIAL){
-            if (! this.inEndGamePausePeriod && this.tutorialCurrentMillis > CraterBackend.JOYSTICK_INTRODUCTION) {
+            if (! (this.inEndGamePausePeriod) && this.tutorialCurrentMillis > CraterBackend.JOYSTICK_INTRODUCTION) {
                 this.updateJoySticks(e);
             }
             if (this.currentGameState == CraterBackend.GAME_STATE_TUTORIAL){
@@ -1514,9 +1834,6 @@ public class CraterBackend {
         }
         return true;
     }
-
-
-
 
     /** Based on a touch event, updates positions for the joySticks
      *
@@ -1544,17 +1861,10 @@ public class CraterBackend {
                 this.movementJoyStickDown = true;
 
             } else if (! evolveButton.onTouch(e)){
-                if (Math.hypot(x-ATTACK_JOY_STICK_CENTER[0],y - ATTACK_JOY_STICK_CENTER[1]) <Math.hypot(x-DEFENSE_JOY_STICK_CENTER[0],y - DEFENSE_JOY_STICK_CENTER[1])) {
-                    //assign attack
-                    this.attackJoyStickPointer = e.getPointerId(pointerInd);
-                    this.attackJoyStickDown = true;
-                    this.player.showAngleAimer();
-                } else {
-                    //assign defense
-                    this.defenseJoyStickPointer = e.getPointerId(pointerInd);
-                    this.defenseJoyStickDown = true;
-                    this.player.showDefenseAngleAimer();
-                }
+                //assign attack
+                this.attackJoyStickPointer = e.getPointerId(pointerInd);
+                this.attackJoyStickDown = true;
+                this.player.showAngleAimer();
             }
 
         } else if (e.getActionMasked() == MotionEvent.ACTION_POINTER_UP || e.getActionMasked() == MotionEvent.ACTION_UP || e.getActionMasked() == MotionEvent.ACTION_CANCEL){
@@ -1567,18 +1877,17 @@ public class CraterBackend {
             if  (e.getPointerId(pointerInd) == this.attackJoyStickPointer && this.attackJoyStickDown){
                 this.attackJoyStickDown = false;
                 float hypotenuse = (float) Math.hypot(this.attackJoyStickX/scaleX,this.attackJoyStickY/scaleY);
-                this.player.attack(MathOps.getAngle(attackJoyStickX/(scaleX * hypotenuse), attackJoyStickY/(scaleY*hypotenuse)));
-                this.joysticksTapped[2] = true;
-            }
-            if (e.getPointerId(pointerInd) == this.defenseJoyStickPointer && this.defenseJoyStickDown){
-                this.defenseJoyStickDown = false;
-                float hypotenuse = (float) Math.hypot(this.defenseJoyStickX/scaleX,this.defenseJoyStickY/scaleX);
-                this.player.spawnShield(1000,MathOps.getAngle(defenseJoyStickX/(hypotenuse*scaleX), defenseJoyStickY/(scaleY * hypotenuse)));
+                synchronized (CraterBackend.PLAYER_LOCK) {
+                    this.player.attack(MathOps.getAngle(attackJoyStickX / (scaleX * hypotenuse), attackJoyStickY / (scaleY * hypotenuse)));
+                }
                 this.joysticksTapped[1] = true;
-
             }
 
+        }
 
+        //don't move in pre game period
+        if (this.inPreGameZoomPeriod){
+            return;
         }
 
         if (this.movementJoyStickDown) {
@@ -1618,23 +1927,6 @@ public class CraterBackend {
             this.attackJoyStickY = 0;
         }
 
-        if (this.defenseJoyStickDown) {
-            this.defenseJoyStickX = (MathOps.getOpenGLX(e.getX(e.findPointerIndex(this.defenseJoyStickPointer))) -  DEFENSE_JOY_STICK_CENTER[0]);
-            this.defenseJoyStickY = (MathOps.getOpenGLY(e.getY(e.findPointerIndex(this.defenseJoyStickPointer))) -  DEFENSE_JOY_STICK_CENTER[1]);
-
-
-            float hypotenuse = (float) Math.hypot(this.defenseJoyStickX/scaleX,this.defenseJoyStickY/scaleY);
-
-            this.player.setDefenseAngleAimerAngle((float) (180/Math.PI) * MathOps.getAngle(defenseJoyStickX/(scaleX * hypotenuse),  defenseJoyStickY/(scaleY *hypotenuse)));
-
-            if (hypotenuse > CraterBackend.JOY_STICK_MAX_RADIUS){
-                this.defenseJoyStickX *= CraterBackend.JOY_STICK_MAX_RADIUS/(hypotenuse);
-                this.defenseJoyStickY *= CraterBackend.JOY_STICK_MAX_RADIUS/(hypotenuse);
-            }
-        } else {
-            this.defenseJoyStickX = 0;
-            this.defenseJoyStickY = 0;
-        }
 
 
     }

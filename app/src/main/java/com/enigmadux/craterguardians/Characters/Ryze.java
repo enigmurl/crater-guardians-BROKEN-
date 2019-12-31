@@ -22,7 +22,7 @@ import enigmadux2d.core.shapes.TexturedRect;
  */
 public class Ryze extends Player {
     //a constant that represents how fast the character is, right now there aren't any particular units which needs to change (see todo)
-    private static final float CHARACTER_SPEED = 5f;
+    private static final float CHARACTER_SPEED = 2f;
     //a constant that represents how many rows the sprite sheet has (how many orientations of rotations
     private static final int NUM_ROTATION_ORIENTATIONS = 1;
     //a constant that represents how many columns the sprite sheet has (how many frames in a single rotation animation)
@@ -45,13 +45,15 @@ public class Ryze extends Player {
     //this says the width of the gun of kaiser
     private static final float GUN_WIDTH = 0.3f;
 
+    //the level of the this player
+    private static int PLAYER_LEVEL = 0;
 
     //visual is shared by all objects as they all have the same sprite, this is the basic state (gen 0)
-    private static TexturedRect VISUAL_REPRESENTATION_E1 = new TexturedRect(-Player.CHARACTER_WIDTH/2,-Player.CHARACTER_HEIGHT/2,Player.CHARACTER_WIDTH,Player.CHARACTER_HEIGHT);
+    private static TexturedRect VISUAL_REPRESENTATION_E1 = new TexturedRect(-Player.CHARACTER_RADIUS,-Player.CHARACTER_RADIUS,Player.CHARACTER_RADIUS*2,Player.CHARACTER_RADIUS*2);
     //visual is shared by all objects as they all have the same sprite, this is the secondary state (gen 1)
-    private static TexturedRect VISUAL_REPRESENTATION_E2 = new TexturedRect(-Player.CHARACTER_WIDTH/2,-Player.CHARACTER_HEIGHT/2,Player.CHARACTER_WIDTH,Player.CHARACTER_HEIGHT);
+    private static TexturedRect VISUAL_REPRESENTATION_E2  = new TexturedRect(-Player.CHARACTER_RADIUS,-Player.CHARACTER_RADIUS,Player.CHARACTER_RADIUS*2,Player.CHARACTER_RADIUS*2);
     //visual is share by all objects as they all have the same gun, for now same gun for both evolutions, when player is looking to right, the gun
-    private static TexturedRect VISUAL_REPRESENTATION_GUN = new TexturedRect(0,-Player.CHARACTER_HEIGHT/2,Ryze.GUN_WIDTH,Ryze.GUN_HEIGHT);
+    private static TexturedRect VISUAL_REPRESENTATION_GUN = new TexturedRect(0,-Player.CHARACTER_RADIUS,Ryze.GUN_WIDTH,Ryze.GUN_HEIGHT);
 
     //translates the Character according to delta x and delta y. And rotates it based on the offsetAngle
     private float[] translationRotationMatrix = new float[16];
@@ -99,7 +101,7 @@ public class Ryze extends Player {
      */
     @Override
     protected ProgressBar createAttackChargeUp() {
-        return new ProgressBar(2000 * NUM_ATTACKS,this.getW(),0.1f, false, true);
+        return new ProgressBar(2000 * NUM_ATTACKS,this.getRadius()*2,0.1f, false, true);
     }
 
     /** Loads the texture of the sprite sheet
@@ -230,5 +232,23 @@ public class Ryze extends Player {
         }
         this.attackChargeUp.update(Math.min(this.attackChargeUp.getCurrentHitPoints() + 2000,this.getNumAttacks() * 1000),0,0);
 
+    }
+
+    /** Sets the level of this class
+     *
+     * @param level the level of this player starting from 0
+     */
+    @Override
+    public void setPlayerLevel(int level){
+        Ryze.PLAYER_LEVEL = level;
+    }
+
+    /** Gets the current level of this class
+     *
+     * @return the level of this player type starting from 0
+     */
+    @Override
+    public  int getPlayerLevel() {
+        return Ryze.PLAYER_LEVEL;
     }
 }

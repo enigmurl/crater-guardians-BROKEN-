@@ -16,14 +16,34 @@ todo PRIORITY:
                   1) nerf attack rate/balance stuff in general
                   2) fix enemy's AI
                   3) Get up to level 20,(a little less is fine, lets target getting all levels done by end of the year = around 30 levels)
-               levelIDEAS a level like the spider one (12 i think) but with like 6 arms, each with 1 hp spawner
+    12/27 GOALS: finish crater image prototype, maybe 2 levels, enemy ai prototype (most likely using a* variant, with three different sizes 0.3 0.6 1)
+        from level 25+ add a rainbow spawner this basically does a spawner like battle cats
+    12/28,29 GOALS:
+            1) Convert base characters + enemies to circles to save time Partially done need to optimize some stuff where it's treated as circular ellipse instead of just circle
+            2) Find out why graphics are very memory inefficient + see the drawing FPS
+            3) Finish enemymap + rest of enemy AI, thinking of only re calculate path when nearest target changes
+            4) Draw basic icons that don't require a lot of art FINISHED
+            5) Balance stuff (Also at some point fix the orientation of valley + do that in level maker as well)
+            6) Fix pausing + stopping - tbd
+
+
+    add a loading screen instead of white background
+
+    Convert some of the "Home buttons" to the Image Button
+    Upgradable characters
+    Implement Waves
+
+    make zooming further out and longer so user has more time to prepare
 
 
 
-    nerf attack rate, just balance stuff in general, fix enemy's AI
+    nerf attack rate, just balance stuff in general, fix enemy's AI, possibly something like a*
 
      FIRST UPDATE: add a character who has two nunchunks, resulting in  two circles
                     add personalized character attack noises
+
+
+     OPTIMIZATION: graphis are taking a lottttt of memory fix this, pausing is bad/ fix these
 
 
 

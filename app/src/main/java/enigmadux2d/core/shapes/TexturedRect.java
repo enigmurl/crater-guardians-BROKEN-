@@ -24,8 +24,6 @@ import enigmadux2d.core.EnigmaduxComponent;
  * @version BETA
  */
 public class TexturedRect extends EnigmaduxComponent {
-    //used as a buffer for the vertex and texture buffers
-    private ByteBuffer byteBuffer;
     // buffer holding the vertices
     private FloatBuffer vertexBuffer;
     //vertices used for open gl
@@ -93,16 +91,17 @@ public class TexturedRect extends EnigmaduxComponent {
 
 
         //floats are 4 bytes
-        this.byteBuffer = ByteBuffer.allocateDirect(vertices.length * 4);
-        this.byteBuffer.order(ByteOrder.nativeOrder());
+        //used as a buffer for the vertex and texture buffers
+        ByteBuffer byteBuffer = ByteBuffer.allocateDirect(vertices.length * 4);
+        byteBuffer.order(ByteOrder.nativeOrder());
 
-        vertexBuffer = this.byteBuffer.asFloatBuffer();
+        vertexBuffer = byteBuffer.asFloatBuffer();
         vertexBuffer.put(vertices);
         vertexBuffer.position(0);
 
 
-        this.byteBuffer = ByteBuffer.allocateDirect(vertices.length * 8/3);
-        this.byteBuffer.order(ByteOrder.nativeOrder());
+        byteBuffer = ByteBuffer.allocateDirect(vertices.length * 8/3);
+        byteBuffer.order(ByteOrder.nativeOrder());
 
         textureBuffer = byteBuffer.asFloatBuffer();
 
@@ -266,7 +265,7 @@ public class TexturedRect extends EnigmaduxComponent {
         // Draw the vertices as triangle strip
         gl.glColor4f(shader[0],shader[1],shader[2],shader[3]); // This is where the magic does happen
         gl.glDrawArrays(GL10.GL_TRIANGLE_STRIP, 0, vertices.length / 3);
-        gl.glColor4f(1.0f, 1.0f, 1.0f, 1.0f); // Low mana, stop the magic
+        gl.glColor4f(1.0f, 1.0f, 1.0f, 1.0f);
         //Disable the client state before leaving
         gl.glDisableClientState(GL10.GL_VERTEX_ARRAY);
         gl.glDisableClientState(GL10.GL_TEXTURE_COORD_ARRAY);

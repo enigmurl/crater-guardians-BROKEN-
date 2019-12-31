@@ -50,7 +50,7 @@ public class InGameTextbox extends EnigmaduxComponent {
 
 
     //if its a textbox thats linked to the game map or linked to the screen
-    private boolean isInGame = true;
+    private boolean isInGame;
 
 
 

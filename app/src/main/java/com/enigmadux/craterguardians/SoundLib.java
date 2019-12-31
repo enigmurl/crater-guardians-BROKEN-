@@ -94,15 +94,26 @@ public class SoundLib {
 
     }
 
-    /** Pauses all music, unlike muteAllMedia, the songs do not continue to play
+    /** Pauses all music,
+     * unlike muteAllMedia, the songs do not continue to play FIX THIS IT STILL DOES CONTINUE TO PLAY TODO
      *
      */
     public static void pauseAllMedia(){
         try {
-            SoundLib.setStateLossMusic(false);
-            SoundLib.setStateVictoryMusic(false);
-            SoundLib.setStateGameMusic(false);
-            SoundLib.setStateLobbyMusic(false);
+            SoundLib.muteAllMedia();
+        } catch (NullPointerException e){
+            Log.d("SOUND_LIB","null pointer",e);
+        }
+    }
+
+    /** resumes all music
+     *
+     *
+     *
+     */
+    public static void resumeAllMedia(){
+        try {
+            SoundLib.unMuteAllMedia();
         } catch (NullPointerException e){
             Log.d("SOUND_LIB","null pointer",e);
         }

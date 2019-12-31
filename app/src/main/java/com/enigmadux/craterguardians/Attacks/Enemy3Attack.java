@@ -50,7 +50,7 @@ public class Enemy3Attack extends Attack {
     /** The actual visual component is shared between all instances to save memory
      *
      */
-    private static final TexturedRect VISUAL_REPRESENTATION = new TexturedRect(0,-1,1,1);
+    private static final TexturedRect VISUAL_REPRESENTATION = new TexturedRect(-0.5f,-0.5f,1,1);
 
 
     /** Default constructor
@@ -90,9 +90,6 @@ public class Enemy3Attack extends Attack {
         });
 
 
-
-
-
         Matrix.setIdentityM(rotatorMatrix,0);
         Matrix.setIdentityM(translatorMatrix,0);
         Matrix.setIdentityM(rotationScalarMatrix,0);
@@ -115,7 +112,7 @@ public class Enemy3Attack extends Attack {
      * @param context used to access resources
      */
     public static void loadGLTexture(@NonNull GL10 gl, Context context) {
-        VISUAL_REPRESENTATION.loadGLTexture(gl,context,R.drawable.enemy2_attack_spritesheet);//todo needs work
+        VISUAL_REPRESENTATION.loadGLTexture(gl,context,R.drawable.enemy3_attack_spritesheet);//todo needs work
     }
 
 

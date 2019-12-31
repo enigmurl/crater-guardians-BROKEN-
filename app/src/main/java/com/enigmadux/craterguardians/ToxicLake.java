@@ -60,10 +60,8 @@ public class ToxicLake extends EnigmaduxComponent {
     private float x;
     //center y of the lake
     private float y;
-    //xRadius of the image (width/2)
-    private float xRadius;
-    //yRadius of the image (height/2)
-    private float yRadius;
+    //radius of the image (width/2)
+    private float radius;
 
     //the amount of millis since the last damage
     private long currentMillis;
@@ -82,19 +80,16 @@ public class ToxicLake extends EnigmaduxComponent {
     private ArrayList<ToxicBubble> toxicBubbles;
 
     /** Default Constructor
-     *
-     * @param x the openGL x coordinate
+     *  @param x the openGL x coordinate
      * @param y the openGL y coordinate
-     * @param width xRadius of the image (radius * 2)
-     * @param height yRadius of the image (height * 2)
+     * @param radius the radius of the image
      */
-    public ToxicLake(float x,float y,float width,float height){
-        super(x,y,width,height);
+    public ToxicLake(float x, float y, float radius){
+        super(x,y,2*radius,2*radius);
         this.x = x;
         this.y = y;
         //super(x-r,y-r,2*r,2*r);
-        this.xRadius = width/2;
-        this.yRadius = height/2;
+        this.radius = radius;
 
         this.toxicBubbles = new ArrayList<ToxicBubble>();
 
@@ -107,7 +102,7 @@ public class ToxicLake extends EnigmaduxComponent {
         Matrix.translateM(translationMatrix,0,this.x,this.y,0);
 
         Matrix.setIdentityM(scalarMatrix,0);
-        Matrix.scaleM(scalarMatrix,0,2*xRadius,2*yRadius,0);
+        Matrix.scaleM(scalarMatrix,0,2*radius,2*radius,0);
 
         Matrix.multiplyMM(translationScalarMatrix,0,translationMatrix,0,scalarMatrix,0);
     }
@@ -143,7 +138,7 @@ public class ToxicLake extends EnigmaduxComponent {
     public void update(long dt, Player player, List<Enemy> enemyList){
         //randomly add a toxic bubles
         if (Math.random() < ToxicLake.TOXIC_BUBBLE_CHANCE){
-            double r = Math.min(this.xRadius, Math.random() * (ToxicLake.TOXIC_BUBBLE_MAX_RADIUS - TOXIC_BUBBLE_MIN_RADIUS) + TOXIC_BUBBLE_MIN_RADIUS);
+            double r = Math.min(this.radius, Math.random() * (ToxicLake.TOXIC_BUBBLE_MAX_RADIUS - TOXIC_BUBBLE_MIN_RADIUS) + TOXIC_BUBBLE_MIN_RADIUS);
             double magnitude = Math.random() * (this.w/2 - r);
             double angle = Math.random() * 2 * Math.PI;
 
@@ -172,23 +167,22 @@ public class ToxicLake extends EnigmaduxComponent {
             currentMillis = 0;
         }
 
-        List<float[]> collisions;
-        for (Enemy enemy: enemyList){
-            collisions = enemy.getCollisionsWithLine(enemy.getDeltaX(),enemy.getDeltaY(),this.x,this.y);
-            if (collisions.size() == 0 || Math.pow((collisions.get(0)[0]-this.x),2)/(xRadius*xRadius) + Math.pow((collisions.get(0)[1]-this.y),2)/(yRadius*yRadius) < 1){
-                if (currentMillis == 0) {
+        if (currentMillis == 0) {
+            for (Enemy enemy : enemyList) {
+                if (Math.hypot(enemy.getDeltaX() - this.x, enemy.getDeltaY() - this.y) < this.radius + enemy.getWidth() / 2) {
                     enemy.damage(DAMAGE);
                 }
             }
         }
-        collisions = player.getCollisionsWithLine(player.getDeltaX(),player.getDeltaY(),this.x,this.y);
-        if (collisions.size() == 0 || Math.pow((collisions.get(0)[0]-this.x),2)/(xRadius*xRadius) + Math.pow((collisions.get(0)[1]-this.y),2)/(yRadius*yRadius) < 1){
+
+        if (Math.hypot(player.getDeltaX() - this.x,player.getDeltaY() - this.y) < this.radius + player.getWidth()/2){
             if (currentMillis == 0) {
                 player.damage(DAMAGE);
                 SoundLib.playToxicLakeTickSoundEffect();
             }
             player.addSpeedEffect(0.2f,200);//todo HARDCODED
         }
+
 
     }
 

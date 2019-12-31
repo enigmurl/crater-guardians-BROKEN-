@@ -4,7 +4,6 @@ import android.content.Context;
 import android.opengl.Matrix;
 import android.support.annotation.NonNull;
 
-import com.enigmadux.craterguardians.Attacks.Attack;
 import com.enigmadux.craterguardians.Attacks.Enemy1Attack;
 import com.enigmadux.craterguardians.BaseCharacter;
 import com.enigmadux.craterguardians.MathOps;
@@ -35,16 +34,13 @@ public class Enemy1 extends Enemy {
     private static final int MAXIMUM_HEALTH = 10;
 
 
-    /** The width in openGL terms of any enemy
+    /** The radius in openGL terms of this enemy
      *
      */
-    public static final float CHARACTER_WIDTH = 0.3f;
-    /** The height in openGL terms of any enemy
-     *
-     */
-    public static final float CHARACTER_HEIGHT = 0.3f;
+    public static final float CHARACTER_RADIUS = 0.15f;
+
     //visual is shared by all objects as they all have the same sprite
-    private static TexturedRect VISUAL_REPRESENTATION = new TexturedRect(-Enemy1.CHARACTER_WIDTH/2,-Enemy1.CHARACTER_HEIGHT/2,Enemy1.CHARACTER_WIDTH,Enemy1.CHARACTER_HEIGHT);
+    private static TexturedRect VISUAL_REPRESENTATION = new TexturedRect(-Enemy1.CHARACTER_RADIUS,-Enemy1.CHARACTER_RADIUS,Enemy1.CHARACTER_RADIUS*2,Enemy1.CHARACTER_RADIUS*2);
 
 
     //translates the Character according to delta x and delta y
@@ -87,18 +83,6 @@ public class Enemy1 extends Enemy {
     }
 
 
-    /** Updates the position
-     *
-     * @param dt amount of milliseconds since last call
-     * @param player the current character the player is using.
-     */
-    @Override
-    public void update(long dt, BaseCharacter player, List<Supply> supplies, List<Plateau> plateaus){
-        super.update(dt, player,supplies,plateaus);
-
-
-    }
-
 
     /** Draws the enemy, and all sub components
      *
@@ -124,21 +108,13 @@ public class Enemy1 extends Enemy {
         return Enemy1.MAXIMUM_HEALTH;
     }
 
-    /** Gets the width of this enemy
+    /** Gets the radius of this enemy
      *
-     * @return the width of this enemy
+     * @return the radius of this enemy
      */
     @Override
-    public float getW() {
-        return Enemy1.CHARACTER_WIDTH;
+    public float getRadius() {
+        return Enemy1.CHARACTER_RADIUS;
     }
 
-    /** Gets the height of this enemy
-     *
-     * @return the height of this type of enemy
-     */
-    @Override
-    public float getH() {
-        return Enemy1.CHARACTER_HEIGHT;
-    }
 }
