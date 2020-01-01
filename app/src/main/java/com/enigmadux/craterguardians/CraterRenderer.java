@@ -235,6 +235,19 @@ public class CraterRenderer extends EnigmaduxGLRenderer {
     int under60 = 0;
     List<Long> under60s = new ArrayList<Long>();
     long lastMillis = System.currentTimeMillis();
+    private long DEBUGtotalTime;
+    private long DEBUGsupplyTime;
+    private long DEBUGanimationsTime;
+    private long DEBUGplayerTime;
+    private long DEBUGplateauTime;
+    private long DEBUGenemyTime;
+    private long DEBUGtoxicLakeTime;
+    private long DEBUGspawnerTime;
+    private int DEBUGCOUNT;
+    private long DEBUGothersTime;
+    private long DEBUGlevelTime;
+    private long DEBUGscreenTime;
+    private long DEBUGhomeTime;
 
     /** Called whenever a new frame is needed to be drawn. If the render mode is dirty, then it will only be called
      * on requestRender, otherwise it's called at 60fps (I believe)
@@ -255,7 +268,7 @@ public class CraterRenderer extends EnigmaduxGLRenderer {
         gl.glMatrixMode(gl.GL_MODELVIEW);
         gl.glLoadIdentity();
 
-        if ((this.backend.getCurrentGameState() == CraterBackend.GAME_STATE_INGAME || this.backend.getCurrentGameState() == CraterBackend.GAME_STATE_HOMESCREEN) && this.gameScreenLayout.isVisible()) {
+        if ((backend.getCurrentGameState() != CraterBackend.GAME_STATE_HOMESCREEN) && this.gameScreenLayout.isVisible()) {
             float yOffset = (this.backend.getCurrentGameState() == CraterBackend.GAME_STATE_INGAME) ? -0f : 0;
             Matrix.setLookAtM(this.cameraTranslationM, 0, this.player.getDeltaX(), player.getDeltaY() + yOffset, 1f, player.getDeltaX(), player.getDeltaY(), 0, 0, 1f, 0);
             Matrix.scaleM(cameraTranslationM, 0, this.backend.getCameraZoom(), this.backend.getCameraZoom(), 0);
@@ -269,11 +282,22 @@ public class CraterRenderer extends EnigmaduxGLRenderer {
 
 
         //draws all on screen components
+        long start = System.currentTimeMillis();
+
         Matrix.setLookAtM(this.cameraTranslationM, 0, 0, 0, 1, 0, 0, 0, 0, 1f, 0);
         Matrix.scaleM(this.cameraTranslationM, 0, CAMERA_Z, CAMERA_Z * LayoutConsts.SCREEN_HEIGHT / LayoutConsts.SCREEN_WIDTH, 0);//too offset the orthographic projection for areas where it isnt needed
+
+
+        long subStart = System.currentTimeMillis();
         this.levelSelectLayout.draw(gl, this.cameraTranslationM);
+        this.DEBUGlevelTime += System.currentTimeMillis() - subStart;
+        subStart = System.currentTimeMillis();
         this.fullHomeScreenLayout.draw(gl, this.cameraTranslationM);
+        this.DEBUGhomeTime += System.currentTimeMillis() - subStart;
+        subStart = System.currentTimeMillis();
         this.drawScreenUtils(gl);
+        this.DEBUGscreenTime += System.currentTimeMillis() - subStart;
+        this.DEBUGothersTime += System.currentTimeMillis() - start;
 
         if (System.currentTimeMillis() - lastMillis  >  1000/60f){
             under60++;
@@ -285,14 +309,27 @@ public class CraterRenderer extends EnigmaduxGLRenderer {
             Log.d("FRONTENDTHREAD:","Frames per second:"  + (1000 * updateCount/(double) (System.currentTimeMillis() - debugStartMillis)));
             Log.d("FRONTENDTHREAD:","percentage under 60:"  + ((float) under60/updateCount));
             Log.d("FRONTENDTHREAD:","under 60s:"  + under60s);
+            Log.d("F TIMECONSUMPTION:","level Time"  + ((float) this.DEBUGlevelTime)/this.DEBUGothersTime);
+            Log.d("F TIMECONSUMPTION:","home Time"  + ((float) this.DEBUGhomeTime)/this.DEBUGothersTime);
+            Log.d("F TIMECONSUMPTION:","util Time"  + ((float) this.DEBUGscreenTime)/this.DEBUGothersTime);
+
+            Log.d("F TIMECONSUMPTION:","AVG TIME F:"  + ((float) this.DEBUGothersTime)/this.updateCount);
+            this.DEBUGhomeTime = 0;
+            this.DEBUGothersTime = 0;
+            this.DEBUGscreenTime = 0;
+            this.DEBUGlevelTime = 0;
+
 
             debugStartMillis = System.currentTimeMillis();
             updateCount = 0;
             under60 = 0;
             under60s.clear();
+
+
         }
 
     }
+
 
     /** Helps draw portions of the game map that is not covered in the game layout. Mostly stuff that have a variable amount
      * (enemies, obstacles, spawners etc)
@@ -303,62 +340,98 @@ public class CraterRenderer extends EnigmaduxGLRenderer {
         //basically this stops threads from accessing the same variables at the same time, as during the level select levels are loaded, which
         //if drawn at the same time from two threads will throw a java ConcurrmentModificationExcpetion
 
-        synchronized (CraterBackend.PLATEAU_LOCK) {
-            for (Plateau plateau : this.backend.getPlateaus()) {
-                plateau.draw(gl, this.cameraTranslationM);
+        this.DEBUGCOUNT ++;
+        long overallStart = System.currentTimeMillis();
+        long start;
+        start = System.currentTimeMillis();
+        for (Plateau plateau : this.backend.getPlateaus()) {
+            //we can break bc toxic lakes are not actually removed
+            if (plateau == null) break;
+            plateau.draw(gl, this.cameraTranslationM);
+        }
+        this.DEBUGplateauTime += System.currentTimeMillis() -start;
+
+        start = System.currentTimeMillis();
+
+        if (this.backend.getTutorialCurrentMillis() > CraterBackend.PLATEAUS_TOXIC_LAKE_INTRODUCTION) {
+            for (ToxicLake toxicLake : this.backend.getToxicLakes()) {
+                //we can break bc toxic lakes are not actually removed
+                if (toxicLake == null) break;
+                toxicLake.draw(gl, this.cameraTranslationM);
             }
         }
+        this.DEBUGtoxicLakeTime += System.currentTimeMillis() - start;
 
-        synchronized (CraterBackend.TOXICLAKE_LOCK) {
-            if (this.backend.getTutorialCurrentMillis() > CraterBackend.PLATEAUS_TOXIC_LAKE_INTRODUCTION) {
-                for (ToxicLake toxicLake : this.backend.getToxicLakes()) {
-                    toxicLake.draw(gl, this.cameraTranslationM);
-                }
+
+
+
+
+        start = System.currentTimeMillis();
+        if (this.backend.getTutorialCurrentMillis() > CraterBackend.SUPPLIES_INTRODUCTION) {
+            for (Supply supply : this.backend.getSupplies()) {
+                if (supply == null) continue;
+                supply.draw(gl, this.cameraTranslationM);
             }
         }
+        this.DEBUGsupplyTime += System.currentTimeMillis() - start;
 
-
-
-
-
-        synchronized (CraterBackend.SUPPLIES_LOCK) {
-            if (this.backend.getTutorialCurrentMillis() > CraterBackend.SUPPLIES_INTRODUCTION) {
-                for (Supply supply : this.backend.getSupplies()) {
-                    supply.draw(gl, this.cameraTranslationM);
-                }
-            }
-        }
 
 
 
         if (this.backend.getTutorialCurrentMillis() > CraterBackend.ENEMIES_INTRODUCTION) {
-            synchronized (CraterBackend.SPAWNER_LOCK) {
-                for (Spawner spawner : this.backend.getSpawners()) {
-                    spawner.draw(gl, this.cameraTranslationM);
-                }
+            start = System.currentTimeMillis();
+            for (Spawner spawner : this.backend.getSpawners()) {
+                if (spawner == null) continue;
+                spawner.draw(gl, this.cameraTranslationM);
             }
-            synchronized (CraterBackend.ENEMIES_LOCK) {
-                for (Enemy enemy : this.backend.getEnemies()) {
-                    enemy.draw(gl, this.cameraTranslationM);
-                }
+            this.DEBUGspawnerTime += System.currentTimeMillis() - start;
+
+            start = System.currentTimeMillis();
+            for (Enemy enemy : this.backend.getEnemies()) {
+                if (enemy == null) continue;
+                enemy.draw(gl, this.cameraTranslationM);
             }
+            this.DEBUGenemyTime += System.currentTimeMillis() - start;
+
         }
 
-        synchronized (CraterBackend.ANIMATIONS_LOCK) {
-            for (Animation animation : this.backend.getAnimations()) {
-                animation.draw(gl, this.cameraTranslationM);
-            }
+        start = System.currentTimeMillis();
+        for (Animation animation : this.backend.getAnimations()) {
+            if (animation == null) continue;
+            animation.draw(gl, this.cameraTranslationM);
         }
+        this.DEBUGanimationsTime += System.currentTimeMillis() - start;
 
-
-        synchronized (CraterBackend.PLAYER_LOCK) {
-            if (this.backend.getTutorialCurrentMillis() > CraterBackend.CHARACTER_INTRODUCTION) {
-                this.player.draw(gl, this.cameraTranslationM);
-            }
+        start = System.currentTimeMillis();
+        if (this.backend.getTutorialCurrentMillis() > CraterBackend.CHARACTER_INTRODUCTION) {
+            this.player.draw(gl, this.cameraTranslationM);
         }
+        this.DEBUGplayerTime += System.currentTimeMillis() - start;
 
         if (this.backend.getCurrentGameState() == CraterBackend.GAME_STATE_TUTORIAL ){
             this.gameMapTutorialLayout.draw(gl,this.cameraTranslationM);
+        }
+
+        this.DEBUGtotalTime += System.currentTimeMillis() - overallStart;
+        if (this.DEBUGtotalTime > 10000){
+            Log.d("F TIMECONSUMPTION:","ANIMATION PERCENTAGE:"  + ((float) this.DEBUGanimationsTime)/this.DEBUGtotalTime);
+            Log.d("F TIMECONSUMPTION:","PLAYER PERCENTAGE:"  + ((float) this.DEBUGplayerTime)/this.DEBUGtotalTime);
+            Log.d("F TIMECONSUMPTION:","PLATEAU PERCENTAGE:"  + ((float) this.DEBUGplateauTime)/this.DEBUGtotalTime);
+            Log.d("F TIMECONSUMPTION:","ENEMY PERCENTAGE:"  + ((float) this.DEBUGenemyTime)/this.DEBUGtotalTime);
+            Log.d("F TIMECONSUMPTION:","TOXIC LAKE PERCENTAGE:"  + ((float) this.DEBUGtoxicLakeTime)/this.DEBUGtotalTime);
+            Log.d("F TIMECONSUMPTION:","SPAWNER PERCENTAGE:"  + ((float) this.DEBUGspawnerTime)/this.DEBUGtotalTime);
+            Log.d("F TIMECONSUMPTION:","SUpply PERCENTAGE:"  + ((float) this.DEBUGsupplyTime)/this.DEBUGtotalTime);
+            Log.d("F TIMECONSUMPTION:","AVG TIMES"  + ((float) this.DEBUGtotalTime)/this.DEBUGCOUNT);
+
+            this.DEBUGplateauTime = 0;
+            this.DEBUGtotalTime = 0;
+            this.DEBUGanimationsTime = 0;
+            this.DEBUGplayerTime = 0;
+            this.DEBUGenemyTime = 0;
+            this.DEBUGtoxicLakeTime = 0;
+            this.DEBUGspawnerTime = 0;
+            this.DEBUGsupplyTime = 0;
+            this.DEBUGCOUNT = 0;
         }
 
 

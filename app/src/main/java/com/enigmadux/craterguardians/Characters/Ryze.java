@@ -7,6 +7,7 @@ import com.enigmadux.craterguardians.AngleAimers.AngleAimer;
 import com.enigmadux.craterguardians.AngleAimers.TriRectAimer;
 import com.enigmadux.craterguardians.AngleAimers.TriangleAimer;
 import com.enigmadux.craterguardians.Attacks.RyzeAttack;
+import com.enigmadux.craterguardians.CraterBackend;
 import com.enigmadux.craterguardians.MathOps;
 import com.enigmadux.craterguardians.ProgressBar;
 import com.enigmadux.craterguardians.R;
@@ -148,9 +149,9 @@ public class Ryze extends Player {
         if (this.numAttacks > 0) {
             this.numAttacks --;
             if (this.evolveGen == 0)
-                this.attacks.add(new RyzeAttack(this.getDeltaX(), this.getDeltaY(), (int) (5 * (1 + (float) this.attackChargeUp.getCurrentHitPoints()/(NUM_ATTACKS * 1000))), angle, 0.4f, 0.15f,0.2f,0.1f,250,this));
+                CraterBackend.addObject(new RyzeAttack(this.getDeltaX(), this.getDeltaY(), (int) (5 * (1 + (float) this.attackChargeUp.getCurrentHitPoints()/(NUM_ATTACKS * 1000))), angle, 0.4f, 0.15f,0.2f,0.1f,250,this),this.attacks);
             else if (this.evolveGen == 1)
-                this.attacks.add(new RyzeAttack(this.getDeltaX(), this.getDeltaY(), (int) (7 * (1 + (float) this.attackChargeUp.getCurrentHitPoints()/(NUM_ATTACKS * 1000))), angle, 0.6f, 0.15f,0.4f,0.1f,250,this));
+                CraterBackend.addObject(new RyzeAttack(this.getDeltaX(), this.getDeltaY(), (int) (7 * (1 + (float) this.attackChargeUp.getCurrentHitPoints()/(NUM_ATTACKS * 1000))), angle, 0.6f, 0.15f,0.4f,0.1f,250,this),this.attacks);
 
         }
         //pass for now

@@ -68,13 +68,14 @@ public class Enemy1 extends Enemy {
 
     @Override
     public void setFrame(float rotation, int frameNum) {
-        VISUAL_REPRESENTATION.loadTextureBuffer(MathOps.getTextureBuffer(rotation,frameNum,framesPerRotation,numRotationOrientations));
+        //VISUAL_REPRESENTATION.loadTextureBuffer(MathOps.getTextureBuffer(rotation,frameNum,framesPerRotation,numRotationOrientations));
         this.offsetDegrees = MathOps.getOffsetDegrees(rotation,numRotationOrientations);
     }
 
     @Override
     public void attack(float angle) {
-        this.attacks.add(new Enemy1Attack(this.getDeltaX(),this.getDeltaY(),5, angle,0.7f,0.1f,250,this));
+        // for now we are having it only 1 attack at a time
+        this.attacks[0] = new Enemy1Attack(this.getDeltaX(),this.getDeltaY(),5, angle,0.7f,0.1f,250,this);
     }
 
     @Override
@@ -92,10 +93,10 @@ public class Enemy1 extends Enemy {
     @Override
     public void draw(GL10 gl, float[] parentMatrix) {
         super.draw(gl,parentMatrix);
-        Matrix.setIdentityM(translationMatrix,0);
-        Matrix.translateM(translationMatrix,0,this.getDeltaX(),this.getDeltaY(),0);
-
-        Matrix.multiplyMM(finalMatrix,0,parentMatrix,0,translationMatrix,0);
+        //Matrix.setIdentityM(translationMatrix,0);
+        //Matrix.translateM(translationMatrix,0,this.getDeltaX(),this.getDeltaY(),0);
+        Matrix.translateM(finalMatrix,0,parentMatrix,0,this.getDeltaX(),this.getDeltaY(),0);
+        //Matrix.multiplyMM(finalMatrix,0,parentMatrix,0,translationMatrix,0);
         VISUAL_REPRESENTATION.draw(gl,finalMatrix);
     }
 

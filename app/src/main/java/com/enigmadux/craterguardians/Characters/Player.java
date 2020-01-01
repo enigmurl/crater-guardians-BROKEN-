@@ -11,7 +11,6 @@ import com.enigmadux.craterguardians.BaseCharacter;
 import com.enigmadux.craterguardians.Enemies.Enemy;
 import com.enigmadux.craterguardians.ProgressBar;
 import com.enigmadux.craterguardians.R;
-import com.enigmadux.craterguardians.Shield;
 import com.enigmadux.craterguardians.SoundLib;
 import com.enigmadux.craterguardians.Spawners.Spawner;
 
@@ -159,6 +158,7 @@ public abstract class Player extends BaseCharacter {
 
         //TODO Concurrent modification happening here sometimes also on line 178 a null pointer was thrown
         for (Attack attack: this.attacks){
+            if (attack == null) continue;
             attack.draw(gl,parentMatrix);
         }
         Matrix.setIdentityM(this.translationMatrix,0);
@@ -191,7 +191,7 @@ public abstract class Player extends BaseCharacter {
 
         this.attackAngleAimer.setPosition(this.getDeltaX(),this.getDeltaY());
         this.attackAngleAimer.draw(gl,parentMatrix);
-   this.attackChargeUp.update(this.attackChargeUp.getCurrentHitPoints(),this.getDeltaX()-this.getRadius(),this.getDeltaY() + this.getRadius() + 0.1f);
+        this.attackChargeUp.update(this.attackChargeUp.getCurrentHitPoints(),this.getDeltaX()-this.getRadius(),this.getDeltaY() + this.getRadius() + 0.1f);
         this.attackChargeUp.draw(gl,parentMatrix);
 
     }
@@ -255,26 +255,27 @@ public abstract class Player extends BaseCharacter {
      * @param enemies all possible enemies on the game map
      * @param spawners  all possible spawners on the game map used to see if the atttacks
      */
-    public void update(long dt, float rotation, List<Enemy> enemies, List<Spawner> spawners) {
+    public void update(long dt, float rotation, Enemy[] enemies, Spawner[] spawners) {
         super.update(dt, rotation);
 
         this.rotation = rotation;
 
-        Iterator itr = attacks.iterator();
+
 
         //todo this is throwing exceptions
-        while (itr.hasNext()){
-            Attack attack = (Attack) itr.next();
+        for (int i = 0;i<this.attacks.length;i++){
+            Attack attack = this.attacks[i];
+            if (attack == null) continue;
             if (attack.isFinished()){
-                itr.remove();
+                this.attacks[i] = null;
             }
             attack.update(dt);
             for (Enemy enemy: enemies){
-                attack.attemptAttack(enemy);
+                if (enemy != null) attack.attemptAttack(enemy);
             }
 
             for (Spawner spawner: spawners){
-                attack.attemptAttack(spawner);
+                if (spawner != null) attack.attemptAttack(spawner);
             }
         }
 

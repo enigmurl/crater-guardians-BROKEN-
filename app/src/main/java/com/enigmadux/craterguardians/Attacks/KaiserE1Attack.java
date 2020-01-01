@@ -87,13 +87,13 @@ public class KaiserE1Attack extends Attack {
         float x1 = ((int) (this.finishedMillis/(this.millis/this.numFrames)) * 1f/this.numFrames) %1 ;
         float x2 = (((int) (this.finishedMillis/(this.millis/this.numFrames)) * 1f/this.numFrames) %1 + 1f/numFrames);
 
-        VISUAL_REPRESENTATION.loadTextureBuffer(new float[] {
-                x1,1,
-                x1,0,
-                x2,1,
-                x2,0
-
-        });
+//        VISUAL_REPRESENTATION.loadTextureBuffer(new float[] {
+//                x1,1,
+//                x1,0,
+//                x2,1,
+//                x2,0
+//
+//        });
         Matrix.setIdentityM(rotatorMatrix,0);
         Matrix.setIdentityM(translatorMatrix,0);
         Matrix.setIdentityM(rotationScalarTranslationMatrix,0);

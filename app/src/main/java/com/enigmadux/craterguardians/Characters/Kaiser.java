@@ -7,6 +7,7 @@ import com.enigmadux.craterguardians.AngleAimers.AngleAimer;
 import com.enigmadux.craterguardians.AngleAimers.TriangleAimer;
 import com.enigmadux.craterguardians.Attacks.KaiserE1Attack;
 import com.enigmadux.craterguardians.Attacks.KaiserE2Attack;
+import com.enigmadux.craterguardians.CraterBackend;
 import com.enigmadux.craterguardians.MathOps;
 import com.enigmadux.craterguardians.ProgressBar;
 import com.enigmadux.craterguardians.R;
@@ -152,9 +153,9 @@ public class Kaiser extends Player {
         if (this.numAttacks > 0) {
             this.numAttacks --;
             if (this.evolveGen == 0)
-                this.attacks.add(new KaiserE1Attack(this.getDeltaX(), this.getDeltaY(), (int) (5 * (1 + (float) this.attackChargeUp.getCurrentHitPoints()/(NUM_ATTACKS * 1000))), angle, 0.5f, 250,this));
+                CraterBackend.addObject(new KaiserE1Attack(this.getDeltaX(), this.getDeltaY(), (int) (5 * (1 + (float) this.attackChargeUp.getCurrentHitPoints()/(NUM_ATTACKS * 1000))), angle, 0.5f, 250,this),this.attacks);
             else if (this.evolveGen == 1)
-                this.attacks.add(new KaiserE2Attack(this.getDeltaX(), this.getDeltaY(), (int) (7 * (1 + (float) this.attackChargeUp.getCurrentHitPoints()/(NUM_ATTACKS*1000))), angle, 1f, 250,this));
+                CraterBackend.addObject(new KaiserE2Attack(this.getDeltaX(), this.getDeltaY(), (int) (7 * (1 + (float) this.attackChargeUp.getCurrentHitPoints()/(NUM_ATTACKS*1000))), angle, 1f, 250,this),this.attacks);
 
         }
         //pass for now

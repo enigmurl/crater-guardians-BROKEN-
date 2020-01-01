@@ -22,6 +22,10 @@ public abstract class BaseCharacter extends EnigmaduxComponent {
      */
     private static final String TAG = "CHARACTER";
 
+    /** MAximum amount of attacks alive at a second
+     *
+     */
+    private static final int MAX_ATTACKS = 4;
     /** The width in openGL terms of any character
      *
      */
@@ -47,7 +51,7 @@ public abstract class BaseCharacter extends EnigmaduxComponent {
 
 
     //all alive attacks
-    protected List<Attack> attacks = new ArrayList<>();
+    protected Attack[] attacks = new Attack[BaseCharacter.MAX_ATTACKS];
 
     //health of player
     protected int health;
@@ -205,7 +209,7 @@ public abstract class BaseCharacter extends EnigmaduxComponent {
      *
      */
     public void spawn(){
-        this.attacks.clear();
+        CraterBackend.clearArray(this.attacks);
         this.health = getMaxHealth();
         this.isAlive = true;
     }

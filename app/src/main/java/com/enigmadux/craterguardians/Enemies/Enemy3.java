@@ -70,13 +70,13 @@ public class Enemy3 extends Enemy {
 
     @Override
     public void setFrame(float rotation, int frameNum) {
-        VISUAL_REPRESENTATION.loadTextureBuffer(MathOps.getTextureBuffer(rotation,frameNum,framesPerRotation,numRotationOrientations));
+        //VISUAL_REPRESENTATION.loadTextureBuffer(MathOps.getTextureBuffer(rotation,frameNum,framesPerRotation,numRotationOrientations));
         this.offsetDegrees = MathOps.getOffsetDegrees(rotation,numRotationOrientations);
     }
 
     @Override
     public void attack(float angle) {
-        this.attacks.add(new Enemy3Attack(this.getDeltaX(),this.getDeltaY(),99,angle,0.5f + Enemy3.CHARACTER_RADIUS*2,5000,this));
+        this.attacks[0] = new Enemy3Attack(this.getDeltaX(),this.getDeltaY(),99,angle,0.5f + Enemy3.CHARACTER_RADIUS*2,5000,this);
     }
 
     @Override
@@ -92,12 +92,14 @@ public class Enemy3 extends Enemy {
      * @param supplies  all alive supplies on the map
      * @param enemyMap A map of where and how the enemy should go
      */
-    public void update(long dt, BaseCharacter player, List<Supply> supplies, EnemyMap enemyMap) {
-        if (this.attacks.size() == 0){
+    @Override
+    public void update(long dt, BaseCharacter player, Supply[] supplies, EnemyMap enemyMap) {
+        if (this.attacks[0] == null){
             this.canMove = true;
         } else {
-            this.canMove = this.attacks.get(0).isFinished();
+            this.canMove = this.attacks[0].isFinished();
         }
+
 
         super.update(dt, player,supplies,enemyMap);
 

@@ -102,8 +102,8 @@ public class ProgressBar extends EnigmaduxComponent  {
         //Log.d("PROGRESSBAR",)
         //todo this is probably expensive to create a bitmap each time, maybe do it only when the score is updated, this whole method can be optimized
         if (this.textbox != null && (! this.textbox.getText().equals(String.valueOf(this.currentHitPoints)) || ! this.textbox.isTextureLoaded())){
-            this.textbox.setText(String.valueOf(currentHitPoints));
-            this.textbox.loadGLTexture(gl);
+            //this.textbox.setText(String.valueOf(currentHitPoints));
+            //this.textbox.loadGLTexture(gl);
         }
 
         BAR_VISUAL.setShader(1 - (float) currentHitPoints/maxHitPoints, (float) currentHitPoints/maxHitPoints,0,1);
@@ -124,8 +124,8 @@ public class ProgressBar extends EnigmaduxComponent  {
         BAR_VISUAL.draw(gl,finalMatrix);
 
         if (this.textbox != null) {
-            Matrix.multiplyMM(finalMatrix, 0, parentMatrix, 0, translationMatrix, 0);
-            this.textbox.draw(gl, finalMatrix);
+            //Matrix.multiplyMM(finalMatrix, 0, parentMatrix, 0, translationMatrix, 0);
+            //this.textbox.draw(gl, finalMatrix);
         }
 
 

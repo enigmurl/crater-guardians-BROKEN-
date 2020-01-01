@@ -10,6 +10,7 @@ import com.enigmadux.craterguardians.Plateau;
 import com.enigmadux.craterguardians.ProgressBar;
 import com.enigmadux.craterguardians.Supply;
 
+import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
@@ -56,10 +57,11 @@ public abstract class Enemy extends BaseCharacter {
      */
     @Override
     public void draw(GL10 gl, float[] parentMatrix) {
-        for (Attack attack: this.attacks){
-            attack.draw(gl,parentMatrix);
-        }
-        healthDisplay.draw(gl,parentMatrix);
+        //for (Attack attack: this.attacks){
+        //    if (attack == null) continue;
+            //attack.draw(gl,parentMatrix);
+        //}
+        //healthDisplay.draw(gl,parentMatrix);
     }
 
 
@@ -181,20 +183,18 @@ public abstract class Enemy extends BaseCharacter {
      * @param supplies  all alive supplies on the map
      * @param enemyMap A map of where and how the enemy should go
      */
-    public void update(long dt, BaseCharacter player, List<Supply> supplies, EnemyMap enemyMap) {
-        Iterator itr = attacks.iterator();
-
-
-        while (itr.hasNext()) {
-            Attack attack = (Attack) itr.next();
-            if (attack.isFinished()) {
-                itr.remove();
+    public void update(long dt, BaseCharacter player, Supply[] supplies, EnemyMap enemyMap) {
+        for (int i = 0;i<this.attacks.length;i++){
+            Attack attack = this.attacks[i];
+            if (attack == null) continue;
+            if (attack.isFinished()){
+                this.attacks[i] = null;
             }
             attack.update(dt);
             attack.attemptAttack(player);
 
             for (Supply supply : supplies) {
-                attack.attemptAttack(supply);
+                if (supply != null) attack.attemptAttack(supply);
             }
         }
 
@@ -206,9 +206,9 @@ public abstract class Enemy extends BaseCharacter {
             int supplyIndex = -1;//if it's negative 1 that refers to the player
 
 
-            for (int i = 0; i < supplies.size(); i++) {
-
-                float hypotenuse = Math.max(0.01f, (float) Math.hypot(this.getDeltaX() - supplies.get(i).getX(), this.getDeltaY() - supplies.get(i).getY()));
+            for (int i = 0; i < supplies.length; i++) {
+                if (supplies[i] == null) continue;
+                float hypotenuse = Math.max(0.01f, (float) Math.hypot(this.getDeltaX() - supplies[i].getX(), this.getDeltaY() - supplies[i].getY()));
                 if (hypotenuse < minLength) {
                     minLength = hypotenuse;
                     supplyIndex = i;
@@ -220,8 +220,10 @@ public abstract class Enemy extends BaseCharacter {
 
             //if (this.lastTarget != supplyIndex) {
             if (this.lastTarget == -2){
-                PathFinder pathFinder = new PathFinder(enemyMap,supplyIndex);
-                pathFinder.run();
+                //PathFinder pathFinder = new PathFinder(enemyMap,supplyIndex);
+                //pathFinder.run();
+                this.currentPath = new ArrayList<>();
+                this.currentPath.add(null);
                 //this.currentPath = enemyMap.nextStepMap(this.getRadius(), this.getDeltaX(), this.getDeltaY(), supplyIndex);
                 Log.d("ENEMY PATH", "path: "  + this.currentPath + " supply: " + supplyIndex);
             }
@@ -252,7 +254,7 @@ public abstract class Enemy extends BaseCharacter {
             if (currentPath != null && currentPath.size() > 1 && Math.hypot(targetX -this.getDeltaX(),targetY- this.getDeltaY()) < Enemy.MIN_DISTANCE) this.currentPath.remove(0);
 
             if (supplyIndex == -1) {
-                if (minLength < 1 && attacks.size() < 1) {//todo this is hardcoded
+                if (minLength < 1 && attacks[0] == null) {//todo this is hardcoded
                     this.attack(MathOps.getAngle((player.getDeltaX() - this.getDeltaX()) / minLength, (player.getDeltaY() - this.getDeltaY()) / minLength));
                 }
                 //Log.d("PLAYER","X: " +this.getDeltaX() + " px " + player.getDeltaX() + " Y: " + this.getDeltaY() + " py " + player.getDeltaY() +  " len " + minLength + " cl "  +clippedLength);
@@ -260,8 +262,8 @@ public abstract class Enemy extends BaseCharacter {
 
             } else {
 
-                if (minLength < 1 && attacks.size() < 1) {//todo this is hardcoded
-                    this.attack(MathOps.getAngle((supplies.get(supplyIndex).getX() - this.getDeltaX()) / minLength, (supplies.get(supplyIndex).getY() - this.getDeltaY()) / minLength));
+                if (minLength < 1 && attacks[0] == null) {//todo this is hardcoded
+                    this.attack(MathOps.getAngle((supplies[supplyIndex].getX() - this.getDeltaX()) / minLength, (supplies[supplyIndex].getY() - this.getDeltaY()) / minLength));
                 }
                 //Log.d("PLAYER","X: " +this.getDeltaX() + " px " + player.getDeltaX() + " Y: " + this.getDeltaY() + " py " + player.getDeltaY() +  " len " + minLength + " cl "  +clippedLength);
                 this.update(dt, 180 / (float) Math.PI * MathOps.getAngle((targetX - this.getDeltaX()) / minLength, (targetY - this.getDeltaY()) / minLength));
@@ -276,6 +278,7 @@ public abstract class Enemy extends BaseCharacter {
         }
 
         for (Attack attack: this.attacks){
+            if (attack == null) continue;
             attack.attemptAttack(player);
         }
     }

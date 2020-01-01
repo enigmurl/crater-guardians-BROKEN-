@@ -34,6 +34,11 @@ public class ToxicLake extends EnigmaduxComponent {
      */
     private static final long MILLIS_BETWEEN_DAMAGE = 1000L;
 
+    /** Maximum amount of toxic bubbles that can exist at any point
+     *
+     */
+
+    private static final int MAX_TOXIC_BUBBLES = 8;
     /** On any given frame the chance that a bubble spawns
      *
      */
@@ -77,7 +82,7 @@ public class ToxicLake extends EnigmaduxComponent {
     private static final TexturedRect VISUAL_REPRESENTATION = new TexturedRect(-0.5f,-0.5f,1,1);
 
     //the bubbles on the toxic lake, should be an array list later on
-    private ArrayList<ToxicBubble> toxicBubbles;
+    private ToxicBubble[] toxicBubbles = new ToxicBubble[ToxicLake.MAX_TOXIC_BUBBLES];
 
     /** Default Constructor
      *  @param x the openGL x coordinate
@@ -90,8 +95,6 @@ public class ToxicLake extends EnigmaduxComponent {
         this.y = y;
         //super(x-r,y-r,2*r,2*r);
         this.radius = radius;
-
-        this.toxicBubbles = new ArrayList<ToxicBubble>();
 
         //translates to appropriate coordinates
         final float[] translationMatrix = new float[16];
@@ -115,9 +118,10 @@ public class ToxicLake extends EnigmaduxComponent {
     public void draw(GL10 gl,float[] parentMatrix){
         Matrix.multiplyMM(finalMatrix,0,parentMatrix,0,translationScalarMatrix,0);
         VISUAL_REPRESENTATION.draw(gl,finalMatrix);
-        for (ToxicBubble tb:this.toxicBubbles) {
-            tb.draw(gl, parentMatrix);
-        }
+        //for (ToxicBubble tb:this.toxicBubbles) {
+         //   if (tb == null) continue;
+         //   tb.draw(gl, parentMatrix);
+       // }
     }
 
     /** Loads the texture
@@ -135,7 +139,7 @@ public class ToxicLake extends EnigmaduxComponent {
      * @param player the player it attempts to damage
      * @param enemyList all enemies it attempts to damage
      */
-    public void update(long dt, Player player, List<Enemy> enemyList){
+    public void update(long dt, Player player, Enemy[] enemyList){
         //randomly add a toxic bubles
         if (Math.random() < ToxicLake.TOXIC_BUBBLE_CHANCE){
             double r = Math.min(this.radius, Math.random() * (ToxicLake.TOXIC_BUBBLE_MAX_RADIUS - TOXIC_BUBBLE_MIN_RADIUS) + TOXIC_BUBBLE_MIN_RADIUS);
@@ -147,17 +151,14 @@ public class ToxicLake extends EnigmaduxComponent {
 
             long animLength = (long) (Math.random() * (TOXIC_BUBBLE_MAX_ANIMLEN - TOXIC_BUBBLE_MIN_ANIMLEN) + TOXIC_BUBBLE_MIN_ANIMLEN);
 
-            toxicBubbles.add(new ToxicBubble((float) x,(float) y,(float) r*2,(float) r*2,animLength));
+            CraterBackend.addObject(new ToxicBubble((float) x,(float) y,(float) r*2,(float) r*2,animLength),this.toxicBubbles);
 
         }
 
         //update the mini bubbles
-        Iterator<ToxicBubble> iterator = this.toxicBubbles.iterator();
-        while (iterator.hasNext()){
-            ToxicBubble tb = iterator.next();
-            tb.update(dt);
-            if (tb.isFinished()){
-                iterator.remove();
+        for (int i = 0;i<this.toxicBubbles.length;i++){
+            if (this.toxicBubbles[i] != null && this.toxicBubbles[i].isFinished()){
+                this.toxicBubbles[i] = null;
             }
         }
 
@@ -169,6 +170,7 @@ public class ToxicLake extends EnigmaduxComponent {
 
         if (currentMillis == 0) {
             for (Enemy enemy : enemyList) {
+                if (enemy == null) continue;
                 if (Math.hypot(enemy.getDeltaX() - this.x, enemy.getDeltaY() - this.y) < this.radius + enemy.getWidth() / 2) {
                     enemy.damage(DAMAGE);
                 }
