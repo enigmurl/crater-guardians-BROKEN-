@@ -178,7 +178,9 @@ public class TexturedRect extends EnigmaduxComponent {
     public void loadGLTexture(@NonNull GL10 gl,Bitmap bitmap,int index){
         int afterW = MathOps.nextPowerTwo(bitmap.getWidth());
         int afterH = MathOps.nextPowerTwo(bitmap.getHeight());
-        bitmap = Bitmap.createScaledBitmap(bitmap,afterW,afterH,false);
+        if (afterH != bitmap.getHeight() || afterW != bitmap.getWidth()) {
+            bitmap = Bitmap.createScaledBitmap(bitmap, afterW, afterH, false);
+        }
 
         loadTextureBuffer(new float[]{
                 0,1,

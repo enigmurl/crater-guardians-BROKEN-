@@ -116,10 +116,9 @@ public class ToxicLake extends EnigmaduxComponent {
     public void draw(GL10 gl,float[] parentMatrix){
         Matrix.multiplyMM(finalMatrix,0,parentMatrix,0,translationScalarMatrix,0);
         VISUAL_REPRESENTATION.draw(gl,finalMatrix);
-        //for (ToxicBubble tb:this.toxicBubbles) {
-         //   if (tb == null) continue;
-         //   tb.draw(gl, parentMatrix);
-       // }
+        for (ToxicBubble tb:this.toxicBubbles) {
+            tb.draw(gl, parentMatrix);
+        }
     }
 
     /** Loads the texture
@@ -157,9 +156,10 @@ public class ToxicLake extends EnigmaduxComponent {
         Iterator<ToxicBubble> toxicBubbleIterator = this.toxicBubbles.iterator();
         while (toxicBubbleIterator.hasNext()){
             ToxicBubble toxicBubble = toxicBubbleIterator.next();
-            if (this.toxicBubbles[i] != null && this.toxicBubbles[i].isFinished()){
-                this.toxicBubbles[i] = null;
+            if (toxicBubble.isFinished()){
+                toxicBubbleIterator.remove();
             }
+            toxicBubble.update(dt);
         }
 
 

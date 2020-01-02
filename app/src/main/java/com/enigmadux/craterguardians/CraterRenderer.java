@@ -558,8 +558,11 @@ public class CraterRenderer extends EnigmaduxGLRenderer {
                 } else {
                     this.soundEffectsOnOffButton.setShader(CraterRenderer.OFF_SHADER[0], CraterRenderer.OFF_SHADER[1], CraterRenderer.OFF_SHADER[2], CraterRenderer.OFF_SHADER[3]);
                 }
+                //this.loadSettingsFile();
                 break;
             case 8:
+                //this.levelData.loadLevelData();
+                //this.backend.loadLevelData();
                 this.loadingCompleted = true;
                 break;
         }

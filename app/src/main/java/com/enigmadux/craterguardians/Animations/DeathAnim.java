@@ -73,11 +73,11 @@ public class DeathAnim extends Animation {
     public void draw(GL10 gl, float[] parentMatrix) {
         Matrix.multiplyMM(this.finalMatrix,0,parentMatrix,0,this.translationScalarMatrix,0);
 
-        //VISUAL_REPRESENTATION.loadTextureBuffer(MathOps.getTextureBuffer(
-        //        0,
-        //        (int) (this.currentPosition* DeathAnim.NUM_FRAMES/DeathAnim.ANIMATION_LENGTH),
-        //        DeathAnim.NUM_FRAMES,
-        //        1));
+        VISUAL_REPRESENTATION.loadTextureBuffer(MathOps.getTextureBuffer(
+                0,
+                (int) (this.currentPosition* DeathAnim.NUM_FRAMES/DeathAnim.ANIMATION_LENGTH),
+                DeathAnim.NUM_FRAMES,
+                1));
         VISUAL_REPRESENTATION.draw(gl,this.finalMatrix);
     }
 

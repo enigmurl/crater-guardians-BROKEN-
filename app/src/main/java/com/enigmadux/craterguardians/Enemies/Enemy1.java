@@ -63,14 +63,16 @@ public class Enemy1 extends Enemy {
 
     @Override
     public void setFrame(float rotation, int frameNum) {
-        //VISUAL_REPRESENTATION.loadTextureBuffer(MathOps.getTextureBuffer(rotation,frameNum,framesPerRotation,numRotationOrientations));
+        VISUAL_REPRESENTATION.loadTextureBuffer(MathOps.getTextureBuffer(rotation,frameNum,framesPerRotation,numRotationOrientations));
         this.offsetDegrees = MathOps.getOffsetDegrees(rotation,numRotationOrientations);
     }
 
     @Override
     public void attack(float angle) {
         // for now we are having it only 1 attack at a time
-        this.attacks[0] = new Enemy1Attack(this.getDeltaX(),this.getDeltaY(),5, angle,0.7f,0.1f,250,this);
+        if (this.attacks.size() == 0) {
+            this.attacks.add(new Enemy1Attack(this.getDeltaX(), this.getDeltaY(), 5, angle, 0.7f, 0.1f, 250, this));
+        }
     }
 
     @Override

@@ -254,7 +254,7 @@ public abstract class Player extends BaseCharacter {
      * @param enemies all possible enemies on the game map
      * @param spawners  all possible spawners on the game map used to see if the atttacks
      */
-    public void update(long dt, float rotation, Enemy[] enemies, Spawner[] spawners) {
+    public void update(long dt, float rotation, List<Enemy> enemies, List<Spawner> spawners) {
         super.update(dt, rotation);
 
         this.rotation = rotation;
