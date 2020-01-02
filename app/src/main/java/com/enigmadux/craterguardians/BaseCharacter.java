@@ -51,7 +51,7 @@ public abstract class BaseCharacter extends EnigmaduxComponent {
 
 
     //all alive attacks
-    protected Attack[] attacks = new Attack[BaseCharacter.MAX_ATTACKS];
+    protected List<Attack> attacks = new ArrayList<Attack>();
 
     //health of player
     protected int health;
@@ -209,7 +209,7 @@ public abstract class BaseCharacter extends EnigmaduxComponent {
      *
      */
     public void spawn(){
-        CraterBackend.clearArray(this.attacks);
+        this.attacks.clear();
         this.health = getMaxHealth();
         this.isAlive = true;
     }

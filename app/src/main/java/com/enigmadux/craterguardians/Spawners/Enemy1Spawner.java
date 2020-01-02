@@ -68,6 +68,8 @@ public class Enemy1Spawner extends Spawner {
      */
     public Enemy1Spawner(float x,float y,float w,float h,short[] numSpawns,long[] times,long totalWaveTime,int health){
         super(x,y,w,h,0,health);
+
+
     }
 
 

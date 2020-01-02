@@ -8,9 +8,8 @@ import com.enigmadux.craterguardians.Attacks.Enemy3Attack;
 import com.enigmadux.craterguardians.BaseCharacter;
 import com.enigmadux.craterguardians.EnemyMap;
 import com.enigmadux.craterguardians.MathOps;
-import com.enigmadux.craterguardians.Plateau;
 import com.enigmadux.craterguardians.R;
-import com.enigmadux.craterguardians.Supply;
+import com.enigmadux.craterguardians.GameObjects.Supply;
 
 import java.util.List;
 

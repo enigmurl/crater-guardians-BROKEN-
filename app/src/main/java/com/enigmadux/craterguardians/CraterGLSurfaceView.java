@@ -1,6 +1,5 @@
 package com.enigmadux.craterguardians;
 
-import android.content.Context;
 import android.view.MotionEvent;
 
 import enigmadux2d.core.EnigmaduxGLSurfaceView;
@@ -18,14 +17,18 @@ public class CraterGLSurfaceView extends EnigmaduxGLSurfaceView {
     //The renderer that does the actual drawing
     private CraterRenderer mRenderer;
 
+
     /** Default Constructor
      *
-     * @param context Context used to reference resources, and other attributes of it. Any non null Context should work.
+     * @param context Context used to reference resources, and other attributes of it. Any crater activity should work
      */
-    public CraterGLSurfaceView(Context context){
+    public CraterGLSurfaceView(CraterActivity context) {
         super(context);
 
+
+
     }
+
 
     /** Not a usual setter method as it takes no parameters, it's meant to be called once by the parent class
      *

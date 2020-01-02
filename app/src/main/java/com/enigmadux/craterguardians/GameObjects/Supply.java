@@ -1,9 +1,13 @@
-package com.enigmadux.craterguardians;
+package com.enigmadux.craterguardians.GameObjects;
 
 import android.content.Context;
 import android.opengl.Matrix;
-import android.util.Log;
 import android.view.MotionEvent;
+
+import com.enigmadux.craterguardians.GUI.ProgressBar;
+import com.enigmadux.craterguardians.MathOps;
+import com.enigmadux.craterguardians.R;
+import com.enigmadux.craterguardians.SoundLib;
 
 import javax.microedition.khronos.opengles.GL10;
 
@@ -66,7 +70,7 @@ public class Supply extends EnigmaduxComponent {
      * @param context context used to grab the actual image from res
      */
     public static void loadGLTexture(GL10 gl, Context context) {
-        VISUAL_REPRESENTATION.loadGLTexture(gl,context,R.drawable.supply_top_view);
+        VISUAL_REPRESENTATION.loadGLTexture(gl,context, R.drawable.supply_top_view);
     }
 
     /** Draws the enemy, and all sub components

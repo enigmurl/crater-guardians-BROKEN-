@@ -26,8 +26,18 @@ todo PRIORITY:
             5) Balance stuff (Also at some point fix the orientation of valley + do that in level maker as well)
             6) Fix pausing + stopping - tbd
 
+    OPTIMIZATIONS:
+        1) don't focus too much on the matrix multiplication i don't think that's the bad part
+        2) Don't load textures during the game, mainly for progress bars, but perhaps just rework text in general use a Typeface instead
+        3) Use as little synchronization as possible
+        4) Where stuff are meant for ellipses, use circles
+        5) Avoid loading texture buffers during the game as well, instead use texture matrices
+        6) May not work, but perhaps reduce the overhead by making a  way in textured rect to draw many at different positions
 
-    add a loading screen instead of white background
+    THERES still more work on the AI, for example the actual level data needs to specify the width of the nodes, and weightage of connections,
+    additionally, it seems that concurrent modification exception is happening sometimes
+
+
 
     Convert some of the "Home buttons" to the Image Button
     Upgradable characters

@@ -5,13 +5,8 @@ import android.opengl.Matrix;
 import android.support.annotation.NonNull;
 
 import com.enigmadux.craterguardians.Attacks.Enemy1Attack;
-import com.enigmadux.craterguardians.BaseCharacter;
 import com.enigmadux.craterguardians.MathOps;
-import com.enigmadux.craterguardians.Plateau;
 import com.enigmadux.craterguardians.R;
-import com.enigmadux.craterguardians.Supply;
-
-import java.util.List;
 
 import javax.microedition.khronos.opengles.GL10;
 

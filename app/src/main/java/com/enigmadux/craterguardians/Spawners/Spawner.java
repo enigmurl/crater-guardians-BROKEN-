@@ -4,8 +4,10 @@ package com.enigmadux.craterguardians.Spawners;
 import android.util.Log;
 
 import com.enigmadux.craterguardians.Enemies.Enemy;
-import com.enigmadux.craterguardians.ProgressBar;
+import com.enigmadux.craterguardians.GUI.ProgressBar;
 import com.enigmadux.craterguardians.MathOps;
+
+import java.util.List;
 
 import javax.microedition.khronos.opengles.GL10;
 
@@ -29,9 +31,20 @@ public abstract class Spawner {
     //amount of health before dieing
     protected int health;
 
+    //at each spawn time, the amount of enemies that are spawned
+    protected short[] numSpawns;
+    //specifies each spawn time in millies
+    protected long[] spawnTime;
+    //the amount of milliseconds before a wave resets
+    private long waveTime;
+
+    //inside the current "spawning wave", how many waves have been spawned
+    private int waveIndex;
+
+
 
     //amount of millis in between spawns
-    protected final long millisPerSpawn;
+    protected long millisPerSpawn;
     //the amount of milli seconds since the last spawn
     protected long millisSinceLastSpawn;
 
@@ -52,6 +65,31 @@ public abstract class Spawner {
         this.health = health;
 
         this.healthDisplay = new ProgressBar(health,w,0.05f, true, true);
+    }
+
+    /** Constructor used for waves, this is in future will be the only one TODO actually implement this
+     *
+     * @param x the open gl coordinate of the spawner, left most edge x coordinate e.g. (1.0f, -0.5f, 0.0f ,0.1f)
+     * @param y the open gl coordinate of the spawner, bottom most y coordinate e.g. (1.0f,-0.5f, 0.0f, 0.1f)
+     * @param w the width of the spawner (distance from left edge to right edge) in open gl coordinate terms e.g (1.0f, 1.5f) Should be positive
+     * @param h the height of the spawner (distance from top edge to bottom edge) in open gl coordinate terms e.g (1.0f, 1.5f) should be positive
+     * @param numSpawns for each spawn location specified by times: how many enemies are spawning
+     * @param times the milliseconds at which a spawn will happen
+     * @param totalWaveTime the total milli seconds of a wave, this means that after the sai amount of milliseconds, the cycle will repeat
+     * @param health the health of the spawner
+     */
+    public Spawner(float x,float y,float w,float h,short[] numSpawns,long[] times,long totalWaveTime,int health){
+        this.x = x;
+        this.y = y;
+        this.w = w;
+        this.h = h;
+
+        this.numSpawns = numSpawns;
+        this.spawnTime = times;
+        this.waveTime = totalWaveTime;
+
+        this.health = health;
+
     }
 
     /** Draws the VISUAL_REPRESENTATION customized for the subclass
@@ -79,6 +117,35 @@ public abstract class Spawner {
         return null;
     }
 
+
+    /** Instead of spawning a single enemy, sometimes, a wave spawner is more suitable
+     *
+     * @param dt milliseconds since last call
+     * @return If enemies are to be spawned, it returns the list of enemies otherwise null
+     */
+    public List<Enemy> attemptWaveSpawn(long dt){
+        this.millisSinceLastSpawn += dt;
+
+        if (this.waveIndex >= this.spawnTime.length){
+            this.waveIndex = 0;
+        }
+
+        if (this.millisSinceLastSpawn > this.spawnTime[waveIndex]){
+            return this.spawnEnemies(this.numSpawns[waveIndex++]);
+
+        }
+
+        return null;
+    }
+
+    /** Returns null, over here as it's an optional override,
+     *
+     * @param numEnemies the amount of enemies in the wave
+     * @return a List of enemies that is (numEnemies) long
+     */
+    public List<Enemy> spawnEnemies(int numEnemies){
+        return null;
+    }
 
     /** Creates 1 enemy, is abstract as child classes need to do for the individual enemy spawner
      *

@@ -9,7 +9,7 @@ import com.enigmadux.craterguardians.Attacks.KaiserE1Attack;
 import com.enigmadux.craterguardians.Attacks.KaiserE2Attack;
 import com.enigmadux.craterguardians.CraterBackend;
 import com.enigmadux.craterguardians.MathOps;
-import com.enigmadux.craterguardians.ProgressBar;
+import com.enigmadux.craterguardians.GUI.ProgressBar;
 import com.enigmadux.craterguardians.R;
 
 import javax.microedition.khronos.opengles.GL10;
@@ -50,7 +50,7 @@ public class Kaiser extends Player {
 
 
     //the level of the this player
-    private static int PLAYER_LEVEL = 0;
+    public static int PLAYER_LEVEL = 0;
 
 
     //visual is shared by all objects as they all have the same sprite, this is the basic state (gen 0)
@@ -153,9 +153,9 @@ public class Kaiser extends Player {
         if (this.numAttacks > 0) {
             this.numAttacks --;
             if (this.evolveGen == 0)
-                CraterBackend.addObject(new KaiserE1Attack(this.getDeltaX(), this.getDeltaY(), (int) (5 * (1 + (float) this.attackChargeUp.getCurrentHitPoints()/(NUM_ATTACKS * 1000))), angle, 0.5f, 250,this),this.attacks);
+                this.attacks.add(new KaiserE1Attack(this.getDeltaX(), this.getDeltaY(), (int) (5 * (1 + (float) this.attackChargeUp.getCurrentHitPoints()/(NUM_ATTACKS * 1000))), angle, 0.5f, 250,this));
             else if (this.evolveGen == 1)
-                CraterBackend.addObject(new KaiserE2Attack(this.getDeltaX(), this.getDeltaY(), (int) (7 * (1 + (float) this.attackChargeUp.getCurrentHitPoints()/(NUM_ATTACKS*1000))), angle, 1f, 250,this),this.attacks);
+                this.attacks.add(new KaiserE2Attack(this.getDeltaX(), this.getDeltaY(), (int) (7 * (1 + (float) this.attackChargeUp.getCurrentHitPoints()/(NUM_ATTACKS*1000))), angle, 1f, 250,this));
 
         }
         //pass for now

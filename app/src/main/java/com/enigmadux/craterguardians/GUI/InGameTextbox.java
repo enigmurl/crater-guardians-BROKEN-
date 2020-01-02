@@ -1,4 +1,4 @@
-package com.enigmadux.craterguardians;
+package com.enigmadux.craterguardians.GUI;
 
 
 import android.content.Context;
@@ -8,6 +8,8 @@ import android.graphics.Paint;
 import android.support.annotation.NonNull;
 import android.support.v4.content.res.ResourcesCompat;
 import android.view.MotionEvent;
+
+import com.enigmadux.craterguardians.R;
 
 import javax.microedition.khronos.opengles.GL10;
 
@@ -53,6 +55,9 @@ public class InGameTextbox extends EnigmaduxComponent {
     private boolean isInGame;
 
 
+    //whether or not the curretn text has been renderer
+    private boolean renderedRecentText = false;
+
 
 
 
@@ -78,7 +83,7 @@ public class InGameTextbox extends EnigmaduxComponent {
      */
     public static void loadFont(Context context) {
 
-        InGameTextbox.bitmapPainter.setTypeface(ResourcesCompat.getFont(context,R.font.baloobhaina));
+        InGameTextbox.bitmapPainter.setTypeface(ResourcesCompat.getFont(context, R.font.baloobhaina));
     }
 
     /** Binds the text to the rect, should only needed to be called if it's a text based InGameTextbox and not a image based
@@ -102,6 +107,7 @@ public class InGameTextbox extends EnigmaduxComponent {
         texturedRect.setTranslate(this.x,this.y);
         texturedRect.loadGLTexture(gl,loadBitmap());
         texturedRect.show();
+        this.renderedRecentText = true;
 
         /*this.widMod = this.w + 2* InGameTextbox.MIN_PADDING;
         this.htMod = this.h + 2* InGameTextbox.MIN_PADDING;
@@ -117,6 +123,9 @@ public class InGameTextbox extends EnigmaduxComponent {
      */
     @Override
     public void draw(GL10 gl, float[] parentMatrix) {
+        if (! this.renderedRecentText){
+            this.loadGLTexture(gl);
+        }
         if (this.visible) {
             this.texturedRect.draw(gl, parentMatrix);
         }
@@ -161,6 +170,7 @@ public class InGameTextbox extends EnigmaduxComponent {
      */
     public void setText(String text) {
         this.text = text.split("\n");
+        this.renderedRecentText = false;
     }
 
     /** Returns the current text, may not be the same text being displayed because loadGLTexture wasn't called

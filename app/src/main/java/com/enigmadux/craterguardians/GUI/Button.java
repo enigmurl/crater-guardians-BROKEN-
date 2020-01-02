@@ -1,4 +1,4 @@
-package com.enigmadux.craterguardians;
+package com.enigmadux.craterguardians.GUI;
 
 import android.content.Context;
 import android.graphics.Bitmap;
@@ -9,6 +9,10 @@ import android.support.annotation.NonNull;
 import android.support.v4.content.res.ResourcesCompat;
 import android.util.Log;
 import android.view.MotionEvent;
+
+import com.enigmadux.craterguardians.LayoutConsts;
+import com.enigmadux.craterguardians.R;
+import com.enigmadux.craterguardians.SoundLib;
 
 import javax.microedition.khronos.opengles.GL10;
 
@@ -73,7 +77,11 @@ public abstract class Button extends EnigmaduxComponent {
 
     //an array representing the current shader
 
+    private float fontHeight;
 
+
+    //whether or not the curretn text has been renderer
+    private boolean renderedRecentText = false;
 
     /** Default constructor which makes text buttons
      * @param text The actual text to draw. Can be digits, words, letters, etc (but as a String object of course)
@@ -95,6 +103,8 @@ public abstract class Button extends EnigmaduxComponent {
 
         this.isLevelButton = isLevelButton;
 
+        this.fontHeight = fontHeight;
+
     }
 
     /** Constructor used for image buttons
@@ -114,7 +124,7 @@ public abstract class Button extends EnigmaduxComponent {
      * @param context any android context use to get the resources (this is subject to change)
      */
     public static void loadButtonGLTexture(GL10 gl, Context context) {
-        Button.BUTTON_BACKGROUND.loadGLTexture(gl,context,R.drawable.button_background);
+        Button.BUTTON_BACKGROUND.loadGLTexture(gl,context, R.drawable.button_background);
         Button.LEVEL_BUTTON_BACKGROUND.loadGLTexture(gl,context,R.drawable.level_button_background);
 
         Button.bitmapPainter.setTypeface(ResourcesCompat.getFont(context,R.font.baloobhaina));
@@ -129,21 +139,32 @@ public abstract class Button extends EnigmaduxComponent {
             Log.d("BUTTON","called loadGLTEXTURE on text button");
             return;
         }
-        bitmapPainter.setTextSize((this.h*height/2));
+        this.renderedRecentText = true;
+        bitmapPainter.setTextSize((this.fontHeight*height/2));
 
         this.w = 2* bitmapPainter.measureText(this.text)/(width);
 
-        this.texturedRect = new TexturedRect(-this.w / 2, -(3 * this.h / (2)), this.w, this.h * 2);//the extra layer
+        float[] shader = null;
+        if (this.texturedRect != null){
+            shader = this.texturedRect.getShader();
+        }
+        this.texturedRect = new TexturedRect(-this.w / 2, -(3 * this.fontHeight / (2)), this.w, this.fontHeight * 2);//the extra layer
+
+        if (this.text.startsWith("UPGRADE:")){
+            Log.d("UPGRADE TEXT:",this.x  + " y: " + this.y);
+        }
 
         this.texturedRect.setTranslate(this.x,this.y);
+
+        if (shader != null) this.texturedRect.setShader(shader[0],shader[1],shader[2],shader[3]);
 
         texturedRect.loadGLTexture(gl,loadBitmap());
         texturedRect.show();
 
-        float textMinPadding = Button.MIN_PADDING * this.h;
+        float textMinPadding = Button.MIN_PADDING * this.fontHeight;
 
         this.w = Math.max(this.w + 2*textMinPadding,this.boxWidth);
-        this.h = Math.max(this.h + 2*textMinPadding,this.boxHeight);
+        this.h = Math.max(this.fontHeight + 2*textMinPadding,this.boxHeight);
         this.x = this.x - this.w/2;
         this.y = this.y - this.h/2;
     }
@@ -169,6 +190,9 @@ public abstract class Button extends EnigmaduxComponent {
     @Override
     public void draw(GL10 gl, float[] parentMatrix) {
         //todo OPTIMIZATION OF THE MATRICES
+        if (! this.isImageButton && ! this.renderedRecentText){
+            this.loadGLTexture(gl);
+        }
         if (this.visible) {
             if (this.drawBackground) {
                 Matrix.setIdentityM(scalarTranslationMatrix, 0);
@@ -237,12 +261,12 @@ public abstract class Button extends EnigmaduxComponent {
      * @return The bitmap that has the same visual content as the text, only as a Bitmap object
      */
     private Bitmap loadBitmap() {
-        Bitmap b = Bitmap.createBitmap((int) (Button.SMOOTHNESS * this.w * width/2),(int) (Button.SMOOTHNESS * this.h * height), Bitmap.Config.ARGB_8888);//no "/2" because we want to make an extra layer for "y","g", "p","q", etc
+        Bitmap b = Bitmap.createBitmap((int) (Button.SMOOTHNESS * this.w * width/2),(int) (Button.SMOOTHNESS * this.fontHeight * height), Bitmap.Config.ARGB_8888);//no "/2" because we want to make an extra layer for "y","g", "p","q", etc
         bitmapPainter.setColor(this.color);
-        bitmapPainter.setTextSize(Button.SMOOTHNESS * this.h*height/2);
+        bitmapPainter.setTextSize(Button.SMOOTHNESS * this.fontHeight*height/2);
 
         Canvas c = new Canvas(b);
-        c.drawText(this.text,0,(Button.SMOOTHNESS * this.h*height/2),Button.bitmapPainter);
+        c.drawText(this.text,0,(Button.SMOOTHNESS * this.fontHeight*height/2),Button.bitmapPainter);
 
 
         return b;
@@ -251,12 +275,15 @@ public abstract class Button extends EnigmaduxComponent {
     /** Method that creates the visual text, Though it is slightly expensive, it's only needed to be called once. (gotten from https://stackoverflow.com/questions/2801116/converting-a-view-to-bitmap-without-displaying-it-in-android)
 
 
-    /** Sets whether or no to draw the background
+    /** Sets the drawing text
      *
-     * @param drawBackground whether or not to draw the background
+     * @param text the new text to draw
      */
-    public void setDrawBackground(boolean drawBackground) {
-        this.drawBackground = drawBackground;
+    public void setText(String text) {
+        this.text = text;
+        this.renderedRecentText = false;
+        this.x += this.w/2;
+        this.y += this.h/2;
     }
 
     /** When the button is released with the finger on it

@@ -4,7 +4,6 @@ package com.enigmadux.craterguardians.Attacks;
 import android.content.Context;
 import android.opengl.Matrix;
 import android.support.annotation.NonNull;
-import android.util.Log;
 
 import com.enigmadux.craterguardians.BaseCharacter;
 import com.enigmadux.craterguardians.Characters.Player;
@@ -12,7 +11,7 @@ import com.enigmadux.craterguardians.Enemies.Enemy;
 import com.enigmadux.craterguardians.MathOps;
 import com.enigmadux.craterguardians.R;
 import com.enigmadux.craterguardians.Spawners.Spawner;
-import com.enigmadux.craterguardians.Supply;
+import com.enigmadux.craterguardians.GameObjects.Supply;
 
 import java.util.ArrayList;
 import java.util.List;

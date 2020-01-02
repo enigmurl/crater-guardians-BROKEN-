@@ -5,11 +5,10 @@ import android.opengl.Matrix;
 import android.util.Log;
 
 import com.enigmadux.craterguardians.AngleAimers.AngleAimer;
-import com.enigmadux.craterguardians.AngleAimers.TriangleAimer;
 import com.enigmadux.craterguardians.Attacks.Attack;
 import com.enigmadux.craterguardians.BaseCharacter;
 import com.enigmadux.craterguardians.Enemies.Enemy;
-import com.enigmadux.craterguardians.ProgressBar;
+import com.enigmadux.craterguardians.GUI.ProgressBar;
 import com.enigmadux.craterguardians.R;
 import com.enigmadux.craterguardians.SoundLib;
 import com.enigmadux.craterguardians.Spawners.Spawner;
@@ -263,19 +262,21 @@ public abstract class Player extends BaseCharacter {
 
 
         //todo this is throwing exceptions
-        for (int i = 0;i<this.attacks.length;i++){
-            Attack attack = this.attacks[i];
-            if (attack == null) continue;
+        Iterator<Attack> attackIterator = this.attacks.iterator();
+
+        while (attackIterator.hasNext()){
+            Attack attack = attackIterator.next();
+
             if (attack.isFinished()){
-                this.attacks[i] = null;
+                attackIterator.remove();
             }
             attack.update(dt);
             for (Enemy enemy: enemies){
-                if (enemy != null) attack.attemptAttack(enemy);
+                attack.attemptAttack(enemy);
             }
 
             for (Spawner spawner: spawners){
-                if (spawner != null) attack.attemptAttack(spawner);
+                attack.attemptAttack(spawner);
             }
         }
 

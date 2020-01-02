@@ -17,23 +17,33 @@ public class CraterBackendThread extends Thread {
     //whether the thread is temporarily paused. It's still in the loop just not making calls to backend
     private boolean paused = false;
 
+
+
     //the backend object
     private CraterBackend backend;
     //the milliseconds of the last frame
     private long lastMillis;
 
 
-
-
+    /** Default constructor
+     *
+     * @param backend backend object, it's ok if it's null so long as before it starts updating it's set
+     */
     public CraterBackendThread(CraterBackend backend){
         super();
         this.backend = backend;
 
         this.lastMillis = System.currentTimeMillis();
 
-
     }
 
+    /** Sets the backend incase the argument was null in the construcotr
+     *
+     * @param backend backend object
+     */
+    public void setBackend(CraterBackend backend) {
+        this.backend = backend;
+    }
 
     /** Called whenever screen is changed, constantly calls update
      *

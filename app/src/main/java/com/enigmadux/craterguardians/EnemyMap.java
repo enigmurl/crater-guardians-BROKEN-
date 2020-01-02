@@ -3,10 +3,14 @@ package com.enigmadux.craterguardians;
 import android.util.Log;
 
 import com.enigmadux.craterguardians.Characters.Player;
+import com.enigmadux.craterguardians.GameObjects.Plateau;
+import com.enigmadux.craterguardians.GameObjects.ToxicLake;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantLock;
 
 /** This class provides information to an enemy about the current level so they can find out where to target
  *
@@ -24,16 +28,17 @@ public class EnemyMap {
     //the granularity of the third map
     private static final float GRANULARITY_3 = 1f;
 
-
+    //used to prevent multiple threads accessing enemy map
+    public static final Lock LOCK = new ReentrantLock();
 
     //each element of this array is itself a node, it tells the x and y and neighbours, first node is player, next N are supply, rest are intermediate
     private Node[] nodeMap;
 
 
     //Plateaus used for ray casting
-    private Plateau[] plateaus;
+    private List<Plateau> plateaus;
     //toxic lakes used for ray casting
-    private ToxicLake[] toxicLakes;
+    private List<ToxicLake> toxicLakes;
 
 
     private long startTime;
@@ -47,7 +52,7 @@ public class EnemyMap {
      * @param toxicLakes all toxic lakes on the current level
      * @param nodes the current node maps
      */
-    public EnemyMap (Plateau[] plateaus, ToxicLake[] toxicLakes, Node[] nodes){
+    public EnemyMap (List<Plateau> plateaus, List<ToxicLake> toxicLakes, Node[] nodes){
         this.plateaus = plateaus;
         this.toxicLakes = toxicLakes;
         this.nodeMap = nodes;
@@ -301,12 +306,15 @@ public class EnemyMap {
         Node playerNode = new Node(player.getDeltaX(),player.getDeltaY());
 
         for (int i = 1;i<this.nodeMap.length;i++){
-            float weightage = (float) this.isValid(playerNode,nodeMap[i],GRANULARITY_1);
+            //0 for now todo
+            float weightage = (float) this.isValid(playerNode,nodeMap[i],0);
             if (weightage != -1){
                 nodeMap[i].addNeighbour(playerNode,weightage);
                 playerNode.addNeighbour(nodeMap[i],weightage);
             }
         }
+
+
         this.nodeMap[0] = playerNode;
 
 
@@ -392,7 +400,7 @@ public class EnemyMap {
                 float neighbourGCost = currentNode.gCost + currentNode.weights.get(i);
 
                 boolean notOpen = ! open.contains(neighbour);
-                if (neighbourGCost < neighbour.gCost ||notOpen){
+                if (neighbourGCost < neighbour.gCost || notOpen){
                     neighbour.gCost = neighbourGCost;
                     neighbour.hCost = (float) Math.hypot(neighbour.x-targetX,neighbour.y-targetY);
                     neighbour.parentNode = currentNode;
@@ -409,9 +417,10 @@ public class EnemyMap {
         //this makes it as if its pointing to the player as no suitable path was found
         List<Node> path = new ArrayList<Node>();
         path.add(null);
-
+        path.add(null);
         runTime += System.currentTimeMillis() - this.startTime;
 
+        Log.d("ENEMY MAP:" ,"Player Position:" + this.nodeMap[0] + " Enemy Pos: "  + start  + " player connections: " + this.nodeMap[0].connections +  " enemy connections " +  start.connections + " supply index: " + supplyIndex);
 
         return path;
     }
@@ -428,6 +437,7 @@ public class EnemyMap {
         while (target != start){
             path.add(0,target);
             target = target.parentNode;
+
         }
         return  path;
     }

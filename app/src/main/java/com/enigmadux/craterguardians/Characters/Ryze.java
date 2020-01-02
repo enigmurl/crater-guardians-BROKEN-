@@ -5,11 +5,10 @@ import android.opengl.Matrix;
 
 import com.enigmadux.craterguardians.AngleAimers.AngleAimer;
 import com.enigmadux.craterguardians.AngleAimers.TriRectAimer;
-import com.enigmadux.craterguardians.AngleAimers.TriangleAimer;
 import com.enigmadux.craterguardians.Attacks.RyzeAttack;
 import com.enigmadux.craterguardians.CraterBackend;
 import com.enigmadux.craterguardians.MathOps;
-import com.enigmadux.craterguardians.ProgressBar;
+import com.enigmadux.craterguardians.GUI.ProgressBar;
 import com.enigmadux.craterguardians.R;
 
 import javax.microedition.khronos.opengles.GL10;
@@ -47,7 +46,7 @@ public class Ryze extends Player {
     private static final float GUN_WIDTH = 0.3f;
 
     //the level of the this player
-    private static int PLAYER_LEVEL = 0;
+    public static int PLAYER_LEVEL = 0;
 
     //visual is shared by all objects as they all have the same sprite, this is the basic state (gen 0)
     private static TexturedRect VISUAL_REPRESENTATION_E1 = new TexturedRect(-Player.CHARACTER_RADIUS,-Player.CHARACTER_RADIUS,Player.CHARACTER_RADIUS*2,Player.CHARACTER_RADIUS*2);
@@ -149,9 +148,10 @@ public class Ryze extends Player {
         if (this.numAttacks > 0) {
             this.numAttacks --;
             if (this.evolveGen == 0)
-                CraterBackend.addObject(new RyzeAttack(this.getDeltaX(), this.getDeltaY(), (int) (5 * (1 + (float) this.attackChargeUp.getCurrentHitPoints()/(NUM_ATTACKS * 1000))), angle, 0.4f, 0.15f,0.2f,0.1f,250,this),this.attacks);
+
+                this.attacks.add(new RyzeAttack(this.getDeltaX(), this.getDeltaY(), (int) (5 * (1 + (float) this.attackChargeUp.getCurrentHitPoints()/(NUM_ATTACKS * 1000))), angle, 0.4f, 0.15f,0.2f,0.1f,250,this));
             else if (this.evolveGen == 1)
-                CraterBackend.addObject(new RyzeAttack(this.getDeltaX(), this.getDeltaY(), (int) (7 * (1 + (float) this.attackChargeUp.getCurrentHitPoints()/(NUM_ATTACKS * 1000))), angle, 0.6f, 0.15f,0.4f,0.1f,250,this),this.attacks);
+                this.attacks.add(new RyzeAttack(this.getDeltaX(), this.getDeltaY(), (int) (7 * (1 + (float) this.attackChargeUp.getCurrentHitPoints()/(NUM_ATTACKS * 1000))), angle, 0.6f, 0.15f,0.4f,0.1f,250,this));
 
         }
         //pass for now

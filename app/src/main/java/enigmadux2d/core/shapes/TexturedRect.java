@@ -13,7 +13,6 @@ import com.enigmadux.craterguardians.MathOps;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.nio.FloatBuffer;
-import java.util.Arrays;
 
 import javax.microedition.khronos.opengles.GL10;
 
@@ -179,8 +178,7 @@ public class TexturedRect extends EnigmaduxComponent {
     public void loadGLTexture(@NonNull GL10 gl,Bitmap bitmap,int index){
         int afterW = MathOps.nextPowerTwo(bitmap.getWidth());
         int afterH = MathOps.nextPowerTwo(bitmap.getHeight());
-        if (afterH != bitmap.getWidth() || afterW != bitmap.getHeight())
-            bitmap = Bitmap.createScaledBitmap(bitmap,afterW,afterH,false);
+        bitmap = Bitmap.createScaledBitmap(bitmap,afterW,afterH,false);
 
         loadTextureBuffer(new float[]{
                 0,1,
@@ -258,7 +256,7 @@ public class TexturedRect extends EnigmaduxComponent {
         gl.glEnableClientState(GL10.GL_TEXTURE_COORD_ARRAY);
 
         // Set the face rotation
-        //gl.glFrontFace(GL10.GL_CW);
+        gl.glFrontFace(GL10.GL_CW);
 
         // Point to our vertex buffer
         gl.glVertexPointer(3, GL10.GL_FLOAT, 0, vertexBuffer);

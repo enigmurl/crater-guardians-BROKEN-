@@ -1,4 +1,4 @@
-package com.enigmadux.craterguardians;
+package com.enigmadux.craterguardians.GameObjects;
 
 import android.content.Context;
 import android.opengl.Matrix;
@@ -8,6 +8,8 @@ import android.view.MotionEvent;
 import com.enigmadux.craterguardians.Animations.ToxicBubble;
 import com.enigmadux.craterguardians.Characters.Player;
 import com.enigmadux.craterguardians.Enemies.Enemy;
+import com.enigmadux.craterguardians.R;
+import com.enigmadux.craterguardians.SoundLib;
 
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -34,11 +36,7 @@ public class ToxicLake extends EnigmaduxComponent {
      */
     private static final long MILLIS_BETWEEN_DAMAGE = 1000L;
 
-    /** Maximum amount of toxic bubbles that can exist at any point
-     *
-     */
 
-    private static final int MAX_TOXIC_BUBBLES = 8;
     /** On any given frame the chance that a bubble spawns
      *
      */
@@ -82,7 +80,7 @@ public class ToxicLake extends EnigmaduxComponent {
     private static final TexturedRect VISUAL_REPRESENTATION = new TexturedRect(-0.5f,-0.5f,1,1);
 
     //the bubbles on the toxic lake, should be an array list later on
-    private ToxicBubble[] toxicBubbles = new ToxicBubble[ToxicLake.MAX_TOXIC_BUBBLES];
+    private List<ToxicBubble> toxicBubbles = new ArrayList<>();
 
     /** Default Constructor
      *  @param x the openGL x coordinate
@@ -130,7 +128,7 @@ public class ToxicLake extends EnigmaduxComponent {
      * @param context context used to load resources, and non null context should work
      */
     public static void loadGLTexture(@NonNull GL10 gl, Context context) {
-        VISUAL_REPRESENTATION.loadGLTexture(gl,context,R.drawable.toxic_lake_texture);
+        VISUAL_REPRESENTATION.loadGLTexture(gl,context, R.drawable.toxic_lake_texture);
     }
 
     /** Tries to attack the enemies and the bots
@@ -139,7 +137,7 @@ public class ToxicLake extends EnigmaduxComponent {
      * @param player the player it attempts to damage
      * @param enemyList all enemies it attempts to damage
      */
-    public void update(long dt, Player player, Enemy[] enemyList){
+    public void update(long dt, Player player,List<Enemy> enemyList){
         //randomly add a toxic bubles
         if (Math.random() < ToxicLake.TOXIC_BUBBLE_CHANCE){
             double r = Math.min(this.radius, Math.random() * (ToxicLake.TOXIC_BUBBLE_MAX_RADIUS - TOXIC_BUBBLE_MIN_RADIUS) + TOXIC_BUBBLE_MIN_RADIUS);
@@ -151,12 +149,14 @@ public class ToxicLake extends EnigmaduxComponent {
 
             long animLength = (long) (Math.random() * (TOXIC_BUBBLE_MAX_ANIMLEN - TOXIC_BUBBLE_MIN_ANIMLEN) + TOXIC_BUBBLE_MIN_ANIMLEN);
 
-            CraterBackend.addObject(new ToxicBubble((float) x,(float) y,(float) r*2,(float) r*2,animLength),this.toxicBubbles);
+            this.toxicBubbles.add(new ToxicBubble((float) x,(float) y,(float) r*2,(float) r*2,animLength));
 
         }
 
         //update the mini bubbles
-        for (int i = 0;i<this.toxicBubbles.length;i++){
+        Iterator<ToxicBubble> toxicBubbleIterator = this.toxicBubbles.iterator();
+        while (toxicBubbleIterator.hasNext()){
+            ToxicBubble toxicBubble = toxicBubbleIterator.next();
             if (this.toxicBubbles[i] != null && this.toxicBubbles[i].isFinished()){
                 this.toxicBubbles[i] = null;
             }
