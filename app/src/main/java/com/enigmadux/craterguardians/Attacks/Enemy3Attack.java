@@ -28,7 +28,10 @@ import enigmadux2d.core.shapes.TexturedRect;
 public class Enemy3Attack extends Attack {
 
 
-
+    /** The amount of frames in this animation
+     *
+     */
+    private static int NUM_FRAMES = 5;
     //matrix used to scale the default to the desired
 
     private final float[] finalMatrix = new float[16];
@@ -63,7 +66,7 @@ public class Enemy3Attack extends Attack {
      * @param initializer the Enemy or player who summoned the attack
      */
     public Enemy3Attack(float x, float y, int damage, float startAngle, float radius, long millis, BaseCharacter initializer){
-        super(x,y,0,0,5,millis,initializer);
+        super(x,y,0,0,NUM_FRAMES,millis,initializer);
 
 
         this.damage = damage;
@@ -78,16 +81,10 @@ public class Enemy3Attack extends Attack {
 
     @Override
     public void draw(GL10 gl, float[] parentMatrix) {
-        float x1 = ((int) (this.finishedMillis/(this.millis/this.numFrames)) * 1f/this.numFrames) %1 ;
-        float x2 = (((int) (this.finishedMillis/(this.millis/this.numFrames)) * 1f/this.numFrames) %1 + 1f/numFrames);
 
-        VISUAL_REPRESENTATION.loadTextureBuffer(new float[] {
-                x1,1,
-                x2,1,
-                x1,0,
-                x2,0,
+        float[] translation = MathOps.getTextureBufferTranslation(0,(int) (this.numFrames * this.finishedMillis/this.millis),numFrames,1);
+        VISUAL_REPRESENTATION.setTextureDelta(translation[0],translation[1]);
 
-        });
 
 
         Matrix.setIdentityM(rotatorMatrix,0);
@@ -113,6 +110,13 @@ public class Enemy3Attack extends Attack {
      */
     public static void loadGLTexture(@NonNull GL10 gl, Context context) {
         VISUAL_REPRESENTATION.loadGLTexture(gl,context,R.drawable.enemy3_attack_spritesheet);//todo needs work
+        //this rotates it so the textures are turned, perhaps in the future we turn the actual sprite sheet instead
+        VISUAL_REPRESENTATION.loadTextureBuffer(new float[] {
+                1/(float) NUM_FRAMES,1,
+                0,1,
+                1/(float) NUM_FRAMES,0,
+                0,0,
+        });
     }
 
 

@@ -2,6 +2,7 @@ package com.enigmadux.craterguardians;
 
 import android.content.Context;
 import android.util.Log;
+import android.view.MotionEvent;
 
 import com.enigmadux.craterguardians.Animations.Animation;
 import com.enigmadux.craterguardians.Characters.Player;
@@ -19,8 +20,12 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Scanner;
 
-public class GameMap {
-    /*the amount of levels in the game*/
+import javax.microedition.khronos.opengles.GL10;
+
+import enigmadux2d.core.EnigmaduxComponent;
+
+public class GameMap extends EnigmaduxComponent {
+    //the amount of levels in the game
     public static final int NUM_LEVELS = 20;
 
 
@@ -52,22 +57,144 @@ public class GameMap {
     private LevelData levelData;
     //used to open resources
     private Context context;
+    //used to calculate tutorial millis
+    private CraterBackend backend;
 
-    public GameMap(Context context) {
+    //details about camera
+    //the world x position
+    private float cameraX;
+    //the world y position
+    private float cameraY;
+
+    /** Creates a GameMap Instance
+     *
+     * @param context any non null context that can acess resources
+     * @param backend we really only need the backend for tutorial checking
+     */
+    public GameMap(Context context,CraterBackend backend) {
+        super(0,0,0,0);//x,y,w,h, are never really used
         this.context = context;
 
         this.levelData = new LevelData(context);
+        this.backend = backend;
+
+        this.show();
+    }
+
+
+    /** The current player object
+     *
+     * @param player the current player object e.g. Ryze
+     */
+    public void setPlayer(Player player){
+        this.player = player;
+    }
+
+
+    /** Sets the camera coordinates
+     *
+     * @param cameraX the cameraX location
+     * @param cameraY the cameraY location
+     */
+    public void setCameraPos(float cameraX,float cameraY){
+        this.cameraX = cameraX;
+        this.cameraY = cameraY;
+    }
+    /** Draws the gameMap
+     *
+     * @param gl any gl reference that we send draw commands too
+     * @param parentMatrix describes how to transform to world coordinates
+     */
+    public void draw(GL10 gl,float[] parentMatrix){
+
+        //basically this stops threads from accessing the same variables at the same time, as during the level select levels are loaded, which
+        //if drawn at the same time from two threads will throw a java ConcurrmentModificationExcpetion
+
+        ///see if splitting it into two loops makes it slower
+
+        if (plateaus.size() > 0) {
+            synchronized (CraterBackend.PLATEAU_LOCK) {
+                Plateau.prepareDrawing(gl,0);
+                for (Plateau plateau : this.plateaus) {
+                    plateau.draw(gl, parentMatrix);
+                }
+                Plateau.endDrawing(gl);
+            }
+        }
+        if (this.backend.getTutorialCurrentMillis() > CraterBackend.PLATEAUS_TOXIC_LAKE_INTRODUCTION) {
+            synchronized (CraterBackend.TOXICLAKE_LOCK) {
+                ToxicLake.prepareDrawing(gl,0);
+                for (ToxicLake toxicLake : this.toxicLakes) {
+                    toxicLake.draw(gl, parentMatrix);
+                }
+                ToxicLake.endDrawing(gl);
+                for (ToxicLake toxicLake : this.toxicLakes) {
+                    toxicLake.drawBubbles(gl, parentMatrix);
+                }
+            }
+        }
+
+
+        if (supplies.size() > 0 && this.backend.getTutorialCurrentMillis() > CraterBackend.SUPPLIES_INTRODUCTION) {
+            synchronized (CraterBackend.SUPPLIES_LOCK) {
+                Supply.prepareDrawing(gl,0);
+                for (Supply supply : this.supplies) {
+                    supply.draw(gl, parentMatrix);
+                }
+                Supply.endDrawing(gl);
+                for (Supply supply : this.supplies){
+                    supply.drawHealthDisplay(gl,parentMatrix);
+                }
+
+            }
+        }
+
+        if (this.backend.getTutorialCurrentMillis() > CraterBackend.ENEMIES_INTRODUCTION) {
+            synchronized (CraterBackend.SPAWNER_LOCK) {
+                for (Spawner spawner : this.spawners) {
+                    spawner.draw(gl, parentMatrix);
+                }
+            }
+            if (enemies.size() > 0) {
+                synchronized (CraterBackend.ENEMIES_LOCK) {
+
+                    for (Enemy enemy : this.enemies) {
+                        enemy.draw(gl, parentMatrix);
+                    }
+                }
+            }
+        }
+
+        synchronized (CraterBackend.ANIMATIONS_LOCK) {
+            for (Animation animation : this.animations) {
+                animation.draw(gl, parentMatrix);
+            }
+        }
+
+
+        synchronized (CraterBackend.PLAYER_LOCK) {
+            if (this.backend.getTutorialCurrentMillis() > CraterBackend.CHARACTER_INTRODUCTION) {
+                float x = this.player.getDeltaX();
+                float y = this.player.getDeltaY();
+                this.player.setTranslate(this.cameraX,this.cameraY);
+                this.player.draw(gl, parentMatrix);
+                this.player.setTranslate(x,y);
+            }
+        }
+
 
     }
+
+
 
 
     /**
      * Initializes a level
      */
     public void loadLevel(int levelNum) {
+        Log.d("GAMEMAP:","Loading level:" + levelNum);
         this.levelData.writeLevelFiles();
 
-        this.reset();
 
         int fileName;
         switch (levelNum) {
@@ -133,7 +260,6 @@ public class GameMap {
                 break;
             default:
                 fileName = R.raw.level_tutorial;
-                //this.levelNum = 0;
         }
 
         Scanner level_data = new Scanner(context.getResources().openRawResource(fileName));
@@ -141,10 +267,9 @@ public class GameMap {
         spawnLocation[0] = level_data.nextFloat();
         spawnLocation[1] = level_data.nextFloat();
         this.player.setTranslate(spawnLocation[0], spawnLocation[1]);
-
-
         craterRadius = level_data.nextFloat();
 
+        this.reset();
 
 
         synchronized (CraterBackend.SUPPLIES_LOCK) {
@@ -249,7 +374,7 @@ public class GameMap {
     /**
      * Kills all enemies; all enemies are removed from memory; reloads the game map
      */
-    private void reset() {
+    public void reset() {
         synchronized (CraterBackend.ENEMIES_LOCK) {
             this.enemies.clear();
         }
@@ -278,4 +403,86 @@ public class GameMap {
         }
     }
 
+    /** Gets the radius of the crater
+     *
+     * @return the radius of the crater
+     */
+    public float getCraterRadius() {
+        return craterRadius;
+    }
+
+    /** Gets the player
+     *
+     * @return the player in the game
+     */
+    public Player getPlayer() {
+        return player;
+    }
+
+    /** Gets a list of all alive enemies
+     *
+     * @return a list of all alive enemies
+     */
+    public List<Enemy> getEnemies() {
+        return enemies;
+    }
+
+    /** Gets a list of all alive spawners
+     *
+     * @return list of all alive spawners
+     *
+     */
+    public List<Spawner> getSpawners() {
+        return spawners;
+    }
+
+    /** Gets all active plateaus
+     *
+     * @return all active plateaus
+     */
+    public List<Plateau> getPlateaus() {
+        return plateaus;
+    }
+
+    /** Gets all active toxic lakes
+     *
+     * @return all active toxic lakes
+     */
+    public List<ToxicLake> getToxicLakes() {
+        return toxicLakes;
+    }
+
+    /** Gts all alive supplies
+     *
+     * @return all alive supplies
+     */
+    public List<Supply> getSupplies() {
+        return supplies;
+    }
+
+    /** All running animations
+     *
+     * @return all running animations
+     */
+    public List<Animation> getAnimations() {
+        return animations;
+    }
+
+    /** Gets a map that tells how enemies should travel the game map
+     *
+     * @return a map that tells how enemies should travel the game map
+     */
+    public EnemyMap getEnemyMap() {
+        return enemyMap;
+    }
+
+    /** Nothing in a game map needs to respond to touch events, so this always returns false
+     *
+     * @param e the MotionEvent describing how the user interacted with the screen
+     * @return Always returns false
+     */
+    @Override
+    public boolean onTouch(MotionEvent e) {
+        return false;
+    }
 }

@@ -108,14 +108,43 @@ public class ToxicLake extends EnigmaduxComponent {
         Matrix.multiplyMM(translationScalarMatrix,0,translationMatrix,0,scalarMatrix,0);
     }
 
-    /** Draws the toxic lake onto the screen
+    /** Prepares drawing, by loading the vertex and texture coordinates
+     *
+     * @param gl a gl reference used to send commands to open Gl
+     * @param frameNum the frame num in the animation (should always be 0)
+     */
+    public static void prepareDrawing(GL10 gl,int frameNum){
+        VISUAL_REPRESENTATION.prepareDraw(gl,frameNum);
+    }
+
+    /** Unassigns vertex and texture arrays
+     *
+     * @param gl a gl reference used to send commands to open Gl
+     */
+    public static void endDrawing(GL10 gl){
+        VISUAL_REPRESENTATION.endDraw(gl);
+    }
+
+
+    /** Draws the enemy, and all sub components
+     *
+     * @param gl used to access openGL
+     * @param parentMatrix used to translate from model to world space
+     */
+    public void draw(GL10 gl,float[] parentMatrix){
+        Matrix.multiplyMM(finalMatrix,0,parentMatrix,0,translationScalarMatrix,0);
+        VISUAL_REPRESENTATION.intermediateDraw(gl,finalMatrix);
+
+    }
+
+
+    /** Draws the toxic bubbles
      *
      * @param gl used to access openGL
      * @param parentMatrix describes how to transform from model to view
      */
-    public void draw(GL10 gl,float[] parentMatrix){
+    public void drawBubbles(GL10 gl,float[] parentMatrix){
         Matrix.multiplyMM(finalMatrix,0,parentMatrix,0,translationScalarMatrix,0);
-        VISUAL_REPRESENTATION.draw(gl,finalMatrix);
         for (ToxicBubble tb:this.toxicBubbles) {
             tb.draw(gl, parentMatrix);
         }
@@ -137,7 +166,7 @@ public class ToxicLake extends EnigmaduxComponent {
      * @param enemyList all enemies it attempts to damage
      */
     public void update(long dt, Player player,List<Enemy> enemyList){
-        //randomly add a toxic bubles
+        //randomly add a toxic bubbles
         if (Math.random() < ToxicLake.TOXIC_BUBBLE_CHANCE){
             double r = Math.min(this.radius, Math.random() * (ToxicLake.TOXIC_BUBBLE_MAX_RADIUS - TOXIC_BUBBLE_MIN_RADIUS) + TOXIC_BUBBLE_MIN_RADIUS);
             double magnitude = Math.random() * (this.w/2 - r);

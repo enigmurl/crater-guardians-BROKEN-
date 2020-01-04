@@ -69,8 +69,8 @@ public class Enemy3 extends Enemy {
 
     @Override
     public void setFrame(float rotation, int frameNum) {
-        VISUAL_REPRESENTATION.loadTextureBuffer(MathOps.getTextureBuffer(rotation,frameNum,framesPerRotation,numRotationOrientations));
-        this.offsetDegrees = MathOps.getOffsetDegrees(rotation,numRotationOrientations);
+        float[] translation = MathOps.getTextureBufferTranslation(rotation,frameNum,framesPerRotation,numRotationOrientations);
+        VISUAL_REPRESENTATION.setTextureDelta(translation[0],translation[1]);this.offsetDegrees = MathOps.getOffsetDegrees(rotation,numRotationOrientations);
     }
 
     @Override

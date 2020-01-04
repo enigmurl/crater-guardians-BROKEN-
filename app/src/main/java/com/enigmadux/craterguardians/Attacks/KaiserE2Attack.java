@@ -10,6 +10,7 @@ import com.enigmadux.craterguardians.BaseCharacter;
 import com.enigmadux.craterguardians.Characters.Kaiser;
 import com.enigmadux.craterguardians.Characters.Player;
 import com.enigmadux.craterguardians.Enemies.Enemy;
+import com.enigmadux.craterguardians.MathOps;
 import com.enigmadux.craterguardians.R;
 import com.enigmadux.craterguardians.Spawners.Spawner;
 import com.enigmadux.craterguardians.GameObjects.Supply;
@@ -42,6 +43,11 @@ public class KaiserE2Attack extends Attack {
      */
     public static final float SWEEP_ANGLE = 0.5f;
 
+    /** The amount of frames in this animation
+     *
+     */
+    private static int NUM_FRAMES = 5;
+
     /** The actual visual component is shared between all instances to save memory
      *
      */
@@ -71,7 +77,7 @@ public class KaiserE2Attack extends Attack {
      */
 
     public KaiserE2Attack(float x, float y, int damage, float angleRadians, float length, long millis, Kaiser initializer){
-        super(x,y,0,0,5,millis,initializer);
+        super(x,y,0,0,NUM_FRAMES,millis,initializer);
 
         Log.d("kaiserAttack", "angle: " + angleRadians);
 
@@ -86,16 +92,9 @@ public class KaiserE2Attack extends Attack {
 
     @Override
     public void draw(GL10 gl, float[] parentMatrix) {
-        float x1 = ((int) (this.finishedMillis/(this.millis/this.numFrames)) * 1f/this.numFrames) %1 ;
-        float x2 = (((int) (this.finishedMillis/(this.millis/this.numFrames)) * 1f/this.numFrames) %1 + 1f/numFrames);
+        float[] translation = MathOps.getTextureBufferTranslation(0,(int) (this.numFrames * this.finishedMillis/this.millis),numFrames,1);
+        VISUAL_REPRESENTATION.setTextureDelta(translation[0],translation[1]);
 
-        VISUAL_REPRESENTATION.loadTextureBuffer(new float[] {
-                x1,1,
-                x1,0,
-                x2,1,
-                x2,0
-
-        });
         Matrix.setIdentityM(rotatorMatrix,0);
         Matrix.setIdentityM(translatorMatrix,0);
         Matrix.setIdentityM(rotationScalarTranslationMatrix,0);
@@ -117,6 +116,12 @@ public class KaiserE2Attack extends Attack {
      */
     public static void loadGLTexture(@NonNull GL10 gl, Context context) {
         VISUAL_REPRESENTATION.loadGLTexture(gl,context,R.drawable.kaiser_attack_spritesheet);
+        VISUAL_REPRESENTATION.loadTextureBuffer(new float[] {
+                0,1,
+                0,0,
+                1/(float) NUM_FRAMES,1,
+                1/(float) NUM_FRAMES,0
+        });
     }
 
 

@@ -3,6 +3,7 @@ package enigmadux2d.core.shapes;
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.opengl.GLES10;
 import android.opengl.GLUtils;
 import android.support.annotation.NonNull;
 import android.view.MotionEvent;
@@ -14,6 +15,7 @@ import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.nio.FloatBuffer;
 
+import javax.microedition.khronos.opengles.GL;
 import javax.microedition.khronos.opengles.GL10;
 
 import enigmadux2d.core.EnigmaduxComponent;
@@ -50,6 +52,11 @@ public class TexturedRect extends EnigmaduxComponent {
 
     //a value of 1,1,1,1 would mean draw the object directly, the shader alters the color of the texture, by multiplying each
     private float[] shader = new float[] {1,1,1,1};
+
+    //how much to translate the texture coordinate x direction
+    private float deltaU;
+    //how much to translate the texture coordinate y direction
+    private float deltaV;
 
 
 
@@ -202,6 +209,7 @@ public class TexturedRect extends EnigmaduxComponent {
         // create nearest filtered texture
         gl.glTexParameterf(GL10.GL_TEXTURE_2D, GL10.GL_TEXTURE_MIN_FILTER, GL10.GL_NEAREST);
         gl.glTexParameterf(GL10.GL_TEXTURE_2D, GL10.GL_TEXTURE_MAG_FILTER, GL10.GL_LINEAR);
+
         // loading texture as late as possible as to save memory (think)
 
         // Use Android GLUtils to specify a two-dimensional texture image from our bitmap
@@ -245,9 +253,55 @@ public class TexturedRect extends EnigmaduxComponent {
         gl.glLoadMatrixf(parentMatrix,0);
 
 
+        this.prepareDraw(gl,frameNum);
+
+        gl.glMatrixMode(GL10.GL_TEXTURE);
+        gl.glLoadIdentity();
+        gl.glTranslatef(this.deltaU,this.deltaV,0);
+        // Draw the vertices as triangle strip
+        gl.glColor4f(shader[0],shader[1],shader[2],shader[3]); // This is where the magic does happen
+        gl.glDrawArrays(GL10.GL_TRIANGLE_STRIP, 0, vertices.length / 3);
+        gl.glColor4f(1.0f, 1.0f, 1.0f, 1.0f);
+
+        this.endDraw(gl);
+
+        gl.glLoadIdentity();
+        gl.glMatrixMode(GL10.GL_MODELVIEW);
+    }
+
+    /** Draw without the overhead of loading the textures
+     *
+     * @param gl the gl object used so we can send commands
+     * @param parentMatrix matrix that represents how to manipulate it to the world coordinates
+     */
+    public void intermediateDraw(GL10 gl,float[] parentMatrix){
+        if (! this.visible){
+            return;
+        }
+
+        gl.glLoadMatrixf(parentMatrix,0);
+        gl.glMatrixMode(GL10.GL_TEXTURE);
+        gl.glLoadIdentity();
+        gl.glTranslatef(this.deltaU,this.deltaV,0);
+        // Draw the vertices as triangle strip
+        gl.glColor4f(shader[0],shader[1],shader[2],shader[3]); // This is where the magic does happen
+        gl.glDrawArrays(GL10.GL_TRIANGLE_STRIP, 0, vertices.length / 3);
+        gl.glColor4f(1.0f, 1.0f, 1.0f, 1.0f);
+        gl.glLoadIdentity();
+        gl.glMatrixMode(GL10.GL_MODELVIEW);
+    }
+
+    /** Prepares drawing, But basically means u can draw the same object multiple times without the overhead
+     *
+     * @param gl the gl object used so we can send commands
+     * @param frameNum the frameNum in the texture
+     */
+    public void prepareDraw(GL10 gl,int frameNum){
         gl.glTranslatef(this.deltaX,this.deltaY,0);
         gl.glScalef(this.scaleX,this.scaleY,1);
         gl.glRotatef(this.angle,0,0,1);
+
+
 
         // bind the previously generated texture
         gl.glEnable(GL10.GL_TEXTURE_2D);
@@ -257,20 +311,21 @@ public class TexturedRect extends EnigmaduxComponent {
         gl.glEnableClientState(GL10.GL_VERTEX_ARRAY);
         gl.glEnableClientState(GL10.GL_TEXTURE_COORD_ARRAY);
 
-        // Set the face rotation
-        gl.glFrontFace(GL10.GL_CW);
 
         // Point to our vertex buffer
         gl.glVertexPointer(3, GL10.GL_FLOAT, 0, vertexBuffer);
         gl.glTexCoordPointer(2, GL10.GL_FLOAT, 0, textureBuffer);
+    }
 
-        // Draw the vertices as triangle strip
-        gl.glColor4f(shader[0],shader[1],shader[2],shader[3]); // This is where the magic does happen
-        gl.glDrawArrays(GL10.GL_TRIANGLE_STRIP, 0, vertices.length / 3);
-        gl.glColor4f(1.0f, 1.0f, 1.0f, 1.0f);
+    /** Ends the drawing period
+     *
+     * @param gl gl object used so we can send commands
+     */
+    public void endDraw(GL10 gl){
         //Disable the client state before leaving
         gl.glDisableClientState(GL10.GL_VERTEX_ARRAY);
         gl.glDisableClientState(GL10.GL_TEXTURE_COORD_ARRAY);
+
     }
 
     /**
@@ -345,6 +400,16 @@ public class TexturedRect extends EnigmaduxComponent {
     public void setScale(float scaleX,float scaleY){
         this.scaleX = scaleX;
         this.scaleY = scaleY;
+    }
+
+    /** Sets how much to translate the deltaU
+     *
+     * @param deltaU how much to translate in the x direction
+     * @param deltaV how much to translate in the y direction
+     */
+    public void setTextureDelta(float deltaU,float deltaV){
+        this.deltaU = deltaU;
+        this.deltaV = deltaV;
     }
 
     /** Sets the shader, which modifies the color of the texture

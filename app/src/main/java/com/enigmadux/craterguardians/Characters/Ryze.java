@@ -48,10 +48,13 @@ public class Ryze extends Player {
     //the level of the this player
     public static int PLAYER_LEVEL = 0;
 
-    //visual is shared by all objects as they all have the same sprite, this is the basic state (gen 0)
-    private static TexturedRect VISUAL_REPRESENTATION_E1 = new TexturedRect(-Player.CHARACTER_RADIUS,-Player.CHARACTER_RADIUS,Player.CHARACTER_RADIUS*2,Player.CHARACTER_RADIUS*2);
-    //visual is shared by all objects as they all have the same sprite, this is the secondary state (gen 1)
-    private static TexturedRect VISUAL_REPRESENTATION_E2  = new TexturedRect(-Player.CHARACTER_RADIUS,-Player.CHARACTER_RADIUS,Player.CHARACTER_RADIUS*2,Player.CHARACTER_RADIUS*2);
+    //visual is shared by all objects as they all have the same sprite, (all gens are saved here)
+    private static TexturedRect VISUAL_REPRESENTATION = new TexturedRect(-Player.CHARACTER_RADIUS,-Player.CHARACTER_RADIUS,Player.CHARACTER_RADIUS*2,Player.CHARACTER_RADIUS*2,2);
+
+//    //visual is shared by all objects as they all have the same sprite, this is the basic state (gen 0)
+//    private static TexturedRect VISUAL_REPRESENTATION_E1 = new TexturedRect(-Player.CHARACTER_RADIUS,-Player.CHARACTER_RADIUS,Player.CHARACTER_RADIUS*2,Player.CHARACTER_RADIUS*2);
+//    //visual is shared by all objects as they all have the same sprite, this is the secondary state (gen 1)
+//    private static TexturedRect VISUAL_REPRESENTATION_E2  = new TexturedRect(-Player.CHARACTER_RADIUS,-Player.CHARACTER_RADIUS,Player.CHARACTER_RADIUS*2,Player.CHARACTER_RADIUS*2);
     //visual is share by all objects as they all have the same gun, for now same gun for both evolutions, when player is looking to right, the gun
     private static TexturedRect VISUAL_REPRESENTATION_GUN = new TexturedRect(0,-Player.CHARACTER_RADIUS,Ryze.GUN_WIDTH,Ryze.GUN_HEIGHT);
 
@@ -110,8 +113,8 @@ public class Ryze extends Player {
      * @param context context used to grab the actual image from res
      */
     public static void loadGLTexture(GL10 gl, Context context) {
-        VISUAL_REPRESENTATION_E1.loadGLTexture(gl,context,R.drawable.kaiser_sprite_sheet_e1);
-        VISUAL_REPRESENTATION_E2.loadGLTexture(gl,context,R.drawable.kaiser_sprite_sheet_e2);
+        VISUAL_REPRESENTATION.loadGLTexture(gl,context,R.drawable.kaiser_sprite_sheet_e1,0);
+        VISUAL_REPRESENTATION.loadGLTexture(gl,context,R.drawable.kaiser_sprite_sheet_e2,1);
         VISUAL_REPRESENTATION_GUN.loadGLTexture(gl,context,R.drawable.kaiser_gun);
     }
 
@@ -185,11 +188,7 @@ public class Ryze extends Player {
         Matrix.multiplyMM(finalMatrix,0,parentMatrix,0,translationRotationMatrix,0);
         VISUAL_REPRESENTATION_GUN.draw(gl,finalMatrix);
 
-        if (this.evolveGen == 0) {
-            VISUAL_REPRESENTATION_E1.draw(gl, finalMatrix);
-        } else if (this.evolveGen == 1){
-            VISUAL_REPRESENTATION_E2.draw(gl,finalMatrix);
-        }
+        VISUAL_REPRESENTATION.draw(gl,finalMatrix,this.evolveGen);
         super.draw(gl,parentMatrix);
 
     }

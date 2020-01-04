@@ -286,6 +286,14 @@ public abstract class Button extends EnigmaduxComponent {
         this.y += this.h/2;
     }
 
+    /** Gets the text that this is representing
+     *
+     * @return the text that this is displaying
+     */
+    public String getText() {
+        return text;
+    }
+
     /** When the button is released with the finger on it
      * On Release, the release sound effect is played, and the down is set to false
      *

@@ -3,20 +3,19 @@ package com.enigmadux.craterguardians.Animations;
 import android.content.Context;
 import android.opengl.Matrix;
 
+import com.enigmadux.craterguardians.MathOps;
 import com.enigmadux.craterguardians.R;
 
 import javax.microedition.khronos.opengles.GL10;
 
 import enigmadux2d.core.shapes.TexturedRect;
 
-/** Played when player or enemy dies
- *
- * TODO convert this to 1 texture textured rect
+/** Played when a player evolves
  *
  * @author Manu Bhat
  * @version BETA
  */
-public class ToxicBubble extends Animation {
+public class EvolveAnimation extends Animation {
 
     /** The amount of frames in the animation
      *
@@ -24,13 +23,14 @@ public class ToxicBubble extends Animation {
     private static final int NUM_FRAMES = 5;
 
 
+    /** The amount of millis in the animation
+     *
+     */
+    private static final long ANIMATION_LENGTH = 1000;
 
     //visual is shared by all objects as they all have the same sprite
-    private static TexturedRect VISUAL_REPRESENTATION = new TexturedRect(0,0,1,1,ToxicBubble.NUM_FRAMES);
+    private static TexturedRect VISUAL_REPRESENTATION = new TexturedRect(0,0,1,1);
 
-
-    //the length of the animation in milliseconds
-    private long animationLength;
 
     //parentMatrix * translationScalarMatrix
     private final float[] finalMatrix = new float[16];
@@ -45,12 +45,9 @@ public class ToxicBubble extends Animation {
      * @param y center opengl y
      * @param w opengl width
      * @param h opengl height
-     * @param animationLength  the length of the animation in milliseconds
      */
-    public ToxicBubble(float x,float y,float w,float h,long animationLength){
+    public EvolveAnimation(float x,float y,float w,float h){
         super(x-w/2,y-h/2,w,h);
-
-        this.animationLength = animationLength;
 
         Matrix.setIdentityM(translationScalarMatrix,0);
         Matrix.translateM(translationScalarMatrix,0,x-w/2,y-h/2,0);
@@ -64,18 +61,7 @@ public class ToxicBubble extends Animation {
      * @param context any nonnull context
      */
     public static void loadGLTexture(GL10 gl10, Context context){
-        VISUAL_REPRESENTATION.loadGLTexture(gl10,context, R.drawable.bubbleanim_frame_0,0);
-        VISUAL_REPRESENTATION.loadGLTexture(gl10,context, R.drawable.bubbleanim_frame_1,1);
-        VISUAL_REPRESENTATION.loadGLTexture(gl10,context, R.drawable.bubbleanim_frame_2,2);
-        VISUAL_REPRESENTATION.loadGLTexture(gl10,context, R.drawable.bubbleanim_frame_3,3);
-        VISUAL_REPRESENTATION.loadGLTexture(gl10,context, R.drawable.bubbleanim_frame_4,4);
-        //this is once we made it sprite sheet based
-//        VISUAL_REPRESENTATION.loadTextureBuffer(new float[] {
-//                0,1,
-//                0,0,
-//                1/(float) NUM_FRAMES,1,
-//                1/(float) NUM_FRAMES,0
-//        });
+        VISUAL_REPRESENTATION.loadGLTexture(gl10,context, R.drawable.death_animation);
     }
 
     /** draws the current frame
@@ -87,8 +73,21 @@ public class ToxicBubble extends Animation {
     public void draw(GL10 gl, float[] parentMatrix) {
         Matrix.multiplyMM(this.finalMatrix,0,parentMatrix,0,this.translationScalarMatrix,0);
 
-        int frameNum = Math.min(ToxicBubble.NUM_FRAMES-1, (int) (this.currentPosition* ToxicBubble.NUM_FRAMES/this.animationLength));
-        VISUAL_REPRESENTATION.draw(gl,this.finalMatrix,frameNum);
+        float[] translation = MathOps.getTextureBufferTranslation(
+                0,
+                (int) (this.currentPosition* EvolveAnimation.NUM_FRAMES/EvolveAnimation.ANIMATION_LENGTH),
+                EvolveAnimation.NUM_FRAMES,
+                1);
+
+//
+//        VISUAL_REPRESENTATION.loadTextureBuffer(MathOps.getTextureBuffer(
+//                0,
+//                (int) (this.currentPosition* EvolveAnimation.NUM_FRAMES/EvolveAnimation.ANIMATION_LENGTH),
+//                EvolveAnimation.NUM_FRAMES,
+//                1));
+        VISUAL_REPRESENTATION.draw(gl,this.finalMatrix);
+
+
     }
 
     /** Updates to the currentFrame
@@ -106,6 +105,6 @@ public class ToxicBubble extends Animation {
      */
     @Override
     public boolean isFinished() {
-        return this.currentPosition>this.animationLength;
+        return this.currentPosition>EvolveAnimation.ANIMATION_LENGTH;
     }
 }

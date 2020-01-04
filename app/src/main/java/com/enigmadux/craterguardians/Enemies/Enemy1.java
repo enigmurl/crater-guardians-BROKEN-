@@ -37,10 +37,6 @@ public class Enemy1 extends Enemy {
     //visual is shared by all objects as they all have the same sprite
     private static TexturedRect VISUAL_REPRESENTATION = new TexturedRect(-Enemy1.CHARACTER_RADIUS,-Enemy1.CHARACTER_RADIUS,Enemy1.CHARACTER_RADIUS*2,Enemy1.CHARACTER_RADIUS*2);
 
-
-    //translates the Character according to delta x and delta y
-    private float[] translationMatrix = new float[16];
-
     //parent matrix * translation matrix
     private float[] finalMatrix = new float[16];
 
@@ -59,11 +55,19 @@ public class Enemy1 extends Enemy {
     public static void loadGLTexture(@NonNull GL10 gl, Context context) {
         VISUAL_REPRESENTATION.loadGLTexture(gl,context,R.drawable.enemy1_sprite_sheet);
 
+        VISUAL_REPRESENTATION.loadTextureBuffer(new float[] {
+                0,1,
+                0,(NUM_ROTATION_ORIENTATIONS-1f)/NUM_ROTATION_ORIENTATIONS,
+                1/(float) FRAMES_PER_ROTATION,1,
+                1/(float) FRAMES_PER_ROTATION,(NUM_ROTATION_ORIENTATIONS-1f)/NUM_ROTATION_ORIENTATIONS,
+        });
     }
 
     @Override
     public void setFrame(float rotation, int frameNum) {
-        VISUAL_REPRESENTATION.loadTextureBuffer(MathOps.getTextureBuffer(rotation,frameNum,framesPerRotation,numRotationOrientations));
+        float[] translation = MathOps.getTextureBufferTranslation(rotation,frameNum,framesPerRotation,numRotationOrientations);
+        VISUAL_REPRESENTATION.setTextureDelta(translation[0],translation[1]);
+        //VISUAL_REPRESENTATION.loadTextureBuffer(MathOps.getTextureBuffer(rotation,frameNum,framesPerRotation,numRotationOrientations));
         this.offsetDegrees = MathOps.getOffsetDegrees(rotation,numRotationOrientations);
     }
 

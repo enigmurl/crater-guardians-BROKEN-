@@ -20,8 +20,10 @@ import com.enigmadux.craterguardians.FileStreams.LevelData;
 import com.enigmadux.craterguardians.FileStreams.PlayerData;
 import com.enigmadux.craterguardians.FileStreams.SettingsData;
 import com.enigmadux.craterguardians.GUI.Button;
+import com.enigmadux.craterguardians.GUI.HomeButton;
 import com.enigmadux.craterguardians.GUI.InGameTextbox;
 import com.enigmadux.craterguardians.GUI.ProgressBar;
+import com.enigmadux.craterguardians.GUI.Upgradable;
 import com.enigmadux.craterguardians.GameObjects.Plateau;
 import com.enigmadux.craterguardians.GameObjects.Supply;
 import com.enigmadux.craterguardians.GameObjects.ToxicLake;
@@ -259,8 +261,7 @@ public class CraterRenderer extends EnigmaduxGLRenderer {
 
 
         if ((this.backend.getCurrentGameState() != CraterBackend.GAME_STATE_HOMESCREEN) && this.gameScreenLayout.isVisible()) {
-            float yOffset = (this.backend.getCurrentGameState() == CraterBackend.GAME_STATE_INGAME) ? -0f : 0;
-            Matrix.setLookAtM(this.cameraTranslationM, 0, this.player.getDeltaX(), player.getDeltaY() + yOffset, 1f, player.getDeltaX(), player.getDeltaY(), 0, 0, 1f, 0);
+            Matrix.setLookAtM(this.cameraTranslationM, 0, this.player.getDeltaX(), this.player.getDeltaY(), 1f, player.getDeltaX(), player.getDeltaY(), 0, 0, 1f, 0);
             Matrix.scaleM(cameraTranslationM, 0, this.backend.getCameraZoom(), this.backend.getCameraZoom(), 0);
             this.gameScreenLayout.draw(gl, this.cameraTranslationM);
 
@@ -306,61 +307,6 @@ public class CraterRenderer extends EnigmaduxGLRenderer {
     private void drawGameMap(GL10 gl){
         //basically this stops threads from accessing the same variables at the same time, as during the level select levels are loaded, which
         //if drawn at the same time from two threads will throw a java ConcurrmentModificationExcpetion
-
-        synchronized (CraterBackend.PLATEAU_LOCK) {
-            for (Plateau plateau : this.backend.getPlateaus()) {
-                plateau.draw(gl, this.cameraTranslationM);
-            }
-        }
-
-        synchronized (CraterBackend.TOXICLAKE_LOCK) {
-            if (this.backend.getTutorialCurrentMillis() > CraterBackend.PLATEAUS_TOXIC_LAKE_INTRODUCTION) {
-                for (ToxicLake toxicLake : this.backend.getToxicLakes()) {
-                    toxicLake.draw(gl, this.cameraTranslationM);
-                }
-            }
-        }
-
-
-
-
-
-        synchronized (CraterBackend.SUPPLIES_LOCK) {
-            if (this.backend.getTutorialCurrentMillis() > CraterBackend.SUPPLIES_INTRODUCTION) {
-                for (Supply supply : this.backend.getSupplies()) {
-                    supply.draw(gl, this.cameraTranslationM);
-                }
-            }
-        }
-
-
-
-        if (this.backend.getTutorialCurrentMillis() > CraterBackend.ENEMIES_INTRODUCTION) {
-            synchronized (CraterBackend.SPAWNER_LOCK) {
-                for (Spawner spawner : this.backend.getSpawners()) {
-                    spawner.draw(gl, this.cameraTranslationM);
-                }
-            }
-            synchronized (CraterBackend.ENEMIES_LOCK) {
-                for (Enemy enemy : this.backend.getEnemies()) {
-                    enemy.draw(gl, this.cameraTranslationM);
-                }
-            }
-        }
-
-        synchronized (CraterBackend.ANIMATIONS_LOCK) {
-            for (Animation animation : this.backend.getAnimations()) {
-                animation.draw(gl, this.cameraTranslationM);
-            }
-        }
-
-
-        synchronized (CraterBackend.PLAYER_LOCK) {
-            if (this.backend.getTutorialCurrentMillis() > CraterBackend.CHARACTER_INTRODUCTION) {
-                this.player.draw(gl, this.cameraTranslationM);
-            }
-        }
-
         if (this.backend.getCurrentGameState() == CraterBackend.GAME_STATE_TUTORIAL ){
             this.gameMapTutorialLayout.draw(gl,this.cameraTranslationM);
         }
@@ -378,11 +324,12 @@ public class CraterRenderer extends EnigmaduxGLRenderer {
         if (this.gameScreenLayout.isVisible()) {
             this.loadLevelLayout.draw(gl, this.cameraTranslationM);
 
-            if (backend.getTutorialCurrentMillis() > CraterBackend.JOYSTICK_INTRODUCTION && ! (this.loadLevelLayout.isVisible() || this.backend.isInEndGamePausePeriod())) {
+            long tutorialMillis = backend.getTutorialCurrentMillis();
+            if (tutorialMillis > CraterBackend.JOYSTICK_INTRODUCTION && ! (this.loadLevelLayout.isVisible() || this.backend.isInEndGamePausePeriod())) {
                 this.attackJoyStick.draw(gl, this.cameraTranslationM);
                 this.movementJoyStick.draw(gl, this.cameraTranslationM);
             }
-            if (backend.getTutorialCurrentMillis() > CraterBackend.EVOLVE_INTRODUCTION && ! (this.loadLevelLayout.isVisible() || this.backend.isInEndGamePausePeriod())) {
+            if (tutorialMillis > CraterBackend.EVOLVE_INTRODUCTION && ! (this.loadLevelLayout.isVisible() || this.backend.isInEndGamePausePeriod())) {
                 this.evolveButton.draw(gl, this.cameraTranslationM);
             }
 
@@ -391,7 +338,7 @@ public class CraterRenderer extends EnigmaduxGLRenderer {
             }
 
 
-            if (this.backend.getTutorialCurrentMillis() > CraterBackend.CHARACTER_INTRODUCTION  && backend.getCurrentGameState() != CraterBackend.GAME_STATE_LEVELSELECT) {
+            if (tutorialMillis > CraterBackend.CHARACTER_INTRODUCTION  && backend.getCurrentGameState() != CraterBackend.GAME_STATE_LEVELSELECT) {
                 this.healthDisplay.draw(gl, this.cameraTranslationM);
             }
 
@@ -540,8 +487,6 @@ public class CraterRenderer extends EnigmaduxGLRenderer {
                 this.loadLayouts(gl, this.context);
                 break;
             case 7:
-                //SettingsData.loadSettingsFile();
-
                 //todo, this may cause it to play the music for an enigma second
                 SoundLib.setStateLobbyMusic(true);
                 this.settingsData.loadSettingsFile();
@@ -558,27 +503,13 @@ public class CraterRenderer extends EnigmaduxGLRenderer {
                 } else {
                     this.soundEffectsOnOffButton.setShader(CraterRenderer.OFF_SHADER[0], CraterRenderer.OFF_SHADER[1], CraterRenderer.OFF_SHADER[2], CraterRenderer.OFF_SHADER[3]);
                 }
-                //this.loadSettingsFile();
                 break;
             case 8:
-                //this.levelData.loadLevelData();
-                //this.backend.loadLevelData();
+
                 this.loadingCompleted = true;
                 break;
         }
-
-
-
-
-
-
-
-
-
-
-
     }
-
 
 
     /** Goes from game to default home screen
@@ -591,6 +522,7 @@ public class CraterRenderer extends EnigmaduxGLRenderer {
         this.pauseGameLayout.hide();
         this.gameScreenLayout.hide();
         this.levelSelectLayout.hide();
+        this.characterSelectLayout.hide();
         this.defaultHomeScreenLayout.show();
 
     }
@@ -640,23 +572,8 @@ public class CraterRenderer extends EnigmaduxGLRenderer {
 
         //Getting all the components
         //TODO MAke this image home button
-        Button backToHomeButton = new Button("Back to home", -0.75f,0.7f, 0.4f, 0.1f, 0.05f,LayoutConsts.CRATER_TEXT_COLOR, false){
-            @Override
-            public boolean isSelect(MotionEvent e) {
-                return this.visible && this.isInside(MathOps.getOpenGLX(e.getRawX()),MathOps.getOpenGLY(e.getRawY()));
-            }
+        HomeButton backToHomeButton = new HomeButton(-0.75f,0f,0.4f,backend,this);
 
-            @Override
-            public void onRelease() {
-                super.onRelease();
-
-                characterSelectLayout.hide();
-                defaultHomeScreenLayout.show();
-                backend.setCurrentGameState(CraterBackend.GAME_STATE_HOMESCREEN);
-            }
-
-
-        };
 
         final Button kaiserSelectButton = new Button("Kaiser Level: " + Kaiser.PLAYER_LEVEL, 0f,0.3f, 0.7f, 0.4f, 0.25f,LayoutConsts.CRATER_TEXT_COLOR, false){
             @Override
@@ -696,37 +613,9 @@ public class CraterRenderer extends EnigmaduxGLRenderer {
 
         };
 
-        final Button ryzeUpgradeButton = new Button("UPGRADE: " + CraterRenderer.UPGRADE_COST,0.7f,-0.5f,0.3f,0.15f,0.1f,LayoutConsts.CRATER_TEXT_COLOR,false) {
-            @Override
-            public boolean isSelect(MotionEvent e) {
-                return PlayerData.getExperience()>=CraterRenderer.UPGRADE_COST && this.visible && this.isInside(MathOps.getOpenGLX(e.getRawX()),MathOps.getOpenGLY(e.getRawY()));
-            }
+        Upgradable ryzeUpgradeButton = new Upgradable(new Ryze(),0.7f,-0.5f,ryzeSelectButton,playerData,this);
 
-            public void onRelease(){
-                super.onRelease();
-
-                playerData.updateXP(PlayerData.getExperience() - CraterRenderer.UPGRADE_COST);
-                Ryze.PLAYER_LEVEL++;
-                ryzeSelectButton.setText("Ryze Level: " + Ryze.PLAYER_LEVEL);
-                updateUpgradeLayouts();
-            }
-        };
-
-        final Button kaiserUpgradeButton = new Button("UPGRADE: " + CraterRenderer.UPGRADE_COST,0.7f,0.2f,0.3f,0.15f,0.1f,LayoutConsts.CRATER_TEXT_COLOR,false) {
-            @Override
-            public boolean isSelect(MotionEvent e) {
-                return PlayerData.getExperience()>=CraterRenderer.UPGRADE_COST && this.visible && this.isInside(MathOps.getOpenGLX(e.getRawX()),MathOps.getOpenGLY(e.getRawY()));
-            }
-
-            public void onRelease(){
-                super.onRelease();
-
-                playerData.updateXP(PlayerData.getExperience() - CraterRenderer.UPGRADE_COST);
-                Kaiser.PLAYER_LEVEL++;
-                kaiserSelectButton.setText("Kaiser Level: " + Kaiser.PLAYER_LEVEL);
-                updateUpgradeLayouts();
-            }
-        };
+        Upgradable kaiserUpgradeButton = new Upgradable(new Kaiser(),0.7f,0.2f,kaiserSelectButton,playerData,this);
 
         final TexturedRect ryzeInfo = new TexturedRect(-scaleX/2,-0.5f,scaleX,1){
             @Override
@@ -879,28 +768,9 @@ public class CraterRenderer extends EnigmaduxGLRenderer {
 
         };
 
-        Button homeButton = new Button(new TexturedRect(- (0.3f * scaleX)/2,-0.1f,0.3f*scaleX,0.3f)){
-            @Override
-            public boolean isSelect(MotionEvent e) {
-                return this.visible && this.isInside(MathOps.getOpenGLX(e.getRawX()),MathOps.getOpenGLY(e.getRawY()));
-            }
 
-            @Override
-            public void onRelease() {
-                super.onRelease();
+        HomeButton homeButton = new HomeButton(0,0.05f,0.3f,this.backend,this);
 
-                exitGame();
-
-                backend.setCurrentGameState(CraterBackend.GAME_STATE_HOMESCREEN);
-                backend.killEndGamePausePeriod();
-
-                SoundLib.setStateLobbyMusic(true);
-                SoundLib.setStateVictoryMusic(false);
-                SoundLib.setStateLossMusic(false);
-                SoundLib.setStateGameMusic(false);
-            }
-
-        };
 
         Button levelSelectButton_PauseMenu = new Button("Levels",0,-0.5f,0.5f,0.2f,0.1f,LayoutConsts.CRATER_TEXT_COLOR, false) {
             @Override
@@ -1106,9 +976,10 @@ public class CraterRenderer extends EnigmaduxGLRenderer {
         playButton_homeScreen.loadGLTexture(gl);
         tutorialButton.loadGLTexture(gl);
 
+        backToHomeButton.loadGLTexture(gl,context,R.drawable.home_button);
+
         kaiserUpgradeButton.loadGLTexture(gl);
         ryzeUpgradeButton.loadGLTexture(gl);
-        backToHomeButton.loadGLTexture(gl);
         kaiserSelectButton.loadGLTexture(gl);
         ryzeSelectButton.loadGLTexture(gl);
         kaiserInfo.loadGLTexture(gl,context,R.drawable.kaiser_info);

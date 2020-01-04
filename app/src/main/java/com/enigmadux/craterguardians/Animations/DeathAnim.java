@@ -31,7 +31,6 @@ public class DeathAnim extends Animation {
     //visual is shared by all objects as they all have the same sprite
     private static TexturedRect VISUAL_REPRESENTATION = new TexturedRect(0,0,1,1);
 
-
     //parentMatrix * translationScalarMatrix
     private final float[] finalMatrix = new float[16];
     //translates and scales appropriately
@@ -62,6 +61,12 @@ public class DeathAnim extends Animation {
      */
     public static void loadGLTexture(GL10 gl10, Context context){
         VISUAL_REPRESENTATION.loadGLTexture(gl10,context, R.drawable.death_animation);
+        VISUAL_REPRESENTATION.loadTextureBuffer(new float[] {
+                0,1,
+                0,0,
+                1/(float) NUM_FRAMES,1,
+                1/(float) NUM_FRAMES,0
+        });
     }
 
     /** draws the current frame
@@ -73,12 +78,16 @@ public class DeathAnim extends Animation {
     public void draw(GL10 gl, float[] parentMatrix) {
         Matrix.multiplyMM(this.finalMatrix,0,parentMatrix,0,this.translationScalarMatrix,0);
 
-        VISUAL_REPRESENTATION.loadTextureBuffer(MathOps.getTextureBuffer(
+        float[] translation = MathOps.getTextureBufferTranslation(
                 0,
                 (int) (this.currentPosition* DeathAnim.NUM_FRAMES/DeathAnim.ANIMATION_LENGTH),
                 DeathAnim.NUM_FRAMES,
-                1));
+                1);
+
+        VISUAL_REPRESENTATION.setTextureDelta(translation[0],translation[1]);
         VISUAL_REPRESENTATION.draw(gl,this.finalMatrix);
+        gl.glLoadIdentity();
+        gl.glMatrixMode(GL10.GL_MODELVIEW);
     }
 
     /** Updates to the currentFrame

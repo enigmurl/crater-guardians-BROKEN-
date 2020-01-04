@@ -5,7 +5,11 @@ package com.enigmadux.craterguardians;
  * @version BETA
  */
 public class MathOps {
-    /** Gets the openGL textureBuffer
+
+
+    /** Rather than re initing a whole buffer, this returns a float[2] where the first element is the x translation, and the second the y translation
+     * IT IS ASSUMED THAT THE STARTING FRAME FOR THE TEXTURE BUFFER IS AT THE TOP LEFT CORNER
+     *
      *
      * @param rotation the rotation in degrees
      * @param frameNum the frame# to display in the animation
@@ -13,19 +17,12 @@ public class MathOps {
      * @param numRotationOrientations how many different rotations are printed (the "height" of the texture)
      * @return the float[] that represents where to clip the frame
      */
-    public static float[] getTextureBuffer(float rotation,int frameNum,float framesPerRotation,float numRotationOrientations){
+    public static float[] getTextureBufferTranslation(float rotation,int frameNum,float framesPerRotation,float numRotationOrientations) {
         float x1 = (float) frameNum/framesPerRotation;
-        float x2 = (float) (frameNum+1)/framesPerRotation;
-        float y1 = (float) ((int) rotation/(int) (360f/numRotationOrientations))/numRotationOrientations;
-        float y2 = (float) ((int) rotation/(int) (360f/numRotationOrientations) +1)/numRotationOrientations;
-
-        return new float[] {
-                x1,y2,
-                x1,y1,
-                x2,y2,
-                x2,y1
-        };
+        float y1 = (float) ((int) rotation/(int) (360f/numRotationOrientations) +1)/numRotationOrientations -1;
+        return new float[] {x1,y1};
     }
+
 
     /** In addition to having multiple rotations, the image is also turned a bit, this calculates how much
      *
@@ -156,11 +153,13 @@ public class MathOps {
      * @return if the line segment intersects the circle (or if it is fully enclosed by it
      */
     public static boolean segmentIntersectsCircle(float x,float y,float r,float x0,float y0,float x1,float y1){
+        //if the point is inside
         float dX1 = x0 - x;
         float dY1 = y0 - y;
         if (dX1 * dX1 + dY1*dY1 < r*r ){
             return true;
         }
+        //if the point 2i sinside
         float dX2 = x1 - x;
         float dY2 = y1 - y;
         if (dX2 * dX2  + dY2*dY2 < r* r){

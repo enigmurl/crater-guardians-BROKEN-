@@ -1,6 +1,7 @@
 package com.enigmadux.craterguardians.GameObjects;
 
 import android.content.Context;
+import android.opengl.GLES10;
 import android.opengl.Matrix;
 import android.support.annotation.NonNull;
 
@@ -94,15 +95,35 @@ public class Plateau{
         return points;
     }
 
-    /** Draws the plateau onto the screen, rotated
+    /** Prepares drawing, by loading the vertex and texture coordinates
      *
-     * @param gl the GL10 object used to communicate with open gl
-     * @param parentMatrix matrix that represents how to manipulate it to the world coordinates
+     * @param gl a gl reference used to send commands to open Gl
+     * @param frameNum the frame num in the animation (should always be 0)
      */
-    public void draw(GL10 gl, float[] parentMatrix) {
-        Matrix.multiplyMM(finalMatrix,0,parentMatrix,0,translatorMatrix,0);
-        VISUAL_REPRESENTATION.draw(gl,finalMatrix);
+    public static void prepareDrawing(GL10 gl,int frameNum){
+        VISUAL_REPRESENTATION.prepareDraw(gl,frameNum);
     }
+
+    /** Unassigns vertex and texture arrays
+     *
+     * @param gl a gl reference used to send commands to open Gl
+     */
+    public static void endDrawing(GL10 gl){
+        VISUAL_REPRESENTATION.endDraw(gl);
+    }
+
+
+    /** Draws the enemy, and all sub components
+     *
+     * @param gl used to access openGL
+     * @param parentMatrix used to translate from model to world space
+     */
+    public void draw(GL10 gl,float[] parentMatrix){
+        Matrix.multiplyMM(finalMatrix,0,parentMatrix,0,translatorMatrix,0);
+        VISUAL_REPRESENTATION.intermediateDraw(gl,finalMatrix);
+
+    }
+
 
     /** Loads the texture for all instances
      *

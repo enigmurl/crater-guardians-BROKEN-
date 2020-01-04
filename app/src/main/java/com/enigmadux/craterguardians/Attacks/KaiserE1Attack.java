@@ -4,11 +4,13 @@ package com.enigmadux.craterguardians.Attacks;
 import android.content.Context;
 import android.opengl.Matrix;
 import android.support.annotation.NonNull;
+import android.util.Log;
 
 import com.enigmadux.craterguardians.BaseCharacter;
 import com.enigmadux.craterguardians.Characters.Kaiser;
 import com.enigmadux.craterguardians.Characters.Player;
 import com.enigmadux.craterguardians.Enemies.Enemy;
+import com.enigmadux.craterguardians.MathOps;
 import com.enigmadux.craterguardians.R;
 import com.enigmadux.craterguardians.Spawners.Spawner;
 import com.enigmadux.craterguardians.GameObjects.Supply;
@@ -22,6 +24,10 @@ import enigmadux2d.core.shapes.TexturedRect;
  */
 public class KaiserE1Attack extends Attack {
 
+    /** The amount of frames in this animation
+     *
+     */
+    private static int NUM_FRAMES = 5;
     //matrix used to scale the default to the desired
     private final float[] finalMatrix = new float[16];
 
@@ -46,6 +52,8 @@ public class KaiserE1Attack extends Attack {
      */
     private static final TexturedRect VISUAL_REPRESENTATION = new TexturedRect(0,0,0,0);
 
+
+
     /** This configures the visual representation to a triangle
      *
      */
@@ -69,7 +77,7 @@ public class KaiserE1Attack extends Attack {
      * @param initializer the Enemy or player who summoned the attack
      */
     public KaiserE1Attack(float x, float y, int damage, float angleRadians, float length, long millis, Kaiser initializer){
-        super(x,y,0,0,5,millis,initializer);
+        super(x,y,0,0,NUM_FRAMES,millis,initializer);
 
 
         this.angleRadians = angleRadians;
@@ -83,16 +91,9 @@ public class KaiserE1Attack extends Attack {
 
     @Override
     public void draw(GL10 gl, float[] parentMatrix) {
-        float x1 = ((int) (this.finishedMillis/(this.millis/this.numFrames)) * 1f/this.numFrames) %1 ;
-        float x2 = (((int) (this.finishedMillis/(this.millis/this.numFrames)) * 1f/this.numFrames) %1 + 1f/numFrames);
+        float[] translation = MathOps.getTextureBufferTranslation(0,(int) (this.numFrames * this.finishedMillis/this.millis),numFrames,1);
+        VISUAL_REPRESENTATION.setTextureDelta(translation[0],translation[1]);
 
-        VISUAL_REPRESENTATION.loadTextureBuffer(new float[] {
-                x1,1,
-                x1,0,
-                x2,1,
-                x2,0
-
-        });
         Matrix.setIdentityM(rotatorMatrix,0);
         Matrix.setIdentityM(translatorMatrix,0);
         Matrix.setIdentityM(rotationScalarTranslationMatrix,0);
@@ -114,6 +115,12 @@ public class KaiserE1Attack extends Attack {
      */
     public static void loadGLTexture(@NonNull GL10 gl, Context context) {
         VISUAL_REPRESENTATION.loadGLTexture(gl,context,R.drawable.kaiser_attack_spritesheet);
+        VISUAL_REPRESENTATION.loadTextureBuffer(new float[] {
+                0,1,
+                0,0,
+                1/(float) NUM_FRAMES,1,
+                1/(float) NUM_FRAMES,0
+        });
     }
 
 

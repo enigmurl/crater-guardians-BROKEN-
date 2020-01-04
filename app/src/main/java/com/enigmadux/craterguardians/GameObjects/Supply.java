@@ -73,6 +73,24 @@ public class Supply extends EnigmaduxComponent {
         VISUAL_REPRESENTATION.loadGLTexture(gl,context, R.drawable.supply_top_view);
     }
 
+    /** Prepares drawing, by loading the vertex and texture coordinates
+     *
+     * @param gl a gl reference used to send commands to open Gl
+     * @param frameNum the frame num in the animation (should always be 0)
+     */
+    public static void prepareDrawing(GL10 gl,int frameNum){
+        VISUAL_REPRESENTATION.prepareDraw(gl,frameNum);
+    }
+
+    /** Unassigns vertex and texture arrays
+     *
+     * @param gl a gl reference used to send commands to open Gl
+     */
+    public static void endDrawing(GL10 gl){
+        VISUAL_REPRESENTATION.endDraw(gl);
+    }
+
+
     /** Draws the enemy, and all sub components
      *
      * @param gl used to access openGL
@@ -80,8 +98,16 @@ public class Supply extends EnigmaduxComponent {
      */
     public void draw(GL10 gl,float[] parentMatrix){
         Matrix.multiplyMM(finalMatrix,0,parentMatrix,0,translationScalarMatrix,0);
-        VISUAL_REPRESENTATION.draw(gl,finalMatrix);
+        VISUAL_REPRESENTATION.intermediateDraw(gl,finalMatrix);
 
+    }
+
+    /** Draws the health display
+     *
+     * @param gl used to access openGL
+     * @param parentMatrix used to translate from model to world space
+     */
+    public void drawHealthDisplay(GL10 gl,float[] parentMatrix){
         this.healthDisplay.draw(gl,parentMatrix);
     }
 
