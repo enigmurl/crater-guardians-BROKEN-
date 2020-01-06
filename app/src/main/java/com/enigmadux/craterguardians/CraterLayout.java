@@ -29,10 +29,13 @@ public class CraterLayout extends EnigmaduxLayout {
     @Override
     public void draw(GL10 gl,float[] parentMatrix) {
         //Log.d(TAG,"drawingFrame " + components[0].getClass());
-        for (EnigmaduxComponent component: this.components){
+        for (int i = 0, size = this.components.length;i<size;i++){
+            components[i].draw(gl,parentMatrix);
+        }
+        /*for (EnigmaduxComponent component: this.components){
             //Log.d(TAG,"calling subDraw " + component.getClass());
             component.draw(gl,parentMatrix);
-        }
+        }*/
     }
 
     /** Gets the enigmadux component array

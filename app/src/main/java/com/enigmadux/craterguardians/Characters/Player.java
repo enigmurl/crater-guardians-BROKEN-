@@ -107,7 +107,7 @@ public abstract class Player extends BaseCharacter {
      * @param context context used to grab the actual image from res
      */
     public static void loadGLTexture(GL10 gl, Context context) {
-        ATTACK_VISUAL.loadGLTexture(gl,context, R.drawable.ammo_visual);
+        ATTACK_VISUAL.loadGLTexture(context, R.drawable.ammo_visual);
     }
 
     /** The sub class should create and return an angle aimer that matches the attack shape
@@ -256,8 +256,6 @@ public abstract class Player extends BaseCharacter {
         this.rotation = rotation;
 
 
-
-        //todo this is throwing exceptions
         Iterator<Attack> attackIterator = this.attacks.iterator();
 
         while (attackIterator.hasNext()){

@@ -64,11 +64,11 @@ public class ToxicBubble extends Animation {
      * @param context any nonnull context
      */
     public static void loadGLTexture(GL10 gl10, Context context){
-        VISUAL_REPRESENTATION.loadGLTexture(gl10,context, R.drawable.bubbleanim_frame_0,0);
-        VISUAL_REPRESENTATION.loadGLTexture(gl10,context, R.drawable.bubbleanim_frame_1,1);
-        VISUAL_REPRESENTATION.loadGLTexture(gl10,context, R.drawable.bubbleanim_frame_2,2);
-        VISUAL_REPRESENTATION.loadGLTexture(gl10,context, R.drawable.bubbleanim_frame_3,3);
-        VISUAL_REPRESENTATION.loadGLTexture(gl10,context, R.drawable.bubbleanim_frame_4,4);
+        VISUAL_REPRESENTATION.loadGLTexture(context, R.drawable.bubbleanim_frame_0,0);
+        VISUAL_REPRESENTATION.loadGLTexture(context, R.drawable.bubbleanim_frame_1,1);
+        VISUAL_REPRESENTATION.loadGLTexture(context, R.drawable.bubbleanim_frame_2,2);
+        VISUAL_REPRESENTATION.loadGLTexture(context, R.drawable.bubbleanim_frame_3,3);
+        VISUAL_REPRESENTATION.loadGLTexture(context, R.drawable.bubbleanim_frame_4,4);
         //this is once we made it sprite sheet based
 //        VISUAL_REPRESENTATION.loadTextureBuffer(new float[] {
 //                0,1,
@@ -88,7 +88,7 @@ public class ToxicBubble extends Animation {
         Matrix.multiplyMM(this.finalMatrix,0,parentMatrix,0,this.translationScalarMatrix,0);
 
         int frameNum = Math.min(ToxicBubble.NUM_FRAMES-1, (int) (this.currentPosition* ToxicBubble.NUM_FRAMES/this.animationLength));
-        VISUAL_REPRESENTATION.draw(gl,this.finalMatrix,frameNum);
+        VISUAL_REPRESENTATION.draw(this.finalMatrix,frameNum);
     }
 
     /** Updates to the currentFrame

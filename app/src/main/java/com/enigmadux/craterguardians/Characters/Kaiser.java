@@ -114,11 +114,11 @@ public class Kaiser extends Player {
      * @param context context used to grab the actual image from res
      */
     public static void loadGLTexture(GL10 gl, Context context) {
-        VISUAL_REPRESENTATION.loadGLTexture(gl,context,R.drawable.kaiser_sprite_sheet_e1,0);
-        VISUAL_REPRESENTATION.loadGLTexture(gl,context,R.drawable.kaiser_sprite_sheet_e2,1);
+        VISUAL_REPRESENTATION.loadGLTexture(context,R.drawable.kaiser_sprite_sheet_e1,0);
+        VISUAL_REPRESENTATION.loadGLTexture(context,R.drawable.kaiser_sprite_sheet_e2,1);
 
         //VISUAL_REPRESENTATION_E2.loadGLTexture(gl,context,R.drawable.kaiser_sprite_sheet_e2);
-        VISUAL_REPRESENTATION_GUN.loadGLTexture(gl,context,R.drawable.kaiser_gun);
+        VISUAL_REPRESENTATION_GUN.loadGLTexture(context,R.drawable.kaiser_gun);
     }
 
 
@@ -190,7 +190,7 @@ public class Kaiser extends Player {
         Matrix.multiplyMM(finalMatrix,0,parentMatrix,0,translationRotationMatrix,0);
         VISUAL_REPRESENTATION_GUN.draw(gl,finalMatrix);
 
-        VISUAL_REPRESENTATION.draw(gl, finalMatrix,this.evolveGen);
+        VISUAL_REPRESENTATION.draw(finalMatrix,this.evolveGen);
 
         super.draw(gl,parentMatrix);
 

@@ -4,7 +4,6 @@ import android.content.Context;
 import android.opengl.Matrix;
 import android.view.MotionEvent;
 
-import com.enigmadux.craterguardians.GUI.InGameTextbox;
 import com.enigmadux.craterguardians.LayoutConsts;
 import com.enigmadux.craterguardians.R;
 
@@ -76,8 +75,8 @@ public class ProgressBar extends EnigmaduxComponent  {
      * @param context context used to grab the actual image from res
      */
     public static void loadGLTexture(GL10 gl, Context context) {
-        BAR_HOLDER.loadGLTexture(gl, context, R.drawable.hitpoints_bar_holder);
-        BAR_VISUAL.loadGLTexture(gl, context, R.drawable.hitpoints_bar);
+        BAR_HOLDER.loadGLTexture(context, R.drawable.hitpoints_bar_holder);
+        BAR_VISUAL.loadGLTexture(context, R.drawable.hitpoints_bar);
     }
 
     /** Called whenever the bar needs to be moved or the hitPoints has changed todo: split this into to functions 1 for translating 1 for hitpoints
@@ -106,7 +105,7 @@ public class ProgressBar extends EnigmaduxComponent  {
         //Log.d("PROGRESSBAR",)
         //todo this is probably expensive to create a bitmap each time, maybe do it only when the score is updated, this whole method can be optimized
         if (this.textbox != null && (! this.textbox.getText().equals(String.valueOf(this.currentHitPoints)) || ! this.textbox.isTextureLoaded())){
-            this.textbox.setText(String.valueOf(currentHitPoints));
+            //this.textbox.setText(String.valueOf(currentHitPoints));
         }
 
         BAR_VISUAL.setShader(1 - (float) currentHitPoints/maxHitPoints, (float) currentHitPoints/maxHitPoints,0,1);

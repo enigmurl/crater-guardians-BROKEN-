@@ -1,7 +1,6 @@
 package com.enigmadux.craterguardians.GameObjects;
 
 import android.content.Context;
-import android.opengl.GLES10;
 import android.opengl.Matrix;
 import android.support.annotation.NonNull;
 
@@ -22,7 +21,7 @@ public class Plateau{
     /**
      * Hold the texture, vertex coordinates are initialized right below this
      */
-    private static TexturedRect VISUAL_REPRESENTATION = new TexturedRect(0, 0, 0, 0);
+    private static TexturedRect VISUAL_REPRESENTATION = new TexturedRect(0, 0, 0,0);
 
 
     static {
@@ -31,7 +30,9 @@ public class Plateau{
                 1,0,0,
                 0,1,0,
                 0,0,1,
+
         });
+
     }
     //parentMatrix * translatorMatrix
     private final float[] finalMatrix = new float[16];
@@ -85,6 +86,7 @@ public class Plateau{
         };
 
 
+
     }
 
     /** Gets the points that make up the vertices
@@ -95,24 +97,6 @@ public class Plateau{
         return points;
     }
 
-    /** Prepares drawing, by loading the vertex and texture coordinates
-     *
-     * @param gl a gl reference used to send commands to open Gl
-     * @param frameNum the frame num in the animation (should always be 0)
-     */
-    public static void prepareDrawing(GL10 gl,int frameNum){
-        VISUAL_REPRESENTATION.prepareDraw(gl,frameNum);
-    }
-
-    /** Unassigns vertex and texture arrays
-     *
-     * @param gl a gl reference used to send commands to open Gl
-     */
-    public static void endDrawing(GL10 gl){
-        VISUAL_REPRESENTATION.endDraw(gl);
-    }
-
-
     /** Draws the enemy, and all sub components
      *
      * @param gl used to access openGL
@@ -120,7 +104,17 @@ public class Plateau{
      */
     public void draw(GL10 gl,float[] parentMatrix){
         Matrix.multiplyMM(finalMatrix,0,parentMatrix,0,translatorMatrix,0);
-        VISUAL_REPRESENTATION.intermediateDraw(gl,finalMatrix);
+        /*float[] returnVec = new float[4];
+        float[][] debug = new float[][] { {0,0,0},
+                {1,0,0},
+                {0,1,0},
+                {0,0,1}};
+        for (int i = 0;i<4;i++) {
+            float[] currentVec = new float[] {debug[i][0],debug[i][1],debug[i][2],1};
+            Matrix.multiplyMV(returnVec,0,finalMatrix,0,currentVec,0);
+            Log.d("PLATEAU:", "CORD " + i  + " : " + Arrays.toString(returnVec));
+        }*/
+        VISUAL_REPRESENTATION.draw(gl,finalMatrix);
 
     }
 
@@ -131,7 +125,7 @@ public class Plateau{
      * @param context used to access resources
      */
     public static void loadGLTexture(@NonNull GL10 gl, Context context) {
-        VISUAL_REPRESENTATION.loadGLTexture(gl,context, R.drawable.plateau);
+        VISUAL_REPRESENTATION.loadGLTexture(context, R.drawable.plateau);
     }
 
 
@@ -150,7 +144,7 @@ public class Plateau{
 
     /** See if a circle intersects this polygon. Note if the circle is completely enclosed by the polygon
      *
-     * @param x
+     * @param x the center x of the circle
      * @param y the center y of the circle
      * @param r the radius
      * @return whether or not the two intersect

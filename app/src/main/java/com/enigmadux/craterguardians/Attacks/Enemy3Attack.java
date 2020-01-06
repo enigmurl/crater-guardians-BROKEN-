@@ -81,10 +81,9 @@ public class Enemy3Attack extends Attack {
 
     @Override
     public void draw(GL10 gl, float[] parentMatrix) {
-
-        float[] translation = MathOps.getTextureBufferTranslation(0,(int) (this.numFrames * this.finishedMillis/this.millis),numFrames,1);
-        VISUAL_REPRESENTATION.setTextureDelta(translation[0],translation[1]);
-
+        float translationX = MathOps.getTextureBufferTranslationX((int) (this.numFrames * this.finishedMillis/this.millis),numFrames);
+        //y translation is always 0
+        VISUAL_REPRESENTATION.setTextureDelta(translationX,0);
 
 
         Matrix.setIdentityM(rotatorMatrix,0);
@@ -109,13 +108,12 @@ public class Enemy3Attack extends Attack {
      * @param context used to access resources
      */
     public static void loadGLTexture(@NonNull GL10 gl, Context context) {
-        VISUAL_REPRESENTATION.loadGLTexture(gl,context,R.drawable.enemy3_attack_spritesheet);//todo needs work
-        //this rotates it so the textures are turned, perhaps in the future we turn the actual sprite sheet instead
+        VISUAL_REPRESENTATION.loadGLTexture(context,R.drawable.enemy3_attack_spritesheet);//todo needs work
         VISUAL_REPRESENTATION.loadTextureBuffer(new float[] {
-                1/(float) NUM_FRAMES,1,
                 0,1,
-                1/(float) NUM_FRAMES,0,
                 0,0,
+                1/(float) NUM_FRAMES,1,
+                1/(float) NUM_FRAMES,0
         });
     }
 

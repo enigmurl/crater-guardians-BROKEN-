@@ -4,7 +4,6 @@ package com.enigmadux.craterguardians.Attacks;
 import android.content.Context;
 import android.opengl.Matrix;
 import android.support.annotation.NonNull;
-import android.util.Log;
 
 import com.enigmadux.craterguardians.BaseCharacter;
 import com.enigmadux.craterguardians.Characters.Player;
@@ -82,9 +81,9 @@ public class Enemy1Attack extends Attack {
 
     @Override
     public void draw(GL10 gl, float[] parentMatrix) {
-        float[] translation = MathOps.getTextureBufferTranslation(0,(int) (this.numFrames * this.finishedMillis/this.millis),numFrames,1);
-        VISUAL_REPRESENTATION.setTextureDelta(translation[0],translation[1]);
-
+        float translationX = MathOps.getTextureBufferTranslationX((int) (this.numFrames * this.finishedMillis/this.millis),numFrames);
+        //y translation is always 0
+        VISUAL_REPRESENTATION.setTextureDelta(translationX,0);
         //Log.d("TEXTURED:","U: " + translation[0] + " V: " + translation[1]);
 
 
@@ -110,7 +109,7 @@ public class Enemy1Attack extends Attack {
      * @param context used to access resources
      */
     public static void loadGLTexture(@NonNull GL10 gl, Context context) {
-        VISUAL_REPRESENTATION.loadGLTexture(gl,context,R.drawable.kaiser_attack_spritesheet);//todo needs work
+        VISUAL_REPRESENTATION.loadGLTexture(context,R.drawable.kaiser_attack_spritesheet);//todo needs work
 
         //this rotates it so the textures are turned, perhaps in the future we turn the actual sprite sheet instead
         VISUAL_REPRESENTATION.loadTextureBuffer(new float[] {

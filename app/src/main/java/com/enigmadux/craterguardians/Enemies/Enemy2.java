@@ -27,7 +27,7 @@ public class Enemy2 extends Enemy {
     //a constant that represents how many rows the sprite sheet has (how many orientations of rotations
     private static final int NUM_ROTATION_ORIENTATIONS = 8;
     //a constant that represents how many columns the sprite sheet has (how many frames in a single rotation animation)
-    private static final int FRAMES_PER_ROTATION = 16;
+    private static final int FRAMES_PER_ROTATION = 8;
     //a constant that represents how fast to play the animation in frames per second
     private static final float FPS = 16;
     //a constant that represents the maximum health of Enemy2
@@ -63,12 +63,20 @@ public class Enemy2 extends Enemy {
      * @param context context used to grab the actual image from res
      */
     public static void loadGLTexture(@NonNull GL10 gl, Context context) {
-        VISUAL_REPRESENTATION.loadGLTexture(gl,context,R.drawable.enemy1_sprite_sheet);//todo
-
+        VISUAL_REPRESENTATION.loadGLTexture(context,R.drawable.enemy1_sprite_sheet);//todo
+        VISUAL_REPRESENTATION.loadTextureBuffer(new float[] {
+                0,1,
+                0,(NUM_ROTATION_ORIENTATIONS-1f)/NUM_ROTATION_ORIENTATIONS,
+                1/(float) FRAMES_PER_ROTATION,1,
+                1/(float) FRAMES_PER_ROTATION,(NUM_ROTATION_ORIENTATIONS-1f)/NUM_ROTATION_ORIENTATIONS,
+        });
     }
 
     @Override
     public void setFrame(float rotation, int frameNum) {
+        float translationX = MathOps.getTextureBufferTranslationX(frameNum,framesPerRotation);
+        float translationY = MathOps.getTextureBufferTranslationY(rotation,numRotationOrientations);
+        VISUAL_REPRESENTATION.setTextureDelta(translationX,translationY);
         //VISUAL_REPRESENTATION.loadTextureBuffer(MathOps.getTextureBuffer(rotation,frameNum,framesPerRotation,numRotationOrientations));
         this.offsetDegrees = MathOps.getOffsetDegrees(rotation,numRotationOrientations);
     }
@@ -113,13 +121,12 @@ public class Enemy2 extends Enemy {
      * @param gl used to access openGL
      * @param parentMatrix used to translate from model to world space
      */
-    @Override
-    public void draw(GL10 gl, float[] parentMatrix) {
-        super.draw(gl,parentMatrix);
-        Matrix.setIdentityM(translationMatrix,0);
-        Matrix.translateM(translationMatrix,0,this.getDeltaX(),this.getDeltaY(),0);
-
-        Matrix.multiplyMM(finalMatrix,0,parentMatrix,0,translationMatrix,0);
+    public void drawIntermediate(GL10 gl, float[] parentMatrix) {
+        //super.draw(gl,parentMatrix);
+        //Matrix.setIdentityM(translationMatrix,0);
+        //Matrix.translateM(translationMatrix,0,this.getDeltaX(),this.getDeltaY(),0);
+        Matrix.translateM(finalMatrix,0,parentMatrix,0,this.getDeltaX(),this.getDeltaY(),0);
+        //Matrix.multiplyMM(finalMatrix,0,parentMatrix,0,translationMatrix,0);
         VISUAL_REPRESENTATION.draw(gl,finalMatrix);
     }
 

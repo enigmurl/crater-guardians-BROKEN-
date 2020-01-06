@@ -345,10 +345,10 @@ public class EnemyMap {
         float targetY = this.nodeMap[supplyIndex + 1].y;
 
         for (int i = 1;i<this.nodeMap.length;i++){
-            Log.d("ENEMY WEIGHT","NULL POINTER: " + (this.nodeMap[i] == null));
+            //Log.d("ENEMY WEIGHT","NULL POINTER: " + (this.nodeMap[i] == null));
 
             float weightage = (float) this.isValid(start,nodeMap[i],GRANULARITY_1);
-            Log.d("ENEMY WEIGHT","weight: " + weightage + " length: "  +this.nodeMap.length);
+            //Log.d("ENEMY WEIGHT","weight: " + weightage + " length: "  +this.nodeMap.length);
             if (weightage != -1){
                 nodeMap[i].addNeighbour(start,weightage);
                 start.addNeighbour(nodeMap[i],weightage);
@@ -379,7 +379,6 @@ public class EnemyMap {
             this.countRunTime += System.currentTimeMillis() - inStart;
             //the plus 1 is to offset for the player node
             if (currentNode == nodeMap[supplyIndex + 1]){
-                //todo return the path
                 List<Node> path = computePath(currentNode,start);
                 if (supplyIndex == -1){
                     path.set(path.size()-1,null);

@@ -4,6 +4,7 @@ import javax.microedition.khronos.egl.EGLConfig;
 import javax.microedition.khronos.opengles.GL10;
 
 import android.content.Context;
+import android.opengl.GLES20;
 import android.opengl.GLSurfaceView;
 
 
@@ -34,14 +35,14 @@ public abstract class EnigmaduxGLRenderer implements GLSurfaceView.Renderer {
      * @param config config of open gl (check android doc)
      */
     public void onSurfaceCreated(GL10 gl,EGLConfig config){
-        gl.glEnable(GL10.GL_TEXTURE_2D);			//Enable Texture Mapping ( NEW )
-        gl.glShadeModel(GL10.GL_SMOOTH); 			//Enable Smooth Shading
-        gl.glClearColor(0.0f, 0.0f, 0.0f, 0.5f); 	//Black Background
-        gl.glEnable(GL10.GL_BLEND);
-        gl.glBlendFunc(GL10.GL_SRC_ALPHA, GL10.GL_ONE_MINUS_SRC_ALPHA);
+        GLES20.glEnable(GLES20.GL_TEXTURE_2D);			//Enable Texture Mapping ( NEW )
+        //GLES20.glShadeModel(GL10.GL_SMOOTH); 			//Enable Smooth Shading
+        GLES20.glClearColor(0.0f, 0.0f, 0.0f, 0.5f); 	//Black Background
+        GLES20.glEnable(GLES20.GL_BLEND);
+        GLES20.glBlendFunc(GLES20.GL_SRC_ALPHA, GLES20.GL_ONE_MINUS_SRC_ALPHA);
 
         //Really Nice Perspective Calculations
-        gl.glHint(GL10.GL_PERSPECTIVE_CORRECTION_HINT, GL10.GL_NICEST);
+        //GLES20.glHint(GLES20.GL_, GLES20.GL_NICEST);
     }
 
     /** Used whenever the surface is changed(e.g rotated screen from landscape to portrait) (see android documentation for more details)

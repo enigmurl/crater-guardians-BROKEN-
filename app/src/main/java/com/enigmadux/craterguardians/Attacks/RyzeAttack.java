@@ -9,6 +9,7 @@ import com.enigmadux.craterguardians.BaseCharacter;
 import com.enigmadux.craterguardians.Characters.Player;
 import com.enigmadux.craterguardians.Characters.Ryze;
 import com.enigmadux.craterguardians.Enemies.Enemy;
+import com.enigmadux.craterguardians.MathOps;
 import com.enigmadux.craterguardians.R;
 import com.enigmadux.craterguardians.Spawners.Spawner;
 import com.enigmadux.craterguardians.GameObjects.Supply;
@@ -22,6 +23,10 @@ import enigmadux2d.core.shapes.TexturedRect;
  */
 public class RyzeAttack extends Attack {
 
+    /** The amount of frames in this animation
+     *
+     */
+    private static int NUM_FRAMES = 5;
     //matrix used to scale the default to the desired
     private final float[] finalMatrix = new float[16];
 
@@ -95,16 +100,9 @@ public class RyzeAttack extends Attack {
 
     @Override
     public void draw(GL10 gl, float[] parentMatrix) {
-        float x1 = ((int) (this.finishedMillis/(this.millis/this.numFrames)) * 1f/this.numFrames) %1 ;
-        float x2 = (((int) (this.finishedMillis/(this.millis/this.numFrames)) * 1f/this.numFrames) %1 + 1f/numFrames);
-
-        VISUAL_REPRESENTATION.loadTextureBuffer(new float[] {
-                x1,1,
-                x2,1,
-                x1,0,
-                x2,0
-
-        });
+        float translationX = MathOps.getTextureBufferTranslationX((int) (this.numFrames * this.finishedMillis/this.millis),numFrames);
+        //y translation is always 0
+        VISUAL_REPRESENTATION.setTextureDelta(translationX,0);
 
         Matrix.multiplyMM(finalMatrix, 0, parentMatrix, 0, leftAttackM, 0);
         VISUAL_REPRESENTATION.draw(gl, finalMatrix);
@@ -124,7 +122,14 @@ public class RyzeAttack extends Attack {
      * @param context used to access resources
      */
     public static void loadGLTexture(@NonNull GL10 gl, Context context) {
-        VISUAL_REPRESENTATION.loadGLTexture(gl,context,R.drawable.kaiser_attack_spritesheet);
+        VISUAL_REPRESENTATION.loadGLTexture(context,R.drawable.kaiser_attack_spritesheet);
+        VISUAL_REPRESENTATION.loadTextureBuffer(new float[] {
+                1/(float) NUM_FRAMES,1,
+                0,1,
+                1/(float) NUM_FRAMES,0,
+                0,0,
+        });
+
     }
 
 

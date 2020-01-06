@@ -37,16 +37,7 @@ import com.enigmadux.craterguardians.Spawners.Enemy2Spawner;
 import com.enigmadux.craterguardians.Spawners.Enemy3Spawner;
 import com.enigmadux.craterguardians.Spawners.Spawner;
 
-import java.io.FileNotFoundException;
-import java.io.IOException;
-import java.io.OutputStreamWriter;
-import java.io.PrintWriter;
-import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Iterator;
-import java.util.List;
-import java.util.NoSuchElementException;
-import java.util.Scanner;
 
 import javax.microedition.khronos.opengles.GL10;
 
@@ -660,16 +651,16 @@ public class CraterBackend {
         playButton.loadGLTexture(gl);
         levelSelectButton.loadGLTexture(gl);
 
-        levelBackground.loadGLTexture(gl,this.context,R.drawable.level_select_example);
+        levelBackground.loadGLTexture(this.context,R.drawable.level_select_example);
         levelSelect_homeButton.loadGLTexture(gl,this.context,R.drawable.home_button);
 
 
-        craterVisual.loadGLTexture(gl,this.context,R.drawable.level_background_crater);
+        craterVisual.loadGLTexture(this.context,R.drawable.level_background_crater);
         battleStartIndicator.loadGLTexture(gl);
         battleStartIndicator.hide();
 
-        this.stateIndicator.loadGLTexture(gl,this.context,R.drawable.victory_sign,0);
-        this.stateIndicator.loadGLTexture(gl,this.context,R.drawable.loss_sign,1);
+        this.stateIndicator.loadGLTexture(this.context,R.drawable.victory_sign,0);
+        this.stateIndicator.loadGLTexture(this.context,R.drawable.loss_sign,1);
         this.stateIndicator.hide();
 
         //todo bad solution to whats happening (the text starts at one place, but after being moved it gets offset)
@@ -844,8 +835,8 @@ public class CraterBackend {
      */
     public void loadTextures(GL10 gl){
         //inputs
-        this.attackJoyStick.loadGLTexture(gl,this.context,R.drawable.test);
-        this.movementJoyStick.loadGLTexture(gl,this.context,R.drawable.test);
+        this.attackJoyStick.loadGLTexture(this.context,R.drawable.test);
+        this.movementJoyStick.loadGLTexture(this.context,R.drawable.test);
         this.evolveButton.loadGLTexture(gl,this.context,R.drawable.evolve_button);
 
         //characters
@@ -853,9 +844,9 @@ public class CraterBackend {
 
         Kaiser.loadGLTexture(gl,this.context);
         Ryze.loadGLTexture(gl,this.context);
-        Enemy1.loadGLTexture(gl,this.context);
+        Enemy1.loadGLTexture(this.context);
         Enemy2.loadGLTexture(gl,this.context);
-        Enemy3.loadGLTexture(gl,this.context);
+        Enemy3.loadGLTexture(this.context);
 
         //aimers
         TriangleAimer.loadGLTexture(gl,this.context);

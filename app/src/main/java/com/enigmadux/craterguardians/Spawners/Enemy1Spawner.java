@@ -103,7 +103,7 @@ public class Enemy1Spawner extends Spawner {
      * @param context used to access resources
      */
     public static void loadGLTexture(@NonNull GL10 gl,Context context) {
-        VISUAL_REPRESENTATION.loadGLTexture(gl,context, R.drawable.enemy1_spawner);
+        VISUAL_REPRESENTATION.loadGLTexture(context, R.drawable.enemy1_spawner);
     }
 
 

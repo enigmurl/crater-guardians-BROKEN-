@@ -1,5 +1,6 @@
 package com.enigmadux.craterguardians.Enemies;
 
+import android.content.Context;
 import android.util.Log;
 
 import com.enigmadux.craterguardians.Attacks.Attack;
@@ -9,12 +10,15 @@ import com.enigmadux.craterguardians.MathOps;
 import com.enigmadux.craterguardians.GameObjects.Plateau;
 import com.enigmadux.craterguardians.GUI.ProgressBar;
 import com.enigmadux.craterguardians.GameObjects.Supply;
+import com.enigmadux.craterguardians.R;
 
 import java.util.Iterator;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
 import javax.microedition.khronos.opengles.GL10;
+
+import enigmadux2d.core.shapes.TexturedRect;
 
 /** Any character that is trying to harm the player
  * @author Manu Bhat
@@ -25,10 +29,18 @@ public abstract class Enemy extends BaseCharacter {
     private ProgressBar healthDisplay;
     //whether or not it can move, it may not be able to move because it's attacking (Enemy 2)
     protected boolean canMove = true;
-    
+
+    //visual is shared by all objects as they all have the same sprite
+    protected static TexturedRect VISUAL_REPRESENTATION = new TexturedRect(-Enemy1.CHARACTER_RADIUS,-Enemy1.CHARACTER_RADIUS,Enemy1.CHARACTER_RADIUS*2,Enemy1.CHARACTER_RADIUS*2);
+
+
     //the distance the enemy must be before moving onto the next node
     private static final float MIN_DISTANCE = 0.1f;
 
+    //a constant that represents how many rows the sprite sheet has (how many orientations of rotations
+    private static final int NUM_ROTATION_ORIENTATIONS = 8;
+    //a constant that represents how many columns the sprite sheet has (how many frames in a single rotation animation)
+    private static final int FRAMES_PER_ROTATION = 8;
 
     //this tells what the last target the enemy was locked onto, if this changes, a new path is calculated
     //it's the index of supplies usually, but -1 means it's locked onto the player
@@ -55,13 +67,47 @@ public abstract class Enemy extends BaseCharacter {
      */
     @Override
     public void draw(GL10 gl, float[] parentMatrix) {
-        for (Attack attack: this.attacks){
-            attack.draw(gl,parentMatrix);
+        for (int i = 0;i<attacks.size();i++) {
+            attacks.get(i).draw(gl, parentMatrix);
         }
         healthDisplay.draw(gl,parentMatrix);
     }
 
+    /** Loads the texture of the sprite sheet
+     *
+     * @param context context used to grab the actual image from res
+     */
+    public static void loadGLTexture(Context context) {
+        VISUAL_REPRESENTATION.loadGLTexture(context, R.drawable.enemy1_sprite_sheet);
 
+        VISUAL_REPRESENTATION.loadTextureBuffer(new float[] {
+                0,1,
+                0,(NUM_ROTATION_ORIENTATIONS-1f)/NUM_ROTATION_ORIENTATIONS,
+                1/(float) FRAMES_PER_ROTATION,1,
+                1/(float) FRAMES_PER_ROTATION,(NUM_ROTATION_ORIENTATIONS-1f)/NUM_ROTATION_ORIENTATIONS,
+        });
+    }
+
+    /** Preparing drawing period
+     *
+     */
+    public static void prepareDraw(){
+        VISUAL_REPRESENTATION.prepareDraw(0);
+    }
+
+    /** Ends the drawing period
+     *
+     */
+    public static void endDrawing(){
+        VISUAL_REPRESENTATION.endDraw();
+    }
+
+    /** Draw the actual enemy
+     *
+     * @param gl gl object
+     * @param parentMatrix the parent matrix
+     */
+    public abstract void drawIntermediate(GL10 gl,float[] parentMatrix);
 
 
     /** Updates the position, and other attributes

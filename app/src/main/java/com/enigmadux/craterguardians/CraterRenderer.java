@@ -4,6 +4,7 @@ import javax.microedition.khronos.egl.EGLConfig;
 import javax.microedition.khronos.opengles.GL10;
 
 import android.content.Context;
+import android.opengl.GLES20;
 import android.opengl.Matrix;
 import android.util.DisplayMetrics;
 import android.util.Log;
@@ -11,12 +12,9 @@ import android.view.Display;
 import android.view.MotionEvent;
 import android.view.WindowManager;
 
-import com.enigmadux.craterguardians.Animations.Animation;
 import com.enigmadux.craterguardians.Characters.Kaiser;
 import com.enigmadux.craterguardians.Characters.Player;
 import com.enigmadux.craterguardians.Characters.Ryze;
-import com.enigmadux.craterguardians.Enemies.Enemy;
-import com.enigmadux.craterguardians.FileStreams.LevelData;
 import com.enigmadux.craterguardians.FileStreams.PlayerData;
 import com.enigmadux.craterguardians.FileStreams.SettingsData;
 import com.enigmadux.craterguardians.GUI.Button;
@@ -24,18 +22,10 @@ import com.enigmadux.craterguardians.GUI.HomeButton;
 import com.enigmadux.craterguardians.GUI.InGameTextbox;
 import com.enigmadux.craterguardians.GUI.ProgressBar;
 import com.enigmadux.craterguardians.GUI.Upgradable;
-import com.enigmadux.craterguardians.GameObjects.Plateau;
-import com.enigmadux.craterguardians.GameObjects.Supply;
-import com.enigmadux.craterguardians.GameObjects.ToxicLake;
-import com.enigmadux.craterguardians.Spawners.Spawner;
 
-import java.io.IOException;
-import java.io.OutputStreamWriter;
-import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import java.util.Scanner;
 
 import enigmadux2d.core.EnigmaduxComponent;
 import enigmadux2d.core.EnigmaduxGLRenderer;
@@ -72,8 +62,6 @@ public class CraterRenderer extends EnigmaduxGLRenderer {
     private PlayerData playerData;
     //loads and writes settings of the player, for now just having to do with sound effects and music
     private SettingsData settingsData;
-    //information about which levels are unlocked/cleared
-    private LevelData levelData;
 
 
     //whether or not all componnets have been loaded to memory
@@ -121,7 +109,10 @@ public class CraterRenderer extends EnigmaduxGLRenderer {
 
 
     //MATRICES
+    private float[] orthographicM = new float[16];
     private float[] cameraTranslationM = new float[16];
+    //ortho * cameraTranslation
+    private float[] vPMatrix = new float[16];
 
     //LAYOUTS
     /** Used to change game wide settings, such as music on or off, and sound effects on or off
@@ -205,7 +196,6 @@ public class CraterRenderer extends EnigmaduxGLRenderer {
 
         this.playerData = new PlayerData(context);
         this.settingsData = new SettingsData(context);
-        this.levelData = new LevelData(context);
 
     }
 
@@ -216,6 +206,8 @@ public class CraterRenderer extends EnigmaduxGLRenderer {
     int under60 = 0;
     List<Long> under60s = new ArrayList<Long>();
     long lastMillis = System.currentTimeMillis();
+    long debugGameScreenMillis = System.currentTimeMillis();
+
 
     /** Called whenever a new frame is needed to be drawn. If the render mode is dirty, then it will only be called
      * on requestRender, otherwise it's called at 60fps (I believe)
@@ -226,15 +218,12 @@ public class CraterRenderer extends EnigmaduxGLRenderer {
     public void onDrawFrame(GL10 gl) {
 
         // clear Screen
-        gl.glClear(GL10.GL_COLOR_BUFFER_BIT);
-        gl.glClearColor(0.6f,0.274f,0.1764f,1.0f);
-
-        gl.glMatrixMode(gl.GL_MODELVIEW);
-        gl.glLoadIdentity();
+        GLES20.glClear(GL10.GL_COLOR_BUFFER_BIT);
+        GLES20.glClearColor(0.6f,0.274f,0.1764f,1.0f);
 
 
         if (! this.loadingStarted){
-            renderingThread = new RenderingThread(gl);
+            renderingThread = new RenderingThread();
             this.loadingStarted = true;
             Log.d("LOADING SCREEN:","Started rendering");
         }
@@ -242,9 +231,10 @@ public class CraterRenderer extends EnigmaduxGLRenderer {
 
             Matrix.setLookAtM(this.cameraTranslationM, 0, 0, 0, 1, 0, 0, 0, 0, 1f, 0);
             Matrix.scaleM(this.cameraTranslationM, 0, CAMERA_Z, CAMERA_Z * LayoutConsts.SCREEN_HEIGHT / LayoutConsts.SCREEN_WIDTH, 0);//too offset the orthographic projection for areas where it isnt needed
-            this.loadingScreen.draw(gl,cameraTranslationM);
+            Matrix.multiplyMM(vPMatrix,0,orthographicM,0,this.cameraTranslationM,0);
+            this.loadingScreen.draw(gl,vPMatrix);
             this.lastMillis = System.currentTimeMillis();
-            renderingThread.step();
+            renderingThread.step(gl);
             return;
         }
 
@@ -260,23 +250,25 @@ public class CraterRenderer extends EnigmaduxGLRenderer {
         //Log.d("FRAMERATE","current framerate: "  + 10000/(longs.get(9) - longs.get(0)));
 
 
+        long start = System.currentTimeMillis();
         if ((this.backend.getCurrentGameState() != CraterBackend.GAME_STATE_HOMESCREEN) && this.gameScreenLayout.isVisible()) {
             Matrix.setLookAtM(this.cameraTranslationM, 0, this.player.getDeltaX(), this.player.getDeltaY(), 1f, player.getDeltaX(), player.getDeltaY(), 0, 0, 1f, 0);
             Matrix.scaleM(cameraTranslationM, 0, this.backend.getCameraZoom(), this.backend.getCameraZoom(), 0);
-            this.gameScreenLayout.draw(gl, this.cameraTranslationM);
+            Matrix.multiplyMM(vPMatrix,0,orthographicM,0,this.cameraTranslationM,0);
+            this.gameScreenLayout.draw(gl, this.vPMatrix);
 
             this.drawGameMap(gl);
         }
+        this.debugGameScreenMillis += System.currentTimeMillis() - start;
 
-        // Reset the Model view Matrix
-        gl.glLoadIdentity();
-
+        // Reset the Model view Matri
 
         //draws all on screen components
         Matrix.setLookAtM(this.cameraTranslationM, 0, 0, 0, 1, 0, 0, 0, 0, 1f, 0);
         Matrix.scaleM(this.cameraTranslationM, 0, CAMERA_Z, CAMERA_Z * LayoutConsts.SCREEN_HEIGHT / LayoutConsts.SCREEN_WIDTH, 0);//too offset the orthographic projection for areas where it isnt needed
-        this.levelSelectLayout.draw(gl, this.cameraTranslationM);
-        this.fullHomeScreenLayout.draw(gl, this.cameraTranslationM);
+        Matrix.multiplyMM(vPMatrix,0,orthographicM,0,this.cameraTranslationM,0);
+        if (this.backend.getCurrentGameState() == CraterBackend.GAME_STATE_LEVELSELECT)  this.levelSelectLayout.draw(gl, this.vPMatrix);
+        if (this.backend.getCurrentGameState() == CraterBackend.GAME_STATE_HOMESCREEN) this.fullHomeScreenLayout.draw(gl, this.vPMatrix);
         this.drawScreenUtils(gl);
 
         if (System.currentTimeMillis() - lastMillis  >  1000/60f){
@@ -290,10 +282,13 @@ public class CraterRenderer extends EnigmaduxGLRenderer {
             Log.d("FRONTENDTHREAD:","percentage under 60:"  + ((float) under60/updateCount));
             Log.d("FRONTENDTHREAD:","under 60s:"  + under60s);
 
+            Log.d("FRONTENDTHREAD:","Game screen Time:"  + (this.debugGameScreenMillis/this.updateCount) + " percentage: " + (this.debugGameScreenMillis/(double) (System.currentTimeMillis() - debugStartMillis)));
+
             debugStartMillis = System.currentTimeMillis();
             updateCount = 0;
             under60 = 0;
             under60s.clear();
+            this.debugGameScreenMillis = 0;
         }
 
 
@@ -308,7 +303,7 @@ public class CraterRenderer extends EnigmaduxGLRenderer {
         //basically this stops threads from accessing the same variables at the same time, as during the level select levels are loaded, which
         //if drawn at the same time from two threads will throw a java ConcurrmentModificationExcpetion
         if (this.backend.getCurrentGameState() == CraterBackend.GAME_STATE_TUTORIAL ){
-            this.gameMapTutorialLayout.draw(gl,this.cameraTranslationM);
+            this.gameMapTutorialLayout.draw(gl,this.vPMatrix);
         }
 
 
@@ -322,32 +317,32 @@ public class CraterRenderer extends EnigmaduxGLRenderer {
      */
     private void drawScreenUtils(GL10 gl){
         if (this.gameScreenLayout.isVisible()) {
-            this.loadLevelLayout.draw(gl, this.cameraTranslationM);
+            this.loadLevelLayout.draw(gl, this.vPMatrix);
 
             long tutorialMillis = backend.getTutorialCurrentMillis();
             if (tutorialMillis > CraterBackend.JOYSTICK_INTRODUCTION && ! (this.loadLevelLayout.isVisible() || this.backend.isInEndGamePausePeriod())) {
-                this.attackJoyStick.draw(gl, this.cameraTranslationM);
-                this.movementJoyStick.draw(gl, this.cameraTranslationM);
+                this.attackJoyStick.draw(gl, this.vPMatrix);
+                this.movementJoyStick.draw(gl, this.vPMatrix);
             }
             if (tutorialMillis > CraterBackend.EVOLVE_INTRODUCTION && ! (this.loadLevelLayout.isVisible() || this.backend.isInEndGamePausePeriod())) {
-                this.evolveButton.draw(gl, this.cameraTranslationM);
+                this.evolveButton.draw(gl, this.vPMatrix);
             }
 
             if (this.backend.getCurrentGameState() == CraterBackend.GAME_STATE_TUTORIAL) {
-                this.stationaryTutorialLayout.draw(gl, this.cameraTranslationM);
+                this.stationaryTutorialLayout.draw(gl, this.vPMatrix);
             }
 
 
             if (tutorialMillis > CraterBackend.CHARACTER_INTRODUCTION  && backend.getCurrentGameState() != CraterBackend.GAME_STATE_LEVELSELECT) {
-                this.healthDisplay.draw(gl, this.cameraTranslationM);
+                this.healthDisplay.draw(gl, this.vPMatrix);
             }
 
-            this.stateIndicator.draw(gl,this.cameraTranslationM,(this.backend.hasWonLastLevel() ? 0:1));
-            this.battleStartIndicator.draw(gl,this.cameraTranslationM);
+            this.stateIndicator.draw(this.vPMatrix,(this.backend.hasWonLastLevel() ? 0:1));
+            this.battleStartIndicator.draw(gl,this.vPMatrix);
 
 
-            this.pauseButton.draw(gl,this.cameraTranslationM);
-            this.pauseGameLayout.draw(gl,this.cameraTranslationM);
+            this.pauseButton.draw(gl,this.vPMatrix);
+            this.pauseGameLayout.draw(gl,this.vPMatrix);
 
 
         }
@@ -377,17 +372,19 @@ public class CraterRenderer extends EnigmaduxGLRenderer {
             height = 1; 						//Making Height Equal One
         }
 
-        gl.glViewport(0, 0, width, height); 	//Reset The Current Viewport
-        gl.glMatrixMode(GL10.GL_PROJECTION); 	//Select The Projection Matrix
-        gl.glLoadIdentity();
+
+        GLES20.glViewport(0, 0, width, height); 	//Reset The Current Viewport
+        //gl.glMatrixMode(GL10.GL_PROJECTION); 	//Select The Projection Matrix
+        //gl.glLoadIdentity();
         //Reset The Projection Matrix
 
         //Calculate The Aspect Ratio Of The Window
-        gl.glOrthof(-CAMERA_Z,CAMERA_Z,-CAMERA_Z* height/width,CAMERA_Z * height/width,0.2f,5f);
+        Matrix.orthoM(orthographicM,0,-CAMERA_Z,CAMERA_Z,-CAMERA_Z* height/width,CAMERA_Z * height/width,0.2f,5f);
+        //gl.glOrthof(-CAMERA_Z,CAMERA_Z,-CAMERA_Z* height/width,CAMERA_Z * height/width,0.2f,5f);
         //GLU.gluOrtho2D(gl,-1.0f,1.0f,-1.0f,1.0f);
         //GLU.gluPerspective(gl, 45.0f, (float)width / (float)height, 0.1f, 100.0f);
-        gl.glMatrixMode(GL10.GL_MODELVIEW); 	//Select The Modelview Matrix
-        gl.glLoadIdentity(); 					//Reset The Modelview Matrix
+        //gl.glMatrixMode(GL10.GL_MODELVIEW); 	//Select The Modelview Matrix
+        //gl.glLoadIdentity(); 					//Reset The Modelview Matrix
         Log.d("RENDERER","dimensions " + width + " H "  + height);
 
 
@@ -426,7 +423,8 @@ public class CraterRenderer extends EnigmaduxGLRenderer {
 
         //if this is the first time
         if (! this.loadingStarted) {
-            this.loadingScreen.loadGLTexture(gl, this.context, R.drawable.loading_screen);
+            TexturedRect.loadProgram();
+            this.loadingScreen.loadGLTexture(this.context, R.drawable.loading_screen);
         }
     }
 
@@ -982,8 +980,8 @@ public class CraterRenderer extends EnigmaduxGLRenderer {
         ryzeUpgradeButton.loadGLTexture(gl);
         kaiserSelectButton.loadGLTexture(gl);
         ryzeSelectButton.loadGLTexture(gl);
-        kaiserInfo.loadGLTexture(gl,context,R.drawable.kaiser_info);
-        ryzeInfo.loadGLTexture(gl,context,R.drawable.ryze_info);
+        kaiserInfo.loadGLTexture(context,R.drawable.kaiser_info);
+        ryzeInfo.loadGLTexture(context,R.drawable.ryze_info);
         kaiserInfoButton.loadGLTexture(gl);
         ryzeInfoButton.loadGLTexture(gl);
 
@@ -1049,31 +1047,39 @@ public class CraterRenderer extends EnigmaduxGLRenderer {
     }
 
     private class RenderingThread {
-        //the gl context
-        private GL10 gl10;
+
 
         //put some blank steps before so gl can keep the screen blank
         private int PADDING_STEPS = 5;
         //step number
         private int step = -PADDING_STEPS;
 
-        /** Default constructor
-         *
-         * @param gl10 used for loading resources
-         */
-        RenderingThread(GL10 gl10){
-            this.gl10 = gl10;
-
-
-        }
-
         /**
          *
          */
-        public void step() {
-            loadNonBegginingTextures(this.gl10,this.step);
+        void step(GL10 gl10) {
+            loadNonBegginingTextures(gl10,this.step);
             this.step++;
         }
+    }
+
+    /** Compiles the shader code
+     *
+     * @param type vertex or fragment
+     * @param shaderCode the actual code
+     * @return an integer that tells openGL how to write the code
+     */
+    public static int loadShader(int type, String shaderCode){
+
+        // create a vertex shader type (GLES20.GL_VERTEX_SHADER)
+        // or a fragment shader type (GLES20.GL_FRAGMENT_SHADER)
+        int shader = GLES20.glCreateShader(type);
+
+        // add the source code to the shader and compile it
+        GLES20.glShaderSource(shader, shaderCode);
+        GLES20.glCompileShader(shader);
+
+        return shader;
     }
 
 

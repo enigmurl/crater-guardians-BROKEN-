@@ -2,11 +2,11 @@ package com.enigmadux.craterguardians.Characters;
 
 import android.content.Context;
 import android.opengl.Matrix;
+import android.util.Log;
 
 import com.enigmadux.craterguardians.AngleAimers.AngleAimer;
 import com.enigmadux.craterguardians.AngleAimers.TriRectAimer;
 import com.enigmadux.craterguardians.Attacks.RyzeAttack;
-import com.enigmadux.craterguardians.CraterBackend;
 import com.enigmadux.craterguardians.MathOps;
 import com.enigmadux.craterguardians.GUI.ProgressBar;
 import com.enigmadux.craterguardians.R;
@@ -113,9 +113,9 @@ public class Ryze extends Player {
      * @param context context used to grab the actual image from res
      */
     public static void loadGLTexture(GL10 gl, Context context) {
-        VISUAL_REPRESENTATION.loadGLTexture(gl,context,R.drawable.kaiser_sprite_sheet_e1,0);
-        VISUAL_REPRESENTATION.loadGLTexture(gl,context,R.drawable.kaiser_sprite_sheet_e2,1);
-        VISUAL_REPRESENTATION_GUN.loadGLTexture(gl,context,R.drawable.kaiser_gun);
+        VISUAL_REPRESENTATION.loadGLTexture(context,R.drawable.kaiser_sprite_sheet_e1,0);
+        VISUAL_REPRESENTATION.loadGLTexture(context,R.drawable.kaiser_sprite_sheet_e2,1);
+        VISUAL_REPRESENTATION_GUN.loadGLTexture(context,R.drawable.kaiser_gun);
     }
 
 
@@ -186,9 +186,13 @@ public class Ryze extends Player {
 
 
         Matrix.multiplyMM(finalMatrix,0,parentMatrix,0,translationRotationMatrix,0);
-        VISUAL_REPRESENTATION_GUN.draw(gl,finalMatrix);
+        try {
+            VISUAL_REPRESENTATION_GUN.draw(gl, finalMatrix);
 
-        VISUAL_REPRESENTATION.draw(gl,finalMatrix,this.evolveGen);
+            VISUAL_REPRESENTATION.draw(finalMatrix, this.evolveGen);
+        } catch (Exception e){
+            Log.e("RYZE:","EXCEPTION ",e);
+        }
         super.draw(gl,parentMatrix);
 
     }

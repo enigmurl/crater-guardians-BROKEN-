@@ -3,19 +3,21 @@ package enigmadux2d.core.shapes;
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
-import android.opengl.GLES10;
+import android.opengl.GLES20;
 import android.opengl.GLUtils;
-import android.support.annotation.NonNull;
+import android.opengl.Matrix;
+import android.util.Log;
 import android.view.MotionEvent;
 
 
+import com.enigmadux.craterguardians.CraterRenderer;
 import com.enigmadux.craterguardians.MathOps;
 
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.nio.FloatBuffer;
+import java.util.Arrays;
 
-import javax.microedition.khronos.opengles.GL;
 import javax.microedition.khronos.opengles.GL10;
 
 import enigmadux2d.core.EnigmaduxComponent;
@@ -26,6 +28,52 @@ import enigmadux2d.core.EnigmaduxComponent;
  * @version BETA
  */
 public class TexturedRect extends EnigmaduxComponent {
+   /* private static final String vertexShaderCode =
+
+            // This matrix member variable provides a hook to manipulate
+            // the coordinates of objects that use this vertex shader.
+            "uniform mat4 uMVPMatrix;   \n" +
+            "attribute vec4 vPosition;  \n" +
+            "void main(){               \n" +
+            // The matrix must be included as part of gl_Position
+            // Note that the uMVPMatrix factor *must be first* in order
+            // for the matrix multiplication product to be correct.
+            " gl_Position = uMVPMatrix * vPosition; \n" +
+
+            "}  \n";*/
+    //vertex shader code
+   private static final String vertexShaderCode =
+           "precision mediump float;" +
+           "uniform mat4 uMVPMatrix;" +
+           "uniform vec2 texCoordDelta;"+
+
+           "attribute vec4 vPosition;" +
+           "attribute vec2 TexCoordIn;" +
+
+
+           "varying vec2 TexCoordOut;" +
+
+           "void main() {" +
+           //the matrix must be included as a modifier of gl_Position
+           "  gl_Position = uMVPMatrix * vPosition;" +
+           "  TexCoordOut = TexCoordIn + texCoordDelta;" +
+           "}";
+    //fragement shader code
+    private static final String fragmentShaderCode =
+            "precision mediump float;" +
+            "uniform sampler2D Texture;" +     // The input texture.
+            "varying lowp vec2 TexCoordOut;"  + // Interpolated texture coordinate per fragment.
+            "uniform vec4 shaderIn;" +
+            "void main() {" +
+            //"  gl_FragColor = ();" +
+            "  gl_FragColor = texture2D(Texture,TexCoordOut) * shaderIn;" +
+            "}";
+
+    //an empty openGL program
+    private static int mProgram;
+
+
+
     // buffer holding the vertices
     private FloatBuffer vertexBuffer;
     //vertices used for open gl
@@ -53,11 +101,26 @@ public class TexturedRect extends EnigmaduxComponent {
     //a value of 1,1,1,1 would mean draw the object directly, the shader alters the color of the texture, by multiplying each
     private float[] shader = new float[] {1,1,1,1};
 
-    //how much to translate the texture coordinate x direction
-    private float deltaU;
-    //how much to translate the texture coordinate y direction
-    private float deltaV;
 
+    //how much to translate the texture coordinate x direction
+    private float[] deltaTextureCoordinates = new float[2];
+
+
+    //how to apply the scaling and rotating
+    private final float[] finalMatrix = new float[16];
+
+    //position handle of the vertex pointer
+    private int verticesHandle;
+    //position handle of the texture coordinates
+    private int textureCordHandle;
+    //position handle of the texture delta coordinates
+    private int textureDeltaHandle;
+    //position handle of the actual texture
+    private int textureHandle;
+    //position handle of the view projection matrix;
+    private int vPMatrixHandle;
+    //position handle of the shader vec
+    private int shaderHandle;
 
 
     /** Default Constructor, defaults to 1 texture
@@ -112,18 +175,66 @@ public class TexturedRect extends EnigmaduxComponent {
 
         textureBuffer = byteBuffer.asFloatBuffer();
 
-
     }
 
+    /** Loads the program
+     *
+     */
+    public static void loadProgram() {
+        int vertexShader = CraterRenderer.loadShader(GLES20.GL_VERTEX_SHADER, vertexShaderCode);
+        int fragmentShader = CraterRenderer.loadShader(GLES20.GL_FRAGMENT_SHADER, fragmentShaderCode);
+
+        Log.e("TEXTURED:","vertex: " + vertexShader + " fragement: " +  fragmentShader);
+        // create empty OpenGL ES Program
+        mProgram = GLES20.glCreateProgram();
+
+        // add the vertex shader to program
+        GLES20.glAttachShader(mProgram, vertexShader);
+
+        // add the fragment shader to program
+        GLES20.glAttachShader(mProgram, fragmentShader);
+
+        // creates OpenGL ES program executables
+        GLES20.glLinkProgram(mProgram);
+
+        GLES20.glUseProgram(mProgram);
+    }
+
+
+    /** Gets integers that represent the handles
+     *
+     */
+    private void loadHandles() {
+        // get handle to vertex shader's vPosition member
+        this.verticesHandle = GLES20.glGetAttribLocation(mProgram, "vPosition");
+
+        this.textureHandle = GLES20.glGetUniformLocation(mProgram, "Texture");
+
+        this.textureCordHandle = GLES20.glGetAttribLocation(mProgram, "TexCoordIn");
+
+        this.textureDeltaHandle = GLES20.glGetUniformLocation(mProgram,"texCoordDelta");
+
+        this.vPMatrixHandle = GLES20.glGetUniformLocation(mProgram, "uMVPMatrix");
+
+        this.shaderHandle = GLES20.glGetUniformLocation(mProgram,"shaderIn");
+
+        //Log.e("TEXTURED:", mProgram + " " + this.verticesHandle + " " + this.textureHandle  +"  " + this.textureCordHandle + " " + this.vPMatrixHandle + " " + this.shaderHandle + " " + this.textureDeltaHandle);
+
+    }
 
     /** Loads the vertices from a float[] to a buffer
      *
      * @param vertices the vertices, should be in the form of {x1,y1,z1,x2,y2,z2 ...}, bottom right, top right, bottom left, top left
      */
     public void loadVertexBuffer(float[] vertices){
+        this.vertices = vertices;
+        ByteBuffer byteBuffer = ByteBuffer.allocateDirect(vertices.length * 4);
+        byteBuffer.order(ByteOrder.nativeOrder());
 
+        vertexBuffer = byteBuffer.asFloatBuffer();
         vertexBuffer.put(vertices);
         vertexBuffer.position(0);
+
     }
 
 
@@ -132,32 +243,27 @@ public class TexturedRect extends EnigmaduxComponent {
      * @param texture the texture represented as a float[]. All sub values should be 0 to 1f
      */
     public void loadTextureBuffer(float[] texture){
-
         textureBuffer.put(texture);
         textureBuffer.position(0);
     }
 
     /** Binds the given image to the rect. Defaults to save at the 0th position in the texture array
-     *
-     * @param gl an instance of GL10 used to access open gl
-     * @param context any android context use to get the resources (this is subject to change)
+     *  @param context any android context use to get the resources (this is subject to change)
      * @param textureID the android reference to the R.drawable.* image
      */
-    public void loadGLTexture(@NonNull GL10 gl, Context context,int textureID) {
-        this.loadGLTexture(gl,context,textureID,0);
+    public void loadGLTexture(Context context, int textureID) {
+        this.loadGLTexture(context,textureID,0);
     }
 
     /** Binds the given image to the rect
-     *
-     * @param gl an instance of GL10 used to access open gl
-     * @param context any android context use to get the resources (this is subject to change)
+     *  @param context any android context use to get the resources (this is subject to change)
      * @param textureID the android reference to the R.drawable.* image
      * @param index corresponds to the position in the textures array
      */
-    public void loadGLTexture(@NonNull GL10 gl, Context context,int textureID, int index) {
+    public void loadGLTexture(Context context, int textureID, int index) {
         Bitmap bitmap = BitmapFactory.decodeResource(context.getResources(),textureID);
 
-        this.loadGLTexture(gl,bitmap,index);
+        this.loadGLTexture(bitmap,index);
 
     }
 
@@ -167,22 +273,22 @@ public class TexturedRect extends EnigmaduxComponent {
      *
      * (possible optimizations: don't recreate the bitmap if it's already fine. And make it so you can pass in the texture possibly separate method
      *
-     * @param gl an instance of GL10 used to access open gl
      * @param bitmap The bitmap that defines the texture of the rect
      */
-    public void loadGLTexture(@NonNull GL10 gl,Bitmap bitmap){
-        this.loadGLTexture(gl,bitmap,0);
+    public void loadGLTexture(Bitmap bitmap){
+        this.loadGLTexture(bitmap,0);
     }
 
-    /** Binds the given bitmap image to the rect.
+    /** Binds the given bitmap image to the rect. Additionally loads handles
      *
      * (possible optimizations: don't recreate the bitmap if it's already fine. And make it so you can pass in the texture possibly separate method
-     *
-     * @param gl an instance of GL10 used to access open gl
-     * @param bitmap The bitmap that defines the texture of the rect
+     *  @param bitmap The bitmap that defines the texture of the rect
      * @param index corresponds to the position in the textures array
      */
-    public void loadGLTexture(@NonNull GL10 gl,Bitmap bitmap,int index){
+    public void loadGLTexture(Bitmap bitmap, int index){
+        this.loadHandles();
+
+
         int afterW = MathOps.nextPowerTwo(bitmap.getWidth());
         int afterH = MathOps.nextPowerTwo(bitmap.getHeight());
         if (afterH != bitmap.getHeight() || afterW != bitmap.getWidth()) {
@@ -199,16 +305,16 @@ public class TexturedRect extends EnigmaduxComponent {
 
         // generate one texture pointer
         if (! this.texturesInitialized) {
-            gl.glGenTextures(textures.length, textures, 0);
+            GLES20.glGenTextures(textures.length, textures, 0);
             this.texturesInitialized = true;
         }
 
         // ...and bind it to our array
-        gl.glBindTexture(GL10.GL_TEXTURE_2D, textures[index]);
+        GLES20.glBindTexture(GLES20.GL_TEXTURE_2D, textures[index]);
 
         // create nearest filtered texture
-        gl.glTexParameterf(GL10.GL_TEXTURE_2D, GL10.GL_TEXTURE_MIN_FILTER, GL10.GL_NEAREST);
-        gl.glTexParameterf(GL10.GL_TEXTURE_2D, GL10.GL_TEXTURE_MAG_FILTER, GL10.GL_LINEAR);
+        GLES20.glTexParameterf(GLES20.GL_TEXTURE_2D, GLES20.GL_TEXTURE_MIN_FILTER, GLES20.GL_NEAREST);
+        GLES20.glTexParameterf(GLES20.GL_TEXTURE_2D, GLES20.GL_TEXTURE_MAG_FILTER, GLES20.GL_LINEAR);
 
         // loading texture as late as possible as to save memory (think)
 
@@ -236,95 +342,89 @@ public class TexturedRect extends EnigmaduxComponent {
      * @param parentMatrix matrix that represents how to manipulate it to the world coordinates
      */
     public void draw(GL10 gl,float[] parentMatrix) {
-        this.draw(gl,parentMatrix,0);
+        this.draw(parentMatrix,0);
     }
 
     /** The draw method for the TexturedRect with the GL context. Draws the TexturedRect with the texture given.
      *
-     * @param gl the GL10 object used to communicate with open gl
      * @param parentMatrix matrix that represents how to manipulate it to the world coordinates
      * @param frameNum refers to which texture to bind too
      */
-    public void draw(GL10 gl,float[] parentMatrix,int frameNum) {
+    public void draw(float[] parentMatrix, int frameNum) {
         if (! this.visible){
             return;
         }
 
-        gl.glLoadMatrixf(parentMatrix,0);
+        this.prepareDraw(frameNum);
 
 
-        this.prepareDraw(gl,frameNum);
 
-        gl.glMatrixMode(GL10.GL_TEXTURE);
-        gl.glLoadIdentity();
-        gl.glTranslatef(this.deltaU,this.deltaV,0);
-        // Draw the vertices as triangle strip
-        gl.glColor4f(shader[0],shader[1],shader[2],shader[3]); // This is where the magic does happen
-        gl.glDrawArrays(GL10.GL_TRIANGLE_STRIP, 0, vertices.length / 3);
-        gl.glColor4f(1.0f, 1.0f, 1.0f, 1.0f);
 
-        this.endDraw(gl);
+        this.intermediateDraw(parentMatrix);
 
-        gl.glLoadIdentity();
-        gl.glMatrixMode(GL10.GL_MODELVIEW);
+
+
+        this.endDraw();
+
     }
 
     /** Draw without the overhead of loading the textures
      *
-     * @param gl the gl object used so we can send commands
      * @param parentMatrix matrix that represents how to manipulate it to the world coordinates
      */
-    public void intermediateDraw(GL10 gl,float[] parentMatrix){
+    public void intermediateDraw(float[] parentMatrix){
         if (! this.visible){
             return;
         }
+        // Pass the projection and view transformation to the shader
+        Matrix.translateM(finalMatrix,0,parentMatrix,0,this.deltaX,this.deltaY,0);
+        Matrix.scaleM(finalMatrix,0,this.scaleX,this.scaleY,1);
+        Matrix.rotateM(finalMatrix,0,this.angle,0,0,1);
 
-        gl.glLoadMatrixf(parentMatrix,0);
-        gl.glMatrixMode(GL10.GL_TEXTURE);
-        gl.glLoadIdentity();
-        gl.glTranslatef(this.deltaU,this.deltaV,0);
-        // Draw the vertices as triangle strip
-        gl.glColor4f(shader[0],shader[1],shader[2],shader[3]); // This is where the magic does happen
-        gl.glDrawArrays(GL10.GL_TRIANGLE_STRIP, 0, vertices.length / 3);
-        gl.glColor4f(1.0f, 1.0f, 1.0f, 1.0f);
-        gl.glLoadIdentity();
-        gl.glMatrixMode(GL10.GL_MODELVIEW);
+        GLES20.glUniformMatrix4fv(vPMatrixHandle, 1, false, finalMatrix, 0);
+
+
+        GLES20.glUniform2fv(this.textureDeltaHandle,1,this.deltaTextureCoordinates,0);
+
+        GLES20.glDrawArrays(GLES20.GL_TRIANGLE_STRIP, 0, this.vertices.length / 3);
+
     }
 
     /** Prepares drawing, But basically means u can draw the same object multiple times without the overhead
      *
-     * @param gl the gl object used so we can send commands
      * @param frameNum the frameNum in the texture
      */
-    public void prepareDraw(GL10 gl,int frameNum){
-        gl.glTranslatef(this.deltaX,this.deltaY,0);
-        gl.glScalef(this.scaleX,this.scaleY,1);
-        gl.glRotatef(this.angle,0,0,1);
+    public void prepareDraw(int frameNum){
 
-
-
-        // bind the previously generated texture
-        gl.glEnable(GL10.GL_TEXTURE_2D);
-        gl.glBindTexture(GL10.GL_TEXTURE_2D, textures[frameNum]);
 
         // Point to our buffers
-        gl.glEnableClientState(GL10.GL_VERTEX_ARRAY);
-        gl.glEnableClientState(GL10.GL_TEXTURE_COORD_ARRAY);
+        GLES20.glEnableVertexAttribArray(verticesHandle);
+        // Prepare the rect coordinate data
+        GLES20.glVertexAttribPointer(verticesHandle,3, GLES20.GL_FLOAT, false, 12, vertexBuffer);
+
+        GLES20.glEnableVertexAttribArray(textureCordHandle);
+        // Prepare the triangle coordinate data
+        GLES20.glVertexAttribPointer(textureCordHandle,2, GLES20.GL_FLOAT, false, 8, textureBuffer);
 
 
-        // Point to our vertex buffer
-        gl.glVertexPointer(3, GL10.GL_FLOAT, 0, vertexBuffer);
-        gl.glTexCoordPointer(2, GL10.GL_FLOAT, 0, textureBuffer);
+        GLES20.glActiveTexture(GLES20.GL_TEXTURE0);
+        GLES20.glBindTexture(GLES20.GL_TEXTURE_2D, textures[frameNum]);
+        GLES20.glUniform1i(textureHandle, 0);
+
+        GLES20.glEnableVertexAttribArray(shaderHandle);
+        // Prepare the triangle coordinate data
+        GLES20.glUniform4fv(shaderHandle, 1,this.shader,0);
+
+
     }
 
     /** Ends the drawing period
      *
-     * @param gl gl object used so we can send commands
      */
-    public void endDraw(GL10 gl){
-        //Disable the client state before leaving
-        gl.glDisableClientState(GL10.GL_VERTEX_ARRAY);
-        gl.glDisableClientState(GL10.GL_TEXTURE_COORD_ARRAY);
+    public void endDraw(){
+        GLES20.glDisableVertexAttribArray(verticesHandle);
+        GLES20.glDisableVertexAttribArray(textureCordHandle);
+        GLES20.glDisableVertexAttribArray(shaderHandle);
 
     }
 
@@ -371,10 +471,6 @@ public class TexturedRect extends EnigmaduxComponent {
         return this.h;
     }
 
-
-
-
-
     /** Sets the angle around the axis 0,0,1
      *
      * @param angle the angle around axis 0,0,1
@@ -408,8 +504,8 @@ public class TexturedRect extends EnigmaduxComponent {
      * @param deltaV how much to translate in the y direction
      */
     public void setTextureDelta(float deltaU,float deltaV){
-        this.deltaU = deltaU;
-        this.deltaV = deltaV;
+        this.deltaTextureCoordinates[0] = deltaU;
+        this.deltaTextureCoordinates[1] = deltaV;
     }
 
     /** Sets the shader, which modifies the color of the texture
@@ -424,6 +520,7 @@ public class TexturedRect extends EnigmaduxComponent {
         this.shader[1] = g;
         this.shader[2] = b;
         this.shader[3] = a;
+
     }
 
     /** Gets the array representing the shader
@@ -433,4 +530,6 @@ public class TexturedRect extends EnigmaduxComponent {
     public float[] getShader() {
         return shader;
     }
+
+
 }

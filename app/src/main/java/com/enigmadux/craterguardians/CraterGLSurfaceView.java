@@ -26,13 +26,13 @@ public class CraterGLSurfaceView extends EnigmaduxGLSurfaceView {
         super(context);
 
 
-
     }
 
 
     /** Not a usual setter method as it takes no parameters, it's meant to be called once by the parent class
      *
      */
+    @Override
     public void setRenderer(){
         mRenderer = new CraterRenderer(this.context);
         setRenderer(mRenderer);

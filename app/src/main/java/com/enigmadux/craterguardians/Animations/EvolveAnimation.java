@@ -57,11 +57,10 @@ public class EvolveAnimation extends Animation {
 
     /** Binds the sprite sheet to the quad
      *
-     * @param gl10 access to openGL
      * @param context any nonnull context
      */
-    public static void loadGLTexture(GL10 gl10, Context context){
-        VISUAL_REPRESENTATION.loadGLTexture(gl10,context, R.drawable.death_animation);
+    public static void loadGLTexture(Context context){
+        VISUAL_REPRESENTATION.loadGLTexture(context, R.drawable.death_animation);
     }
 
     /** draws the current frame
@@ -73,11 +72,9 @@ public class EvolveAnimation extends Animation {
     public void draw(GL10 gl, float[] parentMatrix) {
         Matrix.multiplyMM(this.finalMatrix,0,parentMatrix,0,this.translationScalarMatrix,0);
 
-        float[] translation = MathOps.getTextureBufferTranslation(
-                0,
-                (int) (this.currentPosition* EvolveAnimation.NUM_FRAMES/EvolveAnimation.ANIMATION_LENGTH),
-                EvolveAnimation.NUM_FRAMES,
-                1);
+        float translationX = MathOps.getTextureBufferTranslationX((int) (this.currentPosition* EvolveAnimation.NUM_FRAMES/EvolveAnimation.ANIMATION_LENGTH), EvolveAnimation.NUM_FRAMES);
+        //y translation is always 0
+        VISUAL_REPRESENTATION.setTextureDelta(translationX,0);
 
 //
 //        VISUAL_REPRESENTATION.loadTextureBuffer(MathOps.getTextureBuffer(

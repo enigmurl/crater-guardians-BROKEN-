@@ -124,8 +124,8 @@ public abstract class Button extends EnigmaduxComponent {
      * @param context any android context use to get the resources (this is subject to change)
      */
     public static void loadButtonGLTexture(GL10 gl, Context context) {
-        Button.BUTTON_BACKGROUND.loadGLTexture(gl,context, R.drawable.button_background);
-        Button.LEVEL_BUTTON_BACKGROUND.loadGLTexture(gl,context,R.drawable.level_button_background);
+        Button.BUTTON_BACKGROUND.loadGLTexture(context, R.drawable.button_background);
+        Button.LEVEL_BUTTON_BACKGROUND.loadGLTexture(context,R.drawable.level_button_background);
 
         Button.bitmapPainter.setTypeface(ResourcesCompat.getFont(context,R.font.baloobhaina));
     }
@@ -139,6 +139,7 @@ public abstract class Button extends EnigmaduxComponent {
             Log.d("BUTTON","called loadGLTEXTURE on text button");
             return;
         }
+
         this.renderedRecentText = true;
         bitmapPainter.setTextSize((this.fontHeight*height/2));
 
@@ -158,7 +159,7 @@ public abstract class Button extends EnigmaduxComponent {
 
         if (shader != null) this.texturedRect.setShader(shader[0],shader[1],shader[2],shader[3]);
 
-        texturedRect.loadGLTexture(gl,loadBitmap());
+        texturedRect.loadGLTexture(loadBitmap());
         texturedRect.show();
 
         float textMinPadding = Button.MIN_PADDING * this.fontHeight;
@@ -179,7 +180,7 @@ public abstract class Button extends EnigmaduxComponent {
             Log.d("BUTTON","called loadGLTEXTURE on image button");
             return;
         }
-        this.texturedRect.loadGLTexture(gl,context,fileID);
+        this.texturedRect.loadGLTexture(context,fileID);
     }
 
     /** The draw method for the button. Draws the button text and background to the screen to the frame.
@@ -191,6 +192,7 @@ public abstract class Button extends EnigmaduxComponent {
     public void draw(GL10 gl, float[] parentMatrix) {
         //todo OPTIMIZATION OF THE MATRICES
         if (! this.isImageButton && ! this.renderedRecentText){
+            this.renderedRecentText = true;
             this.loadGLTexture(gl);
         }
         if (this.visible) {
@@ -281,9 +283,13 @@ public abstract class Button extends EnigmaduxComponent {
      */
     public void setText(String text) {
         this.text = text;
+        //this basically happens when the text is change twice before the loadGLtextur is called, moving it wihtout an offset
+        if (this.renderedRecentText){
+            this.x += this.w/2;
+            this.y += this.h/2;
+        }
         this.renderedRecentText = false;
-        this.x += this.w/2;
-        this.y += this.h/2;
+
     }
 
     /** Gets the text that this is representing

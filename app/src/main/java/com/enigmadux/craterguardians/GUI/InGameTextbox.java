@@ -105,7 +105,7 @@ public class InGameTextbox extends EnigmaduxComponent {
         texturedRect = new TexturedRect(- this.w/2,-(3*this.h/(this.text.length*2)),this.w,this.h + this.h/this.text.length);//extra layer
 
         texturedRect.setTranslate(this.x,this.y);
-        texturedRect.loadGLTexture(gl,loadBitmap());
+        texturedRect.loadGLTexture(loadBitmap());
         texturedRect.show();
         this.renderedRecentText = true;
 

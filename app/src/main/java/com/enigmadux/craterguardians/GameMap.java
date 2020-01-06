@@ -100,6 +100,17 @@ public class GameMap extends EnigmaduxComponent {
         this.cameraX = cameraX;
         this.cameraY = cameraY;
     }
+
+    //todo these are debug only
+    private long TOTAL = 0;
+    private long plateauTIME;
+    private long toxicLakeTIME;
+    private long suppliesTIME;
+    private long spawnersTIME;
+    private long enemiesTIME;
+    private long animationTIME;
+    private long playerTIME;
+
     /** Draws the gameMap
      *
      * @param gl any gl reference that we send draw commands too
@@ -111,67 +122,93 @@ public class GameMap extends EnigmaduxComponent {
         //if drawn at the same time from two threads will throw a java ConcurrmentModificationExcpetion
 
         ///see if splitting it into two loops makes it slower
+        long overallStart = System.currentTimeMillis();
+        long start = System.currentTimeMillis();
 
         if (plateaus.size() > 0) {
             synchronized (CraterBackend.PLATEAU_LOCK) {
-                Plateau.prepareDrawing(gl,0);
-                for (Plateau plateau : this.plateaus) {
-                    plateau.draw(gl, parentMatrix);
+                for (int i = 0, size = this.plateaus.size();i < size; i++){
+                    plateaus.get(i).draw(gl,parentMatrix);
                 }
-                Plateau.endDrawing(gl);
+                //for (Plateau plateau : this.plateaus) {
+                //  plateau.draw(gl, parentMatrix);
+                //}
             }
         }
+        plateauTIME += System.currentTimeMillis() - start;
+
+        start = System.currentTimeMillis();
         if (this.backend.getTutorialCurrentMillis() > CraterBackend.PLATEAUS_TOXIC_LAKE_INTRODUCTION) {
             synchronized (CraterBackend.TOXICLAKE_LOCK) {
-                ToxicLake.prepareDrawing(gl,0);
-                for (ToxicLake toxicLake : this.toxicLakes) {
-                    toxicLake.draw(gl, parentMatrix);
+                for (int i = 0, size = this.toxicLakes.size();i < size; i++){
+                    toxicLakes.get(i).draw(gl,parentMatrix);
                 }
-                ToxicLake.endDrawing(gl);
-                for (ToxicLake toxicLake : this.toxicLakes) {
-                    toxicLake.drawBubbles(gl, parentMatrix);
-                }
+                //for (ToxicLake toxicLake : this.toxicLakes) {
+                //    toxicLake.draw(gl, parentMatrix);
+                //}
+
             }
         }
+        toxicLakeTIME += System.currentTimeMillis() - start;
 
-
+        start = System.currentTimeMillis();
         if (supplies.size() > 0 && this.backend.getTutorialCurrentMillis() > CraterBackend.SUPPLIES_INTRODUCTION) {
             synchronized (CraterBackend.SUPPLIES_LOCK) {
-                Supply.prepareDrawing(gl,0);
-                for (Supply supply : this.supplies) {
-                    supply.draw(gl, parentMatrix);
+                for (int i = 0, size = this.supplies.size();i < size; i++){
+                    supplies.get(i).draw(gl,parentMatrix);
                 }
-                Supply.endDrawing(gl);
-                for (Supply supply : this.supplies){
-                    supply.drawHealthDisplay(gl,parentMatrix);
-                }
+                //for (Supply supply : this.supplies) {
+                //    supply.draw(gl, parentMatrix);
+                //}
 
             }
         }
+        suppliesTIME += System.currentTimeMillis() - start;
 
         if (this.backend.getTutorialCurrentMillis() > CraterBackend.ENEMIES_INTRODUCTION) {
+            start = System.currentTimeMillis();
             synchronized (CraterBackend.SPAWNER_LOCK) {
-                for (Spawner spawner : this.spawners) {
-                    spawner.draw(gl, parentMatrix);
+                for (int i = 0, size = this.spawners.size();i < size; i++){
+                    spawners.get(i).draw(gl,parentMatrix);
                 }
+                //for (Spawner spawner : this.spawners) {
+                //    spawner.draw(gl, parentMatrix);
+                //}
             }
+            spawnersTIME += System.currentTimeMillis() - start;
             if (enemies.size() > 0) {
                 synchronized (CraterBackend.ENEMIES_LOCK) {
-
-                    for (Enemy enemy : this.enemies) {
-                        enemy.draw(gl, parentMatrix);
+                    Enemy.prepareDraw();
+                    for (int i = 0, size = this.enemies.size();i < size; i++){
+                        enemies.get(i).drawIntermediate(gl,parentMatrix);
                     }
+                    Enemy.endDrawing();
+                    for (int i = 0, size = this.enemies.size();i < size; i++){
+                        enemies.get(i).draw(gl,parentMatrix);
+                    }
+                    //for (Enemy enemy : this.enemies) {
+                    //    enemy.draw(gl, parentMatrix);
+                    //}
                 }
             }
+            enemiesTIME += System.currentTimeMillis() - start;
         }
 
-        synchronized (CraterBackend.ANIMATIONS_LOCK) {
-            for (Animation animation : this.animations) {
-                animation.draw(gl, parentMatrix);
+        start = System.currentTimeMillis();
+        if (animations.size() > 0) {
+            synchronized (CraterBackend.ANIMATIONS_LOCK) {
+                for (int i = 0, size = this.animations.size();i < size; i++) {
+                    animations.get(i).draw(gl, parentMatrix);
+                }
+                //for (Animation animation : this.animations) {
+                //    animation.draw(gl, parentMatrix);
+                //}
             }
         }
+        animationTIME += System.currentTimeMillis() - start;
 
 
+        start = System.currentTimeMillis();
         synchronized (CraterBackend.PLAYER_LOCK) {
             if (this.backend.getTutorialCurrentMillis() > CraterBackend.CHARACTER_INTRODUCTION) {
                 float x = this.player.getDeltaX();
@@ -180,6 +217,28 @@ public class GameMap extends EnigmaduxComponent {
                 this.player.draw(gl, parentMatrix);
                 this.player.setTranslate(x,y);
             }
+        }
+        playerTIME += System.currentTimeMillis() - start;
+
+        this.TOTAL += System.currentTimeMillis() - overallStart;
+        if (TOTAL > 10000){
+            Log.d("FRONTEND:","Plateau time: " + (plateauTIME/((double)TOTAL)) );
+            Log.d("FRONTEND:","Toxic L time: "+ (toxicLakeTIME/((double) TOTAL)) );
+            Log.d("FRONTEND:","SUPPLY  time: "+ (suppliesTIME/((double)TOTAL)) );
+            Log.d("FRONTEND:","SPAWNER time: "+ (spawnersTIME/((double) TOTAL)) );
+            Log.d("FRONTEND:","ENEMY   time: "+ (enemiesTIME/((double) TOTAL)) );
+            Log.d("FRONTEND:","ANIMATI time: "+ (animationTIME/((double) TOTAL)) );
+            Log.d("FRONTEND:","PLAYER  time: "+ (playerTIME/((double) TOTAL)) );
+
+            TOTAL = 0;
+            plateauTIME = 0;
+            toxicLakeTIME = 0;
+            suppliesTIME = 0;
+            spawnersTIME = 0;
+            enemiesTIME = 0;
+            animationTIME = 0;
+            playerTIME = 0;
+
         }
 
 

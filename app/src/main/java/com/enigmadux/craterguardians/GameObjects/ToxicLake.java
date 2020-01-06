@@ -108,24 +108,6 @@ public class ToxicLake extends EnigmaduxComponent {
         Matrix.multiplyMM(translationScalarMatrix,0,translationMatrix,0,scalarMatrix,0);
     }
 
-    /** Prepares drawing, by loading the vertex and texture coordinates
-     *
-     * @param gl a gl reference used to send commands to open Gl
-     * @param frameNum the frame num in the animation (should always be 0)
-     */
-    public static void prepareDrawing(GL10 gl,int frameNum){
-        VISUAL_REPRESENTATION.prepareDraw(gl,frameNum);
-    }
-
-    /** Unassigns vertex and texture arrays
-     *
-     * @param gl a gl reference used to send commands to open Gl
-     */
-    public static void endDrawing(GL10 gl){
-        VISUAL_REPRESENTATION.endDraw(gl);
-    }
-
-
     /** Draws the enemy, and all sub components
      *
      * @param gl used to access openGL
@@ -133,22 +115,14 @@ public class ToxicLake extends EnigmaduxComponent {
      */
     public void draw(GL10 gl,float[] parentMatrix){
         Matrix.multiplyMM(finalMatrix,0,parentMatrix,0,translationScalarMatrix,0);
-        VISUAL_REPRESENTATION.intermediateDraw(gl,finalMatrix);
-
-    }
-
-
-    /** Draws the toxic bubbles
-     *
-     * @param gl used to access openGL
-     * @param parentMatrix describes how to transform from model to view
-     */
-    public void drawBubbles(GL10 gl,float[] parentMatrix){
-        Matrix.multiplyMM(finalMatrix,0,parentMatrix,0,translationScalarMatrix,0);
+        VISUAL_REPRESENTATION.draw(gl,finalMatrix);
         for (ToxicBubble tb:this.toxicBubbles) {
             tb.draw(gl, parentMatrix);
         }
     }
+
+
+
 
     /** Loads the texture
      *
@@ -156,7 +130,7 @@ public class ToxicLake extends EnigmaduxComponent {
      * @param context context used to load resources, and non null context should work
      */
     public static void loadGLTexture(@NonNull GL10 gl, Context context) {
-        VISUAL_REPRESENTATION.loadGLTexture(gl,context, R.drawable.toxic_lake_texture);
+        VISUAL_REPRESENTATION.loadGLTexture(context, R.drawable.toxic_lake_texture);
     }
 
     /** Tries to attack the enemies and the bots

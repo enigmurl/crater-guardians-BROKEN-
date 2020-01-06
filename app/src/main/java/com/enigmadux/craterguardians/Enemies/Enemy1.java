@@ -2,7 +2,6 @@ package com.enigmadux.craterguardians.Enemies;
 
 import android.content.Context;
 import android.opengl.Matrix;
-import android.support.annotation.NonNull;
 
 import com.enigmadux.craterguardians.Attacks.Enemy1Attack;
 import com.enigmadux.craterguardians.MathOps;
@@ -22,7 +21,7 @@ public class Enemy1 extends Enemy {
     //a constant that represents how many rows the sprite sheet has (how many orientations of rotations
     private static final int NUM_ROTATION_ORIENTATIONS = 8;
     //a constant that represents how many columns the sprite sheet has (how many frames in a single rotation animation)
-    private static final int FRAMES_PER_ROTATION = 16;
+    private static final int FRAMES_PER_ROTATION = 8;
     //a constant that represents how fast to play the animation in frames per second
     private static final float FPS = 16;
     //a constant that represents the maximum health of Enemy1
@@ -35,7 +34,7 @@ public class Enemy1 extends Enemy {
     public static final float CHARACTER_RADIUS = 0.15f;
 
     //visual is shared by all objects as they all have the same sprite
-    private static TexturedRect VISUAL_REPRESENTATION = new TexturedRect(-Enemy1.CHARACTER_RADIUS,-Enemy1.CHARACTER_RADIUS,Enemy1.CHARACTER_RADIUS*2,Enemy1.CHARACTER_RADIUS*2);
+    private static TexturedRect VISUAL_REPRESENTATION1 = new TexturedRect(-Enemy1.CHARACTER_RADIUS,-Enemy1.CHARACTER_RADIUS,Enemy1.CHARACTER_RADIUS*2,Enemy1.CHARACTER_RADIUS*2);
 
     //parent matrix * translation matrix
     private float[] finalMatrix = new float[16];
@@ -49,11 +48,10 @@ public class Enemy1 extends Enemy {
 
     /** Loads the texture of the sprite sheet
      *
-     * @param gl a GL10 object used to access openGL
      * @param context context used to grab the actual image from res
      */
-    public static void loadGLTexture(@NonNull GL10 gl, Context context) {
-        VISUAL_REPRESENTATION.loadGLTexture(gl,context,R.drawable.enemy1_sprite_sheet);
+    public static void loadGLTexture(Context context) {
+        VISUAL_REPRESENTATION.loadGLTexture(context,R.drawable.enemy1_sprite_sheet);
 
         VISUAL_REPRESENTATION.loadTextureBuffer(new float[] {
                 0,1,
@@ -65,8 +63,9 @@ public class Enemy1 extends Enemy {
 
     @Override
     public void setFrame(float rotation, int frameNum) {
-        float[] translation = MathOps.getTextureBufferTranslation(rotation,frameNum,framesPerRotation,numRotationOrientations);
-        VISUAL_REPRESENTATION.setTextureDelta(translation[0],translation[1]);
+        float translationX = MathOps.getTextureBufferTranslationX(frameNum,framesPerRotation);
+        float translationY = MathOps.getTextureBufferTranslationY(rotation,numRotationOrientations);
+        VISUAL_REPRESENTATION.setTextureDelta(translationX,translationY);
         //VISUAL_REPRESENTATION.loadTextureBuffer(MathOps.getTextureBuffer(rotation,frameNum,framesPerRotation,numRotationOrientations));
         this.offsetDegrees = MathOps.getOffsetDegrees(rotation,numRotationOrientations);
     }
@@ -91,9 +90,8 @@ public class Enemy1 extends Enemy {
      * @param gl used to access openGL
      * @param parentMatrix used to translate from model to world space
      */
-    @Override
-    public void draw(GL10 gl, float[] parentMatrix) {
-        super.draw(gl,parentMatrix);
+    public void drawIntermediate(GL10 gl, float[] parentMatrix) {
+        //super.draw(gl,parentMatrix);
         //Matrix.setIdentityM(translationMatrix,0);
         //Matrix.translateM(translationMatrix,0,this.getDeltaX(),this.getDeltaY(),0);
         Matrix.translateM(finalMatrix,0,parentMatrix,0,this.getDeltaX(),this.getDeltaY(),0);

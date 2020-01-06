@@ -38,7 +38,7 @@ todo PRIORITY:
     THERES still more work on the AI, for example the actual level data needs to specify the width of the nodes, and weightage of connections,
     additionally, it seems that concurrent modification exception is happening sometimes
 
-    I CHANGED ENEMY SO THERES ONLY ONE TEXTURE FOR ALL CLASSES TO MAKE IT EFFICIENTER, FIND A BETTER SOLUTION IN THE FUTURE, possibly we can use a "3d " spritesheet
+    sometimes it seems that health bars/ evolve button randomly goes to the center of the screen
 
     Upgradable characters - mostly done
     Implement Waves

@@ -5,7 +5,6 @@ import android.opengl.Matrix;
 import android.support.annotation.NonNull;
 
 import com.enigmadux.craterguardians.Enemies.Enemy;
-import com.enigmadux.craterguardians.Enemies.Enemy2;
 import com.enigmadux.craterguardians.Enemies.Enemy3;
 import com.enigmadux.craterguardians.R;
 
@@ -86,7 +85,7 @@ public class Enemy3Spawner extends Spawner {
      * @param context used to access resources
      */
     public static void loadGLTexture(@NonNull GL10 gl,Context context) {
-        VISUAL_REPRESENTATION.loadGLTexture(gl,context, R.drawable.enemy1_spawner);
+        VISUAL_REPRESENTATION.loadGLTexture(context, R.drawable.enemy1_spawner);
     }
 
 

@@ -104,7 +104,7 @@ public class TriRectAimer extends AngleAimer {
      * @param context context used to grab the actual image from res
      */
     public static void loadGLTexture(GL10 gl, Context context) {
-        VISUAL_REPRESENTATION.loadGLTexture(gl, context,R.drawable.tri_rect_angle_aimer);
+        VISUAL_REPRESENTATION.loadGLTexture(context,R.drawable.tri_rect_angle_aimer);
     }
 
 
