@@ -1,7 +1,5 @@
 package com.enigmadux.craterguardians.AngleAimers;
 
-import javax.microedition.khronos.opengles.GL10;
-
 /** Angle aimer
  *
  * @author Manu Bhat
@@ -33,10 +31,9 @@ public abstract class AngleAimer {
 
     /** Draws the angle aimer
      *
-     * @param gl access to openGL
      * @param parentMatrix describes how to transform it from model to world coordinates
      */
-    public abstract void draw(GL10 gl,float[] parentMatrix);
+    public abstract void draw(float[] parentMatrix);
 
     /** Translates the aimer as to match up with the player at all times
      *

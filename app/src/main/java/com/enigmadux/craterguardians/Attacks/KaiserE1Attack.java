@@ -89,7 +89,7 @@ public class KaiserE1Attack extends Attack {
     }
 
     @Override
-    public void draw(GL10 gl, float[] parentMatrix) {
+    public void draw(float[] parentMatrix) {
         float translationX = MathOps.getTextureBufferTranslationX((int) (this.numFrames * this.finishedMillis/this.millis),numFrames);
         //y translation is always 0
         VISUAL_REPRESENTATION.setTextureDelta(translationX,0);
@@ -105,7 +105,7 @@ public class KaiserE1Attack extends Attack {
         Matrix.multiplyMM(rotationScalarTranslationMatrix,0,translatorMatrix,0,rotationScalarTranslationMatrix,0);
 
         Matrix.multiplyMM(finalMatrix, 0, parentMatrix, 0, rotationScalarTranslationMatrix, 0);
-        VISUAL_REPRESENTATION.draw(gl, finalMatrix);
+        VISUAL_REPRESENTATION.draw(finalMatrix);
     }
 
     /** Loads the texture for all instances of the attack

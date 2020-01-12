@@ -41,11 +41,7 @@ public class Enemy2 extends Enemy {
     public static final float CHARACTER_RADIUS = 0.3f;
 
     //visual is shared by all objects as they all have the same sprite
-    private static TexturedRect VISUAL_REPRESENTATION = new TexturedRect(-Enemy2.CHARACTER_RADIUS,-Enemy2.CHARACTER_RADIUS,Enemy2.CHARACTER_RADIUS*2,Enemy2.CHARACTER_RADIUS*2);
-
-
-    //translates the Character according to delta x and delta y
-    private float[] translationMatrix = new float[16];
+    private static TexturedRect VISUAL_REPRESENTATION2 = new TexturedRect(-Enemy2.CHARACTER_RADIUS,-Enemy2.CHARACTER_RADIUS,Enemy2.CHARACTER_RADIUS*2,Enemy2.CHARACTER_RADIUS*2);
 
     //parent matrix * translation matrix
     private float[] finalMatrix = new float[16];
@@ -118,16 +114,16 @@ public class Enemy2 extends Enemy {
 
     /** Draws the enemy, and all sub components
      *
-     * @param gl used to access openGL
      * @param parentMatrix used to translate from model to world space
      */
-    public void drawIntermediate(GL10 gl, float[] parentMatrix) {
+    public void drawIntermediate(float[] parentMatrix) {
         //super.draw(gl,parentMatrix);
         //Matrix.setIdentityM(translationMatrix,0);
         //Matrix.translateM(translationMatrix,0,this.getDeltaX(),this.getDeltaY(),0);
         Matrix.translateM(finalMatrix,0,parentMatrix,0,this.getDeltaX(),this.getDeltaY(),0);
+        Matrix.scaleM(finalMatrix,0,Enemy2.CHARACTER_RADIUS,Enemy2.CHARACTER_RADIUS,0);
         //Matrix.multiplyMM(finalMatrix,0,parentMatrix,0,translationMatrix,0);
-        VISUAL_REPRESENTATION.draw(gl,finalMatrix);
+        VISUAL_REPRESENTATION.draw(finalMatrix);
     }
 
     /** This tells the maximum health of any character; what to initialize the health to

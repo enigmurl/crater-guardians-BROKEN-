@@ -16,7 +16,6 @@ import com.enigmadux.craterguardians.MathOps;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.nio.FloatBuffer;
-import java.util.Arrays;
 
 import javax.microedition.khronos.opengles.GL10;
 
@@ -338,10 +337,9 @@ public class TexturedRect extends EnigmaduxComponent {
 
     /** The draw method for the TexturedRect with the GL context. Draws the TexturedRect with the texture given at pos 0
      *
-     * @param gl the GL10 object used to communicate with open gl
      * @param parentMatrix matrix that represents how to manipulate it to the world coordinates
      */
-    public void draw(GL10 gl,float[] parentMatrix) {
+    public void draw(float[] parentMatrix) {
         this.draw(parentMatrix,0);
     }
 

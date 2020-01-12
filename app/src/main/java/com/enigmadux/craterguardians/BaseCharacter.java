@@ -8,8 +8,6 @@ import com.enigmadux.craterguardians.Attacks.Attack;
 import java.util.ArrayList;
 import java.util.List;
 
-import javax.microedition.khronos.opengles.GL10;
-
 import enigmadux2d.core.EnigmaduxComponent;
 
 /** All characters and enemies derive from here. Provides functionality for rendering like sprite sheets.
@@ -22,18 +20,7 @@ public abstract class BaseCharacter extends EnigmaduxComponent {
      */
     private static final String TAG = "CHARACTER";
 
-    /** MAximum amount of attacks alive at a second
-     *
-     */
-    private static final int MAX_ATTACKS = 4;
-    /** The width in openGL terms of any character
-     *
-     */
-    //public static final float CHARACTER_RADIUS = 0.3f;
-    /** The height in openGL terms of any character
-     *
-     */
-    //public static final float CHARACTER_HEIGHT = 0.3f;
+
 
 
     //the amount of angles that the character is rendered at e.g 4 would mean 0,90,180,270
@@ -87,11 +74,10 @@ public abstract class BaseCharacter extends EnigmaduxComponent {
 
     /** Draws the character and elements related to it. Sub classes are responsible for drawing all elements
      *
-     * @param gl the GL10 object used to communicate with open gl
      * @param parentMatrix matrix that represents how to manipulate it to the world coordinates
      */
     @Override
-    public abstract void draw(GL10 gl, float[] parentMatrix);
+    public abstract void draw(float[] parentMatrix);
 
     /** based on the current state, which frame should it be?
      *

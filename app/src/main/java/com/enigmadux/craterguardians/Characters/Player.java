@@ -140,11 +140,10 @@ public abstract class Player extends BaseCharacter {
 
     /** Draws the player and
      *
-     * @param gl the GL10 object used to communicate with open gl
      * @param parentMatrix matrix that represents how to manipulate it to the world coordinates
      */
     @Override
-    public void draw(GL10 gl, float[] parentMatrix) {
+    public void draw(float[] parentMatrix) {
         if (! this.visible){
             return;
         }
@@ -152,7 +151,7 @@ public abstract class Player extends BaseCharacter {
         //TODO Concurrent modification happening here sometimes also on line 178 a null pointer was thrown
         for (Attack attack: this.attacks){
             if (attack == null) continue;
-            attack.draw(gl,parentMatrix);
+            attack.draw(parentMatrix);
         }
         //Matrix.setIdentityM(this.translationMatrix,0);
         //Matrix.translateM(this.translationMatrix,0,this.getDeltaX(),this.getDeltaY(),0);
@@ -168,7 +167,7 @@ public abstract class Player extends BaseCharacter {
                 Matrix.multiplyMM(finalMatrix,0,parentMatrix,0,scalarTranslationMatrix,0);
 
                 ATTACK_VISUAL.setShader(0.5f,1,1,getAmmoBarAlpha ((float) (reloadTime - millisTillFinishedReloading)/reloadTime));
-                ATTACK_VISUAL.draw(gl,finalMatrix);
+                ATTACK_VISUAL.draw(finalMatrix);
             }
         } else {
             for (int i = 0;i < numAttacks;i++){
@@ -178,16 +177,16 @@ public abstract class Player extends BaseCharacter {
                 Matrix.multiplyMM(finalMatrix,0,parentMatrix,0,scalarTranslationMatrix,0);
 
                 ATTACK_VISUAL.setShader(1,1,1,1);
-                ATTACK_VISUAL.draw(gl,finalMatrix);
+                ATTACK_VISUAL.draw(finalMatrix);
             }
         }
 
 
 
         this.attackAngleAimer.setPosition(this.getDeltaX(),this.getDeltaY());
-        this.attackAngleAimer.draw(gl,parentMatrix);
+        this.attackAngleAimer.draw(parentMatrix);
         this.attackChargeUp.update(this.attackChargeUp.getCurrentHitPoints(),this.getDeltaX()-this.getRadius(),this.getDeltaY() + this.getRadius() + 0.1f);
-        this.attackChargeUp.draw(gl,parentMatrix);
+        this.attackChargeUp.draw(parentMatrix);
 
     }
 

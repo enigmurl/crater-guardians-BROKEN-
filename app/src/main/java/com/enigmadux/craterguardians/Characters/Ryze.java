@@ -2,6 +2,7 @@ package com.enigmadux.craterguardians.Characters;
 
 import android.content.Context;
 import android.opengl.Matrix;
+import android.support.annotation.NonNull;
 import android.util.Log;
 
 import com.enigmadux.craterguardians.AngleAimers.AngleAimer;
@@ -171,11 +172,10 @@ public class Ryze extends Player {
 
     /** Draws kaiser, and all sub components
      *
-     * @param gl used to access openGL
      * @param parentMatrix used to translate from model to world space
      */
     @Override
-    public void draw(GL10 gl, float[] parentMatrix) {
+    public void draw(float[] parentMatrix) {
         if (! this.visible){
             return;
         }
@@ -187,13 +187,13 @@ public class Ryze extends Player {
 
         Matrix.multiplyMM(finalMatrix,0,parentMatrix,0,translationRotationMatrix,0);
         try {
-            VISUAL_REPRESENTATION_GUN.draw(gl, finalMatrix);
+            VISUAL_REPRESENTATION_GUN.draw(finalMatrix);
 
             VISUAL_REPRESENTATION.draw(finalMatrix, this.evolveGen);
         } catch (Exception e){
             Log.e("RYZE:","EXCEPTION ",e);
         }
-        super.draw(gl,parentMatrix);
+        super.draw(parentMatrix);
 
     }
 
@@ -254,5 +254,15 @@ public class Ryze extends Player {
     @Override
     public  int getPlayerLevel() {
         return Ryze.PLAYER_LEVEL;
+    }
+
+    /** Gets a string represnetioatn of this class
+     *
+     * @return "Ryze"
+     */
+    @NonNull
+    @Override
+    public String toString() {
+        return "Ryze";
     }
 }

@@ -3,15 +3,8 @@ package enigmadux2d.core;
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
-import android.graphics.Matrix;
-import android.opengl.GLES10;
-import android.opengl.GLES20;
 import android.opengl.GLUtils;
-import android.util.Log;
 import android.view.MotionEvent;
-
-import com.enigmadux.craterguardians.CraterRenderer;
-import com.enigmadux.craterguardians.SoundLib;
 
 import java.io.IOException;
 import java.nio.ByteBuffer;
@@ -203,35 +196,34 @@ public class Model3D extends EnigmaduxComponent {
 
     /** Draws the model onto the world with the parent matrix as a modifier
      *
-     * @param gl           the GL10 object used to access openGL
      * @param parentMatrix matrix that represents how to manipulate it to the world coordinates
      */
     @Override
-    public void draw(GL10 gl, float[] parentMatrix) {
+    public void draw(float[] parentMatrix) {
         //load the parent matrix
-        gl.glLoadMatrixf(parentMatrix,0);
-
-
-        // bind the previously generated texture
-        gl.glEnable(GL10.GL_TEXTURE_2D);
-        gl.glBindTexture(GL10.GL_TEXTURE_2D, textures[0]);
-
-        // Point to our buffers
-        gl.glEnableClientState(GL10.GL_VERTEX_ARRAY);
-        gl.glEnableClientState(GL10.GL_TEXTURE_COORD_ARRAY);
-
-        // Set the face rotation
-        gl.glFrontFace(GL10.GL_CW);
-
-        // Point to our vertex buffer
-        gl.glVertexPointer(3, GL10.GL_FLOAT, 0, this.vertices);
-        gl.glTexCoordPointer(2, GL10.GL_FLOAT, 0, this.uvCoordinates);
-
-        // Draw the vertices as triangle strip
-        gl.glDrawArrays(GL10.GL_TRIANGLES, 0, this.numVertices);
-        //Disable the client state before leaving
-        gl.glDisableClientState(GL10.GL_VERTEX_ARRAY);
-        gl.glDisableClientState(GL10.GL_TEXTURE_COORD_ARRAY);
+//        gl.glLoadMatrixf(parentMatrix,0);
+//
+//
+//        // bind the previously generated texture
+//        gl.glEnable(GL10.GL_TEXTURE_2D);
+//        gl.glBindTexture(GL10.GL_TEXTURE_2D, textures[0]);
+//
+//        // Point to our buffers
+//        gl.glEnableClientState(GL10.GL_VERTEX_ARRAY);
+//        gl.glEnableClientState(GL10.GL_TEXTURE_COORD_ARRAY);
+//
+//        // Set the face rotation
+//        gl.glFrontFace(GL10.GL_CW);
+//
+//        // Point to our vertex buffer
+//        gl.glVertexPointer(3, GL10.GL_FLOAT, 0, this.vertices);
+//        gl.glTexCoordPointer(2, GL10.GL_FLOAT, 0, this.uvCoordinates);
+//
+//        // Draw the vertices as triangle strip
+//        gl.glDrawArrays(GL10.GL_TRIANGLES, 0, this.numVertices);
+//        //Disable the client state before leaving
+//        gl.glDisableClientState(GL10.GL_VERTEX_ARRAY);
+//        gl.glDisableClientState(GL10.GL_TEXTURE_COORD_ARRAY);
     }
 
     /** Don't do anything

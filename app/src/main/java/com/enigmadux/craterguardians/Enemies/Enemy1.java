@@ -7,8 +7,6 @@ import com.enigmadux.craterguardians.Attacks.Enemy1Attack;
 import com.enigmadux.craterguardians.MathOps;
 import com.enigmadux.craterguardians.R;
 
-import javax.microedition.khronos.opengles.GL10;
-
 import enigmadux2d.core.shapes.TexturedRect;
 
 /** The first type of enemy. todo javadoc
@@ -65,7 +63,7 @@ public class Enemy1 extends Enemy {
     public void setFrame(float rotation, int frameNum) {
         float translationX = MathOps.getTextureBufferTranslationX(frameNum,framesPerRotation);
         float translationY = MathOps.getTextureBufferTranslationY(rotation,numRotationOrientations);
-        VISUAL_REPRESENTATION.setTextureDelta(translationX,translationY);
+        Enemy.VISUAL_REPRESENTATION.setTextureDelta(translationX,translationY);
         //VISUAL_REPRESENTATION.loadTextureBuffer(MathOps.getTextureBuffer(rotation,frameNum,framesPerRotation,numRotationOrientations));
         this.offsetDegrees = MathOps.getOffsetDegrees(rotation,numRotationOrientations);
     }
@@ -87,16 +85,16 @@ public class Enemy1 extends Enemy {
 
     /** Draws the enemy, and all sub components
      *
-     * @param gl used to access openGL
      * @param parentMatrix used to translate from model to world space
      */
-    public void drawIntermediate(GL10 gl, float[] parentMatrix) {
+    public void drawIntermediate(float[] parentMatrix) {
         //super.draw(gl,parentMatrix);
         //Matrix.setIdentityM(translationMatrix,0);
         //Matrix.translateM(translationMatrix,0,this.getDeltaX(),this.getDeltaY(),0);
         Matrix.translateM(finalMatrix,0,parentMatrix,0,this.getDeltaX(),this.getDeltaY(),0);
+        Matrix.scaleM(finalMatrix,0,Enemy1.CHARACTER_RADIUS,Enemy1.CHARACTER_RADIUS,0);
         //Matrix.multiplyMM(finalMatrix,0,parentMatrix,0,translationMatrix,0);
-        VISUAL_REPRESENTATION.draw(gl,finalMatrix);
+        Enemy.VISUAL_REPRESENTATION.draw(finalMatrix);
     }
 
     /** This tells the maximum health of any character; what to initialize the health to

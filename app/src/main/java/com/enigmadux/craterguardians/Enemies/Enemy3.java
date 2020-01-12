@@ -12,8 +12,6 @@ import com.enigmadux.craterguardians.GameObjects.Supply;
 
 import java.util.List;
 
-import javax.microedition.khronos.opengles.GL10;
-
 import enigmadux2d.core.shapes.TexturedRect;
 
 /** The second type of enemy. Is a sort of "Boss" todo javado
@@ -40,14 +38,10 @@ public class Enemy3 extends Enemy {
     public static final float CHARACTER_RADIUS = 0.5f;
 
     //visual is shared by all objects as they all have the same sprite
-    private static TexturedRect VISUAL_REPRESENTATION = new TexturedRect(-Enemy3.CHARACTER_RADIUS,-Enemy3.CHARACTER_RADIUS,Enemy3.CHARACTER_RADIUS*2,Enemy3.CHARACTER_RADIUS*2);
-
-
-    //translates the Character according to delta x and delta y
-    private float[] translationMatrix = new float[16];
+    private static TexturedRect VISUAL_REPRESENTATION3 = new TexturedRect(-Enemy3.CHARACTER_RADIUS,-Enemy3.CHARACTER_RADIUS,Enemy3.CHARACTER_RADIUS*2,Enemy3.CHARACTER_RADIUS*2);
 
     //parent matrix * translation matrix
-    private float[] finalMatrix = new float[16];
+    private final float[] finalMatrix = new float[16];
 
     /** Default Constructor
      *
@@ -113,18 +107,18 @@ public class Enemy3 extends Enemy {
     }
 
 
-    /** Draws the enemy, and all sub components
+    /** Draws the enemy, Sub components are drawn by the superclass draw method
      *
-     * @param gl used to access openGL
      * @param parentMatrix used to translate from model to world space
      */
-    public void drawIntermediate(GL10 gl, float[] parentMatrix) {
+    public void drawIntermediate(float[] parentMatrix) {
         //super.draw(gl,parentMatrix);
         //Matrix.setIdentityM(translationMatrix,0);
         //Matrix.translateM(translationMatrix,0,this.getDeltaX(),this.getDeltaY(),0);
         Matrix.translateM(finalMatrix,0,parentMatrix,0,this.getDeltaX(),this.getDeltaY(),0);
+        Matrix.scaleM(finalMatrix,0,Enemy3.CHARACTER_RADIUS,Enemy3.CHARACTER_RADIUS,0);
         //Matrix.multiplyMM(finalMatrix,0,parentMatrix,0,translationMatrix,0);
-        VISUAL_REPRESENTATION.draw(gl,finalMatrix);
+        VISUAL_REPRESENTATION.draw(finalMatrix);
     }
     /** This tells the maximum health of any character; what to initialize the health to
      *

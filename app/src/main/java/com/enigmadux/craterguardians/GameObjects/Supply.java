@@ -76,13 +76,12 @@ public class Supply extends EnigmaduxComponent {
 
     /** Draws the enemy, and all sub components
      *
-     * @param gl used to access openGL
      * @param parentMatrix used to translate from model to world space
      */
-    public void draw(GL10 gl,float[] parentMatrix){
+    public void draw(float[] parentMatrix){
         Matrix.multiplyMM(finalMatrix,0,parentMatrix,0,translationScalarMatrix,0);
-        VISUAL_REPRESENTATION.draw(gl,finalMatrix);
-        this.healthDisplay.draw(gl,parentMatrix);
+        VISUAL_REPRESENTATION.draw(finalMatrix);
+        this.healthDisplay.draw(parentMatrix);
 
     }
 

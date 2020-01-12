@@ -71,11 +71,10 @@ public class DeathAnim extends Animation {
 
     /** draws the current frame
      *
-     * @param gl           the GL10 object used to access openGL
      * @param parentMatrix matrix that represents how to manipulate it to the world coordinates
      */
     @Override
-    public void draw(GL10 gl, float[] parentMatrix) {
+    public void draw(float[] parentMatrix) {
         Matrix.multiplyMM(this.finalMatrix,0,parentMatrix,0,this.translationScalarMatrix,0);
 
         float translationX = MathOps.getTextureBufferTranslationX((int) (this.currentPosition* DeathAnim.NUM_FRAMES/DeathAnim.ANIMATION_LENGTH), DeathAnim.NUM_FRAMES);
@@ -83,10 +82,9 @@ public class DeathAnim extends Animation {
         VISUAL_REPRESENTATION.setTextureDelta(translationX,0);
 
 
-        VISUAL_REPRESENTATION.setTextureDelta(translationX,0);
-        VISUAL_REPRESENTATION.draw(gl,this.finalMatrix);
-        gl.glLoadIdentity();
-        gl.glMatrixMode(GL10.GL_MODELVIEW);
+        //VISUAL_REPRESENTATION.setTextureDelta(translationY,0);
+        VISUAL_REPRESENTATION.draw(this.finalMatrix);
+
     }
 
     /** Updates to the currentFrame

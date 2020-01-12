@@ -95,40 +95,41 @@ public class ProgressBar extends EnigmaduxComponent  {
 
     /** Draws the holder and the actual hitPoints bar
      *
-     * @param gl access to openGL
      * @param parentMatrix describes how to alter the bar from model to world space
      */
-    public void draw(GL10 gl,float[] parentMatrix){
+    public void draw(float[] parentMatrix){
         if (! this.visible){
             return;
         }
+        //if (this.visible) return;
         //Log.d("PROGRESSBAR",)
         //todo this is probably expensive to create a bitmap each time, maybe do it only when the score is updated, this whole method can be optimized
-        if (this.textbox != null && (! this.textbox.getText().equals(String.valueOf(this.currentHitPoints)) || ! this.textbox.isTextureLoaded())){
-            //this.textbox.setText(String.valueOf(currentHitPoints));
-        }
+//        if (this.textbox != null && (! this.textbox.getText().equals(String.valueOf(this.currentHitPoints)) || ! this.textbox.isTextureLoaded())){
+//            this.textbox.setText(String.valueOf(currentHitPoints));
+//            Log.d("FRONTEND","Reset");
+//        }
 
-        BAR_VISUAL.setShader(1 - (float) currentHitPoints/maxHitPoints, (float) currentHitPoints/maxHitPoints,0,1);
+//        BAR_VISUAL.setShader(1 - (float) currentHitPoints/maxHitPoints, (float) currentHitPoints/maxHitPoints,0,1);
+//
+//        //it needs to be scaled vertically but horizontally just according to dimensions not hitpoints
+//        Matrix.setIdentityM(scalarMatrix,0);
+//        Matrix.scaleM(scalarMatrix,0,this.w,this.h,0);
+//        Matrix.multiplyMM(translationScalarMatrix,0,translationMatrix,0,scalarMatrix,0);
+//        Matrix.multiplyMM(finalMatrix,0,parentMatrix,0,translationScalarMatrix,0);
+//
+//
+//        BAR_HOLDER.draw(finalMatrix);
+//
+//        Matrix.setIdentityM(scalarMatrix,0);
+//        Matrix.scaleM(scalarMatrix,0,(float) currentHitPoints/maxHitPoints * w,h,1);
+//        Matrix.multiplyMM(translationScalarMatrix,0,translationMatrix,0,scalarMatrix,0);
+//        Matrix.multiplyMM(finalMatrix,0,parentMatrix,0,translationScalarMatrix,0);
+//        BAR_VISUAL.draw(finalMatrix);
 
-        //it needs to be scaled vertically but horizontally just according to dimensions not hitpoints
-        Matrix.setIdentityM(scalarMatrix,0);
-        Matrix.scaleM(scalarMatrix,0,this.w,this.h,0);
-        Matrix.multiplyMM(translationScalarMatrix,0,translationMatrix,0,scalarMatrix,0);
-        Matrix.multiplyMM(finalMatrix,0,parentMatrix,0,translationScalarMatrix,0);
-
-
-        BAR_HOLDER.draw(gl,finalMatrix);
-
-        Matrix.setIdentityM(scalarMatrix,0);
-        Matrix.scaleM(scalarMatrix,0,(float) currentHitPoints/maxHitPoints * w,h,1);
-        Matrix.multiplyMM(translationScalarMatrix,0,translationMatrix,0,scalarMatrix,0);
-        Matrix.multiplyMM(finalMatrix,0,parentMatrix,0,translationScalarMatrix,0);
-        BAR_VISUAL.draw(gl,finalMatrix);
-
-        if (this.textbox != null) {
-            Matrix.multiplyMM(finalMatrix, 0, parentMatrix, 0, translationMatrix, 0);
-            this.textbox.draw(gl, finalMatrix);
-        }
+//        if (this.textbox != null) {
+//            Matrix.multiplyMM(finalMatrix, 0, parentMatrix, 0, translationMatrix, 0);
+//           this.textbox.draw(gl, finalMatrix);
+//        }
 
 
     }

@@ -2,8 +2,6 @@ package com.enigmadux.craterguardians.Animations;
 
 import android.view.MotionEvent;
 
-import javax.microedition.khronos.opengles.GL10;
-
 import enigmadux2d.core.EnigmaduxComponent;
 
 /** Used to play animations, such as death animations, todo looping animations/ use textures right
@@ -25,10 +23,9 @@ public abstract class Animation extends EnigmaduxComponent {
 
     /** Draws the component onto the screen, the frame choosing is done in the update call
      *
-     * @param gl           the GL10 object used to access openGL
      * @param parentMatrix matrix that represents how to manipulate it to the world coordinates
      */
-    public abstract void draw(GL10 gl,float[] parentMatrix);
+    public abstract void draw(float[] parentMatrix);
 
     /** Updates the animation to the current frame, for some animations it may also translate or other transformations
      *

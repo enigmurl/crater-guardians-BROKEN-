@@ -97,8 +97,8 @@ public class EnemyMap {
 
         //Log.d("ENEMYMAP:","node1: " + node1 + " node2: " + node2 + "c0: " + c0 + " c1: " + c1  + " c2 " + c2 + " c3: " + c3);
 
-        for (Plateau plateau:this.plateaus){
-            if (plateau == null) continue;
+        for (int i = 0,size = this.plateaus.size();i<size;i++){
+            Plateau plateau = this.plateaus.get(i);
             float[][] points = plateau.getPoints();
 
             /*testing this later
@@ -120,8 +120,8 @@ public class EnemyMap {
                     MathOps.lineIntersectsLine(c1.x,c1.y,c3.x,c3.y,points[2][0],points[2][1],points[3][0],points[3][1])) return -1;
 
         }
-        for (ToxicLake toxicLake:this.toxicLakes){
-            if (toxicLake == null) continue;
+        for (int i = 0,size = this.toxicLakes.size();i<size;i++){
+            ToxicLake toxicLake = this.toxicLakes.get(i);
             float x = toxicLake.getX();
             float y = toxicLake.getY();
             float r = toxicLake.getWidth()/2;

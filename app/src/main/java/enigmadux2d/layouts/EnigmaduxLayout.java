@@ -43,7 +43,8 @@ public abstract class EnigmaduxLayout extends EnigmaduxComponent{
     @Override
     public void show(){
         super.show();
-        for (EnigmaduxComponent cmp: components){
+        for (int i = this.components.length-1;i>=0;i--){
+            EnigmaduxComponent cmp = this.components[i];
             cmp.show();
         }
     }
@@ -54,7 +55,8 @@ public abstract class EnigmaduxLayout extends EnigmaduxComponent{
     @Override
     public void hide(){
         super.hide();
-        for (EnigmaduxComponent cmp: components){
+        for (int i = this.components.length-1;i>=0;i--){
+            EnigmaduxComponent cmp = this.components[i];
             cmp.hide();
         }
     }

@@ -7,7 +7,6 @@ import com.enigmadux.craterguardians.Attacks.Attack;
 import com.enigmadux.craterguardians.BaseCharacter;
 import com.enigmadux.craterguardians.EnemyMap;
 import com.enigmadux.craterguardians.MathOps;
-import com.enigmadux.craterguardians.GameObjects.Plateau;
 import com.enigmadux.craterguardians.GUI.ProgressBar;
 import com.enigmadux.craterguardians.GameObjects.Supply;
 import com.enigmadux.craterguardians.R;
@@ -15,8 +14,6 @@ import com.enigmadux.craterguardians.R;
 import java.util.Iterator;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
-
-import javax.microedition.khronos.opengles.GL10;
 
 import enigmadux2d.core.shapes.TexturedRect;
 
@@ -31,7 +28,7 @@ public abstract class Enemy extends BaseCharacter {
     protected boolean canMove = true;
 
     //visual is shared by all objects as they all have the same sprite
-    protected static TexturedRect VISUAL_REPRESENTATION = new TexturedRect(-Enemy1.CHARACTER_RADIUS,-Enemy1.CHARACTER_RADIUS,Enemy1.CHARACTER_RADIUS*2,Enemy1.CHARACTER_RADIUS*2);
+    protected static TexturedRect VISUAL_REPRESENTATION = new TexturedRect(-1,-1,2,2);
 
 
     //the distance the enemy must be before moving onto the next node
@@ -62,15 +59,14 @@ public abstract class Enemy extends BaseCharacter {
 
     /** Draws the player
      *
-     * @param gl the GL10 object used to communicate with open gl
      * @param parentMatrix matrix that represents how to manipulate it to the world coordinates
      */
     @Override
-    public void draw(GL10 gl, float[] parentMatrix) {
+    public void draw(float[] parentMatrix) {
         for (int i = 0;i<attacks.size();i++) {
-            attacks.get(i).draw(gl, parentMatrix);
+            attacks.get(i).draw(parentMatrix);
         }
-        healthDisplay.draw(gl,parentMatrix);
+        healthDisplay.draw(parentMatrix);
     }
 
     /** Loads the texture of the sprite sheet
@@ -104,10 +100,9 @@ public abstract class Enemy extends BaseCharacter {
 
     /** Draw the actual enemy
      *
-     * @param gl gl object
      * @param parentMatrix the parent matrix
      */
-    public abstract void drawIntermediate(GL10 gl,float[] parentMatrix);
+    public abstract void drawIntermediate(float[] parentMatrix);
 
 
     /** Updates the position, and other attributes

@@ -76,17 +76,6 @@ public class Enemy1Attack extends Attack {
         Matrix.setIdentityM(scalarMatrix, 0);
         Matrix.scaleM(scalarMatrix, 0, length , width, 1);
 
-
-    }
-
-    @Override
-    public void draw(GL10 gl, float[] parentMatrix) {
-        float translationX = MathOps.getTextureBufferTranslationX((int) (this.numFrames * this.finishedMillis/this.millis),numFrames);
-        //y translation is always 0
-        VISUAL_REPRESENTATION.setTextureDelta(translationX,0);
-        //Log.d("TEXTURED:","U: " + translation[0] + " V: " + translation[1]);
-
-
         Matrix.setIdentityM(rotatorMatrix,0);
         Matrix.setIdentityM(translatorMatrix,0);
         Matrix.setIdentityM(rotationScalarMatrix,0);
@@ -99,8 +88,20 @@ public class Enemy1Attack extends Attack {
 
         Matrix.multiplyMM(rotationScalarTranslationMatrix,0,translatorMatrix,0, rotationScalarMatrix,0);
 
+
+    }
+
+    @Override
+    public void draw(float[] parentMatrix) {
+        float translationX = MathOps.getTextureBufferTranslationX((int) (this.numFrames * this.finishedMillis/this.millis),numFrames);
+        //y translation is always 0
+        VISUAL_REPRESENTATION.setTextureDelta(translationX,0);
+        //Log.d("TEXTURED:","U: " + translation[0] + " V: " + translation[1]);
+
+
+
         Matrix.multiplyMM(finalMatrix, 0, parentMatrix, 0, rotationScalarTranslationMatrix, 0);
-        VISUAL_REPRESENTATION.draw(gl, finalMatrix);
+        VISUAL_REPRESENTATION.draw(finalMatrix);
     }
 
     /** Loads the texture for all instances of the attack

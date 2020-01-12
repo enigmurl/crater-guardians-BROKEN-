@@ -6,8 +6,6 @@ import android.opengl.Matrix;
 import com.enigmadux.craterguardians.MathOps;
 import com.enigmadux.craterguardians.R;
 
-import javax.microedition.khronos.opengles.GL10;
-
 import enigmadux2d.core.shapes.TexturedRect;
 
 /** Played when a player evolves
@@ -65,11 +63,10 @@ public class EvolveAnimation extends Animation {
 
     /** draws the current frame
      *
-     * @param gl           the GL10 object used to access openGL
      * @param parentMatrix matrix that represents how to manipulate it to the world coordinates
      */
     @Override
-    public void draw(GL10 gl, float[] parentMatrix) {
+    public void draw(float[] parentMatrix) {
         Matrix.multiplyMM(this.finalMatrix,0,parentMatrix,0,this.translationScalarMatrix,0);
 
         float translationX = MathOps.getTextureBufferTranslationX((int) (this.currentPosition* EvolveAnimation.NUM_FRAMES/EvolveAnimation.ANIMATION_LENGTH), EvolveAnimation.NUM_FRAMES);
@@ -82,7 +79,7 @@ public class EvolveAnimation extends Animation {
 //                (int) (this.currentPosition* EvolveAnimation.NUM_FRAMES/EvolveAnimation.ANIMATION_LENGTH),
 //                EvolveAnimation.NUM_FRAMES,
 //                1));
-        VISUAL_REPRESENTATION.draw(gl,this.finalMatrix);
+        VISUAL_REPRESENTATION.draw(this.finalMatrix);
 
 
     }

@@ -531,7 +531,7 @@ public class CraterBackend {
                 }
             };
 
-            levelPlayButton.loadGLTexture(gl);
+            levelPlayButton.loadGLTexture();
 
             levelButtons[i+1] = levelPlayButton;
         }
@@ -618,9 +618,9 @@ public class CraterBackend {
                 this.gameMap
         },-1.0f,-1.0f,2.0f,2.0f){
             @Override
-            public void draw(GL10 gl, float[] parentMatrix) {
+            public void draw(float[] parentMatrix) {
                 ((GameMap) this.getComponents()[1]).setCameraPos(player.getDeltaX(),player.getDeltaY());
-                super.draw(gl, parentMatrix);
+                super.draw(parentMatrix);
             }
         };
 
@@ -647,16 +647,16 @@ public class CraterBackend {
         this.gameScreenLayout.hide();
         this.loadLevelLayout.hide();
 
-        homeButton.loadGLTexture(gl);
-        playButton.loadGLTexture(gl);
-        levelSelectButton.loadGLTexture(gl);
+        homeButton.loadGLTexture();
+        playButton.loadGLTexture();
+        levelSelectButton.loadGLTexture();
 
         levelBackground.loadGLTexture(this.context,R.drawable.level_select_example);
-        levelSelect_homeButton.loadGLTexture(gl,this.context,R.drawable.home_button);
+        levelSelect_homeButton.loadGLTexture(this.context,R.drawable.home_button);
 
 
         craterVisual.loadGLTexture(this.context,R.drawable.level_background_crater);
-        battleStartIndicator.loadGLTexture(gl);
+        battleStartIndicator.loadGLTexture();
         battleStartIndicator.hide();
 
         this.stateIndicator.loadGLTexture(this.context,R.drawable.victory_sign,0);
@@ -755,23 +755,23 @@ public class CraterBackend {
         this.stationaryTutorialLayout.hide();
         this.gameMapTutorialLayout.hide();
 
-        exitButton.loadGLTexture(gl);
+        exitButton.loadGLTexture();
 
-        playerCaption.loadGLTexture(gl);
-        attackBarCaption.loadGLTexture(gl);
-        attackChargeCaption.loadGLTexture(gl);
+        playerCaption.loadGLTexture();
+        attackBarCaption.loadGLTexture();
+        attackChargeCaption.loadGLTexture();
 
-        joystickCaption.loadGLTexture(gl);
-        movementCaption.loadGLTexture(gl);
-        attackCaption.loadGLTexture(gl);
+        joystickCaption.loadGLTexture();
+        movementCaption.loadGLTexture();
+        attackCaption.loadGLTexture();
 
-        this.evolveTutorialInfo.loadGLTexture(gl);
-        this.suppliesTutorialInfo.loadGLTexture(gl);
+        this.evolveTutorialInfo.loadGLTexture();
+        this.suppliesTutorialInfo.loadGLTexture();
 
-        plateauCaption.loadGLTexture(gl);
-        lakeCaption.loadGLTexture(gl);
+        plateauCaption.loadGLTexture();
+        lakeCaption.loadGLTexture();
 
-        spawnerCaption.loadGLTexture(gl);
+        spawnerCaption.loadGLTexture();
 
     }
 
@@ -837,7 +837,7 @@ public class CraterBackend {
         //inputs
         this.attackJoyStick.loadGLTexture(this.context,R.drawable.test);
         this.movementJoyStick.loadGLTexture(this.context,R.drawable.test);
-        this.evolveButton.loadGLTexture(gl,this.context,R.drawable.evolve_button);
+        this.evolveButton.loadGLTexture(this.context,R.drawable.evolve_button);
 
         //characters
         Player.loadGLTexture(gl,this.context);
@@ -869,7 +869,7 @@ public class CraterBackend {
 
 
         //others (lakes + plateaus)
-        ToxicLake.loadGLTexture(gl,this.context);
+        ToxicLake.loadGLTexture(this.context);
         Plateau.loadGLTexture(gl,this.context);
         ProgressBar.loadGLTexture(gl,this.context);
         Supply.loadGLTexture(gl,this.context);

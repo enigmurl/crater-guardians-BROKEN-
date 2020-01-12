@@ -2,7 +2,6 @@ package com.enigmadux.craterguardians.GameObjects;
 
 import android.content.Context;
 import android.opengl.Matrix;
-import android.support.annotation.NonNull;
 import android.view.MotionEvent;
 
 import com.enigmadux.craterguardians.Animations.ToxicBubble;
@@ -14,8 +13,6 @@ import com.enigmadux.craterguardians.SoundLib;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
-
-import javax.microedition.khronos.opengles.GL10;
 
 import enigmadux2d.core.EnigmaduxComponent;
 import enigmadux2d.core.shapes.TexturedRect;
@@ -40,7 +37,7 @@ public class ToxicLake extends EnigmaduxComponent {
     /** On any given frame the chance that a bubble spawns
      *
      */
-    private static final float TOXIC_BUBBLE_CHANCE = 0.07f;
+    private static final float TOXIC_BUBBLE_CHANCE = 0.03f;
     /** The smallest a bubble can be
      *
      */
@@ -48,15 +45,15 @@ public class ToxicLake extends EnigmaduxComponent {
     /** The largest a bubble can be
      *
      */
-    private static final float TOXIC_BUBBLE_MAX_RADIUS = 0.2f;
+    private static final float TOXIC_BUBBLE_MAX_RADIUS = 0.1f;
     /** THe shortest milliseconds an bubble popping can be
      *
      */
-    private static final long TOXIC_BUBBLE_MIN_ANIMLEN = 200;
+    private static final long TOXIC_BUBBLE_MIN_ANIMLEN = 1200;
     /** THe longest milliseconds an bubble popping can be
      *
      */
-    private static final long TOXIC_BUBBLE_MAX_ANIMLEN = 200;
+    private static final long TOXIC_BUBBLE_MAX_ANIMLEN = 2000;
 
 
     //center x of the lake
@@ -80,7 +77,7 @@ public class ToxicLake extends EnigmaduxComponent {
     private static final TexturedRect VISUAL_REPRESENTATION = new TexturedRect(-0.5f,-0.5f,1,1);
 
     //the bubbles on the toxic lake, should be an array list later on
-    private List<ToxicBubble> toxicBubbles = new ArrayList<>();
+    private ArrayList<ToxicBubble> toxicBubbles = new ArrayList<>();
 
     /** Default Constructor
      *  @param x the openGL x coordinate
@@ -110,15 +107,14 @@ public class ToxicLake extends EnigmaduxComponent {
 
     /** Draws the enemy, and all sub components
      *
-     * @param gl used to access openGL
      * @param parentMatrix used to translate from model to world space
      */
-    public void draw(GL10 gl,float[] parentMatrix){
+    public void draw(float[] parentMatrix){
         Matrix.multiplyMM(finalMatrix,0,parentMatrix,0,translationScalarMatrix,0);
-        VISUAL_REPRESENTATION.draw(gl,finalMatrix);
-        for (ToxicBubble tb:this.toxicBubbles) {
-            tb.draw(gl, parentMatrix);
-        }
+        VISUAL_REPRESENTATION.draw(finalMatrix);
+        //for (int i = 0, size = this.toxicBubbles.size();i < size; i++) {
+        //    toxicBubbles.get(i).draw(gl, parentMatrix);
+        //}
     }
 
 
@@ -126,10 +122,9 @@ public class ToxicLake extends EnigmaduxComponent {
 
     /** Loads the texture
      *
-     * @param gl access to openGL
      * @param context context used to load resources, and non null context should work
      */
-    public static void loadGLTexture(@NonNull GL10 gl, Context context) {
+    public static void loadGLTexture(Context context) {
         VISUAL_REPRESENTATION.loadGLTexture(context, R.drawable.toxic_lake_texture);
     }
 

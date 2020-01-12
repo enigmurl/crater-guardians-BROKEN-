@@ -65,7 +65,7 @@ public class TriRectAimer extends AngleAimer {
     }
 
     @Override
-    public void draw(GL10 gl, float[] parentMatrix) {
+    public void draw(float[] parentMatrix) {
         if (this.visible) {
             //rotationScalarTranslationMatrix = scalarMatrix.clone();
             //todo optimization instead of multiplying it out use the Matrix.rotateM, Matrix.translateM, Matrix.scaleM, it seems to go reverse
@@ -75,7 +75,7 @@ public class TriRectAimer extends AngleAimer {
             Matrix.scaleM(leftAttackM,0,sideLength,sideWidth,0);
 
             Matrix.multiplyMM(finalMatrix, 0, parentMatrix, 0, leftAttackM, 0);
-            VISUAL_REPRESENTATION.draw(gl, finalMatrix);
+            VISUAL_REPRESENTATION.draw(finalMatrix);
 
             Matrix.setIdentityM(rightAttackM,0);
             Matrix.translateM(rightAttackM,0,this.x,this.y,0);
@@ -83,7 +83,7 @@ public class TriRectAimer extends AngleAimer {
             Matrix.scaleM(rightAttackM,0,sideLength,sideWidth,0);
 
             Matrix.multiplyMM(finalMatrix, 0, parentMatrix, 0, rightAttackM, 0);
-            VISUAL_REPRESENTATION.draw(gl, finalMatrix);
+            VISUAL_REPRESENTATION.draw(finalMatrix);
 
             Matrix.setIdentityM(middleAttackM,0);
             Matrix.translateM(middleAttackM,0,this.x,this.y,0);
@@ -91,7 +91,7 @@ public class TriRectAimer extends AngleAimer {
             Matrix.scaleM(middleAttackM,0,mainLength,mainWidth,0);
 
             Matrix.multiplyMM(finalMatrix, 0, parentMatrix, 0, middleAttackM, 0);
-            VISUAL_REPRESENTATION.draw(gl, finalMatrix);
+            VISUAL_REPRESENTATION.draw(finalMatrix);
 
 
         }

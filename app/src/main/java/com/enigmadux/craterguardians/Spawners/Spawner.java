@@ -9,8 +9,6 @@ import com.enigmadux.craterguardians.MathOps;
 
 import java.util.List;
 
-import javax.microedition.khronos.opengles.GL10;
-
 /**
  * @author Manu Bhat
  * @version BETA
@@ -94,12 +92,11 @@ public abstract class Spawner {
 
     /** Draws the VISUAL_REPRESENTATION customized for the subclass
      *
-     * @param gl access to openGL
      * @param parentMatrix describes how to change from model to world coordinates
      */
-    public void draw(GL10 gl,float[] parentMatrix){
+    public void draw(float[] parentMatrix){
         this.healthDisplay.update(this.health,this.x,this.h  + this.y);
-        this.healthDisplay.draw(gl,parentMatrix);
+        this.healthDisplay.draw(parentMatrix);
     }
 
     /** Call every frame, whenever this returns a non null entity an enemy has been spawned, otherwise the spawner is not ready for another enemy to be spawned

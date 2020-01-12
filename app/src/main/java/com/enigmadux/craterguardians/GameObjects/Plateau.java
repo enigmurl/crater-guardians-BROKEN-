@@ -99,10 +99,9 @@ public class Plateau{
 
     /** Draws the enemy, and all sub components
      *
-     * @param gl used to access openGL
      * @param parentMatrix used to translate from model to world space
      */
-    public void draw(GL10 gl,float[] parentMatrix){
+    public void draw(float[] parentMatrix){
         Matrix.multiplyMM(finalMatrix,0,parentMatrix,0,translatorMatrix,0);
         /*float[] returnVec = new float[4];
         float[][] debug = new float[][] { {0,0,0},
@@ -114,7 +113,7 @@ public class Plateau{
             Matrix.multiplyMV(returnVec,0,finalMatrix,0,currentVec,0);
             Log.d("PLATEAU:", "CORD " + i  + " : " + Arrays.toString(returnVec));
         }*/
-        VISUAL_REPRESENTATION.draw(gl,finalMatrix);
+        VISUAL_REPRESENTATION.draw(finalMatrix);
 
     }
 

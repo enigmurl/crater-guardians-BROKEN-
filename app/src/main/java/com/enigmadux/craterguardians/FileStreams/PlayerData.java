@@ -14,7 +14,7 @@ import java.util.Scanner;
 
 public class PlayerData {
     //all character classes
-    private static final Player[] CHARACTERS = new Player[] {new Kaiser(),new Ryze()};
+    public static final Player[] CHARACTERS = new Player[] {new Kaiser(),new Ryze()};
 
     //the path to the player levels + xp file
     private static final String PLAYER_DATA = "player_data";

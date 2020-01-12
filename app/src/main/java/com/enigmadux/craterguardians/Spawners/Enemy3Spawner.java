@@ -58,14 +58,13 @@ public class Enemy3Spawner extends Spawner {
 
     /** Draws the VISUAL_REPRESENTATION customized for this spawner
      *
-     * @param gl access to openGL
      * @param parentMatrix describes how to change from model to world coordinates
      */
     @Override
-    public void draw(GL10 gl,float[] parentMatrix){
-        super.draw(gl,parentMatrix);
+    public void draw(float[] parentMatrix){
+        super.draw(parentMatrix);
         Matrix.multiplyMM(finalMatrix,0,parentMatrix,0,translationScalarMatrix,0);
-        VISUAL_REPRESENTATION.draw(gl,finalMatrix);
+        VISUAL_REPRESENTATION.draw(finalMatrix);
 
     }
 

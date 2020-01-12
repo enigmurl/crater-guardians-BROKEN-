@@ -80,11 +80,10 @@ public class ToxicBubble extends Animation {
 
     /** draws the current frame
      *
-     * @param gl           the GL10 object used to access openGL
      * @param parentMatrix matrix that represents how to manipulate it to the world coordinates
      */
     @Override
-    public void draw(GL10 gl, float[] parentMatrix) {
+    public void draw(float[] parentMatrix) {
         Matrix.multiplyMM(this.finalMatrix,0,parentMatrix,0,this.translationScalarMatrix,0);
 
         int frameNum = Math.min(ToxicBubble.NUM_FRAMES-1, (int) (this.currentPosition* ToxicBubble.NUM_FRAMES/this.animationLength));

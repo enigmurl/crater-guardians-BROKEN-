@@ -5,7 +5,6 @@ import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Paint;
 import android.opengl.Matrix;
-import android.support.annotation.NonNull;
 import android.support.v4.content.res.ResourcesCompat;
 import android.util.Log;
 import android.view.MotionEvent;
@@ -131,10 +130,9 @@ public abstract class Button extends EnigmaduxComponent {
     }
 
     /** Binds the text to the rect, should only needed to be called if it's a text based button and not a image based
-     *  @param gl an instance of GL10 used to access open gl
      *
      */
-    public void loadGLTexture(@NonNull GL10 gl) {
+    public void loadGLTexture() {
         if (this.isImageButton){
             Log.d("BUTTON","called loadGLTEXTURE on text button");
             return;
@@ -172,10 +170,9 @@ public abstract class Button extends EnigmaduxComponent {
 
     /** Binds the given image to the rect, should only needed to be called if it's a image based button and not a text based
      *
-     * @param gl an instance of GL10 used to access open gl
      * @param context any android context use to get the resources (this is subject to change)
      */
-    public void loadGLTexture(@NonNull GL10 gl, Context context,int fileID){
+    public void loadGLTexture(Context context, int fileID){
         if (! this.isImageButton){
             Log.d("BUTTON","called loadGLTEXTURE on image button");
             return;
@@ -185,15 +182,14 @@ public abstract class Button extends EnigmaduxComponent {
 
     /** The draw method for the button. Draws the button text and background to the screen to the frame.
      *
-     * @param gl the GL10 object used to communicate with open gl
      * @param parentMatrix matrix that represents how to manipulate it to the world coordinates
      */
     @Override
-    public void draw(GL10 gl, float[] parentMatrix) {
+    public void draw(float[] parentMatrix) {
         //todo OPTIMIZATION OF THE MATRICES
         if (! this.isImageButton && ! this.renderedRecentText){
             this.renderedRecentText = true;
-            this.loadGLTexture(gl);
+            this.loadGLTexture();
         }
         if (this.visible) {
             if (this.drawBackground) {
@@ -213,14 +209,14 @@ public abstract class Button extends EnigmaduxComponent {
                             this.texturedRect.getShader()[1],
                             this.texturedRect.getShader()[2],
                             this.texturedRect.getShader()[3]);
-                    LEVEL_BUTTON_BACKGROUND.draw(gl, finalMatrix);
+                    LEVEL_BUTTON_BACKGROUND.draw(finalMatrix);
                 } else {
                     BUTTON_BACKGROUND.setShader(
                             this.texturedRect.getShader()[0],
                             this.texturedRect.getShader()[1],
                             this.texturedRect.getShader()[2],
                             this.texturedRect.getShader()[3]);
-                    BUTTON_BACKGROUND.draw(gl, finalMatrix);
+                    BUTTON_BACKGROUND.draw(finalMatrix);
                 }
             }
             if (this.isImageButton && this.down){
@@ -233,7 +229,7 @@ public abstract class Button extends EnigmaduxComponent {
                 Matrix.translateM(scalarTranslationMatrix,0,-this.x,-this.y,0);
                 Matrix.multiplyMM(finalMatrix, 0, parentMatrix, 0, scalarTranslationMatrix, 0);
                 //draws the image
-                this.texturedRect.draw(gl, finalMatrix);
+                this.texturedRect.draw(finalMatrix);
             } else {
                 if (this.down) {
                     this.texturedRect.setScale((float) Math.sqrt(Button.BUTTON_SELECTED_SCALE),(float)Math.sqrt(Button.BUTTON_SELECTED_SCALE));
@@ -241,7 +237,7 @@ public abstract class Button extends EnigmaduxComponent {
                     this.texturedRect.setScale(1,1);
                 }
                 //draws the text
-                this.texturedRect.draw(gl, parentMatrix);
+                this.texturedRect.draw(parentMatrix);
             }
 
         }

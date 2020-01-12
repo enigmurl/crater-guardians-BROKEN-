@@ -5,13 +5,10 @@ import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Paint;
-import android.support.annotation.NonNull;
 import android.support.v4.content.res.ResourcesCompat;
 import android.view.MotionEvent;
 
 import com.enigmadux.craterguardians.R;
-
-import javax.microedition.khronos.opengles.GL10;
 
 import enigmadux2d.core.EnigmaduxComponent;
 import enigmadux2d.core.shapes.TexturedRect;
@@ -88,9 +85,8 @@ public class InGameTextbox extends EnigmaduxComponent {
 
     /** Binds the text to the rect, should only needed to be called if it's a text based InGameTextbox and not a image based
      *
-     * @param gl an instance of GL10 used to access open gl
      */
-    public void loadGLTexture(@NonNull GL10 gl) {
+    public void loadGLTexture() {
         int height = (this.isInGame) ? inGameHeight:screenHeight;
 
         bitmapPainter.setTextSize((this.h*height/2));
@@ -118,16 +114,15 @@ public class InGameTextbox extends EnigmaduxComponent {
 
     /** The draw method for the InGameTextbox. Draws the InGameTextbox text and background to the screen to the frame.
      *
-     * @param gl the GL10 object used to communicate with open gl
      * @param parentMatrix matrix that represents how to manipulate it to the world coordinates
      */
     @Override
-    public void draw(GL10 gl, float[] parentMatrix) {
+    public void draw(float[] parentMatrix) {
         if (! this.renderedRecentText){
-            this.loadGLTexture(gl);
+            this.loadGLTexture();
         }
         if (this.visible) {
-            this.texturedRect.draw(gl, parentMatrix);
+            this.texturedRect.draw(parentMatrix);
         }
     }
 
@@ -179,8 +174,8 @@ public class InGameTextbox extends EnigmaduxComponent {
      */
     public String getText() {
         String returnString = "";
-        for (String str: this.text){
-            returnString = returnString + str;
+        for (int i = this.text.length-1;i>=0;i--){
+            returnString += this.text[i];
         }
         return returnString;
     }

@@ -38,6 +38,13 @@ todo PRIORITY:
     THERES still more work on the AI, for example the actual level data needs to specify the width of the nodes, and weightage of connections,
     additionally, it seems that concurrent modification exception is happening sometimes
 
+    THE CAUSE OF THE LAG IS THE PROGRESS BAR, MAKE A DYNAMIC TEXT CLASS + STATIC TEXT CLASS
+    FULLY IMPLEMENT WAVES
+    Make a level where there is many enemy twos on the side
+    Make Home screen a separate class
+    Rework character select to make it more like battle cats, I think we make it a 2d array of icons, if you click on it
+        three options appear, upgrade, select, info
+
     sometimes it seems that health bars/ evolve button randomly goes to the center of the screen
 
     Upgradable characters - mostly done

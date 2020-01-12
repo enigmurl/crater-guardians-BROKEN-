@@ -99,20 +99,20 @@ public class RyzeAttack extends Attack {
     }
 
     @Override
-    public void draw(GL10 gl, float[] parentMatrix) {
+    public void draw(float[] parentMatrix) {
         float translationX = MathOps.getTextureBufferTranslationX((int) (this.numFrames * this.finishedMillis/this.millis),numFrames);
         //y translation is always 0
         VISUAL_REPRESENTATION.setTextureDelta(translationX,0);
 
         Matrix.multiplyMM(finalMatrix, 0, parentMatrix, 0, leftAttackM, 0);
-        VISUAL_REPRESENTATION.draw(gl, finalMatrix);
+        VISUAL_REPRESENTATION.draw(finalMatrix);
 
 
         Matrix.multiplyMM(finalMatrix, 0, parentMatrix, 0, rightAttackM, 0);
-        VISUAL_REPRESENTATION.draw(gl, finalMatrix);
+        VISUAL_REPRESENTATION.draw(finalMatrix);
 
         Matrix.multiplyMM(finalMatrix, 0, parentMatrix, 0, middleAttackM, 0);
-        VISUAL_REPRESENTATION.draw(gl, finalMatrix);
+        VISUAL_REPRESENTATION.draw(finalMatrix);
 
     }
 

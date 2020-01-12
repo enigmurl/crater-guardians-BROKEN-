@@ -2,6 +2,7 @@ package com.enigmadux.craterguardians.Characters;
 
 import android.content.Context;
 import android.opengl.Matrix;
+import android.support.annotation.NonNull;
 
 import com.enigmadux.craterguardians.AngleAimers.AngleAimer;
 import com.enigmadux.craterguardians.AngleAimers.TriangleAimer;
@@ -31,7 +32,7 @@ public class Kaiser extends Player {
     private static final float FPS = 8;
 
     //a constant that represents the maximum health of KAISER
-    private static final int MAXIMUM_HEALTH = 100;
+    private static final int MAXIMUM_HEALTH = 10000;
     //a constant that represents how many attacks kaiser can perform before reloading
     private static final int NUM_ATTACKS  = 5;
     //a constant that represents how long in millis it takes to reload all attacks;
@@ -64,9 +65,6 @@ public class Kaiser extends Player {
 
     //parent matrix * translation matrix
     private float[] finalMatrix = new float[16];
-
-
-
 
 
 
@@ -173,11 +171,10 @@ public class Kaiser extends Player {
 
     /** Draws kaiser, and all sub components
      *
-     * @param gl used to access openGL
      * @param parentMatrix used to translate from model to world space
      */
     @Override
-    public void draw(GL10 gl, float[] parentMatrix) {
+    public void draw(float[] parentMatrix) {
         if (! this.visible){
             return;
         }
@@ -188,11 +185,11 @@ public class Kaiser extends Player {
 
 
         Matrix.multiplyMM(finalMatrix,0,parentMatrix,0,translationRotationMatrix,0);
-        VISUAL_REPRESENTATION_GUN.draw(gl,finalMatrix);
+        VISUAL_REPRESENTATION_GUN.draw(finalMatrix);
 
         VISUAL_REPRESENTATION.draw(finalMatrix,this.evolveGen);
 
-        super.draw(gl,parentMatrix);
+        super.draw(parentMatrix);
 
     }
 
@@ -253,5 +250,15 @@ public class Kaiser extends Player {
     @Override
     public int getPlayerLevel() {
         return Kaiser.PLAYER_LEVEL;
+    }
+
+    /** Gets a string represnetioatn of this class
+     *
+     * @return "Kaiser"
+     */
+    @NonNull
+    @Override
+    public String toString() {
+        return "Kaiser";
     }
 }

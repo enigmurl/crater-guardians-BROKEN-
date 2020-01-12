@@ -1,10 +1,6 @@
 package enigmadux2d.core;
 
-import android.graphics.Bitmap;
-import android.support.annotation.NonNull;
 import android.view.MotionEvent;
-
-import javax.microedition.khronos.opengles.GL10;
 
 /** Parent Class of all Enigmadux Components including Rectangles, TextBoxes, and Layouts. All components are capable of being
  * visible to the end user.
@@ -84,10 +80,9 @@ public abstract class EnigmaduxComponent {
     /**
      * Draws the component onto the screen
      *
-     * @param gl           the GL10 object used to access openGL
      * @param parentMatrix matrix that represents how to manipulate it to the world coordinates
      */
-    public abstract void draw(GL10 gl, float[] parentMatrix);
+    public abstract void draw(float[] parentMatrix);
 
 
     /**

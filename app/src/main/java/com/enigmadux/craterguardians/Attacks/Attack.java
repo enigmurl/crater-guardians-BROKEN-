@@ -10,8 +10,6 @@ import com.enigmadux.craterguardians.GameObjects.Supply;
 import java.util.ArrayList;
 import java.util.List;
 
-import javax.microedition.khronos.opengles.GL10;
-
 /** Attacks todo: javadoc
  *
  * @author Manu Bhat
@@ -131,8 +129,7 @@ public abstract class Attack {
 
     /** DOES NOT DO THE ACTUAL DRAWING, ONLY PR
      *
-     * @param gl the GL10 object used to communicate with open gl
      * @param parentMatrix matrix that represents how to manipulate it to the world coordinates
      */
-    public abstract void draw(GL10 gl, float[] parentMatrix);
+    public abstract void draw(float[] parentMatrix);
 }
