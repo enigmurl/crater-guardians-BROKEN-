@@ -2,13 +2,13 @@ package com.enigmadux.craterguardians.Spawners;
 
 import android.content.Context;
 import android.opengl.Matrix;
-import android.support.annotation.NonNull;
 
 import com.enigmadux.craterguardians.Enemies.Enemy;
 import com.enigmadux.craterguardians.Enemies.Enemy1;
 import com.enigmadux.craterguardians.R;
 
-import javax.microedition.khronos.opengles.GL10;
+import java.util.ArrayList;
+import java.util.List;
 
 import enigmadux2d.core.shapes.TexturedRect;
 
@@ -67,8 +67,19 @@ public class Enemy1Spawner extends Spawner {
      * @param health the health of the spawner
      */
     public Enemy1Spawner(float x,float y,float w,float h,short[] numSpawns,long[] times,long totalWaveTime,int health){
-        super(x,y,w,h,0,health);
+        super(x,y,w,h,numSpawns,times,totalWaveTime,health);
+        //translates to appropriate coordinates
+        final float[] translationMatrix = new float[16];
+        //scales to appropriate size
+        final float[] scalarMatrix = new float[16];
 
+        Matrix.setIdentityM(translationMatrix,0);
+        Matrix.translateM(translationMatrix,0,this.x,this.y,0);
+
+        Matrix.setIdentityM(scalarMatrix,0);
+        Matrix.scaleM(scalarMatrix,0,w,h,0);
+
+        Matrix.multiplyMM(translationScalarMatrix,0,translationMatrix,0,scalarMatrix,0);
 
     }
 
@@ -96,12 +107,28 @@ public class Enemy1Spawner extends Spawner {
         return e;
     }
 
+    /** Returns a list of enemies
+     *
+     * @param numEnemies the amount of enemies in the wave
+     * @return a list of enemies
+     */
+    @Override
+    public List<Enemy> spawnEnemies(int numEnemies) {
+        List<Enemy> enemies = new ArrayList<>();
+        for (int i = 0;i<numEnemies;i++){
+            float x = this.x + (this.w/2 * (1 + (float) Math.cos(Math.PI * 2* i / numEnemies)));
+            float y = this.y + (this.h/2 * (1  + (float) Math.sin(Math.PI * 2* i / numEnemies)));
+            enemies.add(new Enemy1());
+            enemies.get(i).setTranslate(x,y);
+        }
+        return enemies;
+    }
+
     /** Loads the texture
      *
-     * @param gl used to tell openGL what the new texture is
      * @param context used to access resources
      */
-    public static void loadGLTexture(@NonNull GL10 gl,Context context) {
+    public static void loadGLTexture(Context context) {
         VISUAL_REPRESENTATION.loadGLTexture(context, R.drawable.enemy1_spawner);
     }
 

@@ -369,18 +369,32 @@ public class GameMap extends EnigmaduxComponent {
                 float w = level_data.nextFloat();
                 float h = level_data.nextFloat();
                 String type = level_data.next();
-                long spawnTime = level_data.nextLong();
+                //how long a wave is
+                long waveTime = level_data.nextLong();
+                //the amount of spawns in a wave
+                int numSpawns = level_data.nextInt();
+                short[] spawnsPerSubWave = new short[numSpawns];
+                long[] timesOfSubWave = new long[numSpawns];
+                for (int j = 0;j<numSpawns;j++){
+                    timesOfSubWave[j] = level_data.nextLong();
+                    spawnsPerSubWave[j] = level_data.nextShort();
+                }
+
+                //long spawnTime = level_data.nextLong();
                 int hitPoints = level_data.nextInt();
 
                 switch (type) {
                     case "ENEMY_TYPE_1":
-                        spawners.add(new Enemy1Spawner(x, y, w, h, spawnTime, hitPoints));
+                        //spawners.add(new Enemy1Spawner(x, y, w, h, spawnTime, hitPoints));
+                        spawners.add(new Enemy1Spawner(x, y, w, h,spawnsPerSubWave,timesOfSubWave,waveTime,hitPoints));
                         break;
                     case "ENEMY_TYPE_2":
-                        spawners.add(new Enemy2Spawner(x, y, w, h, spawnTime, hitPoints));
+                        //spawners.add(new Enemy2Spawner(x, y, w, h, spawnTime, hitPoints));
+                        spawners.add(new Enemy2Spawner(x, y, w, h,spawnsPerSubWave,timesOfSubWave,waveTime,hitPoints));
                         break;
                     case "ENEMY_TYPE_3":
-                        spawners.add(new Enemy3Spawner(x, y, w, h, spawnTime, hitPoints));
+                        spawners.add(new Enemy3Spawner(x, y, w, h,spawnsPerSubWave,timesOfSubWave,waveTime,hitPoints));
+                        //spawners.add(new Enemy3Spawner(x, y, w, h, spawnTime, hitPoints));
                         break;
                 }
             }

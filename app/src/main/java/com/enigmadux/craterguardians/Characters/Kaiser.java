@@ -149,7 +149,7 @@ public class Kaiser extends Player {
         super.attack(angle);
         this.attackAngleAimer.hide();
 
-        if (this.numAttacks > 0) {
+        if (this.numAttacks > 0 && this.attacks.size() == 0) {
             this.numAttacks --;
             if (this.evolveGen == 0)
                 this.attacks.add(new KaiserE1Attack(this.getDeltaX(), this.getDeltaY(), (int) (5 * (1 + (float) this.attackChargeUp.getCurrentHitPoints()/(NUM_ATTACKS * 1000))), angle, 0.5f, 250,this));

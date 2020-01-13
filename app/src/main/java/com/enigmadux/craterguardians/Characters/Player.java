@@ -25,7 +25,7 @@ public abstract class Player extends BaseCharacter {
     /** The radius in openGL terms of any character
      *
      */
-    public static final float CHARACTER_RADIUS = 0.15f;
+    public static final float CHARACTER_RADIUS = 0.1f;
 
 
     //the amount of attacks it can hold maximum (think of it as the amount of bullets in a magazine)
@@ -247,7 +247,7 @@ public abstract class Player extends BaseCharacter {
      * @param dt amount of time since last call in milliseconds
      * @param rotation rotation of the player
      * @param enemies all possible enemies on the game map
-     * @param spawners  all possible spawners on the game map used to see if the atttacks
+     * @param spawners  all possible spawners on the game map used to see if the attacks
      */
     public void update(long dt, float rotation, List<Enemy> enemies, List<Spawner> spawners) {
         super.update(dt, rotation);

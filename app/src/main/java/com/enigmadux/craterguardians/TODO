@@ -25,6 +25,7 @@ todo PRIORITY:
             4) Draw basic icons that don't require a lot of art FINISHED
             5) Balance stuff (Also at some point fix the orientation of valley + do that in level maker as well)
             6) Fix pausing + stopping - tbd
+    1/12 GOALS: Just try creating 1 really good level, make attacks less spammy, more skill
 
     OPTIMIZATIONS:
         1) don't focus too much on the matrix multiplication i don't think that's the bad part (small)
@@ -40,6 +41,9 @@ todo PRIORITY:
 
     THE CAUSE OF THE LAG IS THE PROGRESS BAR, MAKE A DYNAMIC TEXT CLASS + STATIC TEXT CLASS
     FULLY IMPLEMENT WAVES
+
+    ANOTHER BUG: on level 19 it looks like first wave targets player initially?
+
     Make a level where there is many enemy twos on the side
     Make Home screen a separate class
     Rework character select to make it more like battle cats, I think we make it a 2d array of icons, if you click on it
@@ -48,7 +52,7 @@ todo PRIORITY:
     sometimes it seems that health bars/ evolve button randomly goes to the center of the screen
 
     Upgradable characters - mostly done
-    Implement Waves
+    Implement Waves - mostly done
 
     make zooming further out and longer so user has more time to prepare
 

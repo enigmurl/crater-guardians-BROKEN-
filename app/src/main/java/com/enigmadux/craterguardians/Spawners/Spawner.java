@@ -88,6 +88,8 @@ public abstract class Spawner {
 
         this.health = health;
 
+        this.healthDisplay = new ProgressBar(health,w,0.05f, true, true);
+
     }
 
     /** Draws the VISUAL_REPRESENTATION customized for the subclass
@@ -123,11 +125,13 @@ public abstract class Spawner {
     public List<Enemy> attemptWaveSpawn(long dt){
         this.millisSinceLastSpawn += dt;
 
-        if (this.waveIndex >= this.spawnTime.length){
+        if (this.millisSinceLastSpawn > this.waveTime) {
+            this.millisSinceLastSpawn = 0;
             this.waveIndex = 0;
         }
 
-        if (this.millisSinceLastSpawn > this.spawnTime[waveIndex]){
+
+        if (this.waveIndex < this.spawnTime.length && this.millisSinceLastSpawn > this.spawnTime[waveIndex]){
             return this.spawnEnemies(this.numSpawns[waveIndex++]);
 
         }
@@ -140,9 +144,7 @@ public abstract class Spawner {
      * @param numEnemies the amount of enemies in the wave
      * @return a List of enemies that is (numEnemies) long
      */
-    public List<Enemy> spawnEnemies(int numEnemies){
-        return null;
-    }
+    public abstract List<Enemy> spawnEnemies(int numEnemies);
 
     /** Creates 1 enemy, is abstract as child classes need to do for the individual enemy spawner
      *

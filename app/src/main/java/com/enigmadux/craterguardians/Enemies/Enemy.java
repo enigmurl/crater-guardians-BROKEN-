@@ -22,6 +22,9 @@ import enigmadux2d.core.shapes.TexturedRect;
  * @version BETA
  */
 public abstract class Enemy extends BaseCharacter {
+    //the minimum amount of waiting time between attacks
+    private static final long ATTACK_MILLIS = 1500;
+
     //health display of the player
     private ProgressBar healthDisplay;
     //whether or not it can move, it may not be able to move because it's attacking (Enemy 2)
@@ -44,6 +47,9 @@ public abstract class Enemy extends BaseCharacter {
     private int lastTarget = -2;
     //the actual position it's targetting
     private List<EnemyMap.Node> currentPath;
+
+    //millis since last attack
+    private long millisSinceAttack;
 
     /** Default Constructor
      *
@@ -113,6 +119,8 @@ public abstract class Enemy extends BaseCharacter {
      * @param enemyMap A map of where and how the enemy should go
      */
     public void update(long dt, BaseCharacter player, List<Supply> supplies, EnemyMap enemyMap) {
+        this.millisSinceAttack += dt;
+
         Iterator itr = attacks.iterator();
 
 
@@ -182,16 +190,18 @@ public abstract class Enemy extends BaseCharacter {
             if (currentPath != null && currentPath.size() > 1 && Math.hypot(targetX -this.getDeltaX(),targetY- this.getDeltaY()) < Enemy.MIN_DISTANCE) this.currentPath.remove(0);
 
             if (supplyIndex == -1) {
-                if (minLength < 1 && attacks.size() < 1) {//todo this is hardcoded
+                if (minLength < 1 && attacks.size() < 1 && this.millisSinceAttack > ATTACK_MILLIS) {//todo this is hardcoded
                     this.attack(MathOps.getAngle((player.getDeltaX() - this.getDeltaX()) / minLength, (player.getDeltaY() - this.getDeltaY()) / minLength));
+                    this.millisSinceAttack = 0;
                 }
                 //Log.d("PLAYER","X: " +this.getDeltaX() + " px " + player.getDeltaX() + " Y: " + this.getDeltaY() + " py " + player.getDeltaY() +  " len " + minLength + " cl "  +clippedLength);
                 this.update(dt, 180 / (float) Math.PI * MathOps.getAngle((targetX - this.getDeltaX()) / minLength, (targetY - this.getDeltaY()) / minLength));
 
             } else {
 
-                if (minLength < 1 && attacks.size() < 1) {//todo this is hardcoded
+                if (minLength < 1 && attacks.size() < 1 && this.millisSinceAttack > ATTACK_MILLIS) {//todo this is hardcoded
                     this.attack(MathOps.getAngle((supplies.get(supplyIndex).getX() - this.getDeltaX()) / minLength, (supplies.get(supplyIndex).getY() - this.getDeltaY()) / minLength));
+                    this.millisSinceAttack = 0;
                 }
                 //Log.d("PLAYER","X: " +this.getDeltaX() + " px " + player.getDeltaX() + " Y: " + this.getDeltaY() + " py " + player.getDeltaY() +  " len " + minLength + " cl "  +clippedLength);
                 this.update(dt, 180 / (float) Math.PI * MathOps.getAngle((targetX - this.getDeltaX()) / minLength, (targetY - this.getDeltaY()) / minLength));

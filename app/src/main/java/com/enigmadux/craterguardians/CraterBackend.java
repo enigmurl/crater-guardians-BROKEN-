@@ -38,6 +38,7 @@ import com.enigmadux.craterguardians.Spawners.Enemy3Spawner;
 import com.enigmadux.craterguardians.Spawners.Spawner;
 
 import java.util.Iterator;
+import java.util.List;
 
 import javax.microedition.khronos.opengles.GL10;
 
@@ -852,9 +853,9 @@ public class CraterBackend {
         TriangleAimer.loadGLTexture(gl,this.context);
         TriRectAimer.loadGLTexture(gl,this.context);
         //spawners
-        Enemy1Spawner.loadGLTexture(gl,this.context);
+        Enemy1Spawner.loadGLTexture(this.context);
         Enemy2Spawner.loadGLTexture(gl,this.context);
-        Enemy3Spawner.loadGLTexture(gl,this.context);
+        Enemy3Spawner.loadGLTexture(this.context);
         //attacks
         Enemy1Attack.loadGLTexture(gl,this.context);
         Enemy2Attack.loadGLTexture(gl,this.context);
@@ -1328,11 +1329,13 @@ public class CraterBackend {
                             itr.remove();
                         }
 
-                        Enemy e = spawner.trySpawnEnemy(dt);
-                        if (e != null) {
+                        //Enemy e = spawner.trySpawnEnemy(dt);
+                        List<Enemy> enemies = spawner.attemptWaveSpawn(dt);
+                        if (enemies != null) {
                             Log.d("BACKEND","Adding enemy");
                             synchronized (CraterBackend.ENEMIES_LOCK){
-                                this.gameMap.getEnemies().add(e);
+                                this.gameMap.getEnemies().addAll(enemies);
+                                //this.gameMap.getEnemies().add(e);
                             }
                         }
                     }
@@ -1478,7 +1481,7 @@ public class CraterBackend {
             this.levelSelectLayout.onTouch(e);
             this.loadLevelLayout.onTouch(e);
         } else if (this.currentGameState == CraterBackend.GAME_STATE_INGAME || this.currentGameState == CraterBackend.GAME_STATE_TUTORIAL){
-            if (! (this.inEndGamePausePeriod) && this.tutorialCurrentMillis > CraterBackend.JOYSTICK_INTRODUCTION) {
+            if (! (this.inEndGamePausePeriod || this.inPreGameZoomPeriod) && this.tutorialCurrentMillis > CraterBackend.JOYSTICK_INTRODUCTION) {
                 this.updateJoySticks(e);
             }
             if (this.currentGameState == CraterBackend.GAME_STATE_TUTORIAL){
