@@ -46,7 +46,6 @@ public class Enemy2Attack extends Attack {
     private final float[] rotationScalarTranslationMatrix = new float[16];
 
 
-    private float angleRadians;
     private float length;
     private float width;
     private int damage;
@@ -64,17 +63,16 @@ public class Enemy2Attack extends Attack {
      * @param x openGL x
      * @param y openGL y
      * @param damage how much damage to deal to enemies;
-     * @param angleRadians the angle between the start of the sweep and the positive x axis in radians. Zero would mean that half the sweep is above the x axis, and half below
+     * @param attackAngle the angle between the start of the sweep and the positive x axis in radians. Zero would mean that half the sweep is above the x axis, and half below
      * @param length how long the attack is in open gl terms
      * @param width how wide the attack is in open gl terms, because orginally it is point ing in the positive x axis, this is originally the height at 0 radians
      * @param millis how long the attack takes to finish
      * @param initializer the Enemy or player who summoned the attack
      */
-    public Enemy2Attack(float x, float y, int damage, float angleRadians, float length,float width, long millis,BaseCharacter initializer){
-        super(x,y,0,0,NUM_FRAMES,millis,initializer);
+    public Enemy2Attack(float x, float y, int damage, float attackAngle, float length,float width, long millis,BaseCharacter initializer){
+        super(x,y,0,0,NUM_FRAMES,millis,initializer, attackAngle);
 
 
-        this.angleRadians = angleRadians;
         this.damage = damage;
         this.length =length;
         this.width = width;
@@ -86,7 +84,7 @@ public class Enemy2Attack extends Attack {
         Matrix.setIdentityM(rotationScalarMatrix,0);
         Matrix.setIdentityM(rotationScalarTranslationMatrix,0);
 
-        Matrix.rotateM(rotatorMatrix,0,180f/(float) Math.PI * this.angleRadians,0,0,1);
+        Matrix.rotateM(rotatorMatrix,0,180f/(float) Math.PI * this.attackAngle,0,0,1);
         Matrix.translateM(translatorMatrix,0,this.x,this.y,0);
 
         Matrix.multiplyMM(rotationScalarMatrix,0,rotatorMatrix,0,scalarMatrix,0);
@@ -135,8 +133,8 @@ public class Enemy2Attack extends Attack {
         float originalXvalue = length * (float) finishedMillis/millis;
         float originalYValue = -width;
 
-        float cos = (float) Math.cos(angleRadians);
-        float sin = (float) Math.sin(angleRadians);
+        float cos = (float) Math.cos(attackAngle);
+        float sin = (float) Math.sin(attackAngle);
 
         float x1 = this.x + cos * originalXvalue;
         float y1 = this.y + sin * originalXvalue ;
@@ -163,8 +161,8 @@ public class Enemy2Attack extends Attack {
         float originalXvalue = length * (float) finishedMillis/millis;
         float originalYValue = -width;
 
-        float cos = (float) Math.cos(angleRadians);
-        float sin = (float) Math.sin(angleRadians);
+        float cos = (float) Math.cos(attackAngle);
+        float sin = (float) Math.sin(attackAngle);
 
         float x1 = this.x + cos * originalXvalue;
         float y1 = this.y + sin * originalXvalue ;

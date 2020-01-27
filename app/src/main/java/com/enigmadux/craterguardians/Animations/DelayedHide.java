@@ -8,10 +8,7 @@ import enigmadux2d.core.EnigmaduxComponent;
 /** This takes in an Enigmadux Component and hides it after the specified time
  *
  */
-public class DelayedHide implements Runnable {
-
-    //a shared handler that does the delaying
-    private static final Handler HANDLER = new Handler(Looper.getMainLooper());
+public class DelayedHide extends TransitionAnim {
 
 
     //the component that needs to be hidden
@@ -22,6 +19,7 @@ public class DelayedHide implements Runnable {
      * @param millis how long to delay the hiding of the enigmadux component
      */
     public DelayedHide(EnigmaduxComponent enigmaduxComponent,long millis){
+        super();
         this.enigmaduxComponent = enigmaduxComponent;
         HANDLER.postDelayed(this,millis);
     }
@@ -34,4 +32,7 @@ public class DelayedHide implements Runnable {
     public void run() {
         this.enigmaduxComponent.hide();
     }
+
+
+
 }

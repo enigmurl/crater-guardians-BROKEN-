@@ -46,24 +46,7 @@ public abstract class Spawner {
     //the amount of milli seconds since the last spawn
     protected long millisSinceLastSpawn;
 
-    /** Default Constructor
-     *
-     * @param x the open gl coordinate of the spawner, left most edge x coordinate e.g. (1.0f, -0.5f, 0.0f ,0.1f)
-     * @param y the open gl coordinate of the spawner, bottom most y coordinate e.g. (1.0f,-0.5f, 0.0f, 0.1f)
-     * @param w the width of the spawner (distance from left edge to right edge) in open gl coordinate terms e.g (1.0f, 1.5f) Should be positive
-     * @param h the height of the spawner (distance from top edge to bottom edge) in open gl coordinate terms e.g (1.0f, 1.5f) should be positive
-     * @param health the amount of damage this can take before dieing
-     */
-    public Spawner(float x, float y, float w, float h,long millisPerSpawn,int health) {
-        this.x = x;
-        this.y = y;
-        this.w = w;
-        this.h = h;
-        this.millisPerSpawn = millisPerSpawn;
-        this.health = health;
 
-        this.healthDisplay = new ProgressBar(health,w,0.05f, true, true);
-    }
 
     /** Constructor used for waves, this is in future will be the only one TODO actually implement this
      *
@@ -88,7 +71,7 @@ public abstract class Spawner {
 
         this.health = health;
 
-        this.healthDisplay = new ProgressBar(health,w,0.05f, true, true);
+        this.healthDisplay = new ProgressBar(health,w,0.05f);
 
     }
 
@@ -191,6 +174,17 @@ public abstract class Spawner {
         }
         return false;
 
+    }
+
+    /** Sees if this collides with a circle
+     *
+     * @param x the center x of the circle
+     * @param y the center y of the circle
+     * @param r the radius of the circle
+     * @return whether the circle collides with this or not
+     */
+    public boolean collidesWithCircle(float x,float y,float r){
+        return Math.hypot(this.x - x,this.y - y) < r + this.w/2;
     }
 
 

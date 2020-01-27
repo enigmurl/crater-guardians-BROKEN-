@@ -14,7 +14,6 @@ import android.view.WindowManager;
 
 import com.enigmadux.craterguardians.Characters.Kaiser;
 import com.enigmadux.craterguardians.Characters.Player;
-import com.enigmadux.craterguardians.Characters.Ryze;
 import com.enigmadux.craterguardians.FileStreams.PlayerData;
 import com.enigmadux.craterguardians.FileStreams.SettingsData;
 import com.enigmadux.craterguardians.GUI.Button;
@@ -23,7 +22,6 @@ import com.enigmadux.craterguardians.GUI.HomeButton;
 import com.enigmadux.craterguardians.GUI.InGameTextbox;
 import com.enigmadux.craterguardians.GUI.MatieralsBar;
 import com.enigmadux.craterguardians.GUI.ProgressBar;
-import com.enigmadux.craterguardians.GUI.Upgradable;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -41,15 +39,12 @@ import enigmadux2d.core.shapes.TexturedRect;
 public class CraterRenderer extends EnigmaduxGLRenderer {
 
     //says how far back the camera is from the view
-    private static final float CAMERA_Z = 4f;//todo tutorial is messed up if its not 2
+    private static final float CAMERA_Z = 2f;//todo tutorial is messed up if its not 2
 
     //shader of off buttons in form of r g b a
     private static final float[] OFF_SHADER = new float[] {1.0f,0.5f,0.5f,1};
     //shader of on buttons in form of r g b a
     private static final float[] ON_SHADER = new float[] {0.5f,1.0f,0.5f,1};
-
-    //cost of upgrdaing characters
-    public static final int UPGRADE_COST  = 10;
 
 
     private DisplayMetrics displayMetrics;//used to get information about screen;
@@ -137,7 +132,6 @@ public class CraterRenderer extends EnigmaduxGLRenderer {
     /** Character Select. A 2d selection grid of which player to choose.
      * It includes the characters. And a back to home button.
      */
-    //private CraterLayout characterSelectLayout;
     private CharacterSelect characterSelectLayout;
 
     /** Level Select. For now its just a place holder layout. In future There should be an image, where if you slide it a new one appears.
@@ -175,11 +169,6 @@ public class CraterRenderer extends EnigmaduxGLRenderer {
      *  it contains all the layouts + textboxes below this that are stuck on the game map
      */
     private CraterLayout gameMapTutorialLayout;
-
-    /** Contains buttons having to do with upgrading characters
-     *
-     */
-    private CraterLayout characterUpgradeLayout;
 
 
     /** Constructor to set the handed over context
@@ -241,6 +230,8 @@ public class CraterRenderer extends EnigmaduxGLRenderer {
             renderingThread.step(gl);
             return;
         }
+
+        this.loadingScreen.recycle();
 
         this.renderingThread = null;
 
@@ -382,11 +373,6 @@ public class CraterRenderer extends EnigmaduxGLRenderer {
 
         //Calculate The Aspect Ratio Of The Window
         Matrix.orthoM(orthographicM,0,-CAMERA_Z,CAMERA_Z,-CAMERA_Z* height/width,CAMERA_Z * height/width,0.2f,5f);
-        //gl.glOrthof(-CAMERA_Z,CAMERA_Z,-CAMERA_Z* height/width,CAMERA_Z * height/width,0.2f,5f);
-        //GLU.gluOrtho2D(gl,-1.0f,1.0f,-1.0f,1.0f);
-        //GLU.gluPerspective(gl, 45.0f, (float)width / (float)height, 0.1f, 100.0f);
-        //gl.glMatrixMode(GL10.GL_MODELVIEW); 	//Select The Modelview Matrix
-        //gl.glLoadIdentity(); 					//Reset The Modelview Matrix
         Log.d("RENDERER","dimensions " + width + " H "  + height);
 
 
@@ -550,25 +536,7 @@ public class CraterRenderer extends EnigmaduxGLRenderer {
 
     }
 
-    /** Sets the appropriate color of the buttons
-     *
-     */
-    public void updateUpgradeLayouts(){
-        this.xpIndicator.updateResources();
-        //this.xpIndicator.setText("Experience: " + PlayerData.getExperience());
 
-        if (PlayerData.getExperience() < CraterRenderer.UPGRADE_COST){
-            for (EnigmaduxComponent enigmaduxComponent:this.characterUpgradeLayout.getComponents()) {
-                ((Button) enigmaduxComponent).setText("UPGRADE: " + CraterRenderer.UPGRADE_COST);
-                ((Button) enigmaduxComponent).setShader(1, 0.5f, 0.5f, 1);
-            }
-        } else {
-            for (EnigmaduxComponent enigmaduxComponent:this.characterUpgradeLayout.getComponents()) {
-                ((Button) enigmaduxComponent).setText("UPGRADE: " + CraterRenderer.UPGRADE_COST);
-                ((Button) enigmaduxComponent).setShader(0.8f,1,0.5f,1);
-            }
-        }
-    }
 
     /** Loads the layouts, including creating sub components, and loading their textures
      *
@@ -584,105 +552,6 @@ public class CraterRenderer extends EnigmaduxGLRenderer {
         //TODO MAke this image home button
         HomeButton backToHomeButton = new HomeButton(-0.75f,0f,0.4f,backend,this);
 
-
-        final Button kaiserSelectButton = new Button("Kaiser Level: " + Kaiser.PLAYER_LEVEL, 0f,0.3f, 0.7f, 0.4f, 0.25f,LayoutConsts.CRATER_TEXT_COLOR, false){
-            @Override
-            public boolean isSelect(MotionEvent e) {
-                return this.visible && this.isInside(MathOps.getOpenGLX(e.getRawX()),MathOps.getOpenGLY(e.getRawY()));
-            }
-
-            @Override
-            public void onRelease() {
-                super.onRelease();
-
-                characterSelectLayout.hide();
-                defaultHomeScreenLayout.show();
-                player = new Kaiser();
-                backend.setPlayer(player);
-            }
-
-
-        };
-
-        final Button ryzeSelectButton = new Button("Ryze Level: " + Ryze.PLAYER_LEVEL, 0f,-0.4f, 0.7f, 0.4f, 0.25f,LayoutConsts.CRATER_TEXT_COLOR, false){
-            @Override
-            public boolean isSelect(MotionEvent e) {
-                return this.visible && this.isInside(MathOps.getOpenGLX(e.getRawX()),MathOps.getOpenGLY(e.getRawY()));
-            }
-
-            @Override
-            public void onRelease() {
-                super.onRelease();
-
-                characterSelectLayout.hide();
-                defaultHomeScreenLayout.show();
-                player = new Ryze();
-                backend.setPlayer(player);
-            }
-
-
-        };
-
-        Upgradable ryzeUpgradeButton = new Upgradable(new Ryze(),0.7f,-0.5f,ryzeSelectButton,playerData,this);
-
-        Upgradable kaiserUpgradeButton = new Upgradable(new Kaiser(),0.7f,0.2f,kaiserSelectButton,playerData,this);
-
-        final TexturedRect ryzeInfo = new TexturedRect(-scaleX/2,-0.5f,scaleX,1){
-            @Override
-            public boolean onTouch(MotionEvent e) {
-                if (this.visible && ! this.isInside(MathOps.getOpenGLX(e.getRawX()),MathOps.getOpenGLY(e.getRawY()))){
-                    if (e.getActionMasked() == MotionEvent.ACTION_UP){
-                        this.hide();
-                        return true;
-                    }
-                }
-                return this.visible;
-            }
-        };
-
-        final TexturedRect kaiserInfo = new TexturedRect(-scaleX/2,-0.5f,scaleX ,1){
-            @Override
-            public boolean onTouch(MotionEvent e) {
-                if (this.visible && ! this.isInside(MathOps.getOpenGLX(e.getRawX()),MathOps.getOpenGLY(e.getRawY()))){
-                    if (e.getActionMasked() == MotionEvent.ACTION_UP){
-                        this.hide();
-                        return true;
-                    }
-                }
-                return this.visible;
-            }
-        };
-
-        Button kaiserInfoButton = new Button("Info", 0.7f,0.45f, 0.3f, 0.15f, 0.1f,LayoutConsts.CRATER_TEXT_COLOR, false){
-            @Override
-            public boolean isSelect(MotionEvent e) {
-                return this.visible && this.isInside(MathOps.getOpenGLX(e.getRawX()),MathOps.getOpenGLY(e.getRawY()));
-            }
-
-            @Override
-            public void onRelease() {
-                super.onRelease();
-                kaiserInfo.show();
-            }
-
-
-        };
-
-        Button ryzeInfoButton = new Button("Info", 0.7f,-0.25f, 0.3f, 0.15f, 0.1f,LayoutConsts.CRATER_TEXT_COLOR, false){
-            @Override
-            public boolean isSelect(MotionEvent e) {
-                return this.visible && this.isInside(MathOps.getOpenGLX(e.getRawX()),MathOps.getOpenGLY(e.getRawY()));
-            }
-
-            @Override
-            public void onRelease() {
-                super.onRelease();
-
-                ryzeInfo.show();
-            }
-
-
-        };
 
         Button characterSelectButton_homeScreen = new Button("Select Evolver", 0,0.4f, 1.2f, 0.5f, 0.2f,LayoutConsts.CRATER_TEXT_COLOR, false){
             @Override
@@ -890,53 +759,17 @@ public class CraterRenderer extends EnigmaduxGLRenderer {
 
         };
 
-        //TexturedRect characterDisplayDefaultHomeScreen = new TexturedRect(-0.8f,-0.2f,0.3f,0.2f);
-        this.characterUpgradeLayout = new CraterLayout(new EnigmaduxComponent[] {
-                kaiserUpgradeButton,
-                ryzeUpgradeButton
-        },-0.8f,-0.8f,1.6f,1.6f);
+        this.characterSelectLayout = new CharacterSelect(this.backend,this,this.playerData,this.xpIndicator);
 
-        //includes characters
 
-        this.characterSelectLayout = new CharacterSelect(this.backend,this,playerData,this.xpIndicator);
-//        this.characterSelectLayout = new CraterLayout(new EnigmaduxComponent[] {
-//                xpIndicator,
-//                this.characterUpgradeLayout,
-//                ryzeInfoButton,
-//                kaiserInfoButton,
-//                backToHomeButton,
-//                kaiserSelectButton,
-//                ryzeSelectButton,
-//                ryzeInfo,
-//                kaiserInfo,
-//        },-0.8f,-0.8f,1.6f,1.6f){
-//
-//            @Override
-//            public void show() {
-//                for (int x = 0;x<this.components.length-2;x++){
-//                    this.components[x].show();
-//                }
-//            }
-//
-//            @Override
-//            public boolean onTouch(MotionEvent e) {
-//                boolean interested = false;
-//                for (int i = this.components.length - 1;i>= 0;i--){
-//                    interested |= this.components[i].onTouch(e);
-//                }
-//                return interested;
-//            }
-//        };
         
         this.defaultHomeScreenLayout = new CraterLayout(new EnigmaduxComponent[] {
+                xpIndicator,
                 tutorialButton,
                 characterSelectButton_homeScreen,
                 playButton_homeScreen,
                 settingsButton,
-                xpIndicator
-                },-1.0f,-1.0f,2.0f,1.8f){
-
-        };
+        },-1.0f,-1.0f,2.0f,1.8f);
 
 
         this.pauseGameLayout = new CraterLayout(new EnigmaduxComponent[]{
@@ -953,9 +786,10 @@ public class CraterRenderer extends EnigmaduxGLRenderer {
                 settingsDoneButton
         },0,0,0,0);
 
+        //todo basically the xpIndicator is being drawn in the character select layout and defaut, which causes it to always be on top, find more permanent solution
         this.fullHomeScreenLayout = new CraterLayout(new EnigmaduxComponent[] {
-                this.defaultHomeScreenLayout,
                 this.characterSelectLayout,
+                this.defaultHomeScreenLayout,
                 this.settingsLayout,
                                          },-1.0f,-1.0f,2.0f,2.0f){
 
@@ -971,7 +805,7 @@ public class CraterRenderer extends EnigmaduxGLRenderer {
         this.defaultHomeScreenLayout.show();
 
 
-
+        this.characterSelectLayout.loadGLTexture(context);
         soundEffectCaption.loadGLTexture();
         musicCaption.loadGLTexture();
         settingsButton.loadGLTexture(this.context,R.drawable.settings_button);
@@ -990,20 +824,6 @@ public class CraterRenderer extends EnigmaduxGLRenderer {
         tutorialButton.loadGLTexture();
 
         backToHomeButton.loadGLTexture(context,R.drawable.home_button);
-
-        this.characterSelectLayout.loadGLTexture(context);
-        kaiserUpgradeButton.loadGLTexture();
-        ryzeUpgradeButton.loadGLTexture();
-        kaiserSelectButton.loadGLTexture();
-        ryzeSelectButton.loadGLTexture();
-        kaiserInfo.loadGLTexture(context,R.drawable.kaiser_info);
-        ryzeInfo.loadGLTexture(context,R.drawable.ryze_info);
-        kaiserInfoButton.loadGLTexture();
-        ryzeInfoButton.loadGLTexture();
-
-        this.updateUpgradeLayouts();
-
-        //characterDisplayDefaultHomeScreen.loadGLTexture(gl,context,R.drawable.test);
 
 
 

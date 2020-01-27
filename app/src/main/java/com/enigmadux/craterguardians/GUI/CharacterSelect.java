@@ -153,14 +153,15 @@ public class CharacterSelect extends EnigmaduxComponent {
      */
     @Override
     public void draw(float[] parentMatrix) {
-        for (int i = 0, size = this.characterIcons.length; i < size; i++) {
-            this.characterIcons[i].draw(parentMatrix);
-        }
-
         this.bottomEdge.draw(parentMatrix);
         this.upgradeButton.draw(parentMatrix);
         this.selectButton.draw(parentMatrix);
         this.homeButton.draw(parentMatrix);
+
+        for (int i = 0, size = this.characterIcons.length; i < size; i++) {
+            this.characterIcons[i].draw(parentMatrix);
+        }
+
 
         this.matieralsBar.draw(parentMatrix);
 
@@ -274,7 +275,7 @@ public class CharacterSelect extends EnigmaduxComponent {
          */
         public void setPlayer(Player player){
             this.player = player;
-            if (PlayerData.getExperience() < CraterRenderer.UPGRADE_COST){
+            if (PlayerData.getExperience() < UPGRADE_COSTS[this.player.getPlayerLevel()]){
                 this.setShader(1,0.75f,0.75f,1);
             } else {
                 this.setShader(0.75f,1,0.5f,1);
@@ -288,7 +289,8 @@ public class CharacterSelect extends EnigmaduxComponent {
          */
         @Override
         public boolean isSelect(MotionEvent e) {
-            return PlayerData.getExperience() >= CraterRenderer.UPGRADE_COST && this.visible && this.isInside(MathOps.getOpenGLX(e.getRawX()),MathOps.getOpenGLY(e.getRawY()));
+            if (this.player == null) return false;
+            return PlayerData.getExperience() >= UPGRADE_COSTS[this.player.getPlayerLevel()] && this.visible && this.isInside(MathOps.getOpenGLX(e.getRawX()),MathOps.getOpenGLY(e.getRawY()));
         }
 
         /**
@@ -299,8 +301,8 @@ public class CharacterSelect extends EnigmaduxComponent {
             if (player == null) return;
 
             player.setPlayerLevel(player.getPlayerLevel()+1);
-            playerData.updateXP(PlayerData.getExperience() - CraterRenderer.UPGRADE_COST);
-            if (PlayerData.getExperience() < CraterRenderer.UPGRADE_COST){
+            playerData.updateXP(PlayerData.getExperience() - UPGRADE_COSTS[this.player.getPlayerLevel()]);
+            if (PlayerData.getExperience() < UPGRADE_COSTS[this.player.getPlayerLevel()]){
                 this.setShader(1,0.75f,0.75f,1);
             } else {
                 this.setShader(0.75f,1,0.5f,1);

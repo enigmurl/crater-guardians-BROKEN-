@@ -6,8 +6,8 @@ import android.util.Log;
 import com.enigmadux.craterguardians.Attacks.Attack;
 import com.enigmadux.craterguardians.BaseCharacter;
 import com.enigmadux.craterguardians.EnemyMap;
+import com.enigmadux.craterguardians.GUI.HealthBar;
 import com.enigmadux.craterguardians.MathOps;
-import com.enigmadux.craterguardians.GUI.ProgressBar;
 import com.enigmadux.craterguardians.GameObjects.Supply;
 import com.enigmadux.craterguardians.R;
 
@@ -26,7 +26,7 @@ public abstract class Enemy extends BaseCharacter {
     private static final long ATTACK_MILLIS = 1500;
 
     //health display of the player
-    private ProgressBar healthDisplay;
+    private HealthBar healthDisplay;
     //whether or not it can move, it may not be able to move because it's attacking (Enemy 2)
     protected boolean canMove = true;
 
@@ -51,6 +51,13 @@ public abstract class Enemy extends BaseCharacter {
     //millis since last attack
     private long millisSinceAttack;
 
+
+    //how longs it's stunned for
+    private long stunnedMillis;
+
+    //iterates over attacks to see which should be removed
+    private Iterator<Attack> attackIterator;
+
     /** Default Constructor
      *
      * @param numRotationOrientations the amount of angles that the character is rendered at e.g 4 would mean 0,90,180,270
@@ -60,7 +67,7 @@ public abstract class Enemy extends BaseCharacter {
     public Enemy(int numRotationOrientations, int framesPerRotation,float fps){
         super(numRotationOrientations,framesPerRotation,fps);
 
-        healthDisplay = new ProgressBar(this.getMaxHealth(),this.getRadius()*2,0.05f, true, true);
+        healthDisplay = new HealthBar(this.getX(),this.getRadius()*2,this.getWidth(),this.getMaxHealth());
     }
 
     /** Draws the player
@@ -72,6 +79,8 @@ public abstract class Enemy extends BaseCharacter {
         for (int i = 0;i<attacks.size();i++) {
             attacks.get(i).draw(parentMatrix);
         }
+
+
         healthDisplay.draw(parentMatrix);
     }
 
@@ -88,6 +97,15 @@ public abstract class Enemy extends BaseCharacter {
                 1/(float) FRAMES_PER_ROTATION,1,
                 1/(float) FRAMES_PER_ROTATION,(NUM_ROTATION_ORIENTATIONS-1f)/NUM_ROTATION_ORIENTATIONS,
         });
+    }
+
+    /** Knocks back the enemy and stuns it
+     *
+     * @param stunnedMillis the amount of millis the enemy is stunned for
+     */
+    public void stun(long stunnedMillis){
+        //this is the stun
+        this.stunnedMillis = Math.max(this.stunnedMillis,stunnedMillis);
     }
 
     /** Preparing drawing period
@@ -110,6 +128,18 @@ public abstract class Enemy extends BaseCharacter {
      */
     public abstract void drawIntermediate(float[] parentMatrix);
 
+    /** Gets the speed of the enemy
+     *
+     * @return the speed of the enemy
+     */
+    public abstract float getSpeed();
+
+    /** Gets the attack range of this enemy
+     *
+     * @return the attack range of this enemy (how far it can shoot
+     */
+    public abstract float getAttackRange();
+
 
     /** Updates the position, and other attributes
      *
@@ -119,15 +149,21 @@ public abstract class Enemy extends BaseCharacter {
      * @param enemyMap A map of where and how the enemy should go
      */
     public void update(long dt, BaseCharacter player, List<Supply> supplies, EnemyMap enemyMap) {
-        this.millisSinceAttack += dt;
+        if (this.stunnedMillis <= 0) {
+            this.millisSinceAttack += dt;
+        }
+        this.healthDisplay.setTranslate(this.getDeltaX(),this.getDeltaY());
 
-        Iterator itr = attacks.iterator();
+
+        this.stunnedMillis -= dt;
+
+        this.attackIterator = attacks.iterator();
 
 
-        while (itr.hasNext()) {
-            Attack attack = (Attack) itr.next();
+        while (this.attackIterator.hasNext()) {
+            Attack attack =  this.attackIterator.next();
             if (attack.isFinished()) {
-                itr.remove();
+                this.attackIterator.remove();
             }
             attack.update(dt);
             attack.attemptAttack(player);
@@ -139,7 +175,9 @@ public abstract class Enemy extends BaseCharacter {
 
         //updates the position todo current this decides which one to go to by the euclidean distance, whereas it should be the distance using the algorithm, it shouldnt affect it too much, but this way is easier and less expensive
         //find the path of each one
-        this.healthDisplay.update(this.health, this.getDeltaX() - this.getRadius(), this.getDeltaY() + this.getRadius());
+
+        this.healthDisplay.updateHealth(this.health);
+        //this.healthDisplay.update(this.health, this.getDeltaX() - this.getRadius(), this.getDeltaY() + this.getRadius());
         if (this.canMove) {
             float minLength = Math.max(0.01f, (float) Math.hypot(this.getDeltaX() - player.getDeltaX(), this.getDeltaY() - player.getDeltaY()));
             int supplyIndex = -1;//if it's negative 1 that refers to the player
@@ -182,7 +220,7 @@ public abstract class Enemy extends BaseCharacter {
             double travelLen = (float) Math.hypot(this.getDeltaX() - targetX,this.getDeltaY()-targetY);
 
             //this may be wrong
-            float clippedLength = (travelLen > dt / 1000f) ? (dt / 1000f)/ (float) travelLen: 1;
+            float clippedLength = (travelLen >  this.getSpeed() * dt / 1000f) ? (this.getSpeed() *  dt / 1000f)/ (float) travelLen: 1;
 
 
 
@@ -190,7 +228,7 @@ public abstract class Enemy extends BaseCharacter {
             if (currentPath != null && currentPath.size() > 1 && Math.hypot(targetX -this.getDeltaX(),targetY- this.getDeltaY()) < Enemy.MIN_DISTANCE) this.currentPath.remove(0);
 
             if (supplyIndex == -1) {
-                if (minLength < 1 && attacks.size() < 1 && this.millisSinceAttack > ATTACK_MILLIS) {//todo this is hardcoded
+                if (minLength < this.getAttackRange() && attacks.size() < 1 && this.millisSinceAttack > ATTACK_MILLIS) {//todo this is hardcoded
                     this.attack(MathOps.getAngle((player.getDeltaX() - this.getDeltaX()) / minLength, (player.getDeltaY() - this.getDeltaY()) / minLength));
                     this.millisSinceAttack = 0;
                 }
@@ -199,7 +237,7 @@ public abstract class Enemy extends BaseCharacter {
 
             } else {
 
-                if (minLength < 1 && attacks.size() < 1 && this.millisSinceAttack > ATTACK_MILLIS) {//todo this is hardcoded
+                if (minLength < this.getAttackRange() && attacks.size() < 1 && this.millisSinceAttack > ATTACK_MILLIS) {//todo this is hardcoded
                     this.attack(MathOps.getAngle((supplies.get(supplyIndex).getX() - this.getDeltaX()) / minLength, (supplies.get(supplyIndex).getY() - this.getDeltaY()) / minLength));
                     this.millisSinceAttack = 0;
                 }
@@ -208,7 +246,7 @@ public abstract class Enemy extends BaseCharacter {
             }
 
             //incase the path is still trying to be figured out
-            if (this.currentPath != null) {
+            if (this.currentPath != null && this.stunnedMillis <= 0 && (currentPath.size() > 2 || minLength > this.getAttackRange())) {
                 this.translateFromPos((targetX - this.getDeltaX()) * clippedLength, (targetY - this.getDeltaY()) * clippedLength);
             }
 

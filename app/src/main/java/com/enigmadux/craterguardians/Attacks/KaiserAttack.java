@@ -5,6 +5,7 @@ import android.content.Context;
 import android.opengl.Matrix;
 
 import com.enigmadux.craterguardians.BaseCharacter;
+import com.enigmadux.craterguardians.Characters.Kaiser;
 import com.enigmadux.craterguardians.Characters.Player;
 import com.enigmadux.craterguardians.Enemies.Enemy;
 import com.enigmadux.craterguardians.MathOps;
@@ -20,12 +21,20 @@ import enigmadux2d.core.shapes.TexturedRect;
 /** this whole subdirectory needs javadoc //TODO
  *
  */
-public class Enemy1Attack extends Attack {
-
+public class KaiserAttack extends Attack {
     /** The amount of frames in this animation
      *
      */
     private static int NUM_FRAMES = 8;
+    /** The width of the fireballs
+     *
+     */
+    private static float FIREBALL_WIDTH = 0.5f;
+    /** The sweep of this attack in radians
+     *
+     */
+    public static float SWEEP_ANGLE = 0.5f;
+
 
     //matrix used to scale the default to the desired
     private final float[] finalMatrix = new float[16];
@@ -35,7 +44,6 @@ public class Enemy1Attack extends Attack {
 
 
     private float length;
-    private float width;
     private int damage;
 
     private List<Object> hits= new ArrayList<>();
@@ -53,21 +61,19 @@ public class Enemy1Attack extends Attack {
      * @param damage how much damage to deal to enemies;
      * @param attackAngle the angle between the start of the sweep and the positive x axis in radians. Zero would mean that half the sweep is above the x axis, and half below
      * @param length how long the attack is in open gl terms
-     * @param width how wide the attack is in open gl terms, because orginally it is point ing in the positive x axis, this is originally the height at 0 radians
      * @param millis how long the attack takes to finish
      * @param initializer the Enemy or player who summoned the attack
      */
-    public Enemy1Attack(float x, float y, int damage, float attackAngle, float length,float width, long millis,BaseCharacter initializer){
+    public KaiserAttack(float x, float y, int damage, float attackAngle, float length, long millis, BaseCharacter initializer){
         super(x,y,0,0,NUM_FRAMES,millis,initializer, attackAngle);
 
 
         this.damage = damage;
         this.length =length;
-        this.width = width;
 
         float[] scalarMatrix = new float[16];
         Matrix.setIdentityM(scalarMatrix, 0);
-        Matrix.scaleM(scalarMatrix, 0, width , width, 1);
+        Matrix.scaleM(scalarMatrix, 0, FIREBALL_WIDTH , FIREBALL_WIDTH, 1);
 
         float[] rotatorMatrix = new float[16];
         Matrix.setIdentityM(rotatorMatrix,0);
@@ -123,27 +129,15 @@ public class Enemy1Attack extends Attack {
     }
 
 
-
     @Override
     public boolean isHit(BaseCharacter character) {
         if (this.hits.contains(character)){
             return false;
         }
 
-        float originalXvalue = length * (float) finishedMillis/millis;
-        float originalYValue = width/2f;
-
-        float cos = (float) Math.cos(attackAngle);
-        float sin = (float) Math.sin(attackAngle);
-
-        float x1 = this.x + cos * originalXvalue - sin * originalYValue;
-        float y1 = this.y + sin * originalXvalue + cos * originalYValue;
-        float x2 = this.x + cos * originalXvalue + sin * originalYValue;
-        float y2 = this.y + sin * originalXvalue - cos * originalYValue;
-
-
-
-        if (character.collidesWithLine(x1,y1,x2,y2)){
+        float x = this.x + (float) Math.cos(this.attackAngle) * length * (float) finishedMillis/millis;
+        float y = this.y + (float) Math.sin(this.attackAngle) * length * (float) finishedMillis/millis;
+        if (Math.hypot(x - character.getDeltaX(),y - character.getDeltaY()) <  FIREBALL_WIDTH/2 + character.getRadius()){
             this.hits.add(character);
             //ends the attack
             this.finishedMillis = this.millis + 1;
@@ -152,33 +146,17 @@ public class Enemy1Attack extends Attack {
         }
         return false;
     }
-
+x
     @Override
     public boolean isHit(Spawner spawner) {
-        return false;//because nothing is done, it doesn't matter whether it's true or false, so we just return true to reduce calculations
-    }
-
-    @Override
-    public boolean isHit(Supply supply) {
-        if (this.hits.contains(supply)){
+        if (this.hits.contains(spawner)){
             return false;
         }
-        float originalXvalue = length * (float) finishedMillis/millis;
-        float originalYValue = width/2f;
 
-        float cos = (float) Math.cos(attackAngle);
-        float sin = (float) Math.sin(attackAngle);
-
-        float x1 = this.x + cos * originalXvalue - sin * originalYValue;
-        float y1 = this.y + sin * originalXvalue + cos * originalYValue;
-        float x2 = this.x + cos * originalXvalue + sin * originalYValue;
-        float y2 = this.y + sin * originalXvalue - cos * originalYValue;
-
-        //(oX + oYi) * (cos + sinI) = oxCos - oYSin + cosOYI + sinIOX
-        //(oX - oYi) * (cos + sinI) = oxCos + oYSin - cosOYI + sinIOX
-
-        if (supply.collidesWithLine(x1,y1,x2,y2)){
-            this.hits.add(supply);
+        float x = this.x + (float) Math.cos(this.attackAngle) * length * (float) finishedMillis/millis;
+        float y = this.y + (float) Math.sin(this.attackAngle) * length * (float) finishedMillis/millis;
+        if (spawner.collidesWithCircle(x,y,FIREBALL_WIDTH/2)){
+            this.hits.add(spawner);
             //ends the attack
             this.finishedMillis = this.millis + 1;
             this.isFinished = true;
@@ -188,26 +166,36 @@ public class Enemy1Attack extends Attack {
     }
 
     @Override
-    public void onHitPlayer(Player player) {
-        float hypotenuse = (float) Math.hypot(player.getDeltaX() - this.x,player.getDeltaY() - this.y);
-        player.damage(player.getAttackDamage(this.damage, MathOps.getAngle((this.x - player.getDeltaX())/hypotenuse,(this.y - player.getDeltaY())/hypotenuse)));
+    public boolean isHit(Supply supply) {
+        return false;//doesn't matter if it's hit so don't waste calculation time on it
+    }
+
+    @Override
+    public void onHitSpawner(Spawner spawner) {
+        spawner.damage(this.damage);
     }
     @Override
     public void onHitEnemy(Enemy enemy) {
-        //pass nothing needs to be done
-    }
-    @Override
-    public void onHitSpawner(Spawner spawner) {
-        //pass nothing is needed
+        enemy.damage(this.damage);
+        ((Kaiser) initializer).gainEvolveCharge(this.damage);
     }
 
-    @Override
-    public void onHitSupply(Supply supply){
-        supply.damage(damage);
-    }
 
     @Override
     public void onAttackFinished() {
-        //nothing needed to be done
+        if (hits.size() == 0) {
+            ((Kaiser) initializer).failedAttack();
+        }
     }
+
+    @Override
+    public void onHitSupply(Supply supply) {
+        //pass nothing needs to be done
+    }
+
+    @Override
+    public void onHitPlayer(Player player) {
+        //nothing needs to be done
+    }
+
 }

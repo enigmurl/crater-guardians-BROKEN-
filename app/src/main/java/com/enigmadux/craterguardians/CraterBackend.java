@@ -9,12 +9,12 @@ import com.enigmadux.craterguardians.AngleAimers.TriangleAimer;
 import com.enigmadux.craterguardians.Animations.Animation;
 import com.enigmadux.craterguardians.Animations.DeathAnim;
 import com.enigmadux.craterguardians.Animations.DelayedHide;
+import com.enigmadux.craterguardians.Animations.EvolveAnimation;
 import com.enigmadux.craterguardians.Animations.ToxicBubble;
 import com.enigmadux.craterguardians.Attacks.Enemy1Attack;
 import com.enigmadux.craterguardians.Attacks.Enemy2Attack;
 import com.enigmadux.craterguardians.Attacks.Enemy3Attack;
-import com.enigmadux.craterguardians.Attacks.KaiserE1Attack;
-import com.enigmadux.craterguardians.Attacks.KaiserE2Attack;
+import com.enigmadux.craterguardians.Attacks.KaiserAttack;
 import com.enigmadux.craterguardians.Attacks.RyzeAttack;
 import com.enigmadux.craterguardians.Characters.Kaiser;
 import com.enigmadux.craterguardians.Characters.Player;
@@ -26,6 +26,7 @@ import com.enigmadux.craterguardians.Enemies.Enemy3;
 import com.enigmadux.craterguardians.FileStreams.LevelData;
 import com.enigmadux.craterguardians.FileStreams.PlayerData;
 import com.enigmadux.craterguardians.GUI.Button;
+import com.enigmadux.craterguardians.GUI.HealthBar;
 import com.enigmadux.craterguardians.GUI.HomeButton;
 import com.enigmadux.craterguardians.GUI.InGameTextbox;
 import com.enigmadux.craterguardians.GUI.ProgressBar;
@@ -171,34 +172,13 @@ public class CraterBackend {
     //describes what the user is doing  (e.g. home screen, level select, and in game)
     private int currentGameState;
 
-    //what levels are unlocked
-    //private boolean[] unlockedLevels = new boolean[CraterBackend.NUM_LEVELS];
-    //what levels have been completed
-    //private boolean[] completedLevels = new boolean[CraterBackend.NUM_LEVELS];
     //what level number
     private int levelNum = 0;
 
-//    //radius of the crater
-//    private float craterRadius;
-//    //spawn location
-//    private float[] spawnLocation = new float[2];
-//    //the current player on the map
+    //the current player
     private Player player;
-//    //all enemies on the map
-//    //private final Enemy[] enemies = new Enemy[CraterBackend.MAX_ENEMIES];
-//    private final List<Enemy> enemies = new ArrayList<>();
-//    //all spawner on the map
-//    //private final Spawner[] spawners = new Spawner[]
-//    private final List<Spawner> spawners = new ArrayList<>();
-//    //all plateaus on the map
-//    private final List<Plateau> plateaus = new ArrayList<>();
-//    //all active toxic lakes on the map
-//    private final List<ToxicLake> toxicLakes = new ArrayList<>();
-//    //all active supplies on the map
-//    private final List<Supply> supplies = new ArrayList<>();
-//    //all active animations
-//    private final List<Animation> animations = new ArrayList<>();
 
+    //a map of everything in the game
     private GameMap gameMap;
     //a map of where the enemy should go
     //private EnemyMap enemyMap;
@@ -461,33 +441,6 @@ public class CraterBackend {
         HomeButton levelSelect_homeButton = new HomeButton(-0.75f,0f,0.4f,this,this.renderer);
 
 
-        /*Button levelSelect_homeButton = new Button(new TexturedRect(-0.8f,-0.25f,0.5f * scaleX,0.5f )){
-            @Override
-            public boolean isSelect(MotionEvent e) {
-                return this.visible && this.isInside(MathOps.getOpenGLX(e.getRawX()),MathOps.getOpenGLY(e.getRawY()));
-            }
-
-            @Override
-            public void onRelease() {
-                super.onRelease();
-
-                resetLevelButtons();
-
-
-                renderer.exitGame();
-                killEndGamePausePeriod();
-
-                setCurrentGameState(CraterBackend.GAME_STATE_HOMESCREEN);
-
-                SoundLib.setStateLobbyMusic(true);
-                SoundLib.setStateVictoryMusic(false);
-                SoundLib.setStateLossMusic(false);
-                SoundLib.setStateGameMusic(false);
-            }
-
-        };*/
-
-
         levelButtons[0] = levelBackground;
         levelButtons[1] = levelSelect_homeButton;
 
@@ -611,7 +564,7 @@ public class CraterBackend {
 
 
         //max health is initialized later in setPlayer() method
-        this.healthDisplay = new ProgressBar(-1,0.3f,0.2f, true, false);
+        this.healthDisplay = new ProgressBar(-1,0.3f,0.2f);
 
 
         this.gameScreenLayout = new CraterLayout(new EnigmaduxComponent[] {
@@ -843,7 +796,7 @@ public class CraterBackend {
         //characters
         Player.loadGLTexture(gl,this.context);
 
-        Kaiser.loadGLTexture(gl,this.context);
+        Kaiser.loadGLTexture(this.context);
         Ryze.loadGLTexture(gl,this.context);
         Enemy1.loadGLTexture(this.context);
         Enemy2.loadGLTexture(gl,this.context);
@@ -857,22 +810,23 @@ public class CraterBackend {
         Enemy2Spawner.loadGLTexture(gl,this.context);
         Enemy3Spawner.loadGLTexture(this.context);
         //attacks
-        Enemy1Attack.loadGLTexture(gl,this.context);
+        Enemy1Attack.loadGLTexture(this.context);
         Enemy2Attack.loadGLTexture(gl,this.context);
         Enemy3Attack.loadGLTexture(gl,this.context);
-        KaiserE1Attack.loadGLTexture(gl,this.context);
-        KaiserE2Attack.loadGLTexture(gl,this.context);
+        KaiserAttack.loadGLTexture(this.context);
         RyzeAttack.loadGLTexture(gl,this.context);
 
         //animations
         DeathAnim.loadGLTexture(gl,this.context);
+        EvolveAnimation.loadGLTexture(this.context);
         ToxicBubble.loadGLTexture(gl,this.context);
 
 
         //others (lakes + plateaus)
         ToxicLake.loadGLTexture(this.context);
         Plateau.loadGLTexture(gl,this.context);
-        ProgressBar.loadGLTexture(gl,this.context);
+        ProgressBar.loadGLTexture(this.context);
+        HealthBar.loadGLTexture(this.context);
         Supply.loadGLTexture(gl,this.context);
         InGameTextbox.loadFont(this.context);
         InGameTextbox.loadFont(this.context);
@@ -1195,6 +1149,12 @@ public class CraterBackend {
             //return;
         }
 
+        //during the evolve period
+        if (this.player.isEvolving()) {
+            this.player.update(dt, this.player.getRotation(), this.gameMap.getEnemies(), this.gameMap.getSpawners());
+            Log.d("FRONT:","EVOLVING:");
+            return;
+        }
         long start = System.currentTimeMillis();
 
         Iterator itr;
@@ -1452,7 +1412,6 @@ public class CraterBackend {
 
         this.playerData.updateXP(PlayerData.getExperience() + CraterBackend.XP_GAIN_PER_LEVEL);
         //this.experience += CraterBackend.XP_GAIN_PER_LEVEL;
-        this.renderer.updateUpgradeLayouts();
 
         this.levelData.writeLevelFiles();
         //this.createLevelFiles();
@@ -1481,7 +1440,7 @@ public class CraterBackend {
             this.levelSelectLayout.onTouch(e);
             this.loadLevelLayout.onTouch(e);
         } else if (this.currentGameState == CraterBackend.GAME_STATE_INGAME || this.currentGameState == CraterBackend.GAME_STATE_TUTORIAL){
-            if (! (this.inEndGamePausePeriod || this.inPreGameZoomPeriod) && this.tutorialCurrentMillis > CraterBackend.JOYSTICK_INTRODUCTION) {
+            if (! (this.inEndGamePausePeriod || this.inPreGameZoomPeriod ) && this.tutorialCurrentMillis > CraterBackend.JOYSTICK_INTRODUCTION) {
                 this.updateJoySticks(e);
             }
             if (this.currentGameState == CraterBackend.GAME_STATE_TUTORIAL){
@@ -1496,6 +1455,7 @@ public class CraterBackend {
      * @param e the motion event describing how the user interacted with the screen
      */
     private void updateJoySticks(MotionEvent e){
+
         //scale it so its circles todo make this not initiated each frame
         float scaleX = 1;
         float scaleY = 1;
@@ -1533,8 +1493,11 @@ public class CraterBackend {
             if  (e.getPointerId(pointerInd) == this.attackJoyStickPointer && this.attackJoyStickDown){
                 this.attackJoyStickDown = false;
                 float hypotenuse = (float) Math.hypot(this.attackJoyStickX/scaleX,this.attackJoyStickY/scaleY);
-                synchronized (CraterBackend.PLAYER_LOCK) {
-                    this.player.attack(MathOps.getAngle(attackJoyStickX / (scaleX * hypotenuse), attackJoyStickY / (scaleY * hypotenuse)));
+                //can't attack while evolving
+                if (! this.player.isEvolving()) {
+                    synchronized (CraterBackend.PLAYER_LOCK) {
+                        this.player.attack(MathOps.getAngle(attackJoyStickX / (scaleX * hypotenuse), attackJoyStickY / (scaleY * hypotenuse)));
+                    }
                 }
                 this.joysticksTapped[1] = true;
             }
@@ -1582,6 +1545,9 @@ public class CraterBackend {
             this.attackJoyStickX = 0;
             this.attackJoyStickY = 0;
         }
+
+        //if evolving no need to hide
+        if (this.player.isEvolving()) this.player.hideAngleAimer();
 
 
 

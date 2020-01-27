@@ -35,7 +35,6 @@ public class RyzeAttack extends Attack {
     private final float[] rightAttackM = new float[16];
 
 
-    private float angleRadians;
     private float mainLength;
     private float mainWidth;
     private float sideLength;
@@ -61,7 +60,7 @@ public class RyzeAttack extends Attack {
      * @param x openGL x
      * @param y openGL y
      * @param damage how much damage to deal to enemies;
-     * @param angleRadians the angle between the start of the sweep and the positive x axis in radians. Zero would mean that half the sweep is above the x axis, and half below
+     * @param attackAngle the angle between the start of the sweep and the positive x axis in radians. Zero would mean that half the sweep is above the x axis, and half below
      * @param mainLength how long the middle attack is in open gl terms (radius)
      * @param mainWidth how wide the middle attack is in open gl terms (radius)
      * @param sideLength how long the side attacks are in open gl terms
@@ -69,11 +68,10 @@ public class RyzeAttack extends Attack {
      * @param millis how long the attack takes to finish
      * @param initializer the Enemy or player who summoned the attack
      */
-    public RyzeAttack(float x, float y, int damage, float angleRadians, float mainLength, float mainWidth, float sideLength, float sideWidth, long millis, Ryze initializer){
-        super(x,y,0,0,5,millis,initializer);
+    public RyzeAttack(float x, float y, int damage, float attackAngle, float mainLength, float mainWidth, float sideLength, float sideWidth, long millis, Ryze initializer){
+        super(x,y,0,0,5,millis,initializer, attackAngle);
 
 
-        this.angleRadians = angleRadians;
         this.damage = damage;
         this.mainLength = mainLength;
         this.mainWidth = mainWidth;
@@ -82,18 +80,18 @@ public class RyzeAttack extends Attack {
 
         Matrix.setIdentityM(leftAttackM,0);
         Matrix.translateM(leftAttackM,0,this.x,this.y,0);
-        Matrix.rotateM(leftAttackM,0,180f/(float) Math.PI * (RyzeAttack.SWEEP_ANGLE/2 + angleRadians),0,0,1);
+        Matrix.rotateM(leftAttackM,0,180f/(float) Math.PI * (RyzeAttack.SWEEP_ANGLE/2 + attackAngle),0,0,1);
         Matrix.scaleM(leftAttackM,0,sideLength,sideWidth,0);
 
 
         Matrix.setIdentityM(rightAttackM,0);
         Matrix.translateM(rightAttackM,0,this.x,this.y,0);
-        Matrix.rotateM(rightAttackM,0,180f/(float) Math.PI * (-RyzeAttack.SWEEP_ANGLE/2 + angleRadians),0,0,1);
+        Matrix.rotateM(rightAttackM,0,180f/(float) Math.PI * (-RyzeAttack.SWEEP_ANGLE/2 + attackAngle),0,0,1);
         Matrix.scaleM(rightAttackM,0,sideLength,sideWidth,0);
 
         Matrix.setIdentityM(middleAttackM,0);
         Matrix.translateM(middleAttackM,0,this.x,this.y,0);
-        Matrix.rotateM(middleAttackM,0,180f/(float) Math.PI * ( angleRadians),0,0,1);
+        Matrix.rotateM(middleAttackM,0,180f/(float) Math.PI * ( attackAngle),0,0,1);
         Matrix.scaleM(middleAttackM,0,mainLength,mainWidth,0);
 
     }
@@ -143,8 +141,8 @@ public class RyzeAttack extends Attack {
             float originalXvalue = mainLength * (float) finishedMillis / millis;
             float originalYValue = mainWidth / 2f;
 
-            float cos = (float) Math.cos(angleRadians);
-            float sin = (float) Math.sin(angleRadians);
+            float cos = (float) Math.cos(attackAngle);
+            float sin = (float) Math.sin(attackAngle);
 
             float x1 = this.x + cos * originalXvalue - sin * originalYValue;
             float y1 = this.y + sin * originalXvalue + cos * originalYValue;
@@ -160,8 +158,8 @@ public class RyzeAttack extends Attack {
             float originalXvalue = sideLength * (float) finishedMillis / millis;
             float originalYValue = sideWidth / 2f;
 
-            float cos = (float) Math.cos(angleRadians + SWEEP_ANGLE/2);
-            float sin = (float) Math.sin(angleRadians + SWEEP_ANGLE/2);
+            float cos = (float) Math.cos(attackAngle + SWEEP_ANGLE/2);
+            float sin = (float) Math.sin(attackAngle + SWEEP_ANGLE/2);
 
             float x1 = this.x + cos * originalXvalue - sin * originalYValue;
             float y1 = this.y + sin * originalXvalue + cos * originalYValue;
@@ -177,8 +175,8 @@ public class RyzeAttack extends Attack {
             float originalXvalue = sideLength * (float) finishedMillis / millis;
             float originalYValue = sideWidth / 2f;
 
-            float cos = (float) Math.cos(angleRadians - SWEEP_ANGLE/2);
-            float sin = (float) Math.sin(angleRadians - SWEEP_ANGLE/2);
+            float cos = (float) Math.cos(attackAngle - SWEEP_ANGLE/2);
+            float sin = (float) Math.sin(attackAngle - SWEEP_ANGLE/2);
 
             float x1 = this.x + cos * originalXvalue - sin * originalYValue;
             float y1 = this.y + sin * originalXvalue + cos * originalYValue;
@@ -204,8 +202,8 @@ public class RyzeAttack extends Attack {
             float originalXvalue = mainLength * (float) finishedMillis / millis;
             float originalYValue = mainWidth / 2f;
 
-            float cos = (float) Math.cos(angleRadians);
-            float sin = (float) Math.sin(angleRadians);
+            float cos = (float) Math.cos(attackAngle);
+            float sin = (float) Math.sin(attackAngle);
 
             float x1 = this.x + cos * originalXvalue - sin * originalYValue;
             float y1 = this.y + sin * originalXvalue + cos * originalYValue;
@@ -221,8 +219,8 @@ public class RyzeAttack extends Attack {
             float originalXvalue = sideLength * (float) finishedMillis / millis;
             float originalYValue = sideWidth / 2f;
 
-            float cos = (float) Math.cos(angleRadians + SWEEP_ANGLE/2);
-            float sin = (float) Math.sin(angleRadians + SWEEP_ANGLE/2);
+            float cos = (float) Math.cos(attackAngle + SWEEP_ANGLE/2);
+            float sin = (float) Math.sin(attackAngle + SWEEP_ANGLE/2);
 
             float x1 = this.x + cos * originalXvalue - sin * originalYValue;
             float y1 = this.y + sin * originalXvalue + cos * originalYValue;
@@ -238,8 +236,8 @@ public class RyzeAttack extends Attack {
             float originalXvalue = sideLength * (float) finishedMillis / millis;
             float originalYValue = sideWidth / 2f;
 
-            float cos = (float) Math.cos(angleRadians - SWEEP_ANGLE/2);
-            float sin = (float) Math.sin(angleRadians - SWEEP_ANGLE/2);
+            float cos = (float) Math.cos(attackAngle - SWEEP_ANGLE/2);
+            float sin = (float) Math.sin(attackAngle - SWEEP_ANGLE/2);
 
             float x1 = this.x + cos * originalXvalue - sin * originalYValue;
             float y1 = this.y + sin * originalXvalue + cos * originalYValue;

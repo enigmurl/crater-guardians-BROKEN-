@@ -20,7 +20,7 @@ import enigmadux2d.core.shapes.TexturedRect;
  */
 public class Enemy3 extends Enemy {
     //a constant that represents how fast the character is, right now there aren't any particular units which needs to change (see todo)
-    private static final float CHARACTER_SPEED = 2.5f;
+    private static final float CHARACTER_SPEED = 0.2f;
     //a constant that represents how many rows the sprite sheet has (how many orientations of rotations
     private static final int NUM_ROTATION_ORIENTATIONS = 8;
     //a constant that represents how many columns the sprite sheet has (how many frames in a single rotation animation)
@@ -28,7 +28,9 @@ public class Enemy3 extends Enemy {
     //a constant that represents how fast to play the animation in frames per second
     private static final float FPS = 16;
     //a constant that represents the maximum health of Enemy3
-    private static final int MAXIMUM_HEALTH = 20;
+    private static final int MAXIMUM_HEALTH = 100;
+    //a constant that represents the attack range of this enemy
+    private static final float ATTACK_RANGE = 2f;
 
 
 
@@ -36,9 +38,6 @@ public class Enemy3 extends Enemy {
      *
      */
     public static final float CHARACTER_RADIUS = 0.5f;
-
-    //visual is shared by all objects as they all have the same sprite
-    private static TexturedRect VISUAL_REPRESENTATION3 = new TexturedRect(-Enemy3.CHARACTER_RADIUS,-Enemy3.CHARACTER_RADIUS,Enemy3.CHARACTER_RADIUS*2,Enemy3.CHARACTER_RADIUS*2);
 
     //parent matrix * translation matrix
     private final float[] finalMatrix = new float[16];
@@ -117,6 +116,7 @@ public class Enemy3 extends Enemy {
         //Matrix.translateM(translationMatrix,0,this.getDeltaX(),this.getDeltaY(),0);
         Matrix.translateM(finalMatrix,0,parentMatrix,0,this.getDeltaX(),this.getDeltaY(),0);
         Matrix.scaleM(finalMatrix,0,Enemy3.CHARACTER_RADIUS,Enemy3.CHARACTER_RADIUS,0);
+        Enemy.VISUAL_REPRESENTATION.setShader(this.shader[0],this.shader[1],this.shader[2],this.shader[3]);
         //Matrix.multiplyMM(finalMatrix,0,parentMatrix,0,translationMatrix,0);
         VISUAL_REPRESENTATION.draw(finalMatrix);
     }
@@ -136,5 +136,23 @@ public class Enemy3 extends Enemy {
     @Override
     public float getRadius() {
         return Enemy3.CHARACTER_RADIUS;
+    }
+
+    /** Gets the speed of the enemy
+     *
+     * @return the spped of this enemy
+     */
+    @Override
+    public float getSpeed() {
+        return Enemy3.CHARACTER_SPEED;
+    }
+
+    /** Gets the attack range of this enemy
+     *
+     * @return the attack range of this enemy (how far it can shoot
+     */
+    @Override
+    public float getAttackRange(){
+        return ATTACK_RANGE;
     }
 }

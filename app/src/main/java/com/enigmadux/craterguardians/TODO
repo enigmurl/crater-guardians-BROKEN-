@@ -26,6 +26,13 @@ todo PRIORITY:
             5) Balance stuff (Also at some point fix the orientation of valley + do that in level maker as well)
             6) Fix pausing + stopping - tbd
     1/12 GOALS: Just try creating 1 really good level, make attacks less spammy, more skill
+    1/21 GOALS: Start/finish evolving animation, hearts instead of progress bar
+    1/23 GOALS: start/finish evolving animation (hopefully finish)
+    1/25 GOALS: Find out what makes progress bars so slow, look into some optimizations, but mostly work on making UI better
+                2) Making game environment good, I reccoemend obviously lowering Kaiser health, then make her attack more bullet
+                like, and make enemies spawn less frequently
+                3) For UI, for one fix the Buttons to not be parralelograms, rounded rects or smthing, then
+    1/26 GOALS: Make the Button good Looking
 
     OPTIMIZATIONS:
         1) don't focus too much on the matrix multiplication i don't think that's the bad part (small)
@@ -46,7 +53,7 @@ todo PRIORITY:
 
     Make a level where there is many enemy twos on the side
     Make Home screen a separate class
-    Rework character select to make it more like battle cats, I think we make it a 2d array of icons, if you click on it
+    Rework character select to make it mor e like battle cats, I think we make it a 2d array of icons, if you click on it
         three options appear, upgrade, select, info
 
     sometimes it seems that health bars/ evolve button randomly goes to the center of the screen

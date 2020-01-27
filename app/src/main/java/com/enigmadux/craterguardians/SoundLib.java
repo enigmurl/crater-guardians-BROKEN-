@@ -7,6 +7,7 @@ import android.util.Log;
 /** All songs and sound effect sare played here
  *
  * todo: reloading stuff
+ * TODO: making it all static is not efficient usage of memory bc all the static variables will never be de assigned
  *
  * @author Manu Bhat
  * @version BETA
@@ -49,7 +50,8 @@ public class SoundLib {
     private static MediaPlayer spawnerDamagedSoundEffect;
     /** sound effect played when a spawner is killed*/
     private static MediaPlayer spawnerDeathSoundEffect;
-
+    /** sound effect played during the evolving of a character, it should be the approximate length*/
+    private static MediaPlayer evolvingSoundEffect;
 
     /** whether or not the player has the music on*/
     private static boolean playMusic = true;
@@ -90,7 +92,7 @@ public class SoundLib {
         SoundLib.supplyDeathSoundEffect = MediaPlayer.create(context,R.raw.supply_death);
         SoundLib.spawnerDamagedSoundEffect = MediaPlayer.create(context,R.raw.spawner_damaged);
         SoundLib.spawnerDeathSoundEffect = MediaPlayer.create(context,R.raw.spawner_death);
-
+        SoundLib.evolvingSoundEffect = MediaPlayer.create(context,R.raw.evolving_soundeffect);
 
     }
 
@@ -335,8 +337,19 @@ public class SoundLib {
         }
     }
 
-    /** Plays the sound effect when a spawner is damaged by the player
+    /** Plays the sound effect when a player is currentyl evolving
      *
+     */
+    public static void playPlayerEvolvingSoundEffect(){
+        if (! SoundLib.playSoundEffects) return;
+
+        if (! SoundLib.evolvingSoundEffect.isPlaying()) {
+            SoundLib.evolvingSoundEffect.start();
+        }
+    }
+
+    /** Plays the sound effect when a spawner is damaged by the player
+     * TODO UPDATE THISS
      */
     public static void playSpawnerDamageSoundEffect(){
         if (! SoundLib.playSoundEffects) return;
@@ -347,7 +360,7 @@ public class SoundLib {
     }
 
     /** Plays the sound effect when a spawner is killed by the player
-     *
+     *     * TODO UPDATE THISS NOT BEING CALLED
      */
     public static void playSpawnerDeathSoundEffect(){
         if (! SoundLib.playSoundEffects) return;

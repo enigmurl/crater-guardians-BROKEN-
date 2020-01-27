@@ -3,6 +3,7 @@ package com.enigmadux.craterguardians;
 import android.util.Log;
 import android.view.MotionEvent;
 
+import com.enigmadux.craterguardians.Animations.RedShader;
 import com.enigmadux.craterguardians.Attacks.Attack;
 
 import java.util.ArrayList;
@@ -51,6 +52,9 @@ public abstract class BaseCharacter extends EnigmaduxComponent {
     //the angle at which the player needs to be rotated. This is because there is some granuality of the number of rotations, so we interpelate between the two by rotating it (degrees)
     protected float offsetDegrees;
 
+    //the shader that tells how to color the this character
+    protected float[] shader = new float[] {1,1,1,1};
+
     /**
      *
      * @param numRotationOrientations the amount of angles that the character is rendered at e.g 4 would mean 0,90,180,270
@@ -70,6 +74,7 @@ public abstract class BaseCharacter extends EnigmaduxComponent {
 
 
         this.health = getMaxHealth();
+
     }
 
     /** Draws the character and elements related to it. Sub classes are responsible for drawing all elements
@@ -86,6 +91,20 @@ public abstract class BaseCharacter extends EnigmaduxComponent {
      */
     public abstract void setFrame(float rotation,int frameNum);
 
+
+    /** Sets the shader of the sprite
+     *
+     * @param r the red value shader (0 = none, 1 = full)
+     * @param g the grn value shader (0 = none, 1 = full)
+     * @param b the blu value shader (0 = none, 1 = full)
+     * @param a the alp value shader (0 = none, 1 = full)
+     */
+    public void setShader(float r,float g,float b,float a){
+        this.shader[0] = r;
+        this.shader[1] = g;
+        this.shader[2] = b;
+        this.shader[3] = a;
+    }
 
     /** Updates based on game state todo this won't work for more than 1 character because of updating not being in the same time frame as drawing
      *
@@ -129,6 +148,9 @@ public abstract class BaseCharacter extends EnigmaduxComponent {
      * @param damage the amount to reduce the health by
      */
     public void damage(int damage){
+        //todo possibly causing garbage collection?
+        new RedShader(this,RedShader.DEFAULT_LEN);
+
         this.health -= damage;
         //this.visualRepresentation.setScale(5f,5f);
         if (this.health <= 0){

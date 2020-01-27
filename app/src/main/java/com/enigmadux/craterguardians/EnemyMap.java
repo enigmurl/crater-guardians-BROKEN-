@@ -84,6 +84,8 @@ public class EnemyMap {
          */
         //left perpendicular
         float scalarL = (width/2)/(float) Math.hypot(node1.x-node2.x,node1.y-node2.y);
+
+        //todo MIGTH BE CAUSING GARBAGE COLLECTO
         Node lP = new Node(-scalarL * (node1.y-node2.y),scalarL * (node1.x-node2.x));
 
         //rightperpendicular

@@ -23,7 +23,7 @@ import enigmadux2d.core.shapes.TexturedRect;
  */
 public class Enemy2 extends Enemy {
     //a constant that represents how fast the character is, right now there aren't any particular units which needs to change (see todo)
-    private static final float CHARACTER_SPEED = 2.5f;
+    private static final float CHARACTER_SPEED = 0.5f;
     //a constant that represents how many rows the sprite sheet has (how many orientations of rotations
     private static final int NUM_ROTATION_ORIENTATIONS = 8;
     //a constant that represents how many columns the sprite sheet has (how many frames in a single rotation animation)
@@ -31,7 +31,9 @@ public class Enemy2 extends Enemy {
     //a constant that represents how fast to play the animation in frames per second
     private static final float FPS = 16;
     //a constant that represents the maximum health of Enemy2
-    private static final int MAXIMUM_HEALTH = 20;
+    private static final int MAXIMUM_HEALTH = 50;
+    //a constant that represents the attack range of this enemy
+    private static final float ATTACK_RANGE = 1f;
 
 
 
@@ -39,9 +41,6 @@ public class Enemy2 extends Enemy {
      *
      */
     public static final float CHARACTER_RADIUS = 0.3f;
-
-    //visual is shared by all objects as they all have the same sprite
-    private static TexturedRect VISUAL_REPRESENTATION2 = new TexturedRect(-Enemy2.CHARACTER_RADIUS,-Enemy2.CHARACTER_RADIUS,Enemy2.CHARACTER_RADIUS*2,Enemy2.CHARACTER_RADIUS*2);
 
     //parent matrix * translation matrix
     private float[] finalMatrix = new float[16];
@@ -117,12 +116,11 @@ public class Enemy2 extends Enemy {
      * @param parentMatrix used to translate from model to world space
      */
     public void drawIntermediate(float[] parentMatrix) {
-        //super.draw(gl,parentMatrix);
-        //Matrix.setIdentityM(translationMatrix,0);
-        //Matrix.translateM(translationMatrix,0,this.getDeltaX(),this.getDeltaY(),0);
+
         Matrix.translateM(finalMatrix,0,parentMatrix,0,this.getDeltaX(),this.getDeltaY(),0);
         Matrix.scaleM(finalMatrix,0,Enemy2.CHARACTER_RADIUS,Enemy2.CHARACTER_RADIUS,0);
-        //Matrix.multiplyMM(finalMatrix,0,parentMatrix,0,translationMatrix,0);
+
+        Enemy.VISUAL_REPRESENTATION.setShader(this.shader[0],this.shader[1],this.shader[2],this.shader[3]);
         VISUAL_REPRESENTATION.draw(finalMatrix);
     }
 
@@ -142,6 +140,24 @@ public class Enemy2 extends Enemy {
     @Override
     public float getRadius() {
         return Enemy2.CHARACTER_RADIUS;
+    }
+
+    /** Gets the speed of the enemy
+     *
+     * @return the spped of this enemy
+     */
+    @Override
+    public float getSpeed() {
+        return Enemy2.CHARACTER_SPEED;
+    }
+
+    /** Gets the attack range of this enemy
+     *
+     * @return the attack range of this enemy (how far it can shoot
+     */
+    @Override
+    public float getAttackRange(){
+        return ATTACK_RANGE;
     }
 
 }

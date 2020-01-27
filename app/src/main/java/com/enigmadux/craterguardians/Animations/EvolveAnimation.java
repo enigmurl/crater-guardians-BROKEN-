@@ -5,6 +5,7 @@ import android.opengl.Matrix;
 
 import com.enigmadux.craterguardians.MathOps;
 import com.enigmadux.craterguardians.R;
+import com.enigmadux.craterguardians.SoundLib;
 
 import enigmadux2d.core.shapes.TexturedRect;
 
@@ -15,6 +16,9 @@ import enigmadux2d.core.shapes.TexturedRect;
  */
 public class EvolveAnimation extends Animation {
 
+
+    //the standard dimensions of evolve animations
+    public static final float STANDARD_DIMENSIONS = 0.4f;
     /** The amount of frames in the animation
      *
      */
@@ -50,6 +54,8 @@ public class EvolveAnimation extends Animation {
         Matrix.setIdentityM(translationScalarMatrix,0);
         Matrix.translateM(translationScalarMatrix,0,x-w/2,y-h/2,0);
         Matrix.scaleM(translationScalarMatrix,0,w,h,1);
+
+        SoundLib.playPlayerEvolvingSoundEffect();
     }
 
 
@@ -59,6 +65,12 @@ public class EvolveAnimation extends Animation {
      */
     public static void loadGLTexture(Context context){
         VISUAL_REPRESENTATION.loadGLTexture(context, R.drawable.death_animation);
+        VISUAL_REPRESENTATION.loadTextureBuffer(new float[] {
+                0,1,
+                0,0,
+                1/(float) NUM_FRAMES,1,
+                1/(float) NUM_FRAMES,0
+        });
     }
 
     /** draws the current frame

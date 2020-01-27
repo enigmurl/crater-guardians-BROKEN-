@@ -27,20 +27,9 @@ import enigmadux2d.core.EnigmaduxComponent;
  * @version BETA
  */
 public class TexturedRect extends EnigmaduxComponent {
-   /* private static final String vertexShaderCode =
+    //the maximum dimension of a bitmap allowed
+    private static final int MAX_DIMENIONS = 512;
 
-            // This matrix member variable provides a hook to manipulate
-            // the coordinates of objects that use this vertex shader.
-            "uniform mat4 uMVPMatrix;   \n" +
-            "attribute vec4 vPosition;  \n" +
-            "void main(){               \n" +
-            // The matrix must be included as part of gl_Position
-            // Note that the uMVPMatrix factor *must be first* in order
-            // for the matrix multiplication product to be correct.
-            " gl_Position = uMVPMatrix * vPosition; \n" +
-
-            "}  \n";*/
-    //vertex shader code
    private static final String vertexShaderCode =
            "precision mediump float;" +
            "uniform mat4 uMVPMatrix;" +
@@ -278,6 +267,8 @@ public class TexturedRect extends EnigmaduxComponent {
         this.loadGLTexture(bitmap,0);
     }
 
+
+    private static long memory;
     /** Binds the given bitmap image to the rect. Additionally loads handles
      *
      * (possible optimizations: don't recreate the bitmap if it's already fine. And make it so you can pass in the texture possibly separate method
@@ -288,8 +279,11 @@ public class TexturedRect extends EnigmaduxComponent {
         this.loadHandles();
 
 
-        int afterW = MathOps.nextPowerTwo(bitmap.getWidth());
-        int afterH = MathOps.nextPowerTwo(bitmap.getHeight());
+        int afterW = Math.min(MathOps.nextPowerTwo(bitmap.getWidth()),TexturedRect.MAX_DIMENIONS);
+        int afterH = Math.min(MathOps.nextPowerTwo(bitmap.getHeight()),TexturedRect.MAX_DIMENIONS);
+        Log.d("TEXTURED RECT: ", "Before w " + bitmap.getWidth() + " h: " + bitmap.getHeight() + "AFTER:  w: "  + afterW  + " h: " + afterH);
+        memory+= afterH * afterW  *4;
+        Log.d("TEXTURED RECT,","memory: " + memory);
         if (afterH != bitmap.getHeight() || afterW != bitmap.getWidth()) {
             bitmap = Bitmap.createScaledBitmap(bitmap, afterW, afterH, false);
         }
@@ -312,8 +306,8 @@ public class TexturedRect extends EnigmaduxComponent {
         GLES20.glBindTexture(GLES20.GL_TEXTURE_2D, textures[index]);
 
         // create nearest filtered texture
-        GLES20.glTexParameterf(GLES20.GL_TEXTURE_2D, GLES20.GL_TEXTURE_MIN_FILTER, GLES20.GL_NEAREST);
-        GLES20.glTexParameterf(GLES20.GL_TEXTURE_2D, GLES20.GL_TEXTURE_MAG_FILTER, GLES20.GL_LINEAR);
+        GLES20.glTexParameteri(GLES20.GL_TEXTURE_2D, GLES20.GL_TEXTURE_MIN_FILTER, GLES20.GL_LINEAR);
+        GLES20.glTexParameteri(GLES20.GL_TEXTURE_2D, GLES20.GL_TEXTURE_MAG_FILTER, GLES20.GL_LINEAR);
 
         // loading texture as late as possible as to save memory (think)
 
@@ -370,24 +364,23 @@ public class TexturedRect extends EnigmaduxComponent {
      *
      * @param parentMatrix matrix that represents how to manipulate it to the world coordinates
      */
-    public void intermediateDraw(float[] parentMatrix){
-        if (! this.visible){
+    public void intermediateDraw(float[] parentMatrix) {
+        if (!this.visible) {
             return;
         }
         // Pass the projection and view transformation to the shader
-        Matrix.translateM(finalMatrix,0,parentMatrix,0,this.deltaX,this.deltaY,0);
-        Matrix.scaleM(finalMatrix,0,this.scaleX,this.scaleY,1);
-        Matrix.rotateM(finalMatrix,0,this.angle,0,0,1);
+        Matrix.translateM(finalMatrix, 0, parentMatrix, 0, this.deltaX, this.deltaY, 0);
+        Matrix.scaleM(finalMatrix, 0, this.scaleX, this.scaleY, 1);
+        Matrix.rotateM(finalMatrix, 0, this.angle, 0, 0, 1);
 
         GLES20.glUniformMatrix4fv(vPMatrixHandle, 1, false, finalMatrix, 0);
 
 
-        GLES20.glUniform2fv(this.textureDeltaHandle,1,this.deltaTextureCoordinates,0);
+        GLES20.glUniform2fv(this.textureDeltaHandle, 1, this.deltaTextureCoordinates, 0);
 
         GLES20.glDrawArrays(GLES20.GL_TRIANGLE_STRIP, 0, this.vertices.length / 3);
 
     }
-
     /** Prepares drawing, But basically means u can draw the same object multiple times without the overhead
      *
      * @param frameNum the frameNum in the texture
@@ -424,6 +417,13 @@ public class TexturedRect extends EnigmaduxComponent {
         GLES20.glDisableVertexAttribArray(textureCordHandle);
         GLES20.glDisableVertexAttribArray(shaderHandle);
 
+    }
+
+    /** De assigns the memory contents of this quad
+     *
+     */
+    public void recycle(){
+        GLES20.glDeleteTextures(this.textures.length,this.textures,0);
     }
 
     /**

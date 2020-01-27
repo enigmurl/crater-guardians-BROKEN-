@@ -6,13 +6,11 @@ import android.support.annotation.NonNull;
 
 import com.enigmadux.craterguardians.AngleAimers.AngleAimer;
 import com.enigmadux.craterguardians.AngleAimers.TriangleAimer;
-import com.enigmadux.craterguardians.Attacks.KaiserE1Attack;
-import com.enigmadux.craterguardians.Attacks.KaiserE2Attack;
+import com.enigmadux.craterguardians.Animations.EvolveAnimation;
+import com.enigmadux.craterguardians.Attacks.KaiserAttack;
 import com.enigmadux.craterguardians.MathOps;
 import com.enigmadux.craterguardians.GUI.ProgressBar;
 import com.enigmadux.craterguardians.R;
-
-import javax.microedition.khronos.opengles.GL10;
 
 import enigmadux2d.core.shapes.TexturedRect;
 
@@ -39,7 +37,7 @@ public class Kaiser extends Player {
     private static final long MILLIS_PER_RELOAD = 1000;
 
     //this says how much damage is needed to be dealt, in order to charge an evolution
-    private static final int NUM_ATTACKS_FOR_EVOLUTION = 20;
+    private static final int NUM_DAMAGE_FOR_EVOLUTION = 100;
 
     //this says the height of the gun of kaiser
     private static final float GUN_HEIGHT = 0.15f;
@@ -94,7 +92,7 @@ public class Kaiser extends Player {
      */
     @Override
     protected AngleAimer createAngleAimer() {
-        return new TriangleAimer(this.getDeltaX(),this.getDeltaY(),KaiserE1Attack.SWEEP_ANGLE,0,0.5f);
+        return new TriangleAimer(this.getDeltaX(),this.getDeltaY(), KaiserAttack.SWEEP_ANGLE,0,0.5f);
     }
 
     /** Creates the attack charge up bar which tells how much damage to add to the current attack
@@ -103,15 +101,14 @@ public class Kaiser extends Player {
      */
     @Override
     protected ProgressBar createAttackChargeUp() {
-        return new ProgressBar(2000 * NUM_ATTACKS,this.getRadius()*2,0.1f, false, true);
+        return new ProgressBar(2000 * NUM_ATTACKS,this.getRadius()*2,0.1f);
     }
 
     /** Loads the texture of the sprite sheet
      *
-     * @param gl a GL10 object used to access openGL
      * @param context context used to grab the actual image from res
      */
-    public static void loadGLTexture(GL10 gl, Context context) {
+    public static void loadGLTexture(Context context) {
         VISUAL_REPRESENTATION.loadGLTexture(context,R.drawable.kaiser_sprite_sheet_e1,0);
         VISUAL_REPRESENTATION.loadGLTexture(context,R.drawable.kaiser_sprite_sheet_e2,1);
 
@@ -128,11 +125,12 @@ public class Kaiser extends Player {
     public boolean attemptEvolve() {
         if (this.evolveGen == 0) {
             this.evolveGen++;
-            this.attackAngleAimer = new TriangleAimer(this.getDeltaX(), this.getDeltaY(), KaiserE2Attack.SWEEP_ANGLE, 0, 1);
             this.numAttacks = Kaiser.NUM_ATTACKS;
             this.health = getMaxHealth();
             this.evolutionCharge = 0;
             this.attackChargeUp.update(0,0,0);
+            this.millisSinceEvolve = 0;
+            this.evolveAnimation = new EvolveAnimation(this.getDeltaX(),this.getDeltaY(),EvolveAnimation.STANDARD_DIMENSIONS,EvolveAnimation.STANDARD_DIMENSIONS);
             return true;
         } else if (this.evolveGen == 1){
             this.evolutionCharge = -1;
@@ -152,9 +150,9 @@ public class Kaiser extends Player {
         if (this.numAttacks > 0 && this.attacks.size() == 0) {
             this.numAttacks --;
             if (this.evolveGen == 0)
-                this.attacks.add(new KaiserE1Attack(this.getDeltaX(), this.getDeltaY(), (int) (5 * (1 + (float) this.attackChargeUp.getCurrentHitPoints()/(NUM_ATTACKS * 1000))), angle, 0.5f, 250,this));
+                this.attacks.add(new KaiserAttack(this.getDeltaX(), this.getDeltaY(), (int) (5 * (1 + (float) this.attackChargeUp.getCurrentHitPoints()/(NUM_ATTACKS * 1000))), angle, 1f, 250,this));
             else if (this.evolveGen == 1)
-                this.attacks.add(new KaiserE2Attack(this.getDeltaX(), this.getDeltaY(), (int) (7 * (1 + (float) this.attackChargeUp.getCurrentHitPoints()/(NUM_ATTACKS*1000))), angle, 1f, 250,this));
+                this.attacks.add(new KaiserAttack(this.getDeltaX(), this.getDeltaY(), (int) (7 * (1 + (float) this.attackChargeUp.getCurrentHitPoints()/(NUM_ATTACKS*1000))), angle, 1.5f, 250,this));
 
         }
         //pass for now
@@ -175,19 +173,26 @@ public class Kaiser extends Player {
      */
     @Override
     public void draw(float[] parentMatrix) {
-        if (! this.visible){
+        if (!this.visible) {
             return;
         }
 
-        Matrix.setIdentityM(translationRotationMatrix,0);
-        Matrix.translateM(translationRotationMatrix,0,this.getDeltaX(),this.getDeltaY(),0);
-        Matrix.rotateM(translationRotationMatrix,0,this.offsetDegrees,0,0,1);
+        Matrix.setIdentityM(translationRotationMatrix, 0);
+        Matrix.translateM(translationRotationMatrix, 0, this.getDeltaX(), this.getDeltaY(), 0);
+        Matrix.rotateM(translationRotationMatrix, 0, this.offsetDegrees, 0, 0, 1);
 
 
-        Matrix.multiplyMM(finalMatrix,0,parentMatrix,0,translationRotationMatrix,0);
+        Matrix.multiplyMM(finalMatrix, 0, parentMatrix, 0, translationRotationMatrix, 0);
         VISUAL_REPRESENTATION_GUN.draw(finalMatrix);
 
-        VISUAL_REPRESENTATION.draw(finalMatrix,this.evolveGen);
+        VISUAL_REPRESENTATION.setShader(this.shader[0], this.shader[1], this.shader[2], this.shader[3]);
+
+        //if we're in the evolve animations
+        if (this.millisSinceEvolve < Player.EVOLVE_MILLIS){
+            VISUAL_REPRESENTATION.draw(finalMatrix, this.evolveGen - 1);
+        } else {
+            VISUAL_REPRESENTATION.draw(finalMatrix, this.evolveGen );
+        }
 
         super.draw(parentMatrix);
 
@@ -228,7 +233,7 @@ public class Kaiser extends Player {
     @Override
     public void gainEvolveCharge(int damage) {
         if (this.evolveGen == 0) {//can't charge it up past max
-            this.evolutionCharge += (float) damage / NUM_ATTACKS_FOR_EVOLUTION;
+            this.evolutionCharge += (float) damage / NUM_DAMAGE_FOR_EVOLUTION;
         }
         this.attackChargeUp.update(Math.min(this.attackChargeUp.getCurrentHitPoints() + 2000,this.getNumAttacks() * 1000),0,0);
 

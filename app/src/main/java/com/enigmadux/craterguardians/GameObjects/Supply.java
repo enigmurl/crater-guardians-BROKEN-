@@ -56,7 +56,7 @@ public class Supply extends EnigmaduxComponent {
         this.r = r;
         this.health = health;
 
-        this.healthDisplay = new ProgressBar(health,this.r,r/5, true, true);
+        this.healthDisplay = new ProgressBar(health,this.r,r/5);
         this.healthDisplay.update(this.health,this.dx-this.r/2,this.dy + r );
 
         Matrix.setIdentityM(translationScalarMatrix,0);

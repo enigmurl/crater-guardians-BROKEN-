@@ -48,7 +48,6 @@ public class Enemy3Attack extends Attack {
 
     private List<Object> hits= new ArrayList<>();
 
-    private float startAngle;
 
     /** The actual visual component is shared between all instances to save memory
      *
@@ -60,17 +59,16 @@ public class Enemy3Attack extends Attack {
      * @param x openGL x
      * @param y openGL y
      * @param damage how much damage to deal to enemies;
-     * @param startAngle this is the angle in radians at which the attacks starts
+     * @param attackAngle this is the angle in radians at which the attacks starts
      * @param radius how long the attack is in open gl terms
      * @param millis how long the attack takes to finish
      * @param initializer the Enemy or player who summoned the attack
      */
-    public Enemy3Attack(float x, float y, int damage, float startAngle, float radius, long millis, BaseCharacter initializer){
-        super(x,y,0,0,NUM_FRAMES,millis,initializer);
+    public Enemy3Attack(float x, float y, int damage, float attackAngle, float radius, long millis, BaseCharacter initializer){
+        super(x,y,0,0,NUM_FRAMES,millis,initializer, attackAngle);
 
 
         this.damage = damage;
-        this.startAngle = startAngle;
         this.radius =radius;
 
         Matrix.setIdentityM(scalarMatrix, 0);
@@ -80,7 +78,7 @@ public class Enemy3Attack extends Attack {
         Matrix.setIdentityM(rotationScalarMatrix,0);
         Matrix.setIdentityM(rotationScalarTranslationMatrix,0);
 
-        Matrix.rotateM(rotatorMatrix,0,180f/(float) Math.PI * this.startAngle,0,0,1);
+        Matrix.rotateM(rotatorMatrix,0,180f/(float) Math.PI * this.attackAngle,0,0,1);
         Matrix.translateM(translatorMatrix,0,this.x,this.y,0);
 
         Matrix.multiplyMM(rotationScalarMatrix,0,rotatorMatrix,0,scalarMatrix,0);
@@ -125,7 +123,7 @@ public class Enemy3Attack extends Attack {
             return false;
         }
 
-        float angleRadians = this.startAngle + 2 * (float) Math.PI * (float) finishedMillis/millis;
+        float angleRadians = this.attackAngle + 2 * (float) Math.PI * (float) finishedMillis/millis;
 
         float cos = (float) Math.cos(angleRadians) * this.radius;
         float sin = (float) Math.sin(angleRadians) * this.radius;
@@ -152,7 +150,7 @@ public class Enemy3Attack extends Attack {
         if (this.hits.contains(supply) ){
             return false;
         }
-        float angleRadians = this.startAngle + 2 * (float) Math.PI * (float) finishedMillis/millis;
+        float angleRadians = this.attackAngle + 2 * (float) Math.PI * (float) finishedMillis/millis;
 
         float cos = (float) Math.cos(angleRadians) * this.radius;
         float sin = (float) Math.sin(angleRadians) * this.radius;

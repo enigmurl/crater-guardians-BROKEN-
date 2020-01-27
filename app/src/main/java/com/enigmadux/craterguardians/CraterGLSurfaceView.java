@@ -7,13 +7,11 @@ import enigmadux2d.core.EnigmaduxGLSurfaceView;
 
 /** The specific Surface View for the app. Screen Related touch events are handled here
  *
- * @Author Manu Bhat
- * @Version BETA
+ * @author Manu Bhat
+ * @version BETA
  */
 public class CraterGLSurfaceView extends EnigmaduxGLSurfaceView {
-    //just for test
-    private float mPreviousX;
-    private float mPreviousY;
+
     //The renderer that does the actual drawing
     private CraterRenderer mRenderer;
 

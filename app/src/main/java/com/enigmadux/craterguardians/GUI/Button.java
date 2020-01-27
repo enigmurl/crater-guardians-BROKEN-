@@ -266,8 +266,9 @@ public abstract class Button extends EnigmaduxComponent {
         Canvas c = new Canvas(b);
         c.drawText(this.text,0,(Button.SMOOTHNESS * this.fontHeight*height/2),Button.bitmapPainter);
 
+        Log.d("TEXTURED RECT:","Button: w" + b.getWidth() +  " h "  + b.getHeight());
 
-        return b;
+        return Bitmap.createScaledBitmap(b,(int) (this.w * width/2),(int) (this.fontHeight * height),true);
 
     }
     /** Method that creates the visual text, Though it is slightly expensive, it's only needed to be called once. (gotten from https://stackoverflow.com/questions/2801116/converting-a-view-to-bitmap-without-displaying-it-in-android)
@@ -278,6 +279,7 @@ public abstract class Button extends EnigmaduxComponent {
      * @param text the new text to draw
      */
     public void setText(String text) {
+        this.texturedRect.recycle();
         this.text = text;
         //this basically happens when the text is change twice before the loadGLtextur is called, moving it wihtout an offset
         if (this.renderedRecentText){

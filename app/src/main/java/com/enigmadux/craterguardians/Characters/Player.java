@@ -5,6 +5,7 @@ import android.opengl.Matrix;
 import android.util.Log;
 
 import com.enigmadux.craterguardians.AngleAimers.AngleAimer;
+import com.enigmadux.craterguardians.Animations.EvolveAnimation;
 import com.enigmadux.craterguardians.Attacks.Attack;
 import com.enigmadux.craterguardians.BaseCharacter;
 import com.enigmadux.craterguardians.Enemies.Enemy;
@@ -26,6 +27,11 @@ public abstract class Player extends BaseCharacter {
      *
      */
     public static final float CHARACTER_RADIUS = 0.1f;
+
+    /** THe amount of milliseconds the evolving animation takes
+     *
+     */
+    protected static final long EVOLVE_MILLIS = 1000;
 
 
     //the amount of attacks it can hold maximum (think of it as the amount of bullets in a magazine)
@@ -72,6 +78,12 @@ public abstract class Player extends BaseCharacter {
     protected float evolutionCharge = 0f;
 
 
+    //the amount of time the player has left for its evolve, sub classes should update this after an evolve is called
+    protected long millisSinceEvolve;
+
+    //an animation used after an evolve, for now it's generic for player, but sub classes may have their individual ones
+    protected EvolveAnimation evolveAnimation;
+
 
     //the angle at which the player is moving
     private float rotation;
@@ -98,6 +110,9 @@ public abstract class Player extends BaseCharacter {
 
         Matrix.setIdentityM(scalarMatrix,0);
         Matrix.scaleM(scalarMatrix,0,2*this.getRadius()/maxAttacks,0.1f,1);
+
+        //this basically indicates it has never evolved.
+        this.millisSinceEvolve = Player.EVOLVE_MILLIS;
     }
 
 
@@ -188,6 +203,8 @@ public abstract class Player extends BaseCharacter {
         this.attackChargeUp.update(this.attackChargeUp.getCurrentHitPoints(),this.getDeltaX()-this.getRadius(),this.getDeltaY() + this.getRadius() + 0.1f);
         this.attackChargeUp.draw(parentMatrix);
 
+        if (this.evolveAnimation != null) this.evolveAnimation.draw(parentMatrix);
+
     }
 
     @Override
@@ -252,7 +269,15 @@ public abstract class Player extends BaseCharacter {
     public void update(long dt, float rotation, List<Enemy> enemies, List<Spawner> spawners) {
         super.update(dt, rotation);
 
+        this.millisSinceEvolve += dt;
         this.rotation = rotation;
+
+        if (this.evolveAnimation != null) {
+            this.evolveAnimation.update(dt);
+            if (this.evolveAnimation.isFinished()){
+                this.evolveAnimation = null;
+            }
+        }
 
 
         Iterator<Attack> attackIterator = this.attacks.iterator();
@@ -404,4 +429,12 @@ public abstract class Player extends BaseCharacter {
      * @return the level of this type of variable
      */
     public abstract int getPlayerLevel();
+
+    /** Sees if the player is evolving so the backend can pause everything else
+     *
+     * @return if the player is currently in the state of evolving
+     */
+    public  boolean isEvolving(){
+        return this.millisSinceEvolve < Player.EVOLVE_MILLIS;
+    }
 }

@@ -3,10 +3,10 @@ package com.enigmadux.craterguardians.Characters;
 import android.content.Context;
 import android.opengl.Matrix;
 import android.support.annotation.NonNull;
-import android.util.Log;
 
 import com.enigmadux.craterguardians.AngleAimers.AngleAimer;
 import com.enigmadux.craterguardians.AngleAimers.TriRectAimer;
+import com.enigmadux.craterguardians.Animations.EvolveAnimation;
 import com.enigmadux.craterguardians.Attacks.RyzeAttack;
 import com.enigmadux.craterguardians.MathOps;
 import com.enigmadux.craterguardians.GUI.ProgressBar;
@@ -105,7 +105,7 @@ public class Ryze extends Player {
      */
     @Override
     protected ProgressBar createAttackChargeUp() {
-        return new ProgressBar(2000 * NUM_ATTACKS,this.getRadius()*2,0.1f, false, true);
+        return new ProgressBar(2000 * NUM_ATTACKS,this.getRadius()*2,0.1f);
     }
 
     /** Loads the texture of the sprite sheet
@@ -133,6 +133,8 @@ public class Ryze extends Player {
             this.health = getMaxHealth();
             this.evolutionCharge = 0;
             this.attackChargeUp.update(0,0,0);
+            this.millisSinceEvolve = 0;
+            this.evolveAnimation = new EvolveAnimation(this.getDeltaX(),this.getDeltaY(),EvolveAnimation.STANDARD_DIMENSIONS,EvolveAnimation.STANDARD_DIMENSIONS);
             return true;
         } else if (this.evolveGen == 1){
             this.evolutionCharge = -1;
@@ -186,13 +188,12 @@ public class Ryze extends Player {
 
 
         Matrix.multiplyMM(finalMatrix,0,parentMatrix,0,translationRotationMatrix,0);
-        try {
-            VISUAL_REPRESENTATION_GUN.draw(finalMatrix);
 
-            VISUAL_REPRESENTATION.draw(finalMatrix, this.evolveGen);
-        } catch (Exception e){
-            Log.e("RYZE:","EXCEPTION ",e);
-        }
+        VISUAL_REPRESENTATION_GUN.draw(finalMatrix);
+
+        VISUAL_REPRESENTATION.setShader(this.shader[0],this.shader[1],this.shader[2],this.shader[3]);
+        VISUAL_REPRESENTATION.draw(finalMatrix, this.evolveGen);
+
         super.draw(parentMatrix);
 
     }

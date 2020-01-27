@@ -4,10 +4,7 @@ import android.content.Context;
 import android.opengl.Matrix;
 import android.view.MotionEvent;
 
-import com.enigmadux.craterguardians.LayoutConsts;
 import com.enigmadux.craterguardians.R;
-
-import javax.microedition.khronos.opengles.GL10;
 
 import enigmadux2d.core.EnigmaduxComponent;
 import enigmadux2d.core.shapes.TexturedRect;
@@ -47,34 +44,25 @@ public class ProgressBar extends EnigmaduxComponent  {
     //scales the designated components
     private final float[] scalarMatrix = new float[16];
 
-    //the text that represents the hitpoints
-    private InGameTextbox textbox;
-
 
     /** Default Constructor
      * @param hitPoints the maximum hitPoints the bar contains
      * @param w the width of the bar in openGL terms
      * @param h the height of the bar in openGL terms
-     * @param drawText whether or not to draw the text
-     * @param inGame whether the bar is bounded to the screen or the game map (true = gameMap, false = screen)
      */
-    public ProgressBar(int hitPoints, float w, float h, boolean drawText, boolean inGame){
+    public ProgressBar(int hitPoints, float w, float h){
         super(0,0,w,h);
         this.maxHitPoints = hitPoints;
         this.w = w;
         this.h = h;
 
-        if (drawText){
-            textbox = new InGameTextbox("-1",this.w/2,this.h*3/2 ,this.h, LayoutConsts.CRATER_TEXT_COLOR, inGame);
-        }
     }
 
     /** Loads the texture of the sprite sheet
      *
-     * @param gl a GL10 object used to access openGL
      * @param context context used to grab the actual image from res
      */
-    public static void loadGLTexture(GL10 gl, Context context) {
+    public static void loadGLTexture(Context context) {
         BAR_HOLDER.loadGLTexture(context, R.drawable.hitpoints_bar_holder);
         BAR_VISUAL.loadGLTexture(context, R.drawable.hitpoints_bar);
     }
@@ -101,35 +89,23 @@ public class ProgressBar extends EnigmaduxComponent  {
         if (! this.visible){
             return;
         }
-        //if (this.visible) return;
-        //Log.d("PROGRESSBAR",)
-        //todo this is probably expensive to create a bitmap each time, maybe do it only when the score is updated, this whole method can be optimized
-//        if (this.textbox != null && (! this.textbox.getText().equals(String.valueOf(this.currentHitPoints)) || ! this.textbox.isTextureLoaded())){
-//            this.textbox.setText(String.valueOf(currentHitPoints));
-//            Log.d("FRONTEND","Reset");
-//        }
 
 //        BAR_VISUAL.setShader(1 - (float) currentHitPoints/maxHitPoints, (float) currentHitPoints/maxHitPoints,0,1);
 //
-//        //it needs to be scaled vertically but horizontally just according to dimensions not hitpoints
-//        Matrix.setIdentityM(scalarMatrix,0);
-//        Matrix.scaleM(scalarMatrix,0,this.w,this.h,0);
-//        Matrix.multiplyMM(translationScalarMatrix,0,translationMatrix,0,scalarMatrix,0);
-//        Matrix.multiplyMM(finalMatrix,0,parentMatrix,0,translationScalarMatrix,0);
-//
-//
-//        BAR_HOLDER.draw(finalMatrix);
-//
-//        Matrix.setIdentityM(scalarMatrix,0);
-//        Matrix.scaleM(scalarMatrix,0,(float) currentHitPoints/maxHitPoints * w,h,1);
-//        Matrix.multiplyMM(translationScalarMatrix,0,translationMatrix,0,scalarMatrix,0);
-//        Matrix.multiplyMM(finalMatrix,0,parentMatrix,0,translationScalarMatrix,0);
-//        BAR_VISUAL.draw(finalMatrix);
+        //it needs to be scaled vertically but horizontally just according to dimensions not hitpoints
+        Matrix.setIdentityM(scalarMatrix,0);
+        Matrix.scaleM(scalarMatrix,0,this.w,this.h,0);
+        Matrix.multiplyMM(translationScalarMatrix,0,translationMatrix,0,scalarMatrix,0);
+        Matrix.multiplyMM(finalMatrix,0,parentMatrix,0,translationScalarMatrix,0);
 
-//        if (this.textbox != null) {
-//            Matrix.multiplyMM(finalMatrix, 0, parentMatrix, 0, translationMatrix, 0);
-//           this.textbox.draw(gl, finalMatrix);
-//        }
+//
+        BAR_HOLDER.draw(finalMatrix);
+
+        Matrix.setIdentityM(scalarMatrix,0);
+        Matrix.scaleM(scalarMatrix,0,(float) currentHitPoints/maxHitPoints * w,h,1);
+        Matrix.multiplyMM(translationScalarMatrix,0,translationMatrix,0,scalarMatrix,0);
+        Matrix.multiplyMM(finalMatrix,0,parentMatrix,0,translationScalarMatrix,0);
+       //BAR_VISUAL.draw(finalMatrix);
 
 
     }

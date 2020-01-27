@@ -6,6 +6,7 @@ import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Paint;
 import android.support.v4.content.res.ResourcesCompat;
+import android.util.Log;
 import android.view.MotionEvent;
 
 import com.enigmadux.craterguardians.R;
@@ -20,7 +21,7 @@ import enigmadux2d.core.shapes.TexturedRect;
 public class InGameTextbox extends EnigmaduxComponent {
 
     /** this tells the level of smoothness of the text (high num = more smooth, the draw back being that it is more expensive*/
-    private static final float SMOOTHNESS = 3;
+    private static final float SMOOTHNESS = 1;
     //** the margin between all the edges and the text, in openGL coordinates*/
     //private static final float MIN_PADDING = 0.15f;
 
@@ -154,7 +155,7 @@ public class InGameTextbox extends EnigmaduxComponent {
         for (int i = 0;i <this.text.length;i++) {
             c.drawText(this.text[i], 0, (InGameTextbox.SMOOTHNESS * (this.h)/this.text.length * height/2) * (i+1), InGameTextbox.bitmapPainter);
         }
-
+        Log.d("TEXTURED RECT:","In game textbox: w" + b.getWidth() +  " h "  + b.getHeight());
         return b;
 
     }
@@ -164,6 +165,7 @@ public class InGameTextbox extends EnigmaduxComponent {
      * @param text the new text to draw
      */
     public void setText(String text) {
+        this.texturedRect.recycle();
         this.text = text.split("\n");
         this.renderedRecentText = false;
     }
