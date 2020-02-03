@@ -1,11 +1,12 @@
-package enigmadux2d.core.shapes;
+package enigmadux2d.core;
+
 
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.opengl.GLES20;
 import android.opengl.GLES30;
 import android.opengl.GLUtils;
-import android.opengl.Matrix;
 import android.util.Log;
 import android.view.MotionEvent;
 
@@ -20,33 +21,32 @@ import java.nio.ShortBuffer;
 
 import javax.microedition.khronos.opengles.GL10;
 
-import enigmadux2d.core.EnigmaduxComponent;
 
-/** An Enigmadux rect. Used for drawing, collision detection, and more
+/** Serves as an easy way to make objects that can be drawn
  *
  * @author Manu Bhat
  * @version BETA
  */
-public class TexturedRect extends EnigmaduxComponent {
+public class Drawable extends EnigmaduxComponent {
     //the maximum dimension of a bitmap allowed
-    private static final int MAX_DIMENIONS = 512;
+    private static final int MAX_DIMENIONS = 1024;
+    //the maximum amount of instances in the scene at once
+    private static final int MAX_INSTANCES = 64;
 
-   private static final String vertexShaderCode =
-           "precision mediump float;" +
-           "uniform mat4 uMVPMatrix;" +
-           "uniform vec2 texCoordDelta;"+
+    private static final String vertexShaderCode =
+            "precision mediump float;" +
+            "uniform mat4 uMVPMatrix;" +
+            "uniform vec2 texCoordDelta;"+
 
-           "attribute vec4 vPosition;" +
-           "attribute vec2 TexCoordIn;" +
+            "attribute vec4 vPosition;" +
+            "attribute vec2 TexCoordIn;" +
+            "varying vec2 TexCoordOut;" +
 
-
-           "varying vec2 TexCoordOut;" +
-
-           "void main() {" +
-           //the matrix must be included as a modifier of gl_Position
-           "  gl_Position = uMVPMatrix * vPosition;" +
-           "  TexCoordOut = TexCoordIn + texCoordDelta;" +
-           "}";
+            "void main() {" +
+            //the matrix must be included as a modifier of gl_Position
+            "  gl_Position = uMVPMatrix * vPosition;" +
+            "  TexCoordOut = TexCoordIn + texCoordDelta;" +
+            "}";
     //fragement shader code
     private static final String fragmentShaderCode =
             "precision mediump float;" +
@@ -54,7 +54,6 @@ public class TexturedRect extends EnigmaduxComponent {
             "varying lowp vec2 TexCoordOut;"  + // Interpolated texture coordinate per fragment.
             "uniform vec4 shaderIn;" +
             "void main() {" +
-            //"  gl_FragColor = ();" +
             "  gl_FragColor = texture2D(Texture,TexCoordOut) * shaderIn;" +
             "}";
 
@@ -71,25 +70,15 @@ public class TexturedRect extends EnigmaduxComponent {
     private ShortBuffer indexBuffer;
     //the acutal indices in array form
     private short[] indices;
+    //
+
 
     // buffer holding the texture coordinates
     private FloatBuffer textureBuffer;
     //the pointers to the textures used for open gl
-    private int[] textures ;
+    private int[] textures;
     //whether or not textures has been initialized
     private boolean texturesInitialized = false;
-
-    //how much to translate it by in the x direction
-    private float deltaX = 0;
-    //how much to translate it by in the y direction
-    private float deltaY = 0;
-
-    //how much to scale it by in the x direction
-    private float scaleX = 1;
-    //how much to scale it by in the y direction;
-    private float scaleY = 1;
-    //how much to rotate it along the 0,0,1 axis
-    private float angle = 0;
 
 
     //a value of 1,1,1,1 would mean draw the object directly, the shader alters the color of the texture, by multiplying each
@@ -99,9 +88,6 @@ public class TexturedRect extends EnigmaduxComponent {
     //how much to translate the texture coordinate x direction
     private float[] deltaTextureCoordinates = new float[2];
 
-
-    //how to apply the scaling and rotating
-    private final float[] finalMatrix = new float[16];
 
     //position handle of the vertex pointer
     private int verticesHandle;
@@ -116,17 +102,9 @@ public class TexturedRect extends EnigmaduxComponent {
     //position handle of the shader vec
     private int shaderHandle;
 
+    //the current amount of instances to draw
+    protected int numInstances;
 
-    /** Default Constructor, defaults to 1 texture
-     *
-     * @param x the open gl coordinate of the rect, left most edge x coordinate e.g. (1.0f, -0.5f, 0.0f ,0.1f)
-     * @param y the open gl coordinate of the rect, bottom most y coordinate e.g. (1.0f,-0.5f, 0.0f, 0.1f)
-     * @param w the width of the rect (distance from left edge to right edge) in open gl coordinate terms e.g (1.0f, 1.5f) Should be positive
-     * @param h the height of the rect (distance from top edge to bottom edge) in open gl coordinate terms e.g (1.0f, 1.5f) should be positive
-     */
-    public TexturedRect( float x, float y, float w, float h) {
-        this(x,y,w,h,1);
-    }
 
     /** Default Constructor
      *
@@ -136,7 +114,7 @@ public class TexturedRect extends EnigmaduxComponent {
      * @param h the height of the rect (distance from top edge to bottom edge) in open gl coordinate terms e.g (1.0f, 1.5f) should be positive
      * @param numTextures the amount of textures that this can be bind too, think of it as the number of frames in an animation
      */
-    public TexturedRect( float x, float y, float w, float h,int numTextures) {
+    public Drawable( float x, float y, float w, float h,int numTextures) {
         super(x, y, w, h);
 
         this.x = x;
@@ -315,8 +293,8 @@ public class TexturedRect extends EnigmaduxComponent {
         this.loadHandles();
 
 
-        int afterW = Math.min(MathOps.nextPowerTwo(bitmap.getWidth()),TexturedRect.MAX_DIMENIONS);
-        int afterH = Math.min(MathOps.nextPowerTwo(bitmap.getHeight()),TexturedRect.MAX_DIMENIONS);
+        int afterW = Math.min(MathOps.nextPowerTwo(bitmap.getWidth()), Drawable.MAX_DIMENIONS);
+        int afterH = Math.min(MathOps.nextPowerTwo(bitmap.getHeight()), Drawable.MAX_DIMENIONS);
         Log.d("TEXTURED RECT: ", "Before w " + bitmap.getWidth() + " h: " + bitmap.getHeight() + "AFTER:  w: "  + afterW  + " h: " + afterH);
         memory+= afterH * afterW  *4;
         Log.d("TEXTURED RECT,","memory: " + memory);
@@ -354,15 +332,6 @@ public class TexturedRect extends EnigmaduxComponent {
         bitmap.recycle();
     }
 
-    /** translates the TexturedRect
-     *
-     * @param x how much to translate in the x direction
-     * @param y how much to translate in the y direction
-     */
-    public void setTranslate(float x,float y){
-        this.deltaX = x;
-        this.deltaY = y;
-    }
 
 
     /** The draw method for the TexturedRect with the GL context. Draws the TexturedRect with the texture given at pos 0
@@ -406,12 +375,8 @@ public class TexturedRect extends EnigmaduxComponent {
             return;
         }
         numDraws++;
-        // Pass the projection and view transformation to the shader
-        Matrix.translateM(finalMatrix, 0, parentMatrix, 0, this.deltaX, this.deltaY, 0);
-        Matrix.scaleM(finalMatrix, 0, this.scaleX, this.scaleY, 1);
-        Matrix.rotateM(finalMatrix, 0, this.angle, 0, 0, 1);
 
-        GLES30.glUniformMatrix4fv(vPMatrixHandle, 1, false, finalMatrix, 0);
+        GLES30.glUniformMatrix4fv(vPMatrixHandle, 1, false, parentMatrix, 0);
 
 
         GLES30.glUniform2fv(this.textureDeltaHandle, 1, this.deltaTextureCoordinates, 0);
@@ -428,7 +393,7 @@ public class TexturedRect extends EnigmaduxComponent {
      * @param frameNum the frameNum in the texture
      */
     public void prepareDraw(int frameNum){
-        GLES30.glUseProgram(mProgram);
+
 
         // Point to our buffers
         GLES30.glEnableVertexAttribArray(verticesHandle);
@@ -455,7 +420,6 @@ public class TexturedRect extends EnigmaduxComponent {
      *
      */
     public void endDraw(){
-
         GLES30.glDisableVertexAttribArray(verticesHandle);
         GLES30.glDisableVertexAttribArray(textureCordHandle);
         GLES30.glDisableVertexAttribArray(shaderHandle);
@@ -512,32 +476,6 @@ public class TexturedRect extends EnigmaduxComponent {
         return this.h;
     }
 
-    /** Sets the angle around the axis 0,0,1
-     *
-     * @param angle the angle around axis 0,0,1
-     */
-    public void setAngle(float angle) {
-        this.angle = angle;
-    }
-
-    /** Gets the angle
-     *
-     * @return the angle around axis 0,0,1
-     */
-    public float getAngle() {
-        return this.angle;
-    }
-
-
-    /** Scales the textured rect. (before rotating and before translating)
-     *
-     * @param scaleX how much to scale in the x direction
-     * @param scaleY how much to scale in the y direction
-     */
-    public void setScale(float scaleX,float scaleY){
-        this.scaleX = scaleX;
-        this.scaleY = scaleY;
-    }
 
     /** Sets how much to translate the deltaU
      *

@@ -30,19 +30,23 @@ public class Kaiser extends Player {
     private static final float FPS = 8;
 
     //a constant that represents the maximum health of KAISER
-    private static final int MAXIMUM_HEALTH = 10000;
+    private static final int MAXIMUM_HEALTH = 200;
     //a constant that represents how many attacks kaiser can perform before reloading
     private static final int NUM_ATTACKS  = 5;
     //a constant that represents how long in millis it takes to reload all attacks;
     private static final long MILLIS_PER_RELOAD = 1000;
 
     //this says how much damage is needed to be dealt, in order to charge an evolution
-    private static final int NUM_DAMAGE_FOR_EVOLUTION = 100;
+    private static final int[] NUM_DAMAGE_FOR_EVOLUTION = new int[] {150,400};
 
     //this says the height of the gun of kaiser
     private static final float GUN_HEIGHT = 0.15f;
     //this says the width of the gun of kaiser
     private static final float GUN_WIDTH = 0.3f;
+
+
+    //the attack damage at each stage of evolution at level 1
+    private static final float[] DAMAGE = new float[] {5,7,25};
 
 
 
@@ -51,8 +55,8 @@ public class Kaiser extends Player {
     public static int PLAYER_LEVEL = 0;
 
 
-    //visual is shared by all objects as they all have the same sprite, (all gens are saved here)
-    private static TexturedRect VISUAL_REPRESENTATION = new TexturedRect(-Player.CHARACTER_RADIUS,-Player.CHARACTER_RADIUS,Player.CHARACTER_RADIUS*2,Player.CHARACTER_RADIUS*2,2);
+    //visual is shared by all objects as they all have the same sprite, (all gens are saved here), 3 textures, 1 for each gen
+    private static TexturedRect VISUAL_REPRESENTATION = new TexturedRect(-Player.CHARACTER_RADIUS,-Player.CHARACTER_RADIUS,Player.CHARACTER_RADIUS*2,Player.CHARACTER_RADIUS*2,3);
     //visual is shared by all objects as they all have the same sprite, this is the secondary state (gen 1)
     //private static TexturedRect VISUAL_REPRESENTATION_E2  = new TexturedRect(-Player.CHARACTER_RADIUS,-Player.CHARACTER_RADIUS,Player.CHARACTER_RADIUS*2,Player.CHARACTER_RADIUS*2);
     //visual is share by all objects as they all have the same gun, for now same gun for both evolutions, when player is looking to right, the gun
@@ -82,6 +86,8 @@ public class Kaiser extends Player {
         else if (evolveGen == 1) {
             //don't do anything since texture buffer isnt needed
             //VISUAL_REPRESENTATION_E2.loadTextureBuffer(MathOps.getTextureBuffer(rotation, frameNum, framesPerRotation, numRotationOrientations));
+        } else if (evolveGen == 2){
+            //don't do anything since texture buffer isnt needed
         }
         this.offsetDegrees = MathOps.getOffsetDegrees(rotation,numRotationOrientations);
     }
@@ -111,6 +117,7 @@ public class Kaiser extends Player {
     public static void loadGLTexture(Context context) {
         VISUAL_REPRESENTATION.loadGLTexture(context,R.drawable.kaiser_sprite_sheet_e1,0);
         VISUAL_REPRESENTATION.loadGLTexture(context,R.drawable.kaiser_sprite_sheet_e2,1);
+        VISUAL_REPRESENTATION.loadGLTexture(context,R.drawable.kaiser_sprite_sheet_e2,2);
 
         //VISUAL_REPRESENTATION_E2.loadGLTexture(gl,context,R.drawable.kaiser_sprite_sheet_e2);
         VISUAL_REPRESENTATION_GUN.loadGLTexture(context,R.drawable.kaiser_gun);
@@ -133,6 +140,15 @@ public class Kaiser extends Player {
             this.evolveAnimation = new EvolveAnimation(this.getDeltaX(),this.getDeltaY(),EvolveAnimation.STANDARD_DIMENSIONS,EvolveAnimation.STANDARD_DIMENSIONS);
             return true;
         } else if (this.evolveGen == 1){
+            this.evolveGen++;
+            this.numAttacks = Kaiser.NUM_ATTACKS;
+            this.health = getMaxHealth();
+            this.evolutionCharge = 0;
+            this.attackChargeUp.update(0,0,0);
+            this.millisSinceEvolve = 0;
+            this.evolveAnimation = new EvolveAnimation(this.getDeltaX(),this.getDeltaY(),EvolveAnimation.STANDARD_DIMENSIONS,EvolveAnimation.STANDARD_DIMENSIONS);
+            return true;
+        } else if (this.evolveGen == 2){
             this.evolutionCharge = -1;
         }
         return false;
@@ -149,10 +165,14 @@ public class Kaiser extends Player {
 
         if (this.numAttacks > 0 && this.attacks.size() == 0) {
             this.numAttacks --;
+
+            int damage = (int) (DAMAGE[this.evolveGen] * (1 + (float) this.attackChargeUp.getCurrentHitPoints()/(NUM_ATTACKS * 1000)));
             if (this.evolveGen == 0)
-                this.attacks.add(new KaiserAttack(this.getDeltaX(), this.getDeltaY(), (int) (5 * (1 + (float) this.attackChargeUp.getCurrentHitPoints()/(NUM_ATTACKS * 1000))), angle, 1f, 250,this));
+                this.attacks.add(new KaiserAttack(this.getDeltaX(), this.getDeltaY(), damage, angle, 1f, 250,this));
             else if (this.evolveGen == 1)
-                this.attacks.add(new KaiserAttack(this.getDeltaX(), this.getDeltaY(), (int) (7 * (1 + (float) this.attackChargeUp.getCurrentHitPoints()/(NUM_ATTACKS*1000))), angle, 1.5f, 250,this));
+                this.attacks.add(new KaiserAttack(this.getDeltaX(), this.getDeltaY(), damage, angle, 1.5f, 250,this));
+            else if (this.evolveGen == 2)
+                this.attacks.add(new KaiserAttack(this.getDeltaX(), this.getDeltaY(), damage, angle, 1.6f, 300,this));
 
         }
         //pass for now
@@ -232,8 +252,8 @@ public class Kaiser extends Player {
      */
     @Override
     public void gainEvolveCharge(int damage) {
-        if (this.evolveGen == 0) {//can't charge it up past max
-            this.evolutionCharge += (float) damage / NUM_DAMAGE_FOR_EVOLUTION;
+        if (this.evolveGen == 0 || this.evolveGen == 1) {//can't charge it up past max
+            this.evolutionCharge += (float) damage / NUM_DAMAGE_FOR_EVOLUTION[this.evolveGen];
         }
         this.attackChargeUp.update(Math.min(this.attackChargeUp.getCurrentHitPoints() + 2000,this.getNumAttacks() * 1000),0,0);
 

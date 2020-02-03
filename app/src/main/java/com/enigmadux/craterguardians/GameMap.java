@@ -381,19 +381,20 @@ public class GameMap extends EnigmaduxComponent {
                 }
 
                 //long spawnTime = level_data.nextLong();
+                long decayTime = level_data.nextInt();
                 int hitPoints = level_data.nextInt();
 
                 switch (type) {
                     case "ENEMY_TYPE_1":
                         //spawners.add(new Enemy1Spawner(x, y, w, h, spawnTime, hitPoints));
-                        spawners.add(new Enemy1Spawner(x, y, w, h,spawnsPerSubWave,timesOfSubWave,waveTime,hitPoints));
+                        spawners.add(new Enemy1Spawner(x, y, w, h,spawnsPerSubWave,timesOfSubWave,waveTime, decayTime, hitPoints));
                         break;
                     case "ENEMY_TYPE_2":
                         //spawners.add(new Enemy2Spawner(x, y, w, h, spawnTime, hitPoints));
-                        spawners.add(new Enemy2Spawner(x, y, w, h,spawnsPerSubWave,timesOfSubWave,waveTime,hitPoints));
+                        spawners.add(new Enemy2Spawner(x, y, w, h,spawnsPerSubWave,timesOfSubWave,waveTime, decayTime, hitPoints));
                         break;
                     case "ENEMY_TYPE_3":
-                        spawners.add(new Enemy3Spawner(x, y, w, h,spawnsPerSubWave,timesOfSubWave,waveTime,hitPoints));
+                        spawners.add(new Enemy3Spawner(x, y, w, h,spawnsPerSubWave,timesOfSubWave,waveTime, decayTime, hitPoints));
                         //spawners.add(new Enemy3Spawner(x, y, w, h, spawnTime, hitPoints));
                         break;
                 }

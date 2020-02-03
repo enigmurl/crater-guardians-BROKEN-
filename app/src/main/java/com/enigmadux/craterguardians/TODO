@@ -33,6 +33,28 @@ todo PRIORITY:
                 like, and make enemies spawn less frequently
                 3) For UI, for one fix the Buttons to not be parralelograms, rounded rects or smthing, then
     1/26 GOALS: Make the Button good Looking
+        - I found that the app crashed once
+    1/31 + FUTURE GOALS (unordered)
+        1) Fix Character Select Layout (add info button, make it look nice)
+        2) Fix UI as a whole
+        3) Implement actual levels for players (as in it actually affects stuff)
+        4) Balance players + enemy (CHANGE environement)
+        5) Create more game levels, add node weights to game level files
+        6) Artwork of spawners and such
+        7) Sound effects (and music)
+        8) Dynamic Text
+        9) Optimize game, 60 fps always
+        10) Make actual progress bars
+        11) Enemy AI slightly buggy, might want to change a bit
+        12) ADD MORE STUFF HERE
+        priorities:
+        dynamic text
+        fix ui (first do positioning, worry about graphic part later)
+        balance game environemnet
+        optimization - look into instancing, also https://stackoverflow.com/questions/4853856/why-are-draw-calls-expensive, explains that we shouldn't be drawing small amounts of quads
+        player levels
+
+    seee why the shaders aren't allowed in and out keywords, among other things
 
     OPTIMIZATIONS:
         1) don't focus too much on the matrix multiplication i don't think that's the bad part (small)

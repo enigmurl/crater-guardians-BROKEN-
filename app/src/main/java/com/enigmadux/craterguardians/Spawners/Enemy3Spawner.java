@@ -4,7 +4,6 @@ import android.content.Context;
 import android.opengl.Matrix;
 
 import com.enigmadux.craterguardians.Enemies.Enemy;
-import com.enigmadux.craterguardians.Enemies.Enemy1;
 import com.enigmadux.craterguardians.Enemies.Enemy3;
 import com.enigmadux.craterguardians.R;
 
@@ -33,7 +32,6 @@ public class Enemy3Spawner extends Spawner {
 
 
     /** Constructor used for waves, this is in future will be the only one TODO actually implement this
-     *
      * @param x the open gl coordinate of the spawner, left most edge x coordinate e.g. (1.0f, -0.5f, 0.0f ,0.1f)
      * @param y the open gl coordinate of the spawner, bottom most y coordinate e.g. (1.0f,-0.5f, 0.0f, 0.1f)
      * @param w the width of the spawner (distance from left edge to right edge) in open gl coordinate terms e.g (1.0f, 1.5f) Should be positive
@@ -41,11 +39,11 @@ public class Enemy3Spawner extends Spawner {
      * @param numSpawns for each spawn location specified by times: how many enemies are spawning
      * @param times the milliseconds at which a spawn will happen
      * @param totalWaveTime the total milli seconds of a wave, this means that after the sai amount of milliseconds, the cycle will repeat
+     * @param decayTime the amount of milliseconds it takes to totally decay
      * @param health the health of the spawner
      */
-    public Enemy3Spawner(float x,float y,float w,float h,short[] numSpawns,long[] times,long totalWaveTime,int health){
-        super(x,y,w,h,numSpawns,times,totalWaveTime,health);
-
+    public Enemy3Spawner(float x, float y, float w, float h, short[] numSpawns, long[] times, long totalWaveTime, long decayTime, int health){
+        super(x,y,w,h,numSpawns,times,totalWaveTime,decayTime,health);
         //translates to appropriate coordinates
         final float[] translationMatrix = new float[16];
         //scales to appropriate size

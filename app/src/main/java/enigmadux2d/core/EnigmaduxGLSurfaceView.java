@@ -31,10 +31,10 @@ public abstract class EnigmaduxGLSurfaceView extends GLSurfaceView {
         super(context);
         this.context = context;
 
-        // Create an OpenGL ES 2.0 context.
-        setEGLContextClientVersion(2);
+        // Create an OpenGL ES 3.0 context.
+        setEGLContextClientVersion(3);
         //fix for error No Config chosen, but I don't know what this does.
-        super.setEGLConfigChooser(8 , 8, 8, 8, 16, 0);
+        //super.setEGLConfigChooser(8 , 8, 8, 8, 16, 0);
         this.setRenderer();
     }
 

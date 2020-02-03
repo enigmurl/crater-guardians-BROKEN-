@@ -146,7 +146,7 @@ public class KaiserAttack extends Attack {
         }
         return false;
     }
-x
+
     @Override
     public boolean isHit(Spawner spawner) {
         if (this.hits.contains(spawner)){

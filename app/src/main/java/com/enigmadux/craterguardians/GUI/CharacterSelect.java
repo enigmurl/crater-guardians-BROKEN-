@@ -27,8 +27,10 @@ public class CharacterSelect extends EnigmaduxComponent {
     private static final int[] UPGRADE_COSTS = new int[] {10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,
             10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,
             10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,
-            10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,
-            10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10};
+            };
+
+    //the maximum level of any player
+    private static final int MAX_LEVEL = UPGRADE_COSTS.length;
     //the amount of columns of the character icon 2d array
     private static final int CHARACTER_ICON_W = 4;
     //the amount of rows of the character icon 2d array
@@ -63,7 +65,7 @@ public class CharacterSelect extends EnigmaduxComponent {
         super(-1,-1,2,2);
         float scaleX = (float) (LayoutConsts.SCREEN_HEIGHT )/ (LayoutConsts.SCREEN_WIDTH);
 
-        this.homeButton = new HomeButton(-0.8f,0.7f,0.2f,backend,renderer);
+        this.homeButton = new HomeButton(-0.8f,0f,0.35f,backend,renderer);
 
         this.bottomEdge = new TexturedRect(-1f,-1f,2,0.5f);
 
@@ -78,9 +80,7 @@ public class CharacterSelect extends EnigmaduxComponent {
             @Override
             public void onRelease() {
                 super.onRelease();
-                //characterSelectLayout.hide();
-                //defaultHomeScreenLayout.show();
-                //player = new Ryze();
+
                 if (currentPlayer != null) {
                     renderer.setPlayer(CharacterSelect.this.currentPlayer);
                     CharacterSelect.this.hide();
@@ -89,7 +89,6 @@ public class CharacterSelect extends EnigmaduxComponent {
                     renderer.exitGame();
                     backend.killEndGamePausePeriod();
                     backend.setCurrentGameState(CraterBackend.GAME_STATE_HOMESCREEN);
-                    //renderer.
                 }
             }
         };
@@ -97,8 +96,8 @@ public class CharacterSelect extends EnigmaduxComponent {
 
         this.characterIcons = new Button[PlayerData.CHARACTERS.length];
         for (int i  = 0;i<PlayerData.CHARACTERS.length;i++){
-            float x = 2 * (i % CHARACTER_ICON_W)/(float) CHARACTER_ICON_W - 1;
-            float y = 1 - 2 * (i/CHARACTER_ICON_W % CHARACTER_ICON_H)/(float) CHARACTER_ICON_H - 2f/CHARACTER_ICON_H ;
+            float x = 1.6f * (i % CHARACTER_ICON_W)/(float) CHARACTER_ICON_W - 1 + 0.4f;
+            float y = 1 - 2 * (i/CHARACTER_ICON_W % CHARACTER_ICON_H)/(float) CHARACTER_ICON_H - 1.5f/CHARACTER_ICON_H ;
 
             Log.d("CHARACTER SELECT","x : " + x + " y "  + y );
 
@@ -187,7 +186,7 @@ public class CharacterSelect extends EnigmaduxComponent {
                 if (e.getActionMasked() == MotionEvent.ACTION_UP) {
                     this.currentPlayer = PlayerData.CHARACTERS[i];
                     this.upgradeButton.setPlayer(this.currentPlayer);
-                    this.upgradeButton.setText("Level: " + this.currentPlayer.getPlayerLevel() + " \n Upgrade for " + UPGRADE_COSTS[this.currentPlayer.getPlayerLevel()]);
+                    this.upgradeButton.setText(this.currentPlayer.getPlayerLevel() >= MAX_LEVEL ? "MAX LEVEL (" + MAX_LEVEL + ")":"Level: " + this.currentPlayer.getPlayerLevel() + " \n Upgrade for " + UPGRADE_COSTS[this.currentPlayer.getPlayerLevel()]);
                     this.selectButton.setText("Select " + this.currentPlayer);
                 }
                 return true;
@@ -275,7 +274,7 @@ public class CharacterSelect extends EnigmaduxComponent {
          */
         public void setPlayer(Player player){
             this.player = player;
-            if (PlayerData.getExperience() < UPGRADE_COSTS[this.player.getPlayerLevel()]){
+            if (this.player.getPlayerLevel() >= MAX_LEVEL || PlayerData.getExperience() < UPGRADE_COSTS[this.player.getPlayerLevel()] ){
                 this.setShader(1,0.75f,0.75f,1);
             } else {
                 this.setShader(0.75f,1,0.5f,1);
@@ -290,7 +289,7 @@ public class CharacterSelect extends EnigmaduxComponent {
         @Override
         public boolean isSelect(MotionEvent e) {
             if (this.player == null) return false;
-            return PlayerData.getExperience() >= UPGRADE_COSTS[this.player.getPlayerLevel()] && this.visible && this.isInside(MathOps.getOpenGLX(e.getRawX()),MathOps.getOpenGLY(e.getRawY()));
+            return this.player.getPlayerLevel() < MAX_LEVEL && PlayerData.getExperience() >= UPGRADE_COSTS[this.player.getPlayerLevel()] && this.visible && this.isInside(MathOps.getOpenGLX(e.getRawX()),MathOps.getOpenGLY(e.getRawY()));
         }
 
         /**
@@ -302,12 +301,12 @@ public class CharacterSelect extends EnigmaduxComponent {
 
             player.setPlayerLevel(player.getPlayerLevel()+1);
             playerData.updateXP(PlayerData.getExperience() - UPGRADE_COSTS[this.player.getPlayerLevel()]);
-            if (PlayerData.getExperience() < UPGRADE_COSTS[this.player.getPlayerLevel()]){
+            if (this.player.getPlayerLevel() >= MAX_LEVEL || PlayerData.getExperience() < UPGRADE_COSTS[this.player.getPlayerLevel()] ){
                 this.setShader(1,0.75f,0.75f,1);
             } else {
                 this.setShader(0.75f,1,0.5f,1);
             }
-            this.setText("Level: " + this.player.getPlayerLevel() + " \n Upgrade for " + UPGRADE_COSTS[this.player.getPlayerLevel()]);
+            this.setText(this.player.getPlayerLevel() >= MAX_LEVEL ? "MAX LEVEL (" + MAX_LEVEL + ")":"Level: " + this.player.getPlayerLevel() + " \n Upgrade for " + UPGRADE_COSTS[this.player.getPlayerLevel()]);
 
             CharacterSelect.this.matieralsBar.updateResources();
         }

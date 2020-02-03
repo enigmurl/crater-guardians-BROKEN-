@@ -4,7 +4,7 @@ import javax.microedition.khronos.egl.EGLConfig;
 import javax.microedition.khronos.opengles.GL10;
 
 import android.content.Context;
-import android.opengl.GLES20;
+import android.opengl.GLES30;
 import android.opengl.Matrix;
 import android.util.DisplayMetrics;
 import android.util.Log;
@@ -29,7 +29,13 @@ import java.util.List;
 
 import enigmadux2d.core.EnigmaduxComponent;
 import enigmadux2d.core.EnigmaduxGLRenderer;
+import enigmadux2d.core.models.Mesh;
+import enigmadux2d.core.models.TexturedModel;
+import enigmadux2d.core.renderEngine.MeshRenderer;
+import enigmadux2d.core.renderEngine.ModelLoader;
+
 import enigmadux2d.core.shapes.TexturedRect;
+import enigmadux2d.core.textures.BasicTexture;
 
 /** The renderer used to do all the drawing
  *
@@ -39,7 +45,7 @@ import enigmadux2d.core.shapes.TexturedRect;
 public class CraterRenderer extends EnigmaduxGLRenderer {
 
     //says how far back the camera is from the view
-    private static final float CAMERA_Z = 2f;//todo tutorial is messed up if its not 2
+    private static final float CAMERA_Z = 3f;//todo tutorial is messed up if its not 2
 
     //shader of off buttons in form of r g b a
     private static final float[] OFF_SHADER = new float[] {1.0f,0.5f,0.5f,1};
@@ -171,6 +177,21 @@ public class CraterRenderer extends EnigmaduxGLRenderer {
     private CraterLayout gameMapTutorialLayout;
 
 
+    //todo these are all debug varaibles delete them before releaes
+
+    long debugStartMillis = System.currentTimeMillis();
+
+    int updateCount = 0;
+    int under60 = 0;
+    List<Long> under60s = new ArrayList<Long>();
+    long lastMillis = System.currentTimeMillis();
+    long debugGameScreenMillis = System.currentTimeMillis();
+
+    ModelLoader modelLoader;
+    MeshRenderer meshRenderer ;
+    Mesh testMesh;
+    TexturedModel texturedModel;
+
     /** Constructor to set the handed over context
      *
      * @param context The context used for loading the square's texture to it
@@ -190,16 +211,12 @@ public class CraterRenderer extends EnigmaduxGLRenderer {
         this.playerData = new PlayerData(context);
         this.settingsData = new SettingsData(context);
 
+
+
     }
 
 
-    long debugStartMillis = System.currentTimeMillis();
 
-    int updateCount = 0;
-    int under60 = 0;
-    List<Long> under60s = new ArrayList<Long>();
-    long lastMillis = System.currentTimeMillis();
-    long debugGameScreenMillis = System.currentTimeMillis();
 
 
     /** Called whenever a new frame is needed to be drawn. If the render mode is dirty, then it will only be called
@@ -209,11 +226,14 @@ public class CraterRenderer extends EnigmaduxGLRenderer {
      */
     @Override
     public void onDrawFrame(GL10 gl) {
-
+        //Log.d("NumDraws: "," "+ TexturedRect.numDraws);
+        TexturedRect.numDraws = 0;
         // clear Screen
-        GLES20.glClear(GL10.GL_COLOR_BUFFER_BIT);
-        GLES20.glClearColor(0.6f,0.274f,0.1764f,1.0f);
-
+        GLES30.glClear(GLES30.GL_COLOR_BUFFER_BIT);
+        GLES30.glClearColor(0.6f,0.274f,0.1764f,1.0f);
+        //Matrix.setLookAtM(this.cameraTranslationM, 0, 0, 0, 1, 0, 0, 0, 0, 1f, 0);
+        //meshRenderer.renderMesh(this.texturedModel,this.cameraTranslationM);
+        //if (true) return;
 
         if (! this.loadingStarted){
             renderingThread = new RenderingThread();
@@ -285,6 +305,7 @@ public class CraterRenderer extends EnigmaduxGLRenderer {
             under60s.clear();
             this.debugGameScreenMillis = 0;
         }
+
 
 
     }
@@ -366,10 +387,8 @@ public class CraterRenderer extends EnigmaduxGLRenderer {
         }
 
 
-        GLES20.glViewport(0, 0, width, height); 	//Reset The Current Viewport
-        //gl.glMatrixMode(GL10.GL_PROJECTION); 	//Select The Projection Matrix
-        //gl.glLoadIdentity();
-        //Reset The Projection Matrix
+        GLES30.glViewport(0, 0, width, height); 	//Reset The Current Viewport
+
 
         //Calculate The Aspect Ratio Of The Window
         Matrix.orthoM(orthographicM,0,-CAMERA_Z,CAMERA_Z,-CAMERA_Z* height/width,CAMERA_Z * height/width,0.2f,5f);
@@ -408,6 +427,36 @@ public class CraterRenderer extends EnigmaduxGLRenderer {
 
         LayoutConsts.SCREEN_WIDTH = displayMetrics.widthPixels + this.getNavigationBarHeight();
         LayoutConsts.SCREEN_HEIGHT = displayMetrics.heightPixels;
+
+        Log.d("GL ERRORS ", "1) Error code; " + GLES30.glGetError());
+
+        /*meshRenderer = new MeshRenderer();
+
+        meshRenderer.loadShaders(this.context,R.raw.basic_vertex_shader,R.raw.basic_frag_shader);
+        modelLoader = new ModelLoader();
+
+
+        testMesh = modelLoader.createVaoMesh(new float[] {
+                -0.5f, 0.5f,0,
+                -0.5f,-0.5f,0,
+                 0.5f,0.5f,0,
+                 0.5f,-0.5f,0,
+
+        },new float[] {
+                0,0,
+                0,1,
+                1,1,
+                1,0
+        },
+                new int[] {
+                0,1,2,
+                1,2,3
+                }
+                );*/
+        //this.texturedModel = new TexturedModel(testMesh,
+                //new BasicTexture(modelLoader.loadTexture(this.context,R.drawable.button_background)));
+
+
 
         //if this is the first time
         if (! this.loadingStarted) {
@@ -907,13 +956,13 @@ public class CraterRenderer extends EnigmaduxGLRenderer {
      */
     public static int loadShader(int type, String shaderCode){
 
-        // create a vertex shader type (GLES20.GL_VERTEX_SHADER)
-        // or a fragment shader type (GLES20.GL_FRAGMENT_SHADER)
-        int shader = GLES20.glCreateShader(type);
+        // create a vertex shader type (GLES30.GL_VERTEX_SHADER)
+        // or a fragment shader type (GLES30.GL_FRAGMENT_SHADER)
+        int shader = GLES30.glCreateShader(type);
 
         // add the source code to the shader and compile it
-        GLES20.glShaderSource(shader, shaderCode);
-        GLES20.glCompileShader(shader);
+        GLES30.glShaderSource(shader, shaderCode);
+        GLES30.glCompileShader(shader);
 
         return shader;
     }

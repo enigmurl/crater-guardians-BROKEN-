@@ -27,7 +27,7 @@ public abstract class Spawner {
     //open gl height (read constructor javadoc for more details)
     protected float h;
     //amount of health before dieing
-    protected int health;
+    protected float health;
 
     //at each spawn time, the amount of enemies that are spawned
     protected short[] numSpawns;
@@ -36,13 +36,14 @@ public abstract class Spawner {
     //the amount of milliseconds before a wave resets
     private long waveTime;
 
+    //the amount of milliseconds it takes to fully decay
+    private long decayTime;
+
     //inside the current "spawning wave", how many waves have been spawned
     private int waveIndex;
 
 
 
-    //amount of millis in between spawns
-    protected long millisPerSpawn;
     //the amount of milli seconds since the last spawn
     protected long millisSinceLastSpawn;
 
@@ -59,7 +60,7 @@ public abstract class Spawner {
      * @param totalWaveTime the total milli seconds of a wave, this means that after the sai amount of milliseconds, the cycle will repeat
      * @param health the health of the spawner
      */
-    public Spawner(float x,float y,float w,float h,short[] numSpawns,long[] times,long totalWaveTime,int health){
+    public Spawner(float x,float y,float w,float h,short[] numSpawns,long[] times,long totalWaveTime, long decayTime,int health){
         this.x = x;
         this.y = y;
         this.w = w;
@@ -70,6 +71,8 @@ public abstract class Spawner {
         this.waveTime = totalWaveTime;
 
         this.health = health;
+        this.decayTime = decayTime;
+
 
         this.healthDisplay = new ProgressBar(health,w,0.05f);
 
@@ -80,32 +83,23 @@ public abstract class Spawner {
      * @param parentMatrix describes how to change from model to world coordinates
      */
     public void draw(float[] parentMatrix){
-        this.healthDisplay.update(this.health,this.x,this.h  + this.y);
+        this.healthDisplay.update((int) this.health,this.x,this.h  + this.y);
         this.healthDisplay.draw(parentMatrix);
     }
 
-    /** Call every frame, whenever this returns a non null entity an enemy has been spawned, otherwise the spawner is not ready for another enemy to be spawned
-     *
-     *
-     * @param dt how many milliseconds since the last call
-     * @return an enemy if it is ready, or null if it is not ready.
-     */
-    public Enemy trySpawnEnemy(long dt){
-        this.millisSinceLastSpawn += dt;
-        if (this.millisSinceLastSpawn >= this.millisPerSpawn){
-            this.millisSinceLastSpawn = 0;
-            return this.instantiateSingleEnemy();
-        }
-        return null;
-    }
 
 
-    /** Instead of spawning a single enemy, sometimes, a wave spawner is more suitable
+    /** Updates the spawner, and retunr
+     * Instead of spawning a single enemy, sometimes, a wave spawner is more suitable
      *
      * @param dt milliseconds since last call
      * @return If enemies are to be spawned, it returns the list of enemies otherwise null
      */
-    public List<Enemy> attemptWaveSpawn(long dt){
+    public List<Enemy> update(long dt){
+
+        this.health -= (float) this.healthDisplay.getMaxHitPoints() * dt/this.decayTime;
+        this.healthDisplay.update((int) Math.ceil(this.health),this.x,this.h + this.y);
+
         this.millisSinceLastSpawn += dt;
 
         if (this.millisSinceLastSpawn > this.waveTime) {
@@ -129,11 +123,6 @@ public abstract class Spawner {
      */
     public abstract List<Enemy> spawnEnemies(int numEnemies);
 
-    /** Creates 1 enemy, is abstract as child classes need to do for the individual enemy spawner
-     *
-     * @return an enemy, of any given spawner there is a specific set of enemies that it can spawn
-     */
-    public abstract Enemy instantiateSingleEnemy();
 
     /** Called by outside attacks whenever they intersect this spawner
      *
@@ -184,7 +173,7 @@ public abstract class Spawner {
      * @return whether the circle collides with this or not
      */
     public boolean collidesWithCircle(float x,float y,float r){
-        return Math.hypot(this.x - x,this.y - y) < r + this.w/2;
+        return Math.hypot(this.x - x + this.w/2,this.y - y +this.h/2) < r + this.w/2;
     }
 
 

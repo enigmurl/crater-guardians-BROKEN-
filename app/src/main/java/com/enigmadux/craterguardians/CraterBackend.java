@@ -831,7 +831,7 @@ public class CraterBackend {
         InGameTextbox.loadFont(this.context);
         InGameTextbox.loadFont(this.context);
 
-        Button.loadButtonGLTexture(gl,this.context);
+        Button.loadButtonGLTexture(this.context);
 
     }
 
@@ -1290,7 +1290,7 @@ public class CraterBackend {
                         }
 
                         //Enemy e = spawner.trySpawnEnemy(dt);
-                        List<Enemy> enemies = spawner.attemptWaveSpawn(dt);
+                        List<Enemy> enemies = spawner.update(dt);
                         if (enemies != null) {
                             Log.d("BACKEND","Adding enemy");
                             synchronized (CraterBackend.ENEMIES_LOCK){

@@ -81,7 +81,7 @@ public class ProgressBar extends EnigmaduxComponent  {
 
     }
 
-    /** Draws the holder and the actual hitPoints bar
+    /** Draws the holder and the actual hitPoints bar TODO: this is still laggy, it's better but could be better
      *
      * @param parentMatrix describes how to alter the bar from model to world space
      */
@@ -90,7 +90,7 @@ public class ProgressBar extends EnigmaduxComponent  {
             return;
         }
 
-//        BAR_VISUAL.setShader(1 - (float) currentHitPoints/maxHitPoints, (float) currentHitPoints/maxHitPoints,0,1);
+        BAR_VISUAL.setShader(1 - (float) currentHitPoints/maxHitPoints, (float) currentHitPoints/maxHitPoints,0,1);
 //
         //it needs to be scaled vertically but horizontally just according to dimensions not hitpoints
         Matrix.setIdentityM(scalarMatrix,0);
@@ -105,7 +105,7 @@ public class ProgressBar extends EnigmaduxComponent  {
         Matrix.scaleM(scalarMatrix,0,(float) currentHitPoints/maxHitPoints * w,h,1);
         Matrix.multiplyMM(translationScalarMatrix,0,translationMatrix,0,scalarMatrix,0);
         Matrix.multiplyMM(finalMatrix,0,parentMatrix,0,translationScalarMatrix,0);
-       //BAR_VISUAL.draw(finalMatrix);
+        BAR_VISUAL.draw(finalMatrix);
 
 
     }
@@ -124,6 +124,14 @@ public class ProgressBar extends EnigmaduxComponent  {
      */
     public int getCurrentHitPoints() {
         return this.currentHitPoints;
+    }
+
+    /** gets the max hit points
+     *
+     * @return the max hit points of the bar
+     */
+    public int getMaxHitPoints() {
+        return this.maxHitPoints;
     }
 
     /** Used to implememt the method

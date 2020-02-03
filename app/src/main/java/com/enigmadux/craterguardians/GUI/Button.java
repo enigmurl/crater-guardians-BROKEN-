@@ -13,8 +13,6 @@ import com.enigmadux.craterguardians.LayoutConsts;
 import com.enigmadux.craterguardians.R;
 import com.enigmadux.craterguardians.SoundLib;
 
-import javax.microedition.khronos.opengles.GL10;
-
 import enigmadux2d.core.EnigmaduxComponent;
 import enigmadux2d.core.shapes.TexturedRect;
 
@@ -41,7 +39,8 @@ public abstract class Button extends EnigmaduxComponent {
 
 
     /**Visual representation of the background of the button*/
-    private static final TexturedRect BUTTON_BACKGROUND = new TexturedRect(0,0,1,1);
+    private static final RoundedButton BUTTON_BACKGROUND = new RoundedButton();
+    //private static final TexturedRect BUTTON_BACKGROUND = new TexturedRect(0,0,1,1);
     /** For level buttons the visual representation is different*/
     private static final TexturedRect LEVEL_BUTTON_BACKGROUND = new TexturedRect(0,0,1,1);
 
@@ -119,11 +118,10 @@ public abstract class Button extends EnigmaduxComponent {
 
     /** Binds the  image to the background rect, also loads the paint's font
      *
-     * @param gl an instance of GL10 used to access open gl
      * @param context any android context use to get the resources (this is subject to change)
      */
-    public static void loadButtonGLTexture(GL10 gl, Context context) {
-        Button.BUTTON_BACKGROUND.loadGLTexture(context, R.drawable.button_background);
+    public static void loadButtonGLTexture(Context context) {
+        Button.BUTTON_BACKGROUND.loadGLTexture(context);
         Button.LEVEL_BUTTON_BACKGROUND.loadGLTexture(context,R.drawable.level_button_background);
 
         Button.bitmapPainter.setTypeface(ResourcesCompat.getFont(context,R.font.baloobhaina));
@@ -216,7 +214,7 @@ public abstract class Button extends EnigmaduxComponent {
                             this.texturedRect.getShader()[1],
                             this.texturedRect.getShader()[2],
                             this.texturedRect.getShader()[3]);
-                    BUTTON_BACKGROUND.draw(finalMatrix);
+                    BUTTON_BACKGROUND.draw(finalMatrix, this.w,this.h);
                 }
             }
             if (this.isImageButton && this.down){
