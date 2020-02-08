@@ -34,7 +34,7 @@ import enigmadux2d.core.models.TexturedModel;
 import enigmadux2d.core.renderEngine.MeshRenderer;
 import enigmadux2d.core.renderEngine.ModelLoader;
 
-import enigmadux2d.core.renderEngine.VaoCollection;
+import enigmadux2d.core.gameObjects.VaoCollection;
 import enigmadux2d.core.shapes.TexturedRect;
 
 /** The renderer used to do all the drawing
@@ -201,12 +201,12 @@ public class CraterRenderer extends EnigmaduxGLRenderer {
     /** This does the openGL work on collections
      *
      */
-    private MeshRenderer collectionsRenderer;
+    MeshRenderer collectionsRenderer;
 
     /** This is a vao that contains data about the supplies
      *
      */
-    private VaoCollection suppliesVao;
+    VaoCollection suppliesVao;
 
     /** Constructor to set the handed over context
      *
@@ -253,8 +253,8 @@ public class CraterRenderer extends EnigmaduxGLRenderer {
         Log.d("GL ERRORS ", "1) Error code; " + GLES30.glGetError());
 
 
-        this.renderer = new MeshRenderer();
-        this.renderer.loadShaders(this.context,R.raw.basic_vertex_shader,R.raw.basic_frag_shader);
+        this.meshRenderer = new MeshRenderer();
+        this.meshRenderer.loadShaders(this.context,R.raw.basic_vertex_shader,R.raw.basic_frag_shader);
 
 
         vaoCollection = new VaoCollection(2,new float[] {
@@ -273,7 +273,24 @@ public class CraterRenderer extends EnigmaduxGLRenderer {
                 1,2,3
         });
 
-        vaoCollection.loadTexture(this.context,R.drawable.button_background);
+        suppliesVao = new VaoCollection(3,new float[] {
+                -0.5f, 0.5f,0,
+                -0.5f,-0.5f,0,
+                0.5f,0.5f,0,
+                0.5f,-0.5f,0,
+
+        },new float[] {
+                0,0,
+                0,1,
+                1,0,
+                1,1
+        }, new int[] {
+                0,1,2,
+                1,2,3
+        });
+        suppliesVao.loadTexture(this.context,R.drawable.supply_top_view);
+
+        vaoCollection.loadTexture(this.context,R.drawable.supply_top_view);
         vaoCollection.addInstance();
         vaoCollection.addInstance();
 
@@ -580,7 +597,7 @@ public class CraterRenderer extends EnigmaduxGLRenderer {
         }
         switch (step) {
             case 0:
-                this.backend = new CraterBackend(context, this);
+                this.backend = new CraterBackend(context, this,this.suppliesVao);
                 this.craterBackendThread.setBackend(this.backend);
                 break;
             case 1:

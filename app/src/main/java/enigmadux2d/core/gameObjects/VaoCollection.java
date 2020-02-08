@@ -1,4 +1,4 @@
-package enigmadux2d.core.renderEngine;
+package enigmadux2d.core.gameObjects;
 
 import android.content.Context;
 import android.graphics.Bitmap;
@@ -16,7 +16,7 @@ import java.nio.IntBuffer;
  *
  *
  */
-public class VaoCollection {
+public abstract class VaoCollection {
     /** The amount of bytes a single entity takes up
      *
      */
@@ -305,12 +305,17 @@ public class VaoCollection {
     }
 
     /** Hides an instance, because shifting it down, is pretty expensive and, makes lots of stuff more complicated.
-     * You can undo this by updating the elements info. As the implementation, just makes the matrix all
+     * You can undo this by updating the elements info. As the implementation, just makes the matrix move all the pixels
+     * to off the screen
      *
      * @param instanceId the id of the element that needs to be hidden,
      */
     public void hideInstance(int instanceId){
+        //this is where the matrix starts
+        int offset = instanceId * VaoCollection.FLOATS_PER_ENTITY;
 
+        //copy the hide matrix to the instance data
+        System.arraycopy(VaoCollection.HIDE_MATRIX,0,this.instancedData,offset,VaoCollection.HIDE_MATRIX.length);
     }
 
     /** After a particular round has been played, it may be best to clear the entire vao, rather that just hiding specific

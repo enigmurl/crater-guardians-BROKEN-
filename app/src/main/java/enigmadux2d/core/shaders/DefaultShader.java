@@ -2,11 +2,10 @@ package enigmadux2d.core.shaders;
 
 import android.content.Context;
 
-import enigmadux2d.core.renderEngine.ModelLoader;
-import enigmadux2d.core.renderEngine.VaoCollection;
+import enigmadux2d.core.gameObjects.VaoCollection;
 
 /** This is the default shader, that has texture coordinates and vertex positioning capabilities,
- * @see enigmadux2d.core.renderEngine.VaoCollection, this is basically paired up with that
+ * @see VaoCollection , this is basically paired up with that
  *
  * @author Manu Bhat
  * @version BETA

@@ -43,7 +43,7 @@ import java.util.List;
 
 import enigmadux2d.core.EnigmaduxComponent;
 import enigmadux2d.core.renderEngine.ModelLoader;
-import enigmadux2d.core.renderEngine.VaoCollection;
+import enigmadux2d.core.gameObjects.VaoCollection;
 import enigmadux2d.core.shapes.TexturedRect;
 
 /** Is in charge of all the backend activities

@@ -6,6 +6,7 @@ import android.opengl.Matrix;
 
 import java.nio.IntBuffer;
 
+import enigmadux2d.core.gameObjects.VaoCollection;
 import enigmadux2d.core.models.InGameModel;
 import enigmadux2d.core.models.TexturedModel;
 import enigmadux2d.core.shaders.DefaultShader;

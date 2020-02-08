@@ -1,6 +1,7 @@
 package com.enigmadux.craterguardians;
 
 import android.content.Context;
+import android.opengl.Matrix;
 import android.util.Log;
 import android.view.MotionEvent;
 
@@ -66,7 +67,7 @@ public class GameMap extends EnigmaduxComponent {
     private float cameraY;
 
     //renders the supplies
-    private MeshRenderer meshRenderer;
+    private CraterRenderer meshRenderer;
 
     /** Creates a GameMap Instance
      *
@@ -80,7 +81,7 @@ public class GameMap extends EnigmaduxComponent {
         this.levelData = new LevelData(context);
         this.backend = backend;
 
-        this.meshRenderer = renderer.renderer;
+        this.meshRenderer = renderer;
 
         this.show();
     }
@@ -158,10 +159,25 @@ public class GameMap extends EnigmaduxComponent {
         start = System.currentTimeMillis();
         if (supplies.size() > 0 && this.backend.getTutorialCurrentMillis() > CraterBackend.SUPPLIES_INTRODUCTION) {
             synchronized (CraterBackend.SUPPLIES_LOCK) {
+
+                float[] supplyData = new float[22];
+                supplyData[16] = 1;
+                supplyData[17] = 1;
+                supplyData[18] = 1;
+                supplyData[19] = 1;
                 for (int i = 0, size = this.supplies.size();i < size; i++){
-                    supplies.get(i).draw(this.meshRenderer,parentMatrix);
+                    Matrix.translateM(supplyData,0,parentMatrix,0,this.supplies.get(i).getX(),this.supplies.get(i).getY(),0);
+                    Matrix.scaleM(supplyData,0,this.supplies.get(i).getWidth(),this.supplies.get(i).getHeight(),1);
+                    this.meshRenderer.suppliesVao.updateInstance(this.supplies.get(i).myVaoKey,supplyData);
+
+                    //supplies.get(i).draw(this.meshRenderer.renderer,parentMatrix);
                     //supplies.get(i).draw(parentMatrix);
                 }
+
+                this.meshRenderer.suppliesVao.updateInstancedVbo();
+
+                this.meshRenderer.meshRenderer.renderCollection(this.meshRenderer.suppliesVao);
+
                 //for (Supply supply : this.supplies) {
                 //    supply.draw(gl, parentMatrix);
                 //}
@@ -350,7 +366,9 @@ public class GameMap extends EnigmaduxComponent {
                 float r = level_data.nextFloat();
                 int health = level_data.nextInt();
 
-                supplies.add(new Supply(x, y, r, health));
+                int id = this.meshRenderer.suppliesVao.addInstance();
+
+                supplies.add(new Supply(x, y, r, health,id));
             }
         }
 
@@ -473,6 +491,7 @@ public class GameMap extends EnigmaduxComponent {
             this.toxicLakes.clear();
         }
         synchronized (CraterBackend.SUPPLIES_LOCK) {
+            this.meshRenderer.suppliesVao.clearInstanceData();
             this.supplies.clear();
         }
         synchronized (CraterBackend.ANIMATIONS_LOCK) {

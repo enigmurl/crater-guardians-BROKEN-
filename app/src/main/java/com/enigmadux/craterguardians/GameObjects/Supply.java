@@ -24,6 +24,9 @@ public class Supply extends EnigmaduxComponent {
     private static final TexturedRect VISUAL_REPRESENTATION = new TexturedRect(-0.5f,-0.5f,1,1);
 
 
+    //the id associated with the collection vao
+    public int myVaoKey;
+
     //the center x position in openGL terms
     private float dx;
     //the center y position in openGL terms
@@ -47,9 +50,12 @@ public class Supply extends EnigmaduxComponent {
      * @param y the center y position in openGL terms
      * @param r the radius in openGL terms
      * @param health the amount of damage it can take dieing
+     * @param myVaoKey the id of this supply with respects to the VaoCollection it's in
      */
-    public Supply(float x,float y,float r,int health){
+    public Supply(float x,float y,float r,int health,int myVaoKey){
         super(x-r,y-r,2*r,2*r);
+
+        this.myVaoKey = myVaoKey;
 
         this.dx = x;
         this.dy = y;
