@@ -2,7 +2,6 @@ package com.enigmadux.craterguardians.Enemies;
 
 import android.content.Context;
 import android.opengl.Matrix;
-import android.support.annotation.NonNull;
 
 import com.enigmadux.craterguardians.Attacks.Enemy2Attack;
 import com.enigmadux.craterguardians.BaseCharacter;
@@ -12,10 +11,6 @@ import com.enigmadux.craterguardians.R;
 import com.enigmadux.craterguardians.GameObjects.Supply;
 
 import java.util.List;
-
-import javax.microedition.khronos.opengles.GL10;
-
-import enigmadux2d.core.shapes.TexturedRect;
 
 /** The second type of enemy. todo javadoc
  * @author Manu Bhat
@@ -54,10 +49,9 @@ public class Enemy2 extends Enemy {
 
     /** Loads the texture of the sprite sheet
      *
-     * @param gl a GL10 object used to access openGL
      * @param context context used to grab the actual image from res
      */
-    public static void loadGLTexture(@NonNull GL10 gl, Context context) {
+    public static void loadGLTexture(Context context) {
         VISUAL_REPRESENTATION.loadGLTexture(context,R.drawable.enemy1_sprite_sheet);//todo
         VISUAL_REPRESENTATION.loadTextureBuffer(new float[] {
                 0,1,

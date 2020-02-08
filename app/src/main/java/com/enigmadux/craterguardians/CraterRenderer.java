@@ -34,8 +34,8 @@ import enigmadux2d.core.models.TexturedModel;
 import enigmadux2d.core.renderEngine.MeshRenderer;
 import enigmadux2d.core.renderEngine.ModelLoader;
 
+import enigmadux2d.core.renderEngine.VaoCollection;
 import enigmadux2d.core.shapes.TexturedRect;
-import enigmadux2d.core.textures.BasicTexture;
 
 /** The renderer used to do all the drawing
  *
@@ -161,7 +161,7 @@ public class CraterRenderer extends EnigmaduxGLRenderer {
 
     /** next Level. shown whenever a level is completed.
      * Includes: play button.
-     * Future: (todo) : implement a back to level select layout
+     *
      *
      */
     private CraterLayout loadLevelLayout;
@@ -177,6 +177,11 @@ public class CraterRenderer extends EnigmaduxGLRenderer {
     private CraterLayout gameMapTutorialLayout;
 
 
+    /** This performs the openGL calls
+     *
+     */
+    MeshRenderer renderer;
+
     //todo these are all debug varaibles delete them before releaes
 
     long debugStartMillis = System.currentTimeMillis();
@@ -191,6 +196,17 @@ public class CraterRenderer extends EnigmaduxGLRenderer {
     MeshRenderer meshRenderer ;
     Mesh testMesh;
     TexturedModel texturedModel;
+    VaoCollection vaoCollection;
+
+    /** This does the openGL work on collections
+     *
+     */
+    private MeshRenderer collectionsRenderer;
+
+    /** This is a vao that contains data about the supplies
+     *
+     */
+    private VaoCollection suppliesVao;
 
     /** Constructor to set the handed over context
      *
@@ -215,49 +231,218 @@ public class CraterRenderer extends EnigmaduxGLRenderer {
 
     }
 
-
-
-
-
-    /** Called whenever a new frame is needed to be drawn. If the render mode is dirty, then it will only be called
-     * on requestRender, otherwise it's called at 60fps (I believe)
+    /** Used whenever the surface is created(see android documentation for more details)
      *
-     * @param gl a GL object used to communicate with OpenGl
+     * @param gl a Gl object used to communicate with open gl
+     * @param config config of open gl (check android doc)
      */
     @Override
-    public void onDrawFrame(GL10 gl) {
-        //Log.d("NumDraws: "," "+ TexturedRect.numDraws);
-        TexturedRect.numDraws = 0;
-        // clear Screen
-        GLES30.glClear(GLES30.GL_COLOR_BUFFER_BIT);
-        GLES30.glClearColor(0.6f,0.274f,0.1764f,1.0f);
-        //Matrix.setLookAtM(this.cameraTranslationM, 0, 0, 0, 1, 0, 0, 0, 0, 1f, 0);
-        //meshRenderer.renderMesh(this.texturedModel,this.cameraTranslationM);
-        //if (true) return;
+    public void onSurfaceCreated(GL10 gl, EGLConfig config){
+        Log.d("LOADING SCREEN:","Started loading from source ");
+        Log.d("RENDERER","onSurfaceCreated");
+        super.onSurfaceCreated(gl,config);
 
+        final WindowManager w = (WindowManager) context.getSystemService(Context.WINDOW_SERVICE);
+        final Display d = w.getDefaultDisplay();
+        displayMetrics = new DisplayMetrics();
+        d.getMetrics(displayMetrics);
+
+        LayoutConsts.SCREEN_WIDTH = displayMetrics.widthPixels + this.getNavigationBarHeight();
+        LayoutConsts.SCREEN_HEIGHT = displayMetrics.heightPixels;
+
+        Log.d("GL ERRORS ", "1) Error code; " + GLES30.glGetError());
+
+
+        this.renderer = new MeshRenderer();
+        this.renderer.loadShaders(this.context,R.raw.basic_vertex_shader,R.raw.basic_frag_shader);
+
+
+        vaoCollection = new VaoCollection(2,new float[] {
+                -0.5f, 0.5f,0,
+                -0.5f,-0.5f,0,
+                0.5f,0.5f,0,
+                0.5f,-0.5f,0,
+
+        },new float[] {
+                0,0,
+                0,1,
+                1,0,
+                1,1
+        }, new int[] {
+                0,1,2,
+                1,2,3
+        });
+
+        vaoCollection.loadTexture(this.context,R.drawable.button_background);
+        vaoCollection.addInstance();
+        vaoCollection.addInstance();
+
+
+        /*meshRenderer = new MeshRenderer();
+
+        meshRenderer.loadShaders(this.context,R.raw.basic_vertex_shader,R.raw.basic_frag_shader);
+        modelLoader = new ModelLoader();
+
+
+        testMesh = modelLoader.createVaoMesh(new float[] {
+                -0.5f, 0.5f,0,
+                -0.5f,-0.5f,0,
+                 0.5f,0.5f,0,
+                 0.5f,-0.5f,0,
+
+        },new float[] {
+                0,0,
+                0,1,
+                1,1,
+                1,0
+        },
+                new int[] {
+                0,1,2,
+                1,2,3
+                }
+                );*/
+        //this.texturedModel = new TexturedModel(testMesh,
+        //new BasicTexture(modelLoader.loadTexture(this.context,R.drawable.button_background)));
+
+
+
+        //if this is the first time
+        if (! this.loadingStarted) {
+            TexturedRect.loadProgram();
+            this.loadingScreen.loadGLTexture(this.context, R.drawable.loading_screen);
+        }
+    }
+
+
+    /** Used whenever the surface is changed(e.g rotated screen from landscape to portrait) (see android documentation for more details)
+     *
+     * @param gl a GL object used to communicate with OpenGL
+     * @param width the new width of the surface (in pixels I believe, but could be open gl width)
+     * @param height the new height of the surface (in pixels I believe, but could be open gl height)
+     */
+    @Override
+    public void onSurfaceChanged(GL10 gl, int width, int height) {
+
+        Log.d("RENDERER_","dm w " + (this.displayMetrics.widthPixels + this.getNavigationBarHeight()) + " dm h " + this.displayMetrics.heightPixels
+                + " lc w "  +LayoutConsts.SCREEN_WIDTH + " lc h " + LayoutConsts.SCREEN_HEIGHT);
+
+
+        if(height == 0) { 						//Prevent A Divide By Zero By
+            height = 1; 						//Making Height Equal One
+        }
+
+
+        GLES30.glViewport(0, 0, width, height); 	//Reset The Current Viewport
+
+
+        //Calculate The Aspect Ratio Of The Window
+        Matrix.orthoM(orthographicM,0,-CAMERA_Z,CAMERA_Z,-CAMERA_Z* height/width,CAMERA_Z * height/width,0.2f,5f);
+        Log.d("RENDERER","dimensions " + width + " H "  + height);
+
+
+        if (this.craterBackendThread != null) this.craterBackendThread.setRunning(false);
+
+        this.craterBackendThread = new CraterBackendThread(this.backend);
+        this.craterBackendThread.setRunning(true);
+        this.craterBackendThread.setPause(true);
+        this.craterBackendThread.start();
+
+
+
+        Log.d("RENDERER","started backend thread");
+
+
+    }
+
+
+    /** Resets the screen to a brown screen
+     *
+     */
+    private void clearScreen(){
+        //reset the color array
+        GLES30.glClear(GLES30.GL_COLOR_BUFFER_BIT);
+        //fill it with a brownish color
+        GLES30.glClearColor(0.6f,0.274f,0.1764f,1.0f);
+    }
+
+    /** Resets the camera Translation M to the origin and pointing towards there
+     *
+     */
+    private void resetCamera(){
+        Matrix.setLookAtM(this.cameraTranslationM, 0, 0, 0, 1, 0, 0, 0, 0, 1f, 0);
+    }
+
+//    /** Called whenever a new frame is needed to be drawn. If the render mode is dirty, then it will only be called
+//     * on requestRender, otherwise it's called at 60fps (I believe)
+//     *
+//     * @param gl a GL object used to communicate with OpenGl
+//     */
+//    @Override
+//    public void onDrawFrame(GL10 gl){
+//        //reset the screen to brown screen
+//        this.clearScreen();
+//        //resets the camera
+//        this.resetCamera();
+//
+//        //draws the loading screen, if it is drawn then we can't draw anything else
+//        if (this.renderLoadingScreen()) return;
+//
+//        //make sure to not have the crater backend thread running for no reason
+//        this.craterBackendThread.setPause(!(gameScreenLayout.isVisible() && ! pauseGameLayout.isVisible()));
+//
+//
+//
+//
+//    }
+
+    /** Renders the loading screen
+     *
+     * @return true if loading screen is visible, false if it is not needed to be rendered
+     */
+    private boolean renderLoadingScreen(){
+        //if loading hasn't started start it
         if (! this.loadingStarted){
             renderingThread = new RenderingThread();
             this.loadingStarted = true;
             Log.d("LOADING SCREEN:","Started rendering");
         }
+        //if it hasn't completed, draw the loading screen
         if (! this.loadingCompleted){
-
-            Matrix.setLookAtM(this.cameraTranslationM, 0, 0, 0, 1, 0, 0, 0, 0, 1f, 0);
+            this.resetCamera();
             Matrix.scaleM(this.cameraTranslationM, 0, CAMERA_Z, CAMERA_Z * LayoutConsts.SCREEN_HEIGHT / LayoutConsts.SCREEN_WIDTH, 0);//too offset the orthographic projection for areas where it isnt needed
             Matrix.multiplyMM(vPMatrix,0,orthographicM,0,this.cameraTranslationM,0);
+
             this.loadingScreen.draw(vPMatrix);
             this.lastMillis = System.currentTimeMillis();
-            renderingThread.step(gl);
-            return;
+            renderingThread.step();
+            return true;
         }
 
-        this.loadingScreen.recycle();
+        //if we haven't finished it, finish it
+        if (this.renderingThread != null) {
+            this.loadingScreen.recycle();
+            this.renderingThread = null;
+        }
 
-        this.renderingThread = null;
+        return false;
+    }
+
+    /** Called whenever a new frame is needed to be drawn. If the render mode is dirty, then it will only be called
+      * on requestRender, otherwise it's called at 60fps (I believe)
+      *
+      * @param gl a GL object used to communicate with OpenGl
+      */
+    @Override
+    public void onDrawFrame(GL10 gl) {
+        //Log.d("NumDraws: "," "+ TexturedRect.numDraws);
+        TexturedRect.numDraws = 0;
+        // clear Screen
 
 
+        this.clearScreen();
 
-
+        //if loading hasn't rendered return
+        if (this.renderLoadingScreen()) return;
 
         //todo inefficient to keep on chaning the pause, should only update it at certain times
         this.craterBackendThread.setPause(!(gameScreenLayout.isVisible() && ! pauseGameLayout.isVisible()));
@@ -369,101 +554,7 @@ public class CraterRenderer extends EnigmaduxGLRenderer {
         return CraterRenderer.CAMERA_Z;
     }
 
-    /** Used whenever the surface is changed(e.g rotated screen from landscape to portrait) (see android documentation for more details)
-     *
-     * @param gl a GL object used to communicate with OpenGL
-     * @param width the new width of the surface (in pixels I believe, but could be open gl width)
-     * @param height the new height of the surface (in pixels I believe, but could be open gl height)
-     */
-    @Override
-    public void onSurfaceChanged(GL10 gl, int width, int height) {
 
-        Log.d("RENDERER_","dm w " + (this.displayMetrics.widthPixels + this.getNavigationBarHeight()) + " dm h " + this.displayMetrics.heightPixels
-             + " lc w "  +LayoutConsts.SCREEN_WIDTH + " lc h " + LayoutConsts.SCREEN_HEIGHT);
-
-
-        if(height == 0) { 						//Prevent A Divide By Zero By
-            height = 1; 						//Making Height Equal One
-        }
-
-
-        GLES30.glViewport(0, 0, width, height); 	//Reset The Current Viewport
-
-
-        //Calculate The Aspect Ratio Of The Window
-        Matrix.orthoM(orthographicM,0,-CAMERA_Z,CAMERA_Z,-CAMERA_Z* height/width,CAMERA_Z * height/width,0.2f,5f);
-        Log.d("RENDERER","dimensions " + width + " H "  + height);
-
-
-        if (this.craterBackendThread != null) this.craterBackendThread.setRunning(false);
-
-        this.craterBackendThread = new CraterBackendThread(this.backend);
-        this.craterBackendThread.setRunning(true);
-        this.craterBackendThread.setPause(true);
-        this.craterBackendThread.start();
-
-
-
-        Log.d("RENDERER","started backend thread");
-
-
-    }
-
-    /** Used whenever the surface is created(see android documentation for more details)
-     *
-     * @param gl a Gl object used to communicate with open gl
-     * @param config config of open gl (check android doc)
-     */
-    @Override
-    public void onSurfaceCreated(GL10 gl, EGLConfig config){
-        Log.d("LOADING SCREEN:","Started loading from source ");
-        Log.d("RENDERER","onSurfaceCreated");
-        super.onSurfaceCreated(gl,config);
-
-        final WindowManager w = (WindowManager) context.getSystemService(Context.WINDOW_SERVICE);
-        final Display d = w.getDefaultDisplay();
-        displayMetrics = new DisplayMetrics();
-        d.getMetrics(displayMetrics);
-
-        LayoutConsts.SCREEN_WIDTH = displayMetrics.widthPixels + this.getNavigationBarHeight();
-        LayoutConsts.SCREEN_HEIGHT = displayMetrics.heightPixels;
-
-        Log.d("GL ERRORS ", "1) Error code; " + GLES30.glGetError());
-
-        /*meshRenderer = new MeshRenderer();
-
-        meshRenderer.loadShaders(this.context,R.raw.basic_vertex_shader,R.raw.basic_frag_shader);
-        modelLoader = new ModelLoader();
-
-
-        testMesh = modelLoader.createVaoMesh(new float[] {
-                -0.5f, 0.5f,0,
-                -0.5f,-0.5f,0,
-                 0.5f,0.5f,0,
-                 0.5f,-0.5f,0,
-
-        },new float[] {
-                0,0,
-                0,1,
-                1,1,
-                1,0
-        },
-                new int[] {
-                0,1,2,
-                1,2,3
-                }
-                );*/
-        //this.texturedModel = new TexturedModel(testMesh,
-                //new BasicTexture(modelLoader.loadTexture(this.context,R.drawable.button_background)));
-
-
-
-        //if this is the first time
-        if (! this.loadingStarted) {
-            TexturedRect.loadProgram();
-            this.loadingScreen.loadGLTexture(this.context, R.drawable.loading_screen);
-        }
-    }
 
 
     /** Sets the player of the renderer, and it passes onto the backend as well
@@ -477,7 +568,7 @@ public class CraterRenderer extends EnigmaduxGLRenderer {
     /** Loads textures that aren't loading screen oriented
      *
      */
-    private void loadNonBegginingTextures(GL10 gl,int step){
+    private void loadNonBegginingTextures(int step){
         //this is in the case of a resumed screen, we don't need to re init all the stuff then
         if (this.loadingCompleted){
             return;
@@ -496,13 +587,13 @@ public class CraterRenderer extends EnigmaduxGLRenderer {
                 this.playerData.loadPlayerData();
                 break;
             case 2:
-                this.backend.loadTextures(gl);
+                this.backend.loadTextures();
                 break;
             case 3:
-                this.backend.loadLayouts(gl);
+                this.backend.loadLayouts();
                 break;
             case 4:
-                this.backend.loadTutorialLayouts(gl);
+                this.backend.loadTutorialLayouts();
                 break;
             case 5:
                 this.player = new Kaiser();
@@ -528,7 +619,7 @@ public class CraterRenderer extends EnigmaduxGLRenderer {
 
                 break;
             case 6:
-                this.loadLayouts(gl, this.context);
+                this.loadLayouts(this.context);
                 break;
             case 7:
                 //todo, this may cause it to play the music for an enigma second
@@ -589,10 +680,9 @@ public class CraterRenderer extends EnigmaduxGLRenderer {
 
     /** Loads the layouts, including creating sub components, and loading their textures
      *
-     * @param gl a GL10 object used to access openGL related methods
      * @param context Any non null context that is used to access resources
      */
-    private void loadLayouts(GL10 gl,Context context){
+    private void loadLayouts(Context context){
         //for some components a scale factor is needed
         float scaleX = (float) LayoutConsts.SCREEN_HEIGHT/LayoutConsts.SCREEN_WIDTH;
 
@@ -942,8 +1032,8 @@ public class CraterRenderer extends EnigmaduxGLRenderer {
         /**
          *
          */
-        void step(GL10 gl10) {
-            loadNonBegginingTextures(gl10,this.step);
+        void step() {
+            loadNonBegginingTextures(this.step);
             this.step++;
         }
     }

@@ -41,9 +41,9 @@ import com.enigmadux.craterguardians.Spawners.Spawner;
 import java.util.Iterator;
 import java.util.List;
 
-import javax.microedition.khronos.opengles.GL10;
-
 import enigmadux2d.core.EnigmaduxComponent;
+import enigmadux2d.core.renderEngine.ModelLoader;
+import enigmadux2d.core.renderEngine.VaoCollection;
 import enigmadux2d.core.shapes.TexturedRect;
 
 /** Is in charge of all the backend activities
@@ -287,11 +287,18 @@ public class CraterBackend {
      */
     private  volatile long tutorialCurrentMillis = 0;
 
+    /** A vao where supplies data is written too
+     *
+     */
+    private VaoCollection suppliesCollection;
+
     /** Default Constructor
      *
      * @param context any non null Context, used to access resources
+     * @param renderer the renderer that has the openGL context
+     * @param suppliesCollection a Vao where supplies data is written too
      */
-    public CraterBackend(Context context,CraterRenderer renderer){
+    public CraterBackend(Context context, CraterRenderer renderer, VaoCollection suppliesCollection){
         this.context = context;
         this.renderer = renderer;
 
@@ -308,7 +315,7 @@ public class CraterBackend {
         this.playerData = new PlayerData(context);
         this.levelData = new LevelData(context);
 
-        this.gameMap = new GameMap(context,this);
+        this.gameMap = new GameMap(context,this,this.renderer);
 
 
         attackJoyStick = new TexturedRect(ATTACK_JOY_STICK_CENTER[0]-JOY_STICK_IMAGE_WIDTH/2, ATTACK_JOY_STICK_CENTER[1]-JOY_STICK_IMAGE_WIDTH/2,scaleX * JOY_STICK_IMAGE_WIDTH,scaleY * JOY_STICK_IMAGE_WIDTH);
@@ -366,7 +373,7 @@ public class CraterBackend {
     /** Initializes all layouts and their sub components;
      *
      */
-    public void loadLayouts(GL10 gl){
+    public void loadLayouts(){
         //this.loadTextures(gl);
 
         float scaleX = (float) LayoutConsts.SCREEN_HEIGHT/LayoutConsts.SCREEN_WIDTH;
@@ -627,7 +634,7 @@ public class CraterBackend {
     /** Initializes all tutorial layouts and their sub components;
      *
      */
-    public void loadTutorialLayouts(GL10 gl){
+    public void loadTutorialLayouts(){
         exitButton = new Button("Exit",0,0.75f,0.4f,0.1f,0.1f,LayoutConsts.CRATER_TEXT_COLOR, false){
             @Override
             public boolean isSelect(MotionEvent e) {
@@ -785,49 +792,50 @@ public class CraterBackend {
 
     /** loads textures for in game components, also loads fonts, but main purpose is to load textures
      *
-     * @param gl GL10 object used to access openGL
      */
-    public void loadTextures(GL10 gl){
+    public void loadTextures(){
         //inputs
         this.attackJoyStick.loadGLTexture(this.context,R.drawable.test);
         this.movementJoyStick.loadGLTexture(this.context,R.drawable.test);
         this.evolveButton.loadGLTexture(this.context,R.drawable.evolve_button);
 
         //characters
-        Player.loadGLTexture(gl,this.context);
+        Player.loadGLTexture(this.context);
 
         Kaiser.loadGLTexture(this.context);
-        Ryze.loadGLTexture(gl,this.context);
+        Ryze.loadGLTexture(this.context);
         Enemy1.loadGLTexture(this.context);
-        Enemy2.loadGLTexture(gl,this.context);
+        Enemy2.loadGLTexture(this.context);
         Enemy3.loadGLTexture(this.context);
 
         //aimers
-        TriangleAimer.loadGLTexture(gl,this.context);
-        TriRectAimer.loadGLTexture(gl,this.context);
+        TriangleAimer.loadGLTexture(this.context);
+        TriRectAimer.loadGLTexture(this.context);
         //spawners
         Enemy1Spawner.loadGLTexture(this.context);
-        Enemy2Spawner.loadGLTexture(gl,this.context);
+        Enemy2Spawner.loadGLTexture(this.context);
         Enemy3Spawner.loadGLTexture(this.context);
         //attacks
         Enemy1Attack.loadGLTexture(this.context);
-        Enemy2Attack.loadGLTexture(gl,this.context);
-        Enemy3Attack.loadGLTexture(gl,this.context);
+        Enemy2Attack.loadGLTexture(this.context);
+        Enemy3Attack.loadGLTexture(this.context);
         KaiserAttack.loadGLTexture(this.context);
-        RyzeAttack.loadGLTexture(gl,this.context);
+        RyzeAttack.loadGLTexture(this.context);
 
         //animations
-        DeathAnim.loadGLTexture(gl,this.context);
+        DeathAnim.loadGLTexture(this.context);
         EvolveAnimation.loadGLTexture(this.context);
-        ToxicBubble.loadGLTexture(gl,this.context);
+        ToxicBubble.loadGLTexture(this.context);
 
 
         //others (lakes + plateaus)
         ToxicLake.loadGLTexture(this.context);
-        Plateau.loadGLTexture(gl,this.context);
+        Plateau.loadGLTexture(this.context);
         ProgressBar.loadGLTexture(this.context);
         HealthBar.loadGLTexture(this.context);
-        Supply.loadGLTexture(gl,this.context);
+
+        ModelLoader modelLoader = new ModelLoader();
+        Supply.loadGLTexture(this.context);
         InGameTextbox.loadFont(this.context);
         InGameTextbox.loadFont(this.context);
 

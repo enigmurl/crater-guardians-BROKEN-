@@ -6,8 +6,6 @@ import android.opengl.Matrix;
 import com.enigmadux.craterguardians.MathOps;
 import com.enigmadux.craterguardians.R;
 
-import javax.microedition.khronos.opengles.GL10;
-
 import enigmadux2d.core.shapes.TexturedRect;
 
 /** Played when player or enemy dies
@@ -56,10 +54,9 @@ public class DeathAnim extends Animation {
 
     /** Binds the sprite sheet to the quad
      *
-     * @param gl10 access to openGL
      * @param context any nonnull context
      */
-    public static void loadGLTexture(GL10 gl10, Context context){
+    public static void loadGLTexture(Context context){
         VISUAL_REPRESENTATION.loadGLTexture(context, R.drawable.death_animation);
         VISUAL_REPRESENTATION.loadTextureBuffer(new float[] {
                 0,1,

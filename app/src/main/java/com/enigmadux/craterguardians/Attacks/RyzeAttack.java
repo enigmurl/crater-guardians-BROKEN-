@@ -3,7 +3,6 @@ package com.enigmadux.craterguardians.Attacks;
 
 import android.content.Context;
 import android.opengl.Matrix;
-import android.support.annotation.NonNull;
 
 import com.enigmadux.craterguardians.BaseCharacter;
 import com.enigmadux.craterguardians.Characters.Player;
@@ -13,8 +12,6 @@ import com.enigmadux.craterguardians.MathOps;
 import com.enigmadux.craterguardians.R;
 import com.enigmadux.craterguardians.Spawners.Spawner;
 import com.enigmadux.craterguardians.GameObjects.Supply;
-
-import javax.microedition.khronos.opengles.GL10;
 
 import enigmadux2d.core.shapes.TexturedRect;
 
@@ -116,10 +113,9 @@ public class RyzeAttack extends Attack {
 
     /** Loads the texture for all instances of the attack
      *
-     * @param gl access to openGL
      * @param context used to access resources
      */
-    public static void loadGLTexture(@NonNull GL10 gl, Context context) {
+    public static void loadGLTexture(Context context) {
         VISUAL_REPRESENTATION.loadGLTexture(context,R.drawable.kaiser_attack_spritesheet);
         VISUAL_REPRESENTATION.loadTextureBuffer(new float[] {
                 1/(float) NUM_FRAMES,1,

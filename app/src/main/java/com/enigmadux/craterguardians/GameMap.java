@@ -21,6 +21,7 @@ import java.util.List;
 import java.util.Scanner;
 
 import enigmadux2d.core.EnigmaduxComponent;
+import enigmadux2d.core.renderEngine.MeshRenderer;
 
 public class GameMap extends EnigmaduxComponent {
     //the amount of levels in the game
@@ -64,17 +65,22 @@ public class GameMap extends EnigmaduxComponent {
     //the world y position
     private float cameraY;
 
+    //renders the supplies
+    private MeshRenderer meshRenderer;
+
     /** Creates a GameMap Instance
      *
      * @param context any non null context that can acess resources
      * @param backend we really only need the backend for tutorial checking
      */
-    public GameMap(Context context,CraterBackend backend) {
+    public GameMap(Context context,CraterBackend backend,CraterRenderer renderer) {
         super(0,0,0,0);//x,y,w,h, are never really used
         this.context = context;
 
         this.levelData = new LevelData(context);
         this.backend = backend;
+
+        this.meshRenderer = renderer.renderer;
 
         this.show();
     }
@@ -153,7 +159,8 @@ public class GameMap extends EnigmaduxComponent {
         if (supplies.size() > 0 && this.backend.getTutorialCurrentMillis() > CraterBackend.SUPPLIES_INTRODUCTION) {
             synchronized (CraterBackend.SUPPLIES_LOCK) {
                 for (int i = 0, size = this.supplies.size();i < size; i++){
-                    supplies.get(i).draw(parentMatrix);
+                    supplies.get(i).draw(this.meshRenderer,parentMatrix);
+                    //supplies.get(i).draw(parentMatrix);
                 }
                 //for (Supply supply : this.supplies) {
                 //    supply.draw(gl, parentMatrix);

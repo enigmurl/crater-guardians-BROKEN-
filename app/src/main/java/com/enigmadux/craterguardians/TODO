@@ -46,13 +46,18 @@ todo PRIORITY:
         9) Optimize game, 60 fps always
         10) Make actual progress bars
         11) Enemy AI slightly buggy, might want to change a bit
-        12) ADD MORE STUFF HERE
+        12) Make the spawning a bit more random, as in path finding a bit more random, then add some noise to the spawn times
+            also make some enemies "boss" enemies as in they are stronger, like a big enemy 1 would do more damage, and a
+            smaller enemy would do less. This is not a separate enemy, just when it spawns it randomly becomes this
+            Perhaps make this in the spawner parameters
+        13) ADD MORE STUFF HERE
         priorities:
         dynamic text
         fix ui (first do positioning, worry about graphic part later)
         balance game environemnet
         optimization - look into instancing, also https://stackoverflow.com/questions/4853856/why-are-draw-calls-expensive, explains that we shouldn't be drawing small amounts of quads
         player levels
+
 
     seee why the shaders aren't allowed in and out keywords, among other things
 

@@ -5,8 +5,6 @@ import android.opengl.Matrix;
 
 import com.enigmadux.craterguardians.R;
 
-import javax.microedition.khronos.opengles.GL10;
-
 import enigmadux2d.core.shapes.TexturedRect;
 
 /** Aims in a triangle function
@@ -73,10 +71,9 @@ public class TriangleAimer extends AngleAimer {
     /**
      * Loads the texture of the sprite sheet
      *
-     * @param gl a GL10 object used to access openGL
      * @param context context used to grab the actual image from res
      */
-    public static void loadGLTexture(GL10 gl, Context context) {
+    public static void loadGLTexture(Context context) {
         VISUAL_REPRESENTATION.loadGLTexture(context,R.drawable.triangle_angle_aimer);
     }
 

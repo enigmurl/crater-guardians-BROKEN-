@@ -2,7 +2,6 @@ package com.enigmadux.craterguardians.Spawners;
 
 import android.content.Context;
 import android.opengl.Matrix;
-import android.support.annotation.NonNull;
 
 import com.enigmadux.craterguardians.Enemies.Enemy;
 import com.enigmadux.craterguardians.Enemies.Enemy2;
@@ -10,8 +9,6 @@ import com.enigmadux.craterguardians.R;
 
 import java.util.ArrayList;
 import java.util.List;
-
-import javax.microedition.khronos.opengles.GL10;
 
 import enigmadux2d.core.shapes.TexturedRect;
 
@@ -101,10 +98,9 @@ public class Enemy2Spawner extends Spawner {
 
     /** Loads the texture
      *     TODO GET TEXTURE FOR THIS:
-     * @param gl used to tell openGL what the new texture is
      * @param context used to access resources
      */
-    public static void loadGLTexture(@NonNull GL10 gl,Context context) {
+    public static void loadGLTexture(Context context) {
         VISUAL_REPRESENTATION.loadGLTexture(context, R.drawable.enemy1_spawner);
     }
 

@@ -6,6 +6,7 @@ import android.graphics.BitmapFactory;
 import android.opengl.GLES30;
 import android.opengl.GLUtils;
 import android.util.Log;
+import android.view.Display;
 
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
@@ -69,6 +70,33 @@ public class ModelLoader {
     private static final int FLOATS_PER_2D_VERTEX = 2;
 
 
+    /** for a quad of size 1 by 1 these are the coordinates of the vertices
+     *
+     */
+    private static final float[] QUAD_VERTICES = new float[] {
+            -0.5f, 0.5f,0,
+            -0.5f,-0.5f,0,
+            0.5f,0.5f,0,
+            0.5f,-0.5f,0,
+    };
+    /** For a quad of size 1 by 1 these are the coordinates for the texture coordinates
+     *
+     */
+    private static final float[] QUAD_TEXTURE_CORDS = new float[]{
+            0,0,
+            0,1,
+            1,0,
+            1,1,
+    };
+    /** For a quad of size 1 by 1 these are the indices needed in the correct order
+     *
+     */
+    private static final int[] QUAD_INDICES = new int[]{
+            0,1,2,
+            1,2,3
+    };
+
+
     //These 3 are not lists because it makes it easier to deAssign;
     //anyways when de assigning we have to make them into int[]s for openGL to be able to de allocate, so it makes
     //more sense to just keep them as int[]s to start;
@@ -87,6 +115,13 @@ public class ModelLoader {
     //the amount of textures assigned
     private int numTexturesAssigned = 0;
 
+    /** Creates a quad with width and height of 1, center around the coordinate 0,0
+     *
+     * @return a Mesh with width and height of 1, centered around  (0,0)
+     */
+    public Mesh createQuadMesh(){
+        return this.createVaoMesh(ModelLoader.QUAD_VERTICES,ModelLoader.QUAD_TEXTURE_CORDS,ModelLoader.QUAD_INDICES);
+    }
 
     /** Takes in a list of positions, and spits out a raw mesh
      *

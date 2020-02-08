@@ -9,9 +9,8 @@ import com.enigmadux.craterguardians.MathOps;
 import com.enigmadux.craterguardians.R;
 import com.enigmadux.craterguardians.SoundLib;
 
-import javax.microedition.khronos.opengles.GL10;
-
 import enigmadux2d.core.EnigmaduxComponent;
+import enigmadux2d.core.renderEngine.MeshRenderer;
 import enigmadux2d.core.shapes.TexturedRect;
 
 /** This is what the robots are trying to steal
@@ -23,6 +22,7 @@ public class Supply extends EnigmaduxComponent {
 
     //visual is shared by all objects as they all have the same sprite,
     private static final TexturedRect VISUAL_REPRESENTATION = new TexturedRect(-0.5f,-0.5f,1,1);
+
 
     //the center x position in openGL terms
     private float dx;
@@ -66,11 +66,10 @@ public class Supply extends EnigmaduxComponent {
 
     /** Loads the texture of the sprite
      *
-     * @param gl a GL10 object used to access openGL
      * @param context context used to grab the actual image from res
      */
-    public static void loadGLTexture(GL10 gl, Context context) {
-        VISUAL_REPRESENTATION.loadGLTexture(context, R.drawable.supply_top_view);
+    public static void loadGLTexture(Context context) {
+        VISUAL_REPRESENTATION.loadGLTexture(context,R.drawable.supply_top_view);
     }
 
 
@@ -80,10 +79,25 @@ public class Supply extends EnigmaduxComponent {
      */
     public void draw(float[] parentMatrix){
         Matrix.multiplyMM(finalMatrix,0,parentMatrix,0,translationScalarMatrix,0);
+
+        //VISUAL_REPRESENTATION.draw(finalMatrix);
+        this.healthDisplay.draw(parentMatrix);
+
+    }
+
+    /** Draws the enemy and sub components
+     *
+     * @param parentMatrix matrix that represents how to manipulate it to the world coordinates
+     */
+    public void draw(MeshRenderer meshRenderer, float[] parentMatrix){
+        Matrix.multiplyMM(finalMatrix,0,parentMatrix,0,translationScalarMatrix,0);
+
         VISUAL_REPRESENTATION.draw(finalMatrix);
         this.healthDisplay.draw(parentMatrix);
 
     }
+
+
 
 
     /** Sees if the supply has been killed

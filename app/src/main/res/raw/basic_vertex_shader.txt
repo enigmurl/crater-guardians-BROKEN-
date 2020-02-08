@@ -1,12 +1,15 @@
-uniform mat4 uMVPmatrix;
-uniform vec2 deltaTextureCord;
+attribute mat4 uMVPmatrix;
+attribute vec2 deltaTextureCord;
+attribute vec4 shader;
 
 attribute vec3 position;
 attribute vec2 textureCord;
 
 varying vec2 pass_textureCord;
+varying vec4 pass_shader;
 
 void main() {
     gl_Position = uMVPmatrix * vec4(position,1);
     pass_textureCord = textureCord + deltaTextureCord;
+    pass_shader = shader;
 }

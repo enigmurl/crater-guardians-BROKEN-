@@ -3,7 +3,6 @@ package com.enigmadux.craterguardians.Attacks;
 
 import android.content.Context;
 import android.opengl.Matrix;
-import android.support.annotation.NonNull;
 
 import com.enigmadux.craterguardians.BaseCharacter;
 import com.enigmadux.craterguardians.Characters.Player;
@@ -15,8 +14,6 @@ import com.enigmadux.craterguardians.GameObjects.Supply;
 
 import java.util.ArrayList;
 import java.util.List;
-
-import javax.microedition.khronos.opengles.GL10;
 
 import enigmadux2d.core.shapes.TexturedRect;
 
@@ -102,10 +99,9 @@ public class Enemy3Attack extends Attack {
 
     /** Loads the texture for all instances of the attack
      *
-     * @param gl access to openGL
      * @param context used to access resources
      */
-    public static void loadGLTexture(@NonNull GL10 gl, Context context) {
+    public static void loadGLTexture(Context context) {
         VISUAL_REPRESENTATION.loadGLTexture(context,R.drawable.enemy3_attack_spritesheet);//todo needs work
         VISUAL_REPRESENTATION.loadTextureBuffer(new float[] {
                 0,1,

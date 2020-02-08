@@ -3,8 +3,10 @@ package enigmadux2d.core.shaders;
 import android.content.Context;
 
 import enigmadux2d.core.renderEngine.ModelLoader;
+import enigmadux2d.core.renderEngine.VaoCollection;
 
-/** This is the default shader, that has texture coordinates and vertex positioning capabilities
+/** This is the default shader, that has texture coordinates and vertex positioning capabilities,
+ * @see enigmadux2d.core.renderEngine.VaoCollection, this is basically paired up with that
  *
  * @author Manu Bhat
  * @version BETA
@@ -20,23 +22,38 @@ public class DefaultShader extends ShaderProgram {
      */
     private static final String IN_TEXTURE_CORD_KEYWORD = "textureCord";
 
+    /** The name of the in variable of the vertex shader that corresponds to the model view matrix
+     *
+     */
+    private static final String IN_MATRIX_KEYWORD = "uMVPmatrix";
+
+    /** The name of the in variable of the vertex shader (which passes it down to the fragment) that corresponds to the pixel shader,
+     * that limits the a,r,g, or b channels
+     */
+    private static final String IN_SHADER_KEYWORD = "shader";
+
+    /** The name of the in variable of the vertex shader that corresponds to how much to offset the texture cords
+     *
+     */
+    private static final String IN_DELTA_TEXTURE_KEYWORD = "deltaTextureCord";
+
 
     /** This is where the uniform variable "texture" location (found in the fragment shader) is stored, so we can edit the value
      * of the texture later
      *
      */
     private int textureLocation;
-    /** This is where the uniform variable "shader" location (found in the fragment shader) is stored, so we can write to this
+    /** This is where the  variable "shader" location (found in the vertex shader, passed on to the vertex) is stored, so we can write to this
      * value  later
      *
      */
     private int shaderLocation;
-    /** This is where the uniform variable "deltaTextureCord" location (found in vertex shader) is stored, so we
+    /** This is where the  variable "deltaTextureCord" location (found in vertex shader) is stored, so we
      * can write to the value later
      *
      */
     private int deltaTextureLocation;
-    /** This is where the uniform variable "uMVPmatrix" location (found in vertex shader) is stored, so we
+    /** This is where the  variable "uMVPmatrix" location (found in vertex shader) is stored, so we
      * can write to the value later
      *
      */
@@ -64,9 +81,20 @@ public class DefaultShader extends ShaderProgram {
     @Override
     public void bindAttributes() {
         //binds vertex attribute with corresponding name in shader program
-        this.bindAttribute(ModelLoader.VERTEX_ATTRIBUTE_SLOT, DefaultShader.IN_VERTEX_POSITION_KEYWORD);
+        super.bindAttribute(VaoCollection.VERTEX_ATTRIBUTE_SLOT, DefaultShader.IN_VERTEX_POSITION_KEYWORD);
         //binds texture coordinate attribute with corresponding name in shader program
-        this.bindAttribute(ModelLoader.TEXTURE_COORDINATES_ATTRIBUTE_SLOT, DefaultShader.IN_TEXTURE_CORD_KEYWORD);
+        super.bindAttribute(VaoCollection.TEXTURE_COORDINATES_ATTRIBUTE_SLOT, DefaultShader.IN_TEXTURE_CORD_KEYWORD);
+
+        //these are per instance attributes
+
+        //bind view matrix attribute with corresponding name in shader program
+        super.bindAttribute(VaoCollection.VIEW_MATRIX_ATTRIBUTE_SLOT,DefaultShader.IN_MATRIX_KEYWORD);
+        //binds shader attribute with corresponding name in shader program
+        super.bindAttribute(VaoCollection.ARGB_SHADER_ATTRIBUTE_SLOT,DefaultShader.IN_SHADER_KEYWORD);
+        //binds delta texture coordinate attribute with corresponding name in shader program
+        super.bindAttribute(VaoCollection.DELTA_TEXTURE_COORDINATES_ATTRIBUTE_SLOT,DefaultShader.IN_DELTA_TEXTURE_KEYWORD);
+
+
     }
 
 
@@ -76,9 +104,9 @@ public class DefaultShader extends ShaderProgram {
     @Override
     protected void getVariableLocations() {
         this.textureLocation = this.getUniformLocation("Texture");
-        this.shaderLocation = this.getUniformLocation("shader");
-        this.deltaTextureLocation = this.getUniformLocation("deltaTextureCord");
-        this.uMVPMatrixLocation = this.getUniformLocation("uMVPmatrix");
+        //this.shaderLocation = this.getUniformLocation("shader");
+        //this.deltaTextureLocation = this.getUniformLocation("deltaTextureCord");
+        //this.uMVPMatrixLocation = this.getUniformLocation("uMVPmatrix");
 
     }
 
@@ -99,7 +127,7 @@ public class DefaultShader extends ShaderProgram {
      * @param a the updated alpha filter value (0 to 1) 0 = transparent, 1 fully opaque
      */
     public void writeShader(float r,float g,float b,float a){
-        super.writeUniformVec4(this.shaderLocation,r,g,b,a);
+        //super.writeUniformVec4(this.shaderLocation,r,g,b,a);
     }
 
     /** Updates the delta texture coordinates variable, really only useful for animations
@@ -109,7 +137,7 @@ public class DefaultShader extends ShaderProgram {
      *
      */
     public void writeDeltaTexture(float deltaX,float deltaY){
-        super.writeUniformVec2(this.deltaTextureLocation,deltaX,deltaY);
+        //super.writeUniformVec2(this.deltaTextureLocation,deltaX,deltaY);
     }
 
 
@@ -118,7 +146,7 @@ public class DefaultShader extends ShaderProgram {
      * @param matrix a 4 by 4 matrix represented by a float[16];
      */
     public void writeUmvpMatrix(float[] matrix){
-        super.writeMatrix(this.uMVPMatrixLocation,matrix);
+        //super.writeMatrix(this.uMVPMatrixLocation,matrix);
     }
 
 

@@ -2,13 +2,10 @@ package com.enigmadux.craterguardians.GameObjects;
 
 import android.content.Context;
 import android.opengl.Matrix;
-import android.support.annotation.NonNull;
 
 import com.enigmadux.craterguardians.BaseCharacter;
 import com.enigmadux.craterguardians.MathOps;
 import com.enigmadux.craterguardians.R;
-
-import javax.microedition.khronos.opengles.GL10;
 
 import enigmadux2d.core.shapes.TexturedRect;
 
@@ -120,10 +117,9 @@ public class Plateau{
 
     /** Loads the texture for all instances
      *
-     * @param gl used to tell openGL what the new texture is
      * @param context used to access resources
      */
-    public static void loadGLTexture(@NonNull GL10 gl, Context context) {
+    public static void loadGLTexture(Context context) {
         VISUAL_REPRESENTATION.loadGLTexture(context, R.drawable.plateau);
     }
 

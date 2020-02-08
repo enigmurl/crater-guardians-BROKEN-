@@ -136,6 +136,8 @@ public class SoundLib {
      *
      */
     public static void unMuteAllMedia(){
+        if (! SoundLib.playMusic) return;
+
         SoundLib.lobbyMusic.setVolume(1,1);
         SoundLib.gameMusic.setVolume(1,1);
         SoundLib.victoryMusic.setVolume(1,1);
