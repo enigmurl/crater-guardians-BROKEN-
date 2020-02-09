@@ -33,10 +33,10 @@ public class TriangleAimer extends AngleAimer {
     /**
      * Default Constructor
      *
-     * @param x               the openGL x of the tip of the triangle
+     * @param x               the openGL deltX of the tip of the triangle
      * @param y               the openGL y of the tip of the triangle
      * @param sweepAngle      the angle between the left and ride sides of the triangle in radians
-     * @param midAngle        the angle between the start of the sweep and the positive x axis in degrees. Zero would mean that half the sweep is above the x axis, and half below
+     * @param midAngle        the angle between the start of the sweep and the positive deltX axis in degrees. Zero would mean that half the sweep is above the deltX axis, and half below
      * @param length          the length of two of the side lengths, (the ones connecting to the tip)
      */
     public TriangleAimer(float x, float y, float sweepAngle, float midAngle, float length) {

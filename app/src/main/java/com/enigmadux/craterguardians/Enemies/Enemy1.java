@@ -17,9 +17,9 @@ public class Enemy1 extends Enemy {
     //a constant that represents how fast the character is, right now there aren't any particular units which needs to change (see todo)
     private static final float CHARACTER_SPEED = 0.6f;
     //a constant that represents how many rows the sprite sheet has (how many orientations of rotations
-    private static final int NUM_ROTATION_ORIENTATIONS = 8;
+    public static final int NUM_ROTATION_ORIENTATIONS = 8;
     //a constant that represents how many columns the sprite sheet has (how many frames in a single rotation animation)
-    private static final int FRAMES_PER_ROTATION = 8;
+    public static final int FRAMES_PER_ROTATION = 8;
     //a constant that represents how fast to play the animation in frames per second
     private static final float FPS = 16;
     //a constant that represents the maximum health of Enemy1
@@ -39,31 +39,14 @@ public class Enemy1 extends Enemy {
     /** Default Constructor
      *
      */
-    public Enemy1(){
-        super(NUM_ROTATION_ORIENTATIONS,FRAMES_PER_ROTATION,FPS);
-    }
-
-    /** Loads the texture of the sprite sheet
-     *
-     * @param context context used to grab the actual image from res
-     */
-    public static void loadGLTexture(Context context) {
-        VISUAL_REPRESENTATION.loadGLTexture(context,R.drawable.enemy1_sprite_sheet);
-
-        VISUAL_REPRESENTATION.loadTextureBuffer(new float[] {
-                0,1,
-                0,(NUM_ROTATION_ORIENTATIONS-1f)/NUM_ROTATION_ORIENTATIONS,
-                1/(float) FRAMES_PER_ROTATION,1,
-                1/(float) FRAMES_PER_ROTATION,(NUM_ROTATION_ORIENTATIONS-1f)/NUM_ROTATION_ORIENTATIONS,
-        });
+    public Enemy1(int instanceID){
+        super(instanceID,NUM_ROTATION_ORIENTATIONS,FRAMES_PER_ROTATION,FPS);
     }
 
     @Override
     public void setFrame(float rotation, int frameNum) {
-        float translationX = MathOps.getTextureBufferTranslationX(frameNum,framesPerRotation);
-        float translationY = MathOps.getTextureBufferTranslationY(rotation,numRotationOrientations);
-        Enemy.VISUAL_REPRESENTATION.setTextureDelta(translationX,translationY);
-
+        this.deltaTextureX =  MathOps.getTextureBufferTranslationX(frameNum,framesPerRotation);
+        this.deltaTextureY = MathOps.getTextureBufferTranslationY(rotation,numRotationOrientations);
         this.offsetDegrees = MathOps.getOffsetDegrees(rotation,numRotationOrientations);
     }
 
@@ -71,7 +54,7 @@ public class Enemy1 extends Enemy {
     public void attack(float angle) {
         // for now we are having it only 1 attack at a time
         if (this.attacks.size() == 0) {
-            this.attacks.add(new Enemy1Attack(this.getDeltaX(), this.getDeltaY(), 5, angle, ATTACK_RANGE, 0.2f, 250, this));
+            this.attacks.add(new Enemy1Attack(this.getDeltaX(), this.getDeltaY(), 5, angle, ATTACK_RANGE, 0.2f, 250));
         }
     }
 
@@ -94,8 +77,24 @@ public class Enemy1 extends Enemy {
         Matrix.scaleM(finalMatrix,0,Enemy1.CHARACTER_RADIUS,Enemy1.CHARACTER_RADIUS,0);
         //Matrix.multiplyMM(finalMatrix,0,parentMatrix,0,translationMatrix,0);
 
-        Enemy.VISUAL_REPRESENTATION.setShader(this.shader[0],this.shader[1],this.shader[2],this.shader[3]);
-        Enemy.VISUAL_REPRESENTATION.draw(finalMatrix);
+        //Enemy.VISUAL_REPRESENTATION.setShader(this.shader[0],this.shader[1],this.shader[2],this.shader[3]);
+        //Enemy.VISUAL_REPRESENTATION.draw(finalMatrix);
+    }
+
+    /** Updates the transform
+     *
+     * @param blankInstanceInfo this is where the instance data should be written too. Rather than creating many arrays,
+     *                          we can reuse the same one. Anyways, write all data to appropriate locations in this array,
+     *                          which should match the format of the VaoCollection you are using
+     * @param uMVPMatrix This is a the model view projection matrix. It performs all outside calculations, make sure to
+     *                   not modify this matrix, as this will cause other instances to get modified in unexpected ways.
+     *                   Rather use method calls like Matrix.translateM(blankInstanceInfo,0,uMVPMatrix,0,dX,dY,dZ), which
+     *                   essentially leaves the uMVPMatrix unchanged, but the translated matrix is dumped into the blankInstanceInfo
+     */
+    @Override
+    public void updateInstanceTransform(float[] blankInstanceInfo, float[] uMVPMatrix) {
+        Matrix.translateM(blankInstanceInfo,0,uMVPMatrix,0,this.getDeltaX(),this.getDeltaY(),0);
+        Matrix.scaleM(blankInstanceInfo,0,2 * Enemy1.CHARACTER_RADIUS,2 * Enemy1.CHARACTER_RADIUS,0);
     }
 
     /** This tells the maximum health of any character; what to initialize the health to

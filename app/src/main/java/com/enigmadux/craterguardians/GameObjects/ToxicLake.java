@@ -9,6 +9,7 @@ import com.enigmadux.craterguardians.Characters.Player;
 import com.enigmadux.craterguardians.Enemies.Enemy;
 import com.enigmadux.craterguardians.R;
 import com.enigmadux.craterguardians.SoundLib;
+import com.enigmadux.craterguardians.gameLib.CraterCollectionElem;
 
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -23,7 +24,7 @@ import enigmadux2d.core.shapes.TexturedRect;
  * @version BETA
  *
  */
-public class ToxicLake extends EnigmaduxComponent {
+public class ToxicLake extends CraterCollectionElem {
     /** How much damage it does at once
      *
      */
@@ -56,39 +57,32 @@ public class ToxicLake extends EnigmaduxComponent {
     private static final long TOXIC_BUBBLE_MAX_ANIMLEN = 2000;
 
 
-    //center x of the lake
-    private float x;
-    //center y of the lake
-    private float y;
     //radius of the image (width/2)
     private float radius;
 
     //the amount of millis since the last damage
     private long currentMillis;
 
-    //parentMatrix*translationScalarMatrix
-    private final float[] finalMatrix = new float[16];
+
     //translationMatrix*scalarMatrix
     private final float[] translationScalarMatrix = new float[16];
 
-    /** The actual visual component is shared between all instances to save memory
-     *
-     */
-    private static final TexturedRect VISUAL_REPRESENTATION = new TexturedRect(-0.5f,-0.5f,1,1);
 
     //the bubbles on the toxic lake, should be an array list later on
     private ArrayList<ToxicBubble> toxicBubbles = new ArrayList<>();
 
     /** Default Constructor
-     *  @param x the openGL x coordinate
+     *
+     * @param instanceID the id of the instance with respect to the Vao it's sitting in
+     *  @param x the openGL deltX coordinate
      * @param y the openGL y coordinate
      * @param radius the radius of the image
      */
-    public ToxicLake(float x, float y, float radius){
-        super(x,y,2*radius,2*radius);
-        this.x = x;
-        this.y = y;
-        //super(x-r,y-r,2*r,2*r);
+    public ToxicLake(int instanceID,float x, float y, float radius){
+        super(instanceID);
+        this.deltaX = x;
+        this.deltaY = y;
+        //super(deltX-r,y-r,2*r,2*r);
         this.radius = radius;
 
         //translates to appropriate coordinates
@@ -97,7 +91,7 @@ public class ToxicLake extends EnigmaduxComponent {
         final float[] scalarMatrix = new float[16];
 
         Matrix.setIdentityM(translationMatrix,0);
-        Matrix.translateM(translationMatrix,0,this.x,this.y,0);
+        Matrix.translateM(translationMatrix,0,this.deltaX,this.deltaY,0);
 
         Matrix.setIdentityM(scalarMatrix,0);
         Matrix.scaleM(scalarMatrix,0,2*radius,2*radius,0);
@@ -105,28 +99,6 @@ public class ToxicLake extends EnigmaduxComponent {
         Matrix.multiplyMM(translationScalarMatrix,0,translationMatrix,0,scalarMatrix,0);
     }
 
-    /** Draws the enemy, and all sub components
-     *
-     * @param parentMatrix used to translate from model to world space
-     */
-    public void draw(float[] parentMatrix){
-        Matrix.multiplyMM(finalMatrix,0,parentMatrix,0,translationScalarMatrix,0);
-        VISUAL_REPRESENTATION.draw(finalMatrix);
-        //for (int i = 0, size = this.toxicBubbles.size();i < size; i++) {
-        //    toxicBubbles.get(i).draw(gl, parentMatrix);
-        //}
-    }
-
-
-
-
-    /** Loads the texture
-     *
-     * @param context context used to load resources, and non null context should work
-     */
-    public static void loadGLTexture(Context context) {
-        VISUAL_REPRESENTATION.loadGLTexture(context, R.drawable.toxic_lake_texture);
-    }
 
     /** Tries to attack the enemies and the bots
      *
@@ -138,11 +110,11 @@ public class ToxicLake extends EnigmaduxComponent {
         //randomly add a toxic bubbles
         if (Math.random() < ToxicLake.TOXIC_BUBBLE_CHANCE){
             double r = Math.min(this.radius, Math.random() * (ToxicLake.TOXIC_BUBBLE_MAX_RADIUS - TOXIC_BUBBLE_MIN_RADIUS) + TOXIC_BUBBLE_MIN_RADIUS);
-            double magnitude = Math.random() * (this.w/2 - r);
+            double magnitude = Math.random() * (this.radius - r);
             double angle = Math.random() * 2 * Math.PI;
 
-            double x = magnitude * Math.cos(angle) + this.x;
-            double y = magnitude * Math.sin(angle) + this.y;
+            double x = magnitude * Math.cos(angle) + this.deltaX;
+            double y = magnitude * Math.sin(angle) + this.deltaY;
 
             long animLength = (long) (Math.random() * (TOXIC_BUBBLE_MAX_ANIMLEN - TOXIC_BUBBLE_MIN_ANIMLEN) + TOXIC_BUBBLE_MIN_ANIMLEN);
 
@@ -169,13 +141,13 @@ public class ToxicLake extends EnigmaduxComponent {
         if (currentMillis == 0) {
             for (Enemy enemy : enemyList) {
                 if (enemy == null) continue;
-                if (Math.hypot(enemy.getDeltaX() - this.x, enemy.getDeltaY() - this.y) < this.radius + enemy.getWidth() / 2) {
+                if (Math.hypot(enemy.getDeltaX() - this.deltaX, enemy.getDeltaY() - this.deltaY) < this.radius + enemy.getWidth() / 2) {
                     enemy.damage(DAMAGE);
                 }
             }
         }
 
-        if (Math.hypot(player.getDeltaX() - this.x,player.getDeltaY() - this.y) < this.radius + player.getWidth()/2){
+        if (Math.hypot(player.getDeltaX() - this.deltaX,player.getDeltaY() - this.deltaY) < this.radius + player.getWidth()/2){
             if (currentMillis == 0) {
                 player.damage(DAMAGE);
                 SoundLib.playToxicLakeTickSoundEffect();
@@ -186,13 +158,19 @@ public class ToxicLake extends EnigmaduxComponent {
 
     }
 
-    /** Used to meet implementation requirements, functionally useless
+    /** Updates the matrix info into the instance info. However, OUTSIDE CLASSES SHOULD NOT CALL THIS METHOD. It's only for use by super classes.
+     * Instead, call updateInstanceInfo
      *
-     * @param e the MotionEvent describing how the user interacted with the screen
-     * @return FALSE
+     * @param blankInstanceInfo this is where the instance data should be written too. Rather than creating many arrays,
+     *                          we can reuse the same one. Anyways, write all data to appropriate locations in this array,
+     *                          which should match the format of the VaoCollection you are using
+     * @param uMVPMatrix This is a the model view projection matrix. It performs all outside calculations, make sure to
+     *                   not modify this matrix, as this will cause other instances to get modified in unexpected ways.
+     *                   Rather use method calls like Matrix.translateM(blankInstanceInfo,0,uMVPMatrix,0,dX,dY,dZ), which
+     *                   essentially leaves the uMVPMatrix unchanged, but the translated matrix is dumped into the blankInstanceInfo
      */
     @Override
-    public boolean onTouch(MotionEvent e) {
-        return false;
+    public void updateInstanceTransform(float[] blankInstanceInfo, float[] uMVPMatrix) {
+        Matrix.multiplyMM(blankInstanceInfo,0,uMVPMatrix,0,this.translationScalarMatrix,0);
     }
 }

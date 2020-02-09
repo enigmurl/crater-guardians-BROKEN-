@@ -54,10 +54,10 @@ public class RyzeAttack extends Attack {
 
 
     /** Default constructor
-     * @param x openGL x
+     * @param x openGL deltX
      * @param y openGL y
      * @param damage how much damage to deal to enemies;
-     * @param attackAngle the angle between the start of the sweep and the positive x axis in radians. Zero would mean that half the sweep is above the x axis, and half below
+     * @param attackAngle the angle between the start of the sweep and the positive deltX axis in radians. Zero would mean that half the sweep is above the deltX axis, and half below
      * @param mainLength how long the middle attack is in open gl terms (radius)
      * @param mainWidth how wide the middle attack is in open gl terms (radius)
      * @param sideLength how long the side attacks are in open gl terms
@@ -272,6 +272,66 @@ public class RyzeAttack extends Attack {
         if (hits.size() == 0) {
             ((Ryze) initializer).failedAttack();
         }
+    }
+
+    @Override
+    public boolean isHit(Enemy enemy) {
+        if (this.hits.contains(enemy)){
+            return false;
+        }
+        if (! mainAttackFinished) {
+            float originalXvalue = mainLength * (float) finishedMillis / millis;
+            float originalYValue = mainWidth / 2f;
+
+            float cos = (float) Math.cos(attackAngle);
+            float sin = (float) Math.sin(attackAngle);
+
+            float x1 = this.x + cos * originalXvalue - sin * originalYValue;
+            float y1 = this.y + sin * originalXvalue + cos * originalYValue;
+            float x2 = this.x + cos * originalXvalue + sin * originalYValue;
+            float y2 = this.y + sin * originalXvalue - cos * originalYValue;
+            if (enemy.collidesWithLine(x1, y1, x2, y2)) {
+                this.hits.add(enemy);
+                mainAttackFinished = true;
+                return true;
+            }
+        }
+        if (! leftAttackFinished){
+            float originalXvalue = sideLength * (float) finishedMillis / millis;
+            float originalYValue = sideWidth / 2f;
+
+            float cos = (float) Math.cos(attackAngle + SWEEP_ANGLE/2);
+            float sin = (float) Math.sin(attackAngle + SWEEP_ANGLE/2);
+
+            float x1 = this.x + cos * originalXvalue - sin * originalYValue;
+            float y1 = this.y + sin * originalXvalue + cos * originalYValue;
+            float x2 = this.x + cos * originalXvalue + sin * originalYValue;
+            float y2 = this.y + sin * originalXvalue - cos * originalYValue;
+            if (enemy.collidesWithLine(x1, y1, x2, y2)) {
+                this.hits.add(enemy);
+                leftAttackFinished = true;
+                return true;
+            }
+        }
+        if (! rightAttackFinished){
+            float originalXvalue = sideLength * (float) finishedMillis / millis;
+            float originalYValue = sideWidth / 2f;
+
+            float cos = (float) Math.cos(attackAngle - SWEEP_ANGLE/2);
+            float sin = (float) Math.sin(attackAngle - SWEEP_ANGLE/2);
+
+            float x1 = this.x + cos * originalXvalue - sin * originalYValue;
+            float y1 = this.y + sin * originalXvalue + cos * originalYValue;
+            float x2 = this.x + cos * originalXvalue + sin * originalYValue;
+            float y2 = this.y + sin * originalXvalue - cos * originalYValue;
+            if (enemy.collidesWithLine(x1, y1, x2, y2)) {
+                this.hits.add(enemy);
+                rightAttackFinished = true;
+                return true;
+            }
+        }
+
+        return false;
     }
 
     @Override

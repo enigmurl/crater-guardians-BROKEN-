@@ -57,7 +57,7 @@ public class Ryze extends Player {
     //visual is share by all objects as they all have the same gun, for now same gun for both evolutions, when player is looking to right, the gun
     private static TexturedRect VISUAL_REPRESENTATION_GUN = new TexturedRect(0,-Player.CHARACTER_RADIUS,Ryze.GUN_WIDTH,Ryze.GUN_HEIGHT);
 
-    //translates the Character according to delta x and delta y. And rotates it based on the offsetAngle
+    //translates the Character according to delta deltX and delta y. And rotates it based on the offsetAngle
     private float[] translationRotationMatrix = new float[16];
 
     //parent matrix * translation matrix

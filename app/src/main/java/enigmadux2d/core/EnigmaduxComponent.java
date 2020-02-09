@@ -9,7 +9,7 @@ import android.view.MotionEvent;
  * @version BETA
  */
 public abstract class EnigmaduxComponent {
-    //open gl x coordinate (read constructor javadoc for more details)
+    //open gl deltX coordinate (read constructor javadoc for more details)
     protected float x;
     //open gl y coordinate (read constructor javadoc for more details)
     protected float y;
@@ -24,7 +24,7 @@ public abstract class EnigmaduxComponent {
     /**
      * Default Constructor
      *
-     * @param x the open gl coordinate of the component, left most edge x coordinate e.g. (1.0f, -0.5f, 0.0f ,0.1f)
+     * @param x the open gl coordinate of the component, left most edge deltX coordinate e.g. (1.0f, -0.5f, 0.0f ,0.1f)
      * @param y the open gl coordinate of the component, bottom most y coordinate e.g. (1.0f,-0.5f, 0.0f, 0.1f)
      * @param w the width of the rect (distance from left edge to right edge) in open gl coordinate terms e.g (1.0f, 1.5f) Should be positive
      * @param h the height of the rect (distance from top edge to bottom edge) in open gl coordinate terms e.g (1.0f, 1.5f) should be positive
@@ -59,7 +59,7 @@ public abstract class EnigmaduxComponent {
         return y;
     }
 
-    /** Gets the left edge x
+    /** Gets the left edge deltX
      *
      * @return left edge openGL
      */
@@ -67,9 +67,9 @@ public abstract class EnigmaduxComponent {
         return x;
     }
 
-    /** Sets the position of the x and y in open gl coordinates. NOTE DOES NOT DO ANYTHING VISUALLY UNLESS TEXTURE IS RELOADED
+    /** Sets the position of the deltX and y in open gl coordinates. NOTE DOES NOT DO ANYTHING VISUALLY UNLESS TEXTURE IS RELOADED
      *
-     * @param x the open gl coordinate of the component, left most edge x coordinate e.g. (1.0f, -0.5f, 0.0f ,0.1f)
+     * @param x the open gl coordinate of the component, left most edge deltX coordinate e.g. (1.0f, -0.5f, 0.0f ,0.1f)
      * @param y the open gl coordinate of the component, bottom most y coordinate e.g. (1.0f,-0.5f, 0.0f, 0.1f)
      */
     public void setPos(float x,float y){
@@ -121,9 +121,9 @@ public abstract class EnigmaduxComponent {
     /**
      * Sees whether a point is contained within the rectangle bounding the component
      *
-     * @param x the openGL x coordinate of the point that is being tested to see if it is inside the component
+     * @param x the openGL deltX coordinate of the point that is being tested to see if it is inside the component
      * @param y the openGL y coordinate of the point that is being tested to see if it is inside the component
-     * @return whether the point represented by the open gl coordinate (x,y) is inside the bounds of this component
+     * @return whether the point represented by the open gl coordinate (deltX,y) is inside the bounds of this component
      */
     public boolean isInside(float x, float y) {
         return (x > this.x &&

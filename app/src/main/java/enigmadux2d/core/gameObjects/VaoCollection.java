@@ -17,14 +17,8 @@ import java.nio.IntBuffer;
  *
  */
 public abstract class VaoCollection {
-    /** The amount of bytes a single entity takes up
-     *
-     */
-    private static final int FLOATS_PER_ENTITY = 22;
-    /** This is the amount of VBOs needed to make a Collection
-     * (Textured Cord, Vertices, Instance Info)
-     */
-    private static final int VBOS_NEEDED = 3;
+
+
     /**
      * in a VAO, the vertices (and any other data must go into a specified slot. This tells which slot
      * (index) the data should be put into by default.
@@ -103,7 +97,7 @@ public abstract class VaoCollection {
 
 
     //this is where the pointer to the vao is stored
-    private int[] vao = new int[1];
+    protected int[] vao = new int[1];
 
 
     //this is where the index array is stored
@@ -113,12 +107,12 @@ public abstract class VaoCollection {
     //anyways when de assigning we have to make them into int[]s for openGL to be able to de allocate, so it makes
     //more sense to just keep them as int[]s to start;
     /**keep a list of all assigned VBOs, so that we don't leak memory, they will all be de - assigned at the end*/
-    private int[] vboList = new int[VBOS_NEEDED];
+    private final int[] vboList;
 
 
 
     /** this our main vbo where we stored instanced data */
-    private int instancedVbo;
+    protected int instancedVbo;
     //this is the actual float[] which we use because it's easy to write to
     private float[] instancedData;
     //this is the vbo data but as as buffer so openGL can understand
@@ -135,8 +129,12 @@ public abstract class VaoCollection {
     //only 1 texture will be used
     private int[] textureList = new int[1];
 
+    //this is the amount of floats thats needed to model a single instance
+    private int floatsPerInstance;
 
-    /** Default Constructor
+
+    /** Default Constructor. Note that it assumed that indices, vertices, and texture cords, are all being used.
+     * And you must provide them.
      *
      * @param numEntities the maximum amount of entities that this VAO can store
      * @param vertices an array of positions in the form of {x1,y1,z1,x2,y2,z2...,xn,yn,zn}. Rather than repeating
@@ -150,10 +148,19 @@ public abstract class VaoCollection {
      * @param indices an int[] of indexes. Each element should correspond to a vertex, that is
      *                if the first element of the index array is 2, it is corresponding to vertices[2]
      *                this is useful when each vertex is comprised of lots of data
+     * @param vbosNeeded the amount of Vertex Buffer Objects that will be needed. Such as texture Cords, InstancedData, vertices, normals, etc
+     * @param floatsPerInstance the amount of floats needed to model one instance. For example, if just a matrix4 is needed,
+     *                          then it would be 16
+     *
      */
-    public VaoCollection(int numEntities,float[] vertices,float[] textureCords,int[] indices){
+    public VaoCollection(int numEntities,float[] vertices,float[] textureCords,int[] indices,int vbosNeeded, int floatsPerInstance){
+        //make a vbo list of the amount needed
+        this.vboList = new int[vbosNeeded];
+
+        this.floatsPerInstance = floatsPerInstance;
+
         //first allocate the memory
-        ByteBuffer pureByteBuffer = ByteBuffer.allocateDirect(numEntities  * VaoCollection.FLOATS_PER_ENTITY * Float.SIZE/Byte.SIZE);
+        ByteBuffer pureByteBuffer = ByteBuffer.allocateDirect(numEntities  * this.floatsPerInstance * Float.SIZE/Byte.SIZE);
         //order it in the way C scripts understands
         pureByteBuffer.order(ByteOrder.nativeOrder());
 
@@ -162,7 +169,7 @@ public abstract class VaoCollection {
 
 
         //initialize the blank instanced data
-        this.instancedData = new float[numEntities * FLOATS_PER_ENTITY];
+        this.instancedData = new float[numEntities *  this.floatsPerInstance];
 
 
         //put in the blank data
@@ -172,7 +179,7 @@ public abstract class VaoCollection {
 
 
         //created the instanced vbo, but it has no information (yet)
-        this.instancedVbo = this.createEmptyVbo(numEntities * FLOATS_PER_ENTITY);
+        this.instancedVbo = this.createEmptyVbo(numEntities *  this.floatsPerInstance);
 
 
 
@@ -203,22 +210,27 @@ public abstract class VaoCollection {
         this.elementArrayBuffer = this.pushDataInIntBuffer(indices);
 
         //now set up all the data to instancedData, no data is being written, but the "links" are
-        //also see if the attribute slots should start at 1 instead of 2, video said 1, but I think that's being used
-        //for texture cords
 
-        //matrix col 0
-        this.pushInstancedDataInAttributeList(this.vao[0], this.instancedVbo, VaoCollection.VIEW_MATRIX_ATTRIBUTE_SLOT, 4, VaoCollection.FLOATS_PER_ENTITY, 0);
-        //matrix col 1
-        this.pushInstancedDataInAttributeList(this.vao[0], this.instancedVbo, VaoCollection.VIEW_MATRIX_ATTRIBUTE_SLOT + 1, 4, VaoCollection.FLOATS_PER_ENTITY, 4);
-        //matrix col 2
-        this.pushInstancedDataInAttributeList(this.vao[0], this.instancedVbo, VaoCollection.VIEW_MATRIX_ATTRIBUTE_SLOT + 2, 4, VaoCollection.FLOATS_PER_ENTITY, 8);
-        //matrix col 3
-        this.pushInstancedDataInAttributeList(this.vao[0], this.instancedVbo, VaoCollection.VIEW_MATRIX_ATTRIBUTE_SLOT + 3, 4, VaoCollection.FLOATS_PER_ENTITY, 12);
-        //shader (a,r,g,b)
-        this.pushInstancedDataInAttributeList(this.vao[0], this.instancedVbo, VaoCollection.ARGB_SHADER_ATTRIBUTE_SLOT, 4, VaoCollection.FLOATS_PER_ENTITY, 16);
-        //texture cord offset
-        this.pushInstancedDataInAttributeList(this.vao[0], this.instancedVbo, VaoCollection.DELTA_TEXTURE_COORDINATES_ATTRIBUTE_SLOT, 2, VaoCollection.FLOATS_PER_ENTITY, 20);
+        this.bindInstancedData();
+
+
     }
+
+    /** This where locations in the instanced VBO are "linked" with corresponding positions in the VAO.
+     * This should be the really only major thing that changes between different VaoCollections. Put data,
+     * like the uMVPMatrix, deltaTextureCoordinates, and other attributes that change per instance here.
+     *
+     * use the this.pushInstancedDataInAttributeList. For example
+     *
+     * this.pushInstancedDataInAttributeList(this.vao[0], this.instancedVbo,2, 4, 22, 0);
+     * which says the the attribute slot two contains 4 floats, each instance contains 22, and the data should be started at the
+     * beginning of the instanced data.
+     *
+     * Also note, that the number of each floats should never pass 4 floats, as that's the max openGL can handle so for attributes
+     * like matrices, you must make 4 separate calls, for the linking
+     */
+    public abstract void bindInstancedData();
+
 
 
     /** Loads the texture provided to V-RAM of the gpu
@@ -297,10 +309,10 @@ public abstract class VaoCollection {
      *
      */
     public void updateInstance(int instanceId,float[] instanceData){
-        int offset = instanceId * VaoCollection.FLOATS_PER_ENTITY;
+        int offset = instanceId *  this.floatsPerInstance;
 
         //copy the passed in data to our global data efficiently
-        System.arraycopy(instanceData, 0, this.instancedData, offset, VaoCollection.FLOATS_PER_ENTITY);
+        System.arraycopy(instanceData, 0, this.instancedData, offset, this.floatsPerInstance);
 
     }
 
@@ -312,7 +324,7 @@ public abstract class VaoCollection {
      */
     public void hideInstance(int instanceId){
         //this is where the matrix starts
-        int offset = instanceId * VaoCollection.FLOATS_PER_ENTITY;
+        int offset = instanceId * this.floatsPerInstance;
 
         //copy the hide matrix to the instance data
         System.arraycopy(VaoCollection.HIDE_MATRIX,0,this.instancedData,offset,VaoCollection.HIDE_MATRIX.length);
@@ -406,7 +418,7 @@ public abstract class VaoCollection {
      * @param usage Specifies the expected usage pattern of the data store. The symbolic constant must be GL_STREAM_DRAW, GL_STATIC_DRAW, or GL_DYNAMIC_DRAW.
      *              it should basically tell how often you expect to update the VBO
      * @param size the amount of floats for each data, for example if you're calling this for vertices
-     *             it will be 3 because each 3d vector is represented by x,y,z which is 3 floats
+     *             it will be 3 because each 3d vector is represented by deltX,y,z which is 3 floats
      *
      */
     private void pushDataInAttributeList(int attributeSlot,float[] data,int usage,int size){
@@ -454,7 +466,7 @@ public abstract class VaoCollection {
      * @param stride the amount of floats needed for one instance
      * @param offset the amount of floats from the beginning of a particular instance
      */
-    private void pushInstancedDataInAttributeList(int vao,int vbo,int attributeSlot, int numFloats,int stride, int offset){
+    protected void pushInstancedDataInAttributeList(int vao,int vbo,int attributeSlot, int numFloats,int stride, int offset){
         //bind the Vbo so we can can use it
         GLES30.glBindBuffer(GLES30.GL_ARRAY_BUFFER,vbo);
         //bind vertex array so we can use it

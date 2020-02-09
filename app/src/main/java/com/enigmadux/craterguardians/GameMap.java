@@ -22,6 +22,7 @@ import java.util.List;
 import java.util.Scanner;
 
 import enigmadux2d.core.EnigmaduxComponent;
+import enigmadux2d.core.gameObjects.VaoCollection;
 import enigmadux2d.core.renderEngine.MeshRenderer;
 
 public class GameMap extends EnigmaduxComponent {
@@ -61,27 +62,42 @@ public class GameMap extends EnigmaduxComponent {
     private CraterBackend backend;
 
     //details about camera
-    //the world x position
+    //the world deltX position
     private float cameraX;
     //the world y position
     private float cameraY;
 
     //renders the supplies
-    private CraterRenderer meshRenderer;
+    private VaoCollection suppliesVao;
+    private VaoCollection toxicLakeCollection;
+    private VaoCollection enemiesCollection;
+    private VaoCollection spawnerCollection;
+
+
+    private MeshRenderer meshRenderer;
 
     /** Creates a GameMap Instance
      *
      * @param context any non null context that can acess resources
      * @param backend we really only need the backend for tutorial checking
      */
-    public GameMap(Context context,CraterBackend backend,CraterRenderer renderer) {
-        super(0,0,0,0);//x,y,w,h, are never really used
+    public GameMap(Context context, CraterBackend backend, VaoCollection suppliesCollection,
+                   VaoCollection toxicLakeCollection,
+                   VaoCollection enemiesCollection,
+                   VaoCollection spawnerCollection,
+                   MeshRenderer meshRenderer) {
+        super(0,0,0,0);//deltX,y,w,h, are never really used
         this.context = context;
 
         this.levelData = new LevelData(context);
         this.backend = backend;
 
-        this.meshRenderer = renderer;
+        this.suppliesVao = suppliesCollection;
+        this.toxicLakeCollection = toxicLakeCollection;
+        this.enemiesCollection = enemiesCollection;
+        this.spawnerCollection = spawnerCollection;
+
+        this.meshRenderer = meshRenderer;
 
         this.show();
     }
@@ -130,6 +146,9 @@ public class GameMap extends EnigmaduxComponent {
         long overallStart = System.currentTimeMillis();
         long start = System.currentTimeMillis();
 
+        float[] bufferData = new float[22];
+
+
         if (plateaus.size() > 0) {
             synchronized (CraterBackend.PLATEAU_LOCK) {
                 for (int i = 0, size = this.plateaus.size();i < size; i++){
@@ -146,8 +165,16 @@ public class GameMap extends EnigmaduxComponent {
         if (this.backend.getTutorialCurrentMillis() > CraterBackend.PLATEAUS_TOXIC_LAKE_INTRODUCTION) {
             synchronized (CraterBackend.TOXICLAKE_LOCK) {
                 for (int i = 0, size = this.toxicLakes.size();i < size; i++){
-                    toxicLakes.get(i).draw(parentMatrix);
+                    this.toxicLakes.get(i).updateInstanceInfo(bufferData,parentMatrix);
+
+                    this.toxicLakeCollection.updateInstance(this.toxicLakes.get(i).getInstanceID(),bufferData);
+
                 }
+
+                this.toxicLakeCollection.updateInstancedVbo();
+
+                this.meshRenderer.renderCollection(this.toxicLakeCollection);
+
                 //for (ToxicLake toxicLake : this.toxicLakes) {
                 //    toxicLake.draw(gl, parentMatrix);
                 //}
@@ -160,23 +187,16 @@ public class GameMap extends EnigmaduxComponent {
         if (supplies.size() > 0 && this.backend.getTutorialCurrentMillis() > CraterBackend.SUPPLIES_INTRODUCTION) {
             synchronized (CraterBackend.SUPPLIES_LOCK) {
 
-                float[] supplyData = new float[22];
-                supplyData[16] = 1;
-                supplyData[17] = 1;
-                supplyData[18] = 1;
-                supplyData[19] = 1;
                 for (int i = 0, size = this.supplies.size();i < size; i++){
-                    Matrix.translateM(supplyData,0,parentMatrix,0,this.supplies.get(i).getX(),this.supplies.get(i).getY(),0);
-                    Matrix.scaleM(supplyData,0,this.supplies.get(i).getWidth(),this.supplies.get(i).getHeight(),1);
-                    this.meshRenderer.suppliesVao.updateInstance(this.supplies.get(i).myVaoKey,supplyData);
+                    this.supplies.get(i).updateInstanceInfo(bufferData,parentMatrix);
 
-                    //supplies.get(i).draw(this.meshRenderer.renderer,parentMatrix);
-                    //supplies.get(i).draw(parentMatrix);
+                    this.suppliesVao.updateInstance(this.supplies.get(i).getInstanceID(),bufferData);
+
                 }
 
-                this.meshRenderer.suppliesVao.updateInstancedVbo();
+                this.suppliesVao.updateInstancedVbo();
 
-                this.meshRenderer.meshRenderer.renderCollection(this.meshRenderer.suppliesVao);
+                this.meshRenderer.renderCollection(this.suppliesVao);
 
                 //for (Supply supply : this.supplies) {
                 //    supply.draw(gl, parentMatrix);
@@ -190,8 +210,12 @@ public class GameMap extends EnigmaduxComponent {
             start = System.currentTimeMillis();
             synchronized (CraterBackend.SPAWNER_LOCK) {
                 for (int i = 0, size = this.spawners.size();i < size; i++){
-                    spawners.get(i).draw(parentMatrix);
+                    this.spawners.get(i).updateInstanceInfo(bufferData,parentMatrix);
+
+                    this.spawnerCollection.updateInstance(this.spawners.get(i).getInstanceID(),bufferData);
                 }
+                this.spawnerCollection.updateInstancedVbo();
+                this.meshRenderer.renderCollection(this.spawnerCollection);
                 //for (Spawner spawner : this.spawners) {
                 //    spawner.draw(gl, parentMatrix);
                 //}
@@ -202,14 +226,17 @@ public class GameMap extends EnigmaduxComponent {
                 synchronized (CraterBackend.ENEMIES_LOCK) {
                     enemiesSynchroTIME += System.currentTimeMillis() - start;
                     start = System.currentTimeMillis();
-                    Enemy.prepareDraw();
+//                    Enemy.prepareDraw();
                     for (int i = 0, size = this.enemies.size();i < size; i++){
-                        enemies.get(i).drawIntermediate(parentMatrix);
+                        enemies.get(i).updateInstanceInfo(bufferData,parentMatrix);
+                        this.enemiesCollection.updateInstance(enemies.get(i).getInstanceID(),bufferData);
                     }
-                    Enemy.endDrawing();
-                    for (int i = 0, size = this.enemies.size();i < size; i++){
-                        enemies.get(i).draw(parentMatrix);
-                    }
+                    this.enemiesCollection.updateInstancedVbo();
+                    this.meshRenderer.renderCollection(this.enemiesCollection);
+//                    Enemy.endDrawing();
+//                    for (int i = 0, size = this.enemies.size();i < size; i++){
+//                        enemies.get(i).draw(parentMatrix);
+//                    }
                     enemiesTIME += System.currentTimeMillis() - start;
 
                     //for (Enemy enemy : this.enemies) {
@@ -366,8 +393,7 @@ public class GameMap extends EnigmaduxComponent {
                 float r = level_data.nextFloat();
                 int health = level_data.nextInt();
 
-                int id = this.meshRenderer.suppliesVao.addInstance();
-
+                int id = this.suppliesVao.addInstance();
                 supplies.add(new Supply(x, y, r, health,id));
             }
         }
@@ -381,8 +407,8 @@ public class GameMap extends EnigmaduxComponent {
                 // here w is the width, not the radius, so we divide by two
                 float w = level_data.nextFloat();
 
-
-                toxicLakes.add(new ToxicLake(x, y, w / 2));
+                int id = this.toxicLakeCollection.addInstance();
+                toxicLakes.add(new ToxicLake(id,x, y, w / 2));
             }
         }
 
@@ -409,18 +435,20 @@ public class GameMap extends EnigmaduxComponent {
                 long decayTime = level_data.nextInt();
                 int hitPoints = level_data.nextInt();
 
+                int instanceID = this.spawnerCollection.addInstance();
+
                 switch (type) {
                     case "ENEMY_TYPE_1":
-                        //spawners.add(new Enemy1Spawner(x, y, w, h, spawnTime, hitPoints));
-                        spawners.add(new Enemy1Spawner(x, y, w, h,spawnsPerSubWave,timesOfSubWave,waveTime, decayTime, hitPoints));
+                        //spawners.add(new Enemy1Spawner(deltX, y, w, h, spawnTime, hitPoints));
+                        spawners.add(new Enemy1Spawner(instanceID, x, y, w, h,spawnsPerSubWave,timesOfSubWave,waveTime, decayTime, hitPoints));
                         break;
                     case "ENEMY_TYPE_2":
-                        //spawners.add(new Enemy2Spawner(x, y, w, h, spawnTime, hitPoints));
-                        spawners.add(new Enemy2Spawner(x, y, w, h,spawnsPerSubWave,timesOfSubWave,waveTime, decayTime, hitPoints));
+                        //spawners.add(new Enemy2Spawner(deltX, y, w, h, spawnTime, hitPoints));
+                        spawners.add(new Enemy2Spawner(instanceID,x, y, w, h,spawnsPerSubWave,timesOfSubWave,waveTime, decayTime, hitPoints));
                         break;
                     case "ENEMY_TYPE_3":
-                        spawners.add(new Enemy3Spawner(x, y, w, h,spawnsPerSubWave,timesOfSubWave,waveTime, decayTime, hitPoints));
-                        //spawners.add(new Enemy3Spawner(x, y, w, h, spawnTime, hitPoints));
+                        spawners.add(new Enemy3Spawner(instanceID,x, y, w, h,spawnsPerSubWave,timesOfSubWave,waveTime, decayTime, hitPoints));
+                        //spawners.add(new Enemy3Spawner(deltX, y, w, h, spawnTime, hitPoints));
                         break;
                 }
             }
@@ -479,19 +507,22 @@ public class GameMap extends EnigmaduxComponent {
      */
     public void reset() {
         synchronized (CraterBackend.ENEMIES_LOCK) {
+            this.enemiesCollection.clearInstanceData();
             this.enemies.clear();
         }
         synchronized (CraterBackend.SPAWNER_LOCK) {
+            this.spawnerCollection.clearInstanceData();
             this.spawners.clear();
         }
         synchronized (CraterBackend.PLATEAU_LOCK) {
             this.plateaus.clear();
         }
         synchronized (CraterBackend.TOXICLAKE_LOCK) {
+            this.suppliesVao.clearInstanceData();
             this.toxicLakes.clear();
         }
         synchronized (CraterBackend.SUPPLIES_LOCK) {
-            this.meshRenderer.suppliesVao.clearInstanceData();
+            this.suppliesVao.clearInstanceData();
             this.supplies.clear();
         }
         synchronized (CraterBackend.ANIMATIONS_LOCK) {
@@ -578,6 +609,14 @@ public class GameMap extends EnigmaduxComponent {
      */
     public EnemyMap getEnemyMap() {
         return enemyMap;
+    }
+
+    /** Gets the vao of enemies vertex data
+     *
+     * @return enemies vertex data
+     */
+    public VaoCollection getEnemiesVao(){
+        return this.enemiesCollection;
     }
 
     /** Nothing in a game map needs to respond to touch events, so this always returns false

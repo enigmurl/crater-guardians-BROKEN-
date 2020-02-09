@@ -61,7 +61,7 @@ public class InGameTextbox extends EnigmaduxComponent {
 
     /** Default constructor which makes text Textboxs
      * @param text The actual text to draw. Can be digits, words, letters, etc (but as a String object of course)
-     * @param x the open gl coordinate of the rect, left most edge x coordinate e.g. (1.0f, -0.5f, 0.0f ,0.1f)
+     * @param x the open gl coordinate of the rect, left most edge deltX coordinate e.g. (1.0f, -0.5f, 0.0f ,0.1f)
      * @param y the open gl coordinate of the rect, bottom most y coordinate e.g. (1.0f,-0.5f, 0.0f, 0.1f)
      * @param fontHeight the height of the text (distance from top edge to bottom edge) in open gl coordinate terms e.g (1.0f, 1.5f) should be positive
      * @param color a color in hex e.g. 0xFFFF0000 is full alpha full red 0 green 0 blue
@@ -108,7 +108,7 @@ public class InGameTextbox extends EnigmaduxComponent {
 
         /*this.widMod = this.w + 2* InGameTextbox.MIN_PADDING;
         this.htMod = this.h + 2* InGameTextbox.MIN_PADDING;
-        this.xMod = this.x - this.w/2;
+        this.xMod = this.deltX - this.w/2;
         this.yMod = this.y - this.h/2;*/
     }
 

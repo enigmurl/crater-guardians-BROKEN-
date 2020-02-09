@@ -44,7 +44,8 @@ public abstract class CollectionElem {
      * on the VaoCollection you are using, for all known cases this is the first 16 floats). To write the complete transformation,
      * calculate the local transformation, that is scaling, translation, rotation, etc (localTransformM). Then in the blankInstanceData
      * write uMVPMatrix * localTransformM. Note that you don't have to create an entire new matrix. Rather you can just,
-     * use commands like Matrix.translateM, as these are more efficient.
+     * use commands like Matrix.translateM, as these are more efficient. However, OUTSIDE CLASSES SHOULD NOT CALL THIS METHOD. It's only for use by super classes.
+     * Instead, call updateInstanceInfo
      *
      * @param blankInstanceInfo this is where the instance data should be written too. Rather than creating many arrays,
      *                          we can reuse the same one. Anyways, write all data to appropriate locations in this array,

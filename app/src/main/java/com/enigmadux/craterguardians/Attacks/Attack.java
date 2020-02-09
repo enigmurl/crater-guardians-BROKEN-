@@ -19,7 +19,7 @@ import java.util.List;
  */
 public abstract class Attack {
 
-    //open gl x coordinate (read constructor javadoc for more details)
+    //open gl deltX coordinate (read constructor javadoc for more details)
     protected float x;
     //open gl y coordinate (read constructor javadoc for more details)
     protected float y;
@@ -43,7 +43,7 @@ public abstract class Attack {
     protected List<Object> hits= new ArrayList<>();
 
     /** Default Constructor
-     *  @param x the open gl coordinate of the rect, left most edge x coordinate e.g. (1.0f, -0.5f, 0.0f ,0.1f)
+     *  @param x the open gl coordinate of the rect, left most edge deltX coordinate e.g. (1.0f, -0.5f, 0.0f ,0.1f)
      * @param y the open gl coordinate of the rect, bottom most y coordinate e.g. (1.0f,-0.5f, 0.0f, 0.1f)
      * @param w the width of the rect (distance from left edge to right edge) in open gl coordinate terms e.g (1.0f, 1.5f) Should be positive
      * @param h the height of the rect (distance from top edge to bottom edge) in open gl coordinate terms e.g (1.0f, 1.5f) should be positive
@@ -67,23 +67,27 @@ public abstract class Attack {
 
     }
 
+
+    public void attemptAttack(Enemy enemy){
+        if (isFinished) return;
+        if (this.isHit(enemy)) return;
+        this.onHitEnemy( enemy);
+
+        float cos = (float) Math.cos(attackAngle);
+        float sin = (float) Math.sin(attackAngle);
+
+        //todo find better solution, also theres hard coded value
+        new Knockback(enemy,Knockback.DEFAULT_MILLIS,cos * Knockback.DEFAULT_KNOCKBACK_LEN,sin * Knockback.DEFAULT_KNOCKBACK_LEN);
+        SoundLib.playPlayerAttackLandSoundEffect();
+    }
     public void attemptAttack(BaseCharacter character){
         if (isFinished) return;
         if (this.isHit(character)) {
             //all enemies are stunned
-            if (Enemy.class.isAssignableFrom(character.getClass())) {
-                this.onHitEnemy((Enemy) character);
 
-                float cos = (float) Math.cos(attackAngle);
-                float sin = (float) Math.sin(attackAngle);
+            this.onHitPlayer((Player) character);
+            SoundLib.playEnemyDamagePlayerSoundEffect();
 
-                //todo find better solution, also theres hard coded value
-                new Knockback((Enemy) character,Knockback.DEFAULT_MILLIS,cos * Knockback.DEFAULT_KNOCKBACK_LEN,sin * Knockback.DEFAULT_KNOCKBACK_LEN);
-                SoundLib.playPlayerAttackLandSoundEffect();
-            } else{
-                this.onHitPlayer((Player) character);
-                SoundLib.playEnemyDamagePlayerSoundEffect();
-            }
         }
 
     }
@@ -114,6 +118,8 @@ public abstract class Attack {
 
 
     public abstract boolean isHit(BaseCharacter character);
+
+    public abstract boolean isHit(Enemy enemy);
 
     public abstract boolean isHit(Supply supply);
 

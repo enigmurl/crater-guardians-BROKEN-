@@ -85,7 +85,7 @@ public class Drawable extends EnigmaduxComponent {
     private float[] shader = new float[] {1,1,1,1};
 
 
-    //how much to translate the texture coordinate x direction
+    //how much to translate the texture coordinate deltX direction
     private float[] deltaTextureCoordinates = new float[2];
 
 
@@ -108,7 +108,7 @@ public class Drawable extends EnigmaduxComponent {
 
     /** Default Constructor
      *
-     * @param x the open gl coordinate of the rect, left most edge x coordinate e.g. (1.0f, -0.5f, 0.0f ,0.1f)
+     * @param x the open gl coordinate of the rect, left most edge deltX coordinate e.g. (1.0f, -0.5f, 0.0f ,0.1f)
      * @param y the open gl coordinate of the rect, bottom most y coordinate e.g. (1.0f,-0.5f, 0.0f, 0.1f)
      * @param w the width of the rect (distance from left edge to right edge) in open gl coordinate terms e.g (1.0f, 1.5f) Should be positive
      * @param h the height of the rect (distance from top edge to bottom edge) in open gl coordinate terms e.g (1.0f, 1.5f) should be positive
@@ -444,9 +444,9 @@ public class Drawable extends EnigmaduxComponent {
         return false;
     }
 
-    /** Gets the open gl x coordinate
+    /** Gets the open gl deltX coordinate
      *
-     * @return the open gl coordinate of the rect, left most edge x coordinate e.g. (1.0f, -0.5f, 0.0f ,0.1f)
+     * @return the open gl coordinate of the rect, left most edge deltX coordinate e.g. (1.0f, -0.5f, 0.0f ,0.1f)
      */
     public float getX(){
         return this.x;
@@ -479,7 +479,7 @@ public class Drawable extends EnigmaduxComponent {
 
     /** Sets how much to translate the deltaU
      *
-     * @param deltaU how much to translate in the x direction
+     * @param deltaU how much to translate in the deltX direction
      * @param deltaV how much to translate in the y direction
      */
     public void setTextureDelta(float deltaU,float deltaV){

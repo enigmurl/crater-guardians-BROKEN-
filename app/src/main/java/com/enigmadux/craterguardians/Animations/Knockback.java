@@ -25,7 +25,7 @@ public class Knockback extends TransitionAnim {
     //the total amount of milliseconds in this animatino
     private long totalMillis;
 
-    //the amount to move in the x direction
+    //the amount to move in the deltX direction
     private float deltaX;
     //the amount to move in the y direction
     private float deltaY;
@@ -34,7 +34,7 @@ public class Knockback extends TransitionAnim {
      *
      * @param enemy The said component that needs to be knockBacked
      * @param millis how long to delay the un shading of the component
-     * @param deltaX the amount to move in the x direction
+     * @param deltaX the amount to move in the deltX direction
      * @param deltaY the amount of move in the y direction
      *
      */

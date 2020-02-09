@@ -12,7 +12,7 @@ import enigmadux2d.core.models.TexturedModel;
 import enigmadux2d.core.shaders.DefaultShader;
 
 
-/** This draws a mesh to the screen.
+/** This draws a mesh to the screen. Todo need to upgrade this
  *
  * @author Manu Bhat
  * @version BETA

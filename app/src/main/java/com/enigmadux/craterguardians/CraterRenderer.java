@@ -14,6 +14,7 @@ import android.view.WindowManager;
 
 import com.enigmadux.craterguardians.Characters.Kaiser;
 import com.enigmadux.craterguardians.Characters.Player;
+import com.enigmadux.craterguardians.Enemies.Enemy1;
 import com.enigmadux.craterguardians.FileStreams.PlayerData;
 import com.enigmadux.craterguardians.FileStreams.SettingsData;
 import com.enigmadux.craterguardians.GUI.Button;
@@ -22,6 +23,7 @@ import com.enigmadux.craterguardians.GUI.HomeButton;
 import com.enigmadux.craterguardians.GUI.InGameTextbox;
 import com.enigmadux.craterguardians.GUI.MatieralsBar;
 import com.enigmadux.craterguardians.GUI.ProgressBar;
+import com.enigmadux.craterguardians.gameLib.CraterVaoCollection;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -52,6 +54,26 @@ public class CraterRenderer extends EnigmaduxGLRenderer {
     //shader of on buttons in form of r g b a
     private static final float[] ON_SHADER = new float[] {0.5f,1.0f,0.5f,1};
 
+    //the vertices of a quad of size 1 by 1, centered around the origin
+    private static final float[] QUAD_VERTICES = new float[] {
+            -0.5f, 0.5f,0,
+            -0.5f,-0.5f,0,
+            0.5f,0.5f,0,
+            0.5f,-0.5f,0,
+
+    };
+    //the texture coordinates of a quad of size 1 by 1 centered around the origin
+    private static final float[] QUAD_TEXTURE_CORDS = new float[] {
+                0,0,
+                0,1,
+                1,0,
+                1,1
+    };
+    //the indices of which vertex to use for a quad
+    private static final int[] QUAD_INDICES = new int[] {
+                0,1,2,
+                1,2,3
+    };
 
     private DisplayMetrics displayMetrics;//used to get information about screen;
 
@@ -113,7 +135,9 @@ public class CraterRenderer extends EnigmaduxGLRenderer {
 
 
     //MATRICES
+    //orthographic projection
     private float[] orthographicM = new float[16];
+    //camera matrix
     private float[] cameraTranslationM = new float[16];
     //ortho * cameraTranslation
     private float[] vPMatrix = new float[16];
@@ -180,7 +204,6 @@ public class CraterRenderer extends EnigmaduxGLRenderer {
     /** This performs the openGL calls
      *
      */
-    MeshRenderer renderer;
 
     //todo these are all debug varaibles delete them before releaes
 
@@ -192,21 +215,31 @@ public class CraterRenderer extends EnigmaduxGLRenderer {
     long lastMillis = System.currentTimeMillis();
     long debugGameScreenMillis = System.currentTimeMillis();
 
-    ModelLoader modelLoader;
-    MeshRenderer meshRenderer ;
-    Mesh testMesh;
-    TexturedModel texturedModel;
-    VaoCollection vaoCollection;
 
     /** This does the openGL work on collections
      *
      */
-    MeshRenderer collectionsRenderer;
+    public MeshRenderer collectionsRenderer;
 
-    /** This is a vao that contains data about the supplies
+    /** This is a vao that contains data about the supplies graphically wise
      *
      */
-    VaoCollection suppliesVao;
+    private VaoCollection suppliesVao;
+
+    /** This is a vao that contains data about the toxic lakes graphically wise
+     *
+     */
+    private VaoCollection toxicLakeVao;
+    /** This is a vao that contains data about the spawners graphically wise
+     *
+     */
+    private VaoCollection spawnersVao;
+    /** This is a vao that contains data about the enemies graphically wise
+     *
+     */
+    private VaoCollection enemiesVao;
+
+
 
     /** Constructor to set the handed over context
      *
@@ -253,73 +286,29 @@ public class CraterRenderer extends EnigmaduxGLRenderer {
         Log.d("GL ERRORS ", "1) Error code; " + GLES30.glGetError());
 
 
-        this.meshRenderer = new MeshRenderer();
-        this.meshRenderer.loadShaders(this.context,R.raw.basic_vertex_shader,R.raw.basic_frag_shader);
+        this.collectionsRenderer = new MeshRenderer();
+        this.collectionsRenderer.loadShaders(this.context,R.raw.basic_vertex_shader,R.raw.basic_frag_shader);
 
 
-        vaoCollection = new VaoCollection(2,new float[] {
-                -0.5f, 0.5f,0,
-                -0.5f,-0.5f,0,
-                0.5f,0.5f,0,
-                0.5f,-0.5f,0,
 
-        },new float[] {
-                0,0,
-                0,1,
-                1,0,
-                1,1
-        }, new int[] {
-                0,1,2,
-                1,2,3
-        });
-
-        suppliesVao = new VaoCollection(3,new float[] {
-                -0.5f, 0.5f,0,
-                -0.5f,-0.5f,0,
-                0.5f,0.5f,0,
-                0.5f,-0.5f,0,
-
-        },new float[] {
-                0,0,
-                0,1,
-                1,0,
-                1,1
-        }, new int[] {
-                0,1,2,
-                1,2,3
-        });
+        suppliesVao = new CraterVaoCollection(3,CraterRenderer.QUAD_VERTICES,CraterRenderer.QUAD_TEXTURE_CORDS,CraterRenderer.QUAD_INDICES);
         suppliesVao.loadTexture(this.context,R.drawable.supply_top_view);
 
-        vaoCollection.loadTexture(this.context,R.drawable.supply_top_view);
-        vaoCollection.addInstance();
-        vaoCollection.addInstance();
+        enemiesVao = new CraterVaoCollection(50,CraterRenderer.QUAD_VERTICES,
+                new float[] {
 
+                    0,(Enemy1.NUM_ROTATION_ORIENTATIONS-1f)/Enemy1.NUM_ROTATION_ORIENTATIONS,
+                    0,1,
+                    1/(float) Enemy1.FRAMES_PER_ROTATION,(Enemy1.NUM_ROTATION_ORIENTATIONS-1f)/Enemy1.NUM_ROTATION_ORIENTATIONS,
+                    1/(float) Enemy1.FRAMES_PER_ROTATION,1,
+                },CraterRenderer.QUAD_INDICES);
+        enemiesVao.loadTexture(this.context,R.drawable.enemy1_sprite_sheet);
 
-        /*meshRenderer = new MeshRenderer();
+        toxicLakeVao = new CraterVaoCollection(10,CraterRenderer.QUAD_VERTICES,CraterRenderer.QUAD_TEXTURE_CORDS,CraterRenderer.QUAD_INDICES);
+        toxicLakeVao.loadTexture(this.context,R.drawable.toxic_lake_texture);
 
-        meshRenderer.loadShaders(this.context,R.raw.basic_vertex_shader,R.raw.basic_frag_shader);
-        modelLoader = new ModelLoader();
-
-
-        testMesh = modelLoader.createVaoMesh(new float[] {
-                -0.5f, 0.5f,0,
-                -0.5f,-0.5f,0,
-                 0.5f,0.5f,0,
-                 0.5f,-0.5f,0,
-
-        },new float[] {
-                0,0,
-                0,1,
-                1,1,
-                1,0
-        },
-                new int[] {
-                0,1,2,
-                1,2,3
-                }
-                );*/
-        //this.texturedModel = new TexturedModel(testMesh,
-        //new BasicTexture(modelLoader.loadTexture(this.context,R.drawable.button_background)));
+        spawnersVao = new CraterVaoCollection(6,CraterRenderer.QUAD_VERTICES,CraterRenderer.QUAD_TEXTURE_CORDS,CraterRenderer.QUAD_INDICES);
+        spawnersVao.loadTexture(this.context,R.drawable.enemy1_spawner);
 
 
 
@@ -389,28 +378,6 @@ public class CraterRenderer extends EnigmaduxGLRenderer {
         Matrix.setLookAtM(this.cameraTranslationM, 0, 0, 0, 1, 0, 0, 0, 0, 1f, 0);
     }
 
-//    /** Called whenever a new frame is needed to be drawn. If the render mode is dirty, then it will only be called
-//     * on requestRender, otherwise it's called at 60fps (I believe)
-//     *
-//     * @param gl a GL object used to communicate with OpenGl
-//     */
-//    @Override
-//    public void onDrawFrame(GL10 gl){
-//        //reset the screen to brown screen
-//        this.clearScreen();
-//        //resets the camera
-//        this.resetCamera();
-//
-//        //draws the loading screen, if it is drawn then we can't draw anything else
-//        if (this.renderLoadingScreen()) return;
-//
-//        //make sure to not have the crater backend thread running for no reason
-//        this.craterBackendThread.setPause(!(gameScreenLayout.isVisible() && ! pauseGameLayout.isVisible()));
-//
-//
-//
-//
-//    }
 
     /** Renders the loading screen
      *
@@ -597,7 +564,8 @@ public class CraterRenderer extends EnigmaduxGLRenderer {
         }
         switch (step) {
             case 0:
-                this.backend = new CraterBackend(context, this,this.suppliesVao);
+                this.backend = new CraterBackend(context, this,this.suppliesVao,this.toxicLakeVao,this.enemiesVao
+                ,this.spawnersVao);
                 this.craterBackendThread.setBackend(this.backend);
                 break;
             case 1:
@@ -613,6 +581,9 @@ public class CraterRenderer extends EnigmaduxGLRenderer {
                 this.backend.loadTutorialLayouts();
                 break;
             case 5:
+                this.suppliesVao.loadTexture(this.context,R.drawable.supply_top_view);
+                break;
+            case 6:
                 this.player = new Kaiser();
                 this.backend.setPlayer(this.player);
 
@@ -635,10 +606,10 @@ public class CraterRenderer extends EnigmaduxGLRenderer {
                 SoundLib.loadMedia(context);
 
                 break;
-            case 6:
+            case 7:
                 this.loadLayouts(this.context);
                 break;
-            case 7:
+            case 8:
                 //todo, this may cause it to play the music for an enigma second
                 SoundLib.setStateLobbyMusic(true);
                 this.settingsData.loadSettingsFile();
@@ -656,7 +627,7 @@ public class CraterRenderer extends EnigmaduxGLRenderer {
                     this.soundEffectsOnOffButton.setShader(CraterRenderer.OFF_SHADER[0], CraterRenderer.OFF_SHADER[1], CraterRenderer.OFF_SHADER[2], CraterRenderer.OFF_SHADER[3]);
                 }
                 break;
-            case 8:
+            case 9:
 
                 this.loadingCompleted = true;
                 break;

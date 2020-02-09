@@ -20,7 +20,7 @@ public class HomeButton extends Button {
     //the renderer object to load the home screen
     private final CraterRenderer craterRenderer;
     /** Default Constructor
-     * @param x the center x
+     * @param x the center deltX
      * @param y the center y
      * @param diameter the height of the scaled image,the width is calculated through this by multiplying to make it a square
      * @param backend the backend object

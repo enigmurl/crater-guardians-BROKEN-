@@ -162,9 +162,9 @@ public abstract class BaseCharacter extends EnigmaduxComponent {
     /** Sees if it collides with a line, but does not indicate where
      * It will return true if both points are withing the ellipse
      *
-     * @param x1 openGL x of first point
+     * @param x1 openGL deltX of first point
      * @param y1 openGL y of first point
-     * @param x2 openGL x of second point
+     * @param x2 openGL deltX of second point
      * @param y2 openGL y of second point
      * @return whether or not they collide
      */
@@ -231,9 +231,9 @@ public abstract class BaseCharacter extends EnigmaduxComponent {
     }
 
 
-    /** Gets x position
+    /** Gets deltX position
      *
-     * @return the x distance of center of character from y axis
+     * @return the deltX distance of center of character from y axis
      */
     public float getDeltaX(){
         return this.deltaX;
@@ -241,7 +241,7 @@ public abstract class BaseCharacter extends EnigmaduxComponent {
 
     /** Gets y pos
      *
-     * @return the y distance of center of character from x axis
+     * @return the y distance of center of character from deltX axis
      */
     public float getDeltaY(){
         return this.deltaY;
@@ -250,7 +250,7 @@ public abstract class BaseCharacter extends EnigmaduxComponent {
 
     /** translates the TexturedRect
      *
-     * @param x how much to translate in the x direction
+     * @param x how much to translate in the deltX direction
      * @param y how much to translate in the y direction
      */
     public void setTranslate(float x,float y){
@@ -260,7 +260,7 @@ public abstract class BaseCharacter extends EnigmaduxComponent {
 
     /** Unlike setTranslate, this moves the character from it's current position
      *
-     * @param deltaX how much to translate in the x direction from the current position
+     * @param deltaX how much to translate in the deltX direction from the current position
      * @param deltaY how much to translate in the y direction from the current position
      */
     public void translateFromPos(float deltaX,float deltaY){

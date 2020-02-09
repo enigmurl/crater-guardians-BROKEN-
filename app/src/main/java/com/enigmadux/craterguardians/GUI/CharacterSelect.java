@@ -99,7 +99,7 @@ public class CharacterSelect extends EnigmaduxComponent {
             float x = 1.6f * (i % CHARACTER_ICON_W)/(float) CHARACTER_ICON_W - 1 + 0.4f;
             float y = 1 - 2 * (i/CHARACTER_ICON_W % CHARACTER_ICON_H)/(float) CHARACTER_ICON_H - 1.5f/CHARACTER_ICON_H ;
 
-            Log.d("CHARACTER SELECT","x : " + x + " y "  + y );
+            Log.d("CHARACTER SELECT","deltX : " + x + " y "  + y );
 
             TexturedRect image = new TexturedRect(x,y,scaleX * 1.75f/CHARACTER_ICON_W,1.75f/CHARACTER_ICON_W);
 
@@ -260,7 +260,7 @@ public class CharacterSelect extends EnigmaduxComponent {
         /** Default Constructor
          *
          * @param player the player class this button is associated with
-         * @param x the center x
+         * @param x the center deltX
          * @param y the center y
          */
         public Upgradable(Player player,float x,float y,PlayerData playerData) {

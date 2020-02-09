@@ -12,7 +12,7 @@ import enigmadux2d.core.EnigmaduxComponent;
 public abstract class Animation extends EnigmaduxComponent {
     /** Default constructor
      *
-     * @param x left edge x openGL
+     * @param x left edge deltX openGL
      * @param y bottom edge y openGL
      * @param w width openGL
      * @param h height openGL

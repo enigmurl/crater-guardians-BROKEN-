@@ -42,6 +42,7 @@ import java.util.Iterator;
 import java.util.List;
 
 import enigmadux2d.core.EnigmaduxComponent;
+import enigmadux2d.core.renderEngine.MeshRenderer;
 import enigmadux2d.core.renderEngine.ModelLoader;
 import enigmadux2d.core.gameObjects.VaoCollection;
 import enigmadux2d.core.shapes.TexturedRect;
@@ -147,7 +148,7 @@ public class CraterBackend {
     //visual joystick
     private TexturedRect attackJoyStick;
 
-    //openGl x coordinate of the attack joystick
+    //openGl deltX coordinate of the attack joystick
     private float attackJoyStickX;
     //openGL y coordinate of the attack joystick
     private float attackJoyStickY;
@@ -158,7 +159,7 @@ public class CraterBackend {
 
     //visual joystick
     private TexturedRect movementJoyStick;
-    //openGl x coordinate of the movement joystick
+    //openGl deltX coordinate of the movement joystick
     private float movementJoyStickX;
     //openGL y coordinate of the movement joystick
     private float movementJoyStickY;
@@ -297,8 +298,14 @@ public class CraterBackend {
      * @param context any non null Context, used to access resources
      * @param renderer the renderer that has the openGL context
      * @param suppliesCollection a Vao where supplies data is written too
+     * @param
      */
-    public CraterBackend(Context context, CraterRenderer renderer, VaoCollection suppliesCollection){
+    public CraterBackend(Context context,
+                         CraterRenderer renderer,
+                         VaoCollection suppliesCollection,
+                         VaoCollection toxicLakeCollection,
+                         VaoCollection enemiesCollection,
+                         VaoCollection spawnerCollection){
         this.context = context;
         this.renderer = renderer;
 
@@ -315,7 +322,7 @@ public class CraterBackend {
         this.playerData = new PlayerData(context);
         this.levelData = new LevelData(context);
 
-        this.gameMap = new GameMap(context,this,this.renderer);
+        this.gameMap = new GameMap(context,this,suppliesCollection,toxicLakeCollection,enemiesCollection,spawnerCollection,this.renderer.collectionsRenderer);
 
 
         attackJoyStick = new TexturedRect(ATTACK_JOY_STICK_CENTER[0]-JOY_STICK_IMAGE_WIDTH/2, ATTACK_JOY_STICK_CENTER[1]-JOY_STICK_IMAGE_WIDTH/2,scaleX * JOY_STICK_IMAGE_WIDTH,scaleY * JOY_STICK_IMAGE_WIDTH);
@@ -811,10 +818,6 @@ public class CraterBackend {
         //aimers
         TriangleAimer.loadGLTexture(this.context);
         TriRectAimer.loadGLTexture(this.context);
-        //spawners
-        Enemy1Spawner.loadGLTexture(this.context);
-        Enemy2Spawner.loadGLTexture(this.context);
-        Enemy3Spawner.loadGLTexture(this.context);
         //attacks
         Enemy1Attack.loadGLTexture(this.context);
         Enemy2Attack.loadGLTexture(this.context);
@@ -829,13 +832,10 @@ public class CraterBackend {
 
 
         //others (lakes + plateaus)
-        ToxicLake.loadGLTexture(this.context);
         Plateau.loadGLTexture(this.context);
         ProgressBar.loadGLTexture(this.context);
         HealthBar.loadGLTexture(this.context);
 
-        ModelLoader modelLoader = new ModelLoader();
-        Supply.loadGLTexture(this.context);
         InGameTextbox.loadFont(this.context);
         InGameTextbox.loadFont(this.context);
 
@@ -1298,7 +1298,7 @@ public class CraterBackend {
                         }
 
                         //Enemy e = spawner.trySpawnEnemy(dt);
-                        List<Enemy> enemies = spawner.update(dt);
+                        List<Enemy> enemies = spawner.update(dt,this.gameMap.getEnemiesVao());
                         if (enemies != null) {
                             Log.d("BACKEND","Adding enemy");
                             synchronized (CraterBackend.ENEMIES_LOCK){
@@ -1318,7 +1318,7 @@ public class CraterBackend {
                         Supply supply = (Supply) itr.next();
                         if (!supply.isAlive()) {
                             synchronized (CraterBackend.ANIMATIONS_LOCK) {
-                                this.gameMap.getAnimations().add(new DeathAnim(supply.getX(), supply.getY(), supply.getWidth(), supply.getHeight()));
+                                this.gameMap.getAnimations().add(new DeathAnim(supply.getDeltaX(), supply.getDeltaY(), supply.getWidth(), supply.getHeight()));
                             }
                             itr.remove();
                         }

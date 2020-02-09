@@ -10,20 +10,31 @@ import enigmadux2d.core.gameObjects.CollectionElem;
  */
 public abstract class CraterCollectionElem extends CollectionElem {
     /** How much to translate the vertices to the right in openGL terms
-     *
+     * This variable does nothing by itself, the child class must use it appropriately
      */
     protected float deltaX;
     /** How much to translate the vertices to the top in openGL terms
-     *
+     * This variable does nothing by itself, the child class must use it appropriately
      */
     protected float deltaY;
 
+    /** How much to scale the width, since it starts at 1, it just is the width.
+     * This variable does nothing by itself, the child class must use it appropriately
+     */
+    protected float width;
+    /** How much to scale the height, since it starts at 1, it just is the height.
+     * This variable does nothing by itself, the child class must use it appropriately
+     */
+    protected float height;
+
+
     /** How much to translate the texture cords to the right in openGL terms
-     *
+     * This variable does nothing by itself, the child class must use it appropriately
      */
     protected float deltaTextureX;
     /** How much to translate the texture cords to the bottom in openGL terms
      * Remember that for texture cords, the y axis is flipped
+     * This variable does nothing by itself, the child class must use it appropriately
      */
     protected float deltaTextureY;
 
@@ -31,7 +42,7 @@ public abstract class CraterCollectionElem extends CollectionElem {
     /** A shader that limits the R,G,B or A channels. They range from 0 to 1, where 1 means allow all of it,
      * and 0 means allow none of it
      */
-    private float[] shader = new float[]{1,1,1,1};
+    protected float[] shader = new float[]{1,1,1,1};
 
     /** Default Constructor
      *
@@ -42,7 +53,7 @@ public abstract class CraterCollectionElem extends CollectionElem {
     }
 
 
-    /** Updates the instance info into the float[]
+    /** Updates the instance info into the float[].
      *
      * @param blankInstanceInfo this is where the instance data should be written too. Rather than creating many arrays,
      *                          we can reuse the same one. Anyways, write all data to appropriate locations in this array,
@@ -65,5 +76,34 @@ public abstract class CraterCollectionElem extends CollectionElem {
         blankInstanceInfo[21] = this.deltaTextureY;
     }
 
+    /** Gets the width variable. Note if the child classes does not use it appropriately, it amy not have any true effect
+     *
+     * @return the width variable
+     */
+    public float getWidth() {
+        return this.width;
+    }
+    /** Gets the height variable. Note if the child classes does not use it appropriately, it amy not have any true effect
+     *
+     * @return the height variable
+     */
+    public float getHeight() {
+        return this.height;
+    }
 
+    /** Gets the center position in openGL space
+     *
+     * @return the center deltX position distance from origin
+     */
+    public float getDeltaX() {
+        return this.deltaX;
+    }
+
+    /** Gets the center position in openGL space
+     *
+     * @return the center y position distance from origin
+     */
+    public float getDeltaY() {
+        return this.deltaY;
+    }
 }

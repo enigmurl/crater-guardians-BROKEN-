@@ -79,12 +79,12 @@ public class TexturedRect extends EnigmaduxComponent {
     //whether or not textures has been initialized
     private boolean texturesInitialized = false;
 
-    //how much to translate it by in the x direction
+    //how much to translate it by in the deltX direction
     private float deltaX = 0;
     //how much to translate it by in the y direction
     private float deltaY = 0;
 
-    //how much to scale it by in the x direction
+    //how much to scale it by in the deltX direction
     private float scaleX = 1;
     //how much to scale it by in the y direction;
     private float scaleY = 1;
@@ -96,7 +96,7 @@ public class TexturedRect extends EnigmaduxComponent {
     private float[] shader = new float[] {1,1,1,1};
 
 
-    //how much to translate the texture coordinate x direction
+    //how much to translate the texture coordinate deltX direction
     private float[] deltaTextureCoordinates = new float[2];
 
 
@@ -119,7 +119,7 @@ public class TexturedRect extends EnigmaduxComponent {
 
     /** Default Constructor, defaults to 1 texture
      *
-     * @param x the open gl coordinate of the rect, left most edge x coordinate e.g. (1.0f, -0.5f, 0.0f ,0.1f)
+     * @param x the open gl coordinate of the rect, left most edge deltX coordinate e.g. (1.0f, -0.5f, 0.0f ,0.1f)
      * @param y the open gl coordinate of the rect, bottom most y coordinate e.g. (1.0f,-0.5f, 0.0f, 0.1f)
      * @param w the width of the rect (distance from left edge to right edge) in open gl coordinate terms e.g (1.0f, 1.5f) Should be positive
      * @param h the height of the rect (distance from top edge to bottom edge) in open gl coordinate terms e.g (1.0f, 1.5f) should be positive
@@ -130,7 +130,7 @@ public class TexturedRect extends EnigmaduxComponent {
 
     /** Default Constructor
      *
-     * @param x the open gl coordinate of the rect, left most edge x coordinate e.g. (1.0f, -0.5f, 0.0f ,0.1f)
+     * @param x the open gl coordinate of the rect, left most edge deltX coordinate e.g. (1.0f, -0.5f, 0.0f ,0.1f)
      * @param y the open gl coordinate of the rect, bottom most y coordinate e.g. (1.0f,-0.5f, 0.0f, 0.1f)
      * @param w the width of the rect (distance from left edge to right edge) in open gl coordinate terms e.g (1.0f, 1.5f) Should be positive
      * @param h the height of the rect (distance from top edge to bottom edge) in open gl coordinate terms e.g (1.0f, 1.5f) should be positive
@@ -356,7 +356,7 @@ public class TexturedRect extends EnigmaduxComponent {
 
     /** translates the TexturedRect
      *
-     * @param x how much to translate in the x direction
+     * @param x how much to translate in the deltX direction
      * @param y how much to translate in the y direction
      */
     public void setTranslate(float x,float y){
@@ -480,9 +480,9 @@ public class TexturedRect extends EnigmaduxComponent {
         return false;
     }
 
-    /** Gets the open gl x coordinate
+    /** Gets the open gl deltX coordinate
      *
-     * @return the open gl coordinate of the rect, left most edge x coordinate e.g. (1.0f, -0.5f, 0.0f ,0.1f)
+     * @return the open gl coordinate of the rect, left most edge deltX coordinate e.g. (1.0f, -0.5f, 0.0f ,0.1f)
      */
     public float getX(){
         return this.x;
@@ -531,7 +531,7 @@ public class TexturedRect extends EnigmaduxComponent {
 
     /** Scales the textured rect. (before rotating and before translating)
      *
-     * @param scaleX how much to scale in the x direction
+     * @param scaleX how much to scale in the deltX direction
      * @param scaleY how much to scale in the y direction
      */
     public void setScale(float scaleX,float scaleY){
@@ -541,7 +541,7 @@ public class TexturedRect extends EnigmaduxComponent {
 
     /** Sets how much to translate the deltaU
      *
-     * @param deltaU how much to translate in the x direction
+     * @param deltaU how much to translate in the deltX direction
      * @param deltaV how much to translate in the y direction
      */
     public void setTextureDelta(float deltaU,float deltaV){

@@ -20,7 +20,7 @@ import enigmadux2d.core.shapes.TexturedRect;
 /** this whole subdirectory needs javadoc //TODO
  * This attack is a hammer swing, it only deals damage at the last swing
  *
- *TODO: in the future perhaps make this a spiral like attack which steps up in radius x amount of times
+ *TODO: in the future perhaps make this a spiral like attack which steps up in radius deltX amount of times
  */
 public class Enemy3Attack extends Attack {
 
@@ -53,16 +53,15 @@ public class Enemy3Attack extends Attack {
 
 
     /** Default constructor
-     * @param x openGL x
+     * @param x openGL deltX
      * @param y openGL y
      * @param damage how much damage to deal to enemies;
      * @param attackAngle this is the angle in radians at which the attacks starts
      * @param radius how long the attack is in open gl terms
      * @param millis how long the attack takes to finish
-     * @param initializer the Enemy or player who summoned the attack
      */
-    public Enemy3Attack(float x, float y, int damage, float attackAngle, float radius, long millis, BaseCharacter initializer){
-        super(x,y,0,0,NUM_FRAMES,millis,initializer, attackAngle);
+    public Enemy3Attack(float x, float y, int damage, float attackAngle, float radius, long millis){
+        super(x,y,0,0,NUM_FRAMES,millis,null, attackAngle);
 
 
         this.damage = damage;
@@ -140,6 +139,12 @@ public class Enemy3Attack extends Attack {
     public boolean isHit(Spawner spawner) {
         return false;//because nothing is done, it doesn't matter whether it's true or false, so we just return true to reduce calculations
     }
+
+    @Override
+    public boolean isHit(Enemy enemy) {
+        return false;
+    }
+
 
     @Override
     public boolean isHit(Supply supply) {

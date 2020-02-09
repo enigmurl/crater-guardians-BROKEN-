@@ -77,7 +77,7 @@ public abstract class ShaderProgram {
     }
 
     /** Writes a vector of two values to a uniform variable, Note that while the parameters are named
-     * x y z,it doesn't have to be position vector, could also be color
+     * deltX y z,it doesn't have to be position vector, could also be color
      *
      * @param location this is where the value will be written to (use getUniformLocation to find the int)
      * @param x the float value that should be written to at position 0
@@ -88,7 +88,7 @@ public abstract class ShaderProgram {
         GLES30.glUniform2f(location,x,y);
     }
     /** Writes a vector of three values to a uniform variable, Note that while the parameters are named
-     * x y z,it doesn't have to be position vector, could also be color
+     * deltX y z,it doesn't have to be position vector, could also be color
      *
      * @param location this is where the value will be written to (use getUniformLocation to find the int)
      * @param x the float value that should be written to at position 0
@@ -100,7 +100,7 @@ public abstract class ShaderProgram {
         GLES30.glUniform3f(location,x,y,z);
     }
     /** Writes a vector of four values to a uniform variable, Note that while the parameters are named
-     * x y z w,it doesn't have to be position vector, could also be color
+     * deltX y z w,it doesn't have to be position vector, could also be color
      *
      * @param location this is where the value will be written to (use getUniformLocation to find the int)
      * @param x the float value that should be written to at position 0

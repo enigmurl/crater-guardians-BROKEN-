@@ -56,10 +56,10 @@ public class KaiserAttack extends Attack {
 
 
     /** Default constructor
-     * @param x openGL x
+     * @param x openGL deltX
      * @param y openGL y
      * @param damage how much damage to deal to enemies;
-     * @param attackAngle the angle between the start of the sweep and the positive x axis in radians. Zero would mean that half the sweep is above the x axis, and half below
+     * @param attackAngle the angle between the start of the sweep and the positive deltX axis in radians. Zero would mean that half the sweep is above the deltX axis, and half below
      * @param length how long the attack is in open gl terms
      * @param millis how long the attack takes to finish
      * @param initializer the Enemy or player who summoned the attack
@@ -131,6 +131,23 @@ public class KaiserAttack extends Attack {
 
     @Override
     public boolean isHit(BaseCharacter character) {
+        if (this.hits.contains(character)){
+            return false;
+        }
+
+        float x = this.x + (float) Math.cos(this.attackAngle) * length * (float) finishedMillis/millis;
+        float y = this.y + (float) Math.sin(this.attackAngle) * length * (float) finishedMillis/millis;
+        if (Math.hypot(x - character.getDeltaX(),y - character.getDeltaY()) <  FIREBALL_WIDTH/2 + character.getRadius()){
+            this.hits.add(character);
+            //ends the attack
+            this.finishedMillis = this.millis + 1;
+            this.isFinished = true;
+            return true;
+        }
+        return false;
+    }
+    @Override
+    public boolean isHit(Enemy character) {
         if (this.hits.contains(character)){
             return false;
         }

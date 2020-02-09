@@ -26,7 +26,7 @@ public class MatieralsBar extends EnigmaduxComponent {
 
     /** Shows the player how many resources they have
      *
-     * @param x the left x
+     * @param x the left deltX
      * @param y the bottom y
      * @param w the width
      * @param h the height

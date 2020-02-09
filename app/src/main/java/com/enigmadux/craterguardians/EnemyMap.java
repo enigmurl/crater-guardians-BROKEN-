@@ -31,7 +31,7 @@ public class EnemyMap {
     //used to prevent multiple threads accessing enemy map
     public static final Lock LOCK = new ReentrantLock();
 
-    //each element of this array is itself a node, it tells the x and y and neighbours, first node is player, next N are supply, rest are intermediate
+    //each element of this array is itself a node, it tells the deltX and y and neighbours, first node is player, next N are supply, rest are intermediate
     private Node[] nodeMap;
 
 
@@ -107,10 +107,10 @@ public class EnemyMap {
             //NOTE to prevent overfitting, what we do is instead of all the times the "rect" formed c0,1,2,3 intersects the plat
             //this is more efficient, and makes it more suited for what we need
 
-            if (MathOps.pointInRect(points[0][0],points[0][1],c0.x,c0.y,c1.x,c1.y,c2.x,c2.y,c3.x,c3.y) ||
-                    MathOps.pointInRect(points[1][0],points[1][1],c0.x,c0.y,c1.x,c1.y,c2.x,c2.y,c3.x,c3.y) ||
-                    MathOps.pointInRect(points[2][0],points[2][1],c0.x,c0.y,c1.x,c1.y,c2.x,c2.y,c3.x,c3.y) ||
-                    MathOps.pointInRect(points[3][0],points[3][1],c0.x,c0.y,c1.x,c1.y,c2.x,c2.y,c3.x,c3.y)) return -1;
+            if (MathOps.pointInRect(points[0][0],points[0][1],c0.deltX,c0.y,c1.deltX,c1.y,c2.deltX,c2.y,c3.deltX,c3.y) ||
+                    MathOps.pointInRect(points[1][0],points[1][1],c0.deltX,c0.y,c1.deltX,c1.y,c2.deltX,c2.y,c3.deltX,c3.y) ||
+                    MathOps.pointInRect(points[2][0],points[2][1],c0.deltX,c0.y,c1.deltX,c1.y,c2.deltX,c2.y,c3.deltX,c3.y) ||
+                    MathOps.pointInRect(points[3][0],points[3][1],c0.deltX,c0.y,c1.deltX,c1.y,c2.deltX,c2.y,c3.deltX,c3.y)) return -1;
             */
             if (MathOps.lineIntersectsLine(c0.x,c0.y,c2.x,c2.y,points[0][0],points[0][1],points[1][0],points[1][1]) ||
                     MathOps.lineIntersectsLine(c0.x,c0.y,c2.x,c2.y,points[3][0],points[3][1],points[1][0],points[1][1]) ||
@@ -124,8 +124,8 @@ public class EnemyMap {
         }
         for (int i = 0,size = this.toxicLakes.size();i<size;i++){
             ToxicLake toxicLake = this.toxicLakes.get(i);
-            float x = toxicLake.getX();
-            float y = toxicLake.getY();
+            float x = toxicLake.getDeltaX();
+            float y = toxicLake.getDeltaY();
             float r = toxicLake.getWidth()/2;
 
 
@@ -160,15 +160,15 @@ public class EnemyMap {
 //        float length = GRANULARITY_1 + EPSILON;
 //
 //        for (int i = 0;i<this.toxicLakes.size();i++){
-//            //the center x and y, plus the radius
-//            float x = this.toxicLakes.get(i).getX();
+//            //the center deltX and y, plus the radius
+//            float deltX = this.toxicLakes.get(i).getX();
 //            float y = this.toxicLakes.get(i).getY();
 //            float r = this.toxicLakes.get(i).getWidth()/2;
 //
-//            this.map1Nodes[offset] = new Node(x,y + r + length);
-//            this.map1Nodes[offset+1] = new Node(x,y - r - length);
-//            this.map1Nodes[offset+2] = new Node(x - r - length,y);
-//            this.map1Nodes[offset+3] = new Node(x + r +length,y);
+//            this.map1Nodes[offset] = new Node(deltX,y + r + length);
+//            this.map1Nodes[offset+1] = new Node(deltX,y - r - length);
+//            this.map1Nodes[offset+2] = new Node(deltX - r - length,y);
+//            this.map1Nodes[offset+3] = new Node(deltX + r +length,y);
 //
 //
 //            offset += 4;
@@ -206,12 +206,12 @@ public class EnemyMap {
 //                for (int i = this.supplies.size();i<this.map1Nodes.length;i++){
 //                    Node node = this.map1Nodes[i];
 //                    if (node == null) continue;
-//                    if (Math.hypot(toxicLake.getX() - node.x,toxicLake.getY() - node.y) < toxicLake.getWidth()/2 + length){
+//                    if (Math.hypot(toxicLake.getX() - node.deltX,toxicLake.getY() - node.y) < toxicLake.getWidth()/2 + length){
 //                        this.map1Nodes[i] = null;
 //                        continue;
 //                    }
 //
-//                    if (plateau.intersectsCircle(node.x,node.y,length)){
+//                    if (plateau.intersectsCircle(node.deltX,node.y,length)){
 //                        this.map1Nodes[i] = null;
 //                    }
 //
@@ -221,7 +221,7 @@ public class EnemyMap {
 //        }
 //        *//*
 //        for (int i = 1;i<this.map1Nodes.length;i++){
-//            if (this.map1Nodes[i] != null && Math.hypot(this.map1Nodes[i].x,this.map1Nodes[i].y) > this.radius) this.map1Nodes[i] = null;
+//            if (this.map1Nodes[i] != null && Math.hypot(this.map1Nodes[i].deltX,this.map1Nodes[i].y) > this.radius) this.map1Nodes[i] = null;
 //        }
 //
 //        for (int i = 0;i<this.map1Nodes.length;i++){
@@ -240,13 +240,13 @@ public class EnemyMap {
 //
 //    *//** Given points on plateau it calculates where the
 //     *
-//     * @param x0 center x
+//     * @param x0 center deltX
 //     * @param y0 center y
-//     * @param x1 opposite x
+//     * @param x1 opposite deltX
 //     * @param y1 opposite y
-//     * @param x2 left x
+//     * @param x2 left deltX
 //     * @param y2 left y
-//     * @param x3 right x
+//     * @param x3 right deltX
 //     * @param y3 right y
 //     * @param length  the minimum distance away the node should be
 //     * @return a Node of where it should be based on parameters so that a  node outside of the plateau by a cleareence of length
@@ -326,7 +326,7 @@ public class EnemyMap {
     /** Returns a List<Node> that represents the path it must take ALGO from: https://www.youtube.com/watch?v=mZfyt03LDH4
      *
      * @param radius the radius of the character
-     * @param currentX the starting x
+     * @param currentX the starting deltX
      * @param currentY the starting y
      * @param supplyIndex -1 if you're targeting the player, otherwise the index of the supply you want
      * @return a path of nodes that represent the path it must take. NOTE if the last Node is null, that means that the last node is  the Player, and appropriate action can be taken from there
@@ -453,7 +453,7 @@ public class EnemyMap {
         /** The node that points to this*/
         public Node parentNode;
 
-        /** the x value of this node*/
+        /** the deltX value of this node*/
         public float x;
         /** the y value of this node*/
         public float y;
@@ -468,7 +468,7 @@ public class EnemyMap {
         //this tells for each connection how much time it will take
         private List<Float> weights = new ArrayList<>();
 
-        //the x and y coorinates of this node
+        //the deltX and y coorinates of this node
         public Node(float x,float y){
             this.x = x;
             this.y = y;

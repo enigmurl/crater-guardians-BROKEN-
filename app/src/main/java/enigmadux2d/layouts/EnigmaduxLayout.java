@@ -11,7 +11,7 @@ public abstract class EnigmaduxLayout extends EnigmaduxComponent{
     /** Default constructor
      *
      * @param components The components that are part of the layout. This includes TexturedRect, Text, a Layout itself and anything else that derives from EnigmaduxComponent that is part of the layout
-     * @param x the open gl coordinate of the rect, left most edge x coordinate e.g. (1.0f, -0.5f, 0.0f ,0.1f)
+     * @param x the open gl coordinate of the rect, left most edge deltX coordinate e.g. (1.0f, -0.5f, 0.0f ,0.1f)
      * @param y the open gl coordinate of the rect, bottom most y coordinate e.g. (1.0f,-0.5f, 0.0f, 0.1f)
      * @param w the width of the rect (distance from left edge to right edge) in open gl coordinate terms e.g (1.0f, 1.5f) Should be positive
      * @param h the height of the rect (distance from top edge to bottom edge) in open gl coordinate terms e.g (1.0f, 1.5f) should be positive

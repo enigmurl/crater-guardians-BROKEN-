@@ -8,12 +8,12 @@ public class MathOps {
 
 
     /**
-     * Rather than re initing a whole buffer, this returns a x translation
+     * Rather than re initing a whole buffer, this returns a deltX translation
      * IT IS ASSUMED THAT THE STARTING FRAME FOR THE TEXTURE BUFFER IS AT THE TOP LEFT CORNER
      *
      * @param frameNum                the frame# to display in the animation
      * @param framesPerRotation       in a single rotation, how many frames are there (the "width" of the texture)
-     * @return gets the x delta position
+     * @return gets the deltX delta position
      */
     public static float getTextureBufferTranslationX(int frameNum, float framesPerRotation) {
         return (float) frameNum / framesPerRotation;
@@ -43,11 +43,11 @@ public class MathOps {
     /** Given three colinear points p, q, r, the function checks if point q lies on line segment 'pr'
      * Following three functions borrowed from https://www.geeksforgeeks.org/check-if-two-given-line-segments-intersect/
      *
-     * @param x0 p1 x
+     * @param x0 p1 deltX
      * @param y0 p1 y
-     * @param x1 p2 x
+     * @param x1 p2 deltX
      * @param y1 p2 y
-     * @param x2 p3 x
+     * @param x2 p3 deltX
      * @param y2 p3 y
      * @return if point q lies on line segment 'pr'
      */
@@ -58,11 +58,11 @@ public class MathOps {
 
     /** Gets the orientation of colinear = 0, clock = 1, counterclockwise = 2
      *
-     * @param x0 p1 x
+     * @param x0 p1 deltX
      * @param y0 p1 y
-     * @param x1 p2 x
+     * @param x1 p2 deltX
      * @param y1 p2 y
-     * @param x2 p3 x
+     * @param x2 p3 deltX
      * @param y2 p3 y
      * @return colinear clockwise or counterclockwise
      */
@@ -77,13 +77,13 @@ public class MathOps {
 
     /** sees whether two line segments intersect
      *
-     * @param x00 line 1 point 1 x
+     * @param x00 line 1 point 1 deltX
      * @param y00 line 1 point 1 y
-     * @param x10 line 1 point 2 x
+     * @param x10 line 1 point 2 deltX
      * @param y10 line 1 point 2 y
-     * @param x01 line 2 point 1 x
+     * @param x01 line 2 point 1 deltX
      * @param y01 line 2 point 1 y
-     * @param x11 line 2 point 2 x
+     * @param x11 line 2 point 2 deltX
      * @param y11 line 2 point 2 y
      * @return whether or not the two intersect
      */
@@ -111,20 +111,20 @@ public class MathOps {
         return (o4 == 0 && onSegment(x01,y01,x11,y11,x10,y10));
     }
 
-    /** Gets the t value where x = t(x10 - x00) + x00 y = t(y10 - y00) + y00 where (x,y) is the intersection point of the two lines
+    /** Gets the t value where deltX = t(x10 - x00) + x00 y = t(y10 - y00) + y00 where (deltX,y) is the intersection point of the two lines
      * even if 0<t<1, there may not be an intersection because it may be only on line 1 but not line segment 2, so use the lineIntersectsLineFunction
      * https://stackoverflow.com/a/1968345/10030086, todo look at "Qwertie"'s optimizations and implement them
      *
      *
-     * @param x00 line 1 point 1 x
+     * @param x00 line 1 point 1 deltX
      * @param y00 line 1 point 1 y
-     * @param x10 line 1 point 2 x
+     * @param x10 line 1 point 2 deltX
      * @param y10 line 1 point 2 y
-     * @param x01 line 2 point 1 x
+     * @param x01 line 2 point 1 deltX
      * @param y01 line 2 point 1 y
-     * @param x11 line 2 point 2 x
+     * @param x11 line 2 point 2 deltX
      * @param y11 line 2 point 2 y
-     * @return  Gets the t value where x = t(x10 - x00) + x00 y = t(y10 - y00) + y00 where (x,y) is the intersection point of the two lines, -1 if they don't intersect/are collinear
+     * @return  Gets the t value where deltX = t(x10 - x00) + x00 y = t(y10 - y00) + y00 where (deltX,y) is the intersection point of the two lines, -1 if they don't intersect/are collinear
      */
     public static float tValueSegmentIntersection(float x00,float y00,float x10,float y10,float x01,float y01,float x11,float y11){
         float s1_x, s1_y, s2_x, s2_y;
@@ -149,12 +149,12 @@ public class MathOps {
 
     /** Given a circle and line segment, see if they intersect. Algorithm borrowed from https://math.stackexchange.com/questions/2193720/find-a-point-on-a-line-segment-which-is-the-closest-to-other-point-not-on-the-li
      *
-     * @param x center x coordinate of the circle
+     * @param x center deltX coordinate of the circle
      * @param y center y coordinate of the circle
      * @param r the radius of circle
-     * @param x0 p1 x
+     * @param x0 p1 deltX
      * @param y0 p1 y
-     * @param x1 p2 x
+     * @param x1 p2 deltX
      * @param y1 p2 y
      * @return if the line segment intersects the circle (or if it is fully enclosed by it
      */
@@ -194,15 +194,15 @@ public class MathOps {
      *   |     |
      *   |_____|
      *   C      D
-     * @param px target point x
+     * @param px target point deltX
      * @param py target point y
-     * @param ax corner 1 x
+     * @param ax corner 1 deltX
      * @param ay corner 1 y
-     * @param bx corner 2 x
+     * @param bx corner 2 deltX
      * @param by corner 2 y
-     * @param cx corner 3 x
+     * @param cx corner 3 deltX
      * @param cy corner 3 y
-     * @param dx corner 4 x
+     * @param dx corner 4 deltX
      * @param dy corner 4 y
      * @return whether or not the point is inside the rectangle
      */
@@ -220,11 +220,11 @@ public class MathOps {
 
     /** Given a triangle specified by a,b,c caclulate the area
      *
-     * @param ax p1 x
+     * @param ax p1 deltX
      * @param ay p1 y
-     * @param bx p2 x
+     * @param bx p2 deltX
      * @param by p2 y
-     * @param cx p3 x
+     * @param cx p3 deltX
      * @param cy p3 y
      * @return the area of the triangle
      */
@@ -271,10 +271,10 @@ public class MathOps {
 
         return 1 << count;
     }
-    /** Converts android canvas x coordinate into openGL coordinate
+    /** Converts android canvas deltX coordinate into openGL coordinate
      *
-     * @param x android canvas x coordinate
-     * @return openGL x coordinate equivalent of (x)
+     * @param x android canvas deltX coordinate
+     * @return openGL deltX coordinate equivalent of (deltX)
      */
     public static float getOpenGLX(float x){
         return  2* (x-(float) (LayoutConsts.SCREEN_WIDTH)/2) /( LayoutConsts.SCREEN_WIDTH);

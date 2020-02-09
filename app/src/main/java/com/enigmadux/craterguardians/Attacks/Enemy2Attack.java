@@ -57,17 +57,16 @@ public class Enemy2Attack extends Attack {
 
 
     /** Default constructor
-     * @param x openGL x
+     * @param x openGL deltX
      * @param y openGL y
      * @param damage how much damage to deal to enemies;
-     * @param attackAngle the angle between the start of the sweep and the positive x axis in radians. Zero would mean that half the sweep is above the x axis, and half below
+     * @param attackAngle the angle between the start of the sweep and the positive deltX axis in radians. Zero would mean that half the sweep is above the deltX axis, and half below
      * @param length how long the attack is in open gl terms
-     * @param width how wide the attack is in open gl terms, because orginally it is point ing in the positive x axis, this is originally the height at 0 radians
+     * @param width how wide the attack is in open gl terms, because orginally it is point ing in the positive deltX axis, this is originally the height at 0 radians
      * @param millis how long the attack takes to finish
-     * @param initializer the Enemy or player who summoned the attack
      */
-    public Enemy2Attack(float x, float y, int damage, float attackAngle, float length,float width, long millis,BaseCharacter initializer){
-        super(x,y,0,0,NUM_FRAMES,millis,initializer, attackAngle);
+    public Enemy2Attack(float x, float y, int damage, float attackAngle, float length,float width, long millis){
+        super(x,y,0,0,NUM_FRAMES,millis,null, attackAngle);
 
 
         this.damage = damage;
@@ -147,6 +146,11 @@ public class Enemy2Attack extends Attack {
     @Override
     public boolean isHit(Spawner spawner) {
         return false;//because nothing is done, it doesn't matter whether it's true or false, so we just return true to reduce calculations
+    }
+
+    @Override
+    public boolean isHit(Enemy enemy) {
+        return false;
     }
 
     @Override

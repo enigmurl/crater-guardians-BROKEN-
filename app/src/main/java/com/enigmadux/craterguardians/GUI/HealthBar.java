@@ -32,7 +32,7 @@ public class HealthBar  extends EnigmaduxComponent {
     //the maximum amount of hearts to display
     private int maxHearts;
 
-    //the amount to travel in the x direction from anchor point
+    //the amount to travel in the deltX direction from anchor point
     private float deltaX;
     //the amount to travel in the y direciton from anchor point
     private float deltaY;
@@ -59,7 +59,7 @@ public class HealthBar  extends EnigmaduxComponent {
 
     /** Sets the translation from the anchor point
      *
-     * @param x the amount to move in the x direction from the anchor point
+     * @param x the amount to move in the deltX direction from the anchor point
      * @param y the amount to move in the y direction from the anchor point
      */
     public void setTranslate(float x, float y){

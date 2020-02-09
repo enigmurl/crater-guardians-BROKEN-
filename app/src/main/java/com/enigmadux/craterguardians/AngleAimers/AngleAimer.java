@@ -6,21 +6,21 @@ package com.enigmadux.craterguardians.AngleAimers;
  * @version BETA
  */
 public abstract class AngleAimer {
-    /**the angle between the start of the sweep and the positive x axis in degrees. Zero would mean that half the sweep is above the x axis, and half below */
+    /**the angle between the start of the sweep and the positive deltX axis in degrees. Zero would mean that half the sweep is above the deltX axis, and half below */
     protected float midAngle;
 
     /** whether or not its going to be drawn to the screen, the actual functionality must be implemented by child class */
     protected boolean visible = true;
 
-    /**the x position of the origin (where the aimer rotates around)*/
+    /**the deltX position of the origin (where the aimer rotates around)*/
     protected float x;
     /**the y position of the origin (where the aimer rotates around)*/
     protected float y;
 
     /** Default Constructor
      *
-     * @param midAngle the angle between the start of the sweep and the positive x axis in radians. Zero would mean that half the sweep is above the x axis, and half below private float midAngle;
-     * @param x the x position of the origin (where the aimer rotates around)
+     * @param midAngle the angle between the start of the sweep and the positive deltX axis in radians. Zero would mean that half the sweep is above the deltX axis, and half below private float midAngle;
+     * @param x the deltX position of the origin (where the aimer rotates around)
      * @param y the y position of the origin (where the aimer rotates around)
      */
     public AngleAimer(float midAngle,float x,float y){
@@ -37,7 +37,7 @@ public abstract class AngleAimer {
 
     /** Translates the aimer as to match up with the player at all times
      *
-     * @param x the x position of the origin (where the aimer rotates around)
+     * @param x the deltX position of the origin (where the aimer rotates around)
      * @param y the y position of the origin (where the aimer rotates around)
      */
     public void setPosition(float x,float y){
@@ -47,7 +47,7 @@ public abstract class AngleAimer {
 
     /** sets the mid angle
      *
-     * @param angle the angle between the start of the sweep and the positive x axis in degrees. Zero would mean that half the sweep is above the x axis, and half below
+     * @param angle the angle between the start of the sweep and the positive deltX axis in degrees. Zero would mean that half the sweep is above the deltX axis, and half below
      */
     public void setMidAngle(float angle){
         this.midAngle = angle;

@@ -44,9 +44,10 @@ public class Enemy3 extends Enemy {
 
     /** Default Constructor
      *
+     * @param instanceID the id of the instance with respects to the VAO it's in
      */
-    public Enemy3(){
-        super(NUM_ROTATION_ORIENTATIONS,FRAMES_PER_ROTATION,FPS);
+    public Enemy3(int instanceID){
+        super(instanceID,NUM_ROTATION_ORIENTATIONS,FRAMES_PER_ROTATION,FPS);
     }
 
     /** Loads the texture of the sprite sheet
@@ -75,7 +76,7 @@ public class Enemy3 extends Enemy {
     @Override
     public void attack(float angle) {
         if (this.attacks.size() == 0) {
-            this.attacks.add(new Enemy3Attack(this.getDeltaX(), this.getDeltaY(), 99, angle, 0.5f + Enemy3.CHARACTER_RADIUS * 2, 5000, this));
+            this.attacks.add(new Enemy3Attack(this.getDeltaX(), this.getDeltaY(), 99, angle, 0.5f + Enemy3.CHARACTER_RADIUS * 2, 5000));
         }
     }
 
@@ -103,6 +104,22 @@ public class Enemy3 extends Enemy {
         super.update(dt, player,supplies,enemyMap);
 
 
+    }
+
+    /** Updates the transform
+     *
+     * @param blankInstanceInfo this is where the instance data should be written too. Rather than creating many arrays,
+     *                          we can reuse the same one. Anyways, write all data to appropriate locations in this array,
+     *                          which should match the format of the VaoCollection you are using
+     * @param uMVPMatrix This is a the model view projection matrix. It performs all outside calculations, make sure to
+     *                   not modify this matrix, as this will cause other instances to get modified in unexpected ways.
+     *                   Rather use method calls like Matrix.translateM(blankInstanceInfo,0,uMVPMatrix,0,dX,dY,dZ), which
+     *                   essentially leaves the uMVPMatrix unchanged, but the translated matrix is dumped into the blankInstanceInfo
+     */
+    @Override
+    public void updateInstanceTransform(float[] blankInstanceInfo, float[] uMVPMatrix) {
+        Matrix.translateM(blankInstanceInfo,0,uMVPMatrix,0,this.getDeltaX(),this.getDeltaY(),0);
+        Matrix.scaleM(blankInstanceInfo,0,2 * Enemy3.CHARACTER_RADIUS,2 * Enemy3.CHARACTER_RADIUS,0);
     }
 
 

@@ -10,7 +10,9 @@ import com.enigmadux.craterguardians.GUI.HealthBar;
 import com.enigmadux.craterguardians.MathOps;
 import com.enigmadux.craterguardians.GameObjects.Supply;
 import com.enigmadux.craterguardians.R;
+import com.enigmadux.craterguardians.gameLib.CraterCollectionElem;
 
+import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
@@ -21,7 +23,7 @@ import enigmadux2d.core.shapes.TexturedRect;
  * @author Manu Bhat
  * @version BETA
  */
-public abstract class Enemy extends BaseCharacter {
+public abstract class Enemy extends CraterCollectionElem {
     //the minimum amount of waiting time between attacks
     private static final long ATTACK_MILLIS = 1500;
 
@@ -55,26 +57,68 @@ public abstract class Enemy extends BaseCharacter {
     //how longs it's stunned for
     private long stunnedMillis;
 
+    //the health of the player
+    private int health;
+    //a list of alive attacks
+    protected List<Attack> attacks = new ArrayList<Attack>();
+
     //iterates over attacks to see which should be removed
     private Iterator<Attack> attackIterator;
 
+    //the amount of rotation orientations
+    protected int numRotationOrientations;
+    //the amount of frames per rotations
+    protected int framesPerRotation;
+    //the millis per frame
+    protected long mpf;
+
+
+
+    //milliseconds since creation
+    private long millisSinceCreation;
+
+
+    //how much to rotate the enemy
+    protected float offsetDegrees;
     /** Default Constructor
      *
+     * @param instanceID the id of this instance in reference to the VAO it's contained in
      * @param numRotationOrientations the amount of angles that the character is rendered at e.g 4 would mean 0,90,180,270
      * @param framesPerRotation in each orientation, how many frames is the animations
      * @param fps the amount of frames displayed in a single second
      */
-    public Enemy(int numRotationOrientations, int framesPerRotation,float fps){
-        super(numRotationOrientations,framesPerRotation,fps);
+    public Enemy(int instanceID,int numRotationOrientations, int framesPerRotation,float fps){
+        super(instanceID);
+        this.numRotationOrientations = numRotationOrientations;
+        this.framesPerRotation = framesPerRotation;
+        this.mpf  = (long) (1000/fps);
 
-        healthDisplay = new HealthBar(this.getX(),this.getRadius()*2,this.getWidth(),this.getMaxHealth());
+        this.health = getMaxHealth();
+        healthDisplay = new HealthBar(this.getDeltaX(),this.getRadius()*2,this.getWidth(),this.getMaxHealth());
     }
+
+    /** Gets the radius of this character
+     * @return the radius of this character
+     *
+     */
+    public abstract float getRadius();
+
+    /** Spawn an attack at a particular angle
+     *
+     * @param angle the angle
+     */
+    public abstract void attack(float angle);
+
+    /** Gets the maximum health
+     *
+     * @return the maximum health of this enemy
+     */
+    public abstract int getMaxHealth();
 
     /** Draws the player
      *
      * @param parentMatrix matrix that represents how to manipulate it to the world coordinates
      */
-    @Override
     public void draw(float[] parentMatrix) {
         for (int i = 0;i<attacks.size();i++) {
             attacks.get(i).draw(parentMatrix);
@@ -83,6 +127,22 @@ public abstract class Enemy extends BaseCharacter {
 
         healthDisplay.draw(parentMatrix);
     }
+
+    /** Unlike setTranslate, this moves the character from it's current position
+     *
+     * @param deltaX how much to translate in the deltX direction from the current position
+     * @param deltaY how much to translate in the y direction from the current position
+     */
+    public void translateFromPos(float deltaX,float deltaY){
+        this.deltaX += deltaX;
+        this.deltaY += deltaY;
+    }
+
+    /** Tells how fast the character is
+     *
+     * @return how fast the object is (as of now there are no units) todo add units
+     */
+    public abstract float getCharacterSpeed();
 
     /** Loads the texture of the sprite sheet
      *
@@ -122,6 +182,32 @@ public abstract class Enemy extends BaseCharacter {
         VISUAL_REPRESENTATION.endDraw();
     }
 
+    /** translates the TexturedRect
+     *
+     * @param x how much to translate in the deltX direction
+     * @param y how much to translate in the y direction
+     */
+    public void setTranslate(float x,float y){
+        this.deltaX = x;
+        this.deltaY = y;
+    }
+
+    /** Gets if this is alive or not
+     *
+     * @return if this is alive or not
+     */
+    public boolean isAlive(){
+        return this.health>0;
+    }
+
+    /** Damages this enemy, use -damage to heal
+     *
+     * @param damage the amount to damage, use negative to heal
+     */
+    public void damage(int damage){
+        this.health -= damage;
+    }
+
     /** Draw the actual enemy
      *
      * @param parentMatrix the parent matrix
@@ -140,6 +226,66 @@ public abstract class Enemy extends BaseCharacter {
      */
     public abstract float getAttackRange();
 
+    /** Sees if it collides with a line, but does not indicate where
+     * It will return true if both points are withing the ellipse
+     *
+     * @param x1 openGL deltX of first point
+     * @param y1 openGL y of first point
+     * @param x2 openGL deltX of second point
+     * @param y2 openGL y of second point
+     * @return whether or not they collide
+     */
+    public boolean collidesWithLine(float x1, float y1, float x2, float y2) {
+        float dX1 = x1 - this.getDeltaX();
+        float dY1 = y1 - this.getDeltaY();
+        if (dX1 * dX1 / (this.getRadius() * this.getRadius()) + dY1 * dY1 / (this.getRadius() * this.getRadius()) < 1) {
+            return true;
+        }
+        float dX2 = x2 - this.getDeltaX();
+        float dY2 = y2 - this.getDeltaY();
+        if (dX2 * dX2 / (this.getRadius() * this.getRadius()) + dY2 * dY2 / (this.getRadius() * this.getRadius()) < 1) {
+            return true;
+        }
+
+
+        float cx = this.getDeltaX();
+        float cy = this.getDeltaY();
+
+        float pt1X = x1 - cx;
+        float pt1Y = y1 - cy;
+        float pt2X = x2 - cx;
+        float pt2Y = y2 - cy;
+
+        // Get the semi major and semi minor axes.
+        float a = this.getRadius();
+        float b = this.getRadius();
+
+        // Calculate the quadratic parameters.
+        float A = (pt2X - pt1X) * (pt2X - pt1X) / (a * a) +
+                (pt2Y - pt1Y) * (pt2Y - pt1Y) / (b * b);
+        float B = 2 * pt1X * (pt2X - pt1X) / (a * a) +
+                2 * pt1Y * (pt2Y - pt1Y) / (b * b);
+        float C = pt1X * pt1X / (a * a) + pt1Y * pt1Y / (b * b) - 1;
+
+
+        // Calculate the discriminant.
+        float discriminant = B * B - 4 * A * C;
+
+        if (discriminant >= 0) {
+            float tValue1 = (float) (-B + Math.sqrt(discriminant)) / (2 * A); //||
+            float tValue2 = (float) (-B - Math.sqrt(discriminant)) / (2 * A);
+
+            return (tValue1 >= 0 && tValue1 <= 1) || (tValue2 >= 0 && tValue2 <= 1);
+        }
+        return false;
+    }
+
+    /** based on the current state, which frame should it be?
+     *
+     * @param rotation the angle at which the character is in degrees
+     * @param frameNum the frame# to display in the animation
+     */
+    public abstract void setFrame(float rotation,int frameNum);
 
     /** Updates the position, and other attributes
      *
@@ -152,6 +298,8 @@ public abstract class Enemy extends BaseCharacter {
         if (this.stunnedMillis <= 0) {
             this.millisSinceAttack += dt;
         }
+
+        this.millisSinceCreation+= dt;
         this.healthDisplay.setTranslate(this.getDeltaX(),this.getDeltaY());
 
 
@@ -185,7 +333,7 @@ public abstract class Enemy extends BaseCharacter {
 
             for (int i = 0; i < supplies.size(); i++) {
 
-                float hypotenuse = Math.max(0.01f, (float) Math.hypot(this.getDeltaX() - supplies.get(i).getX(), this.getDeltaY() - supplies.get(i).getY()));
+                float hypotenuse = Math.max(0.01f, (float) Math.hypot(this.getDeltaX() - supplies.get(i).getDeltaX(), this.getDeltaY() - supplies.get(i).getDeltaY()));
                 if (hypotenuse < minLength) {
                     minLength = hypotenuse;
                     supplyIndex = i;
@@ -233,16 +381,17 @@ public abstract class Enemy extends BaseCharacter {
                     this.millisSinceAttack = 0;
                 }
                 //Log.d("PLAYER","X: " +this.getDeltaX() + " px " + player.getDeltaX() + " Y: " + this.getDeltaY() + " py " + player.getDeltaY() +  " len " + minLength + " cl "  +clippedLength);
-                this.update(dt, 180 / (float) Math.PI * MathOps.getAngle((targetX - this.getDeltaX()) / minLength, (targetY - this.getDeltaY()) / minLength));
-
+                int frameNum = (int) (((int) (this.millisSinceCreation % (this.mpf * this.framesPerRotation)))/this.mpf);
+                this.setFrame( 180 / (float) Math.PI * MathOps.getAngle((targetX - this.getDeltaX()) / minLength, (targetY - this.getDeltaY()) / minLength),frameNum);
             } else {
 
                 if (minLength < this.getAttackRange() && attacks.size() < 1 && this.millisSinceAttack > ATTACK_MILLIS) {//todo this is hardcoded
-                    this.attack(MathOps.getAngle((supplies.get(supplyIndex).getX() - this.getDeltaX()) / minLength, (supplies.get(supplyIndex).getY() - this.getDeltaY()) / minLength));
+                    this.attack(MathOps.getAngle((supplies.get(supplyIndex).getDeltaX() - this.getDeltaX()) / minLength, (supplies.get(supplyIndex).getDeltaY() - this.getDeltaY()) / minLength));
                     this.millisSinceAttack = 0;
                 }
                 //Log.d("PLAYER","X: " +this.getDeltaX() + " px " + player.getDeltaX() + " Y: " + this.getDeltaY() + " py " + player.getDeltaY() +  " len " + minLength + " cl "  +clippedLength);
-                this.update(dt, 180 / (float) Math.PI * MathOps.getAngle((targetX - this.getDeltaX()) / minLength, (targetY - this.getDeltaY()) / minLength));
+                int frameNum = (int) (((int) (this.millisSinceCreation % (this.mpf * this.framesPerRotation)))/this.mpf);
+                this.setFrame( 180 / (float) Math.PI * MathOps.getAngle((targetX - this.getDeltaX()) / minLength, (targetY - this.getDeltaY()) / minLength),frameNum);
             }
 
             //incase the path is still trying to be figured out
@@ -258,7 +407,7 @@ public abstract class Enemy extends BaseCharacter {
         }
     }
 
-    /** Used to find a path without holding up other threads
+    /** Used to find a path without holding up other threads.
      *
      */
     private class PathFinder extends Thread {
@@ -266,7 +415,7 @@ public abstract class Enemy extends BaseCharacter {
         private EnemyMap enemyMap;
         //the target supply, -1 represents targetting the player
         private int supplyIndex;
-        //the x position of the enemy
+        //the deltX position of the enemy
         private float x;
         //the y position of the enemy
         private float y;
@@ -276,7 +425,7 @@ public abstract class Enemy extends BaseCharacter {
          *
          * @param enemyMap the map used to actually determine the path which has information about the level
          * @param supplyIndex the target supply, -1 represents targetting the player
-         * @param x the current x position of this enemy
+         * @param x the current deltX position of this enemy
          * @param y the current y position of this enemy
          */
         public PathFinder(EnemyMap enemyMap,int supplyIndex,float x,float y){

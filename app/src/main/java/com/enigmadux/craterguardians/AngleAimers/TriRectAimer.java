@@ -41,10 +41,10 @@ public class TriRectAimer extends AngleAimer {
     /**
      * Default Constructor
      *
-     * @param x               the openGL x of the tip of the triangle
+     * @param x               the openGL deltX of the tip of the triangle
      * @param y               the openGL y of the tip of the triangle
      * @param sweepAngle      the angle between the left and ride sides of the triangle in radians
-     * @param angleDegrees        the angle between the start of the sweep and the positive x axis in degrees. Zero would mean that half the sweep is above the x axis, and half below
+     * @param angleDegrees        the angle between the start of the sweep and the positive deltX axis in degrees. Zero would mean that half the sweep is above the deltX axis, and half below
      * @param mainLength how long the middle attack is in open gl terms (radius)
      * @param mainWidth how wide the middle attack is in open gl terms (radius)
      * @param sideLength how long the side attacks are in open gl terms

@@ -39,7 +39,7 @@ public class ToxicBubble extends Animation {
 
     /** Default constructor
      *
-     * @param x center opengl x
+     * @param x center opengl deltX
      * @param y center opengl y
      * @param w opengl width
      * @param h opengl height

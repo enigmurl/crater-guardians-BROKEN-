@@ -83,7 +83,7 @@ public abstract class Button extends EnigmaduxComponent {
 
     /** Default constructor which makes text buttons
      * @param text The actual text to draw. Can be digits, words, letters, etc (but as a String object of course)
-     * @param x the open gl x coordinate of the rect, center
+     * @param x the open gl deltX coordinate of the rect, center
      * @param y the open gl y coordinate of the rect, center
      * @param boxWidth the width of the actual box in openGL coordinates, however, it will be extended if the text exceeds the length
      * @param boxHeight the height of the actual box in openGL coordinates
@@ -351,7 +351,7 @@ public abstract class Button extends EnigmaduxComponent {
 
     /** Sets the pos of the background and text
      *
-     * @param x the open gl coordinate of the component, left most edge x coordinate e.g. (1.0f, -0.5f, 0.0f ,0.1f)
+     * @param x the open gl coordinate of the component, left most edge deltX coordinate e.g. (1.0f, -0.5f, 0.0f ,0.1f)
      * @param y the open gl coordinate of the component, bottom most y coordinate e.g. (1.0f,-0.5f, 0.0f, 0.1f)
      */
     @Override

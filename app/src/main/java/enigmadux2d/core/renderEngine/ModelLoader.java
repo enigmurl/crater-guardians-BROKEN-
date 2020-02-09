@@ -257,7 +257,7 @@ public class ModelLoader {
      * @param usage Specifies the expected usage pattern of the data store. The symbolic constant must be GL_STREAM_DRAW, GL_STATIC_DRAW, or GL_DYNAMIC_DRAW.
      *              it should basically tell how often you expect to update the VBO
      * @param size the amount of floats for each data, for example if you're calling this for vertices
-     *             it will be 3 because each 3d vector is represented by x,y,z which is 3 floats
+     *             it will be 3 because each 3d vector is represented by deltX,y,z which is 3 floats
      *
      */
     private void pushDataInAttributeList(int attributeSlot,float[] data,int usage,int size){
