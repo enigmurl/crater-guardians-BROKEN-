@@ -3,6 +3,7 @@ package com.enigmadux.craterguardians.Enemies;
 import android.content.Context;
 import android.util.Log;
 
+import com.enigmadux.craterguardians.Animations.RedShader;
 import com.enigmadux.craterguardians.Attacks.Attack;
 import com.enigmadux.craterguardians.BaseCharacter;
 import com.enigmadux.craterguardians.EnemyMap;
@@ -78,8 +79,13 @@ public abstract class Enemy extends CraterCollectionElem {
     private long millisSinceCreation;
 
 
-    //how much to rotate the enemy
+    //how much to rotate the enemy, based on the rotation it is, as we dont' have 360 different orientations
     protected float offsetDegrees;
+
+    //the current rotation
+    private float rotation;
+
+
     /** Default Constructor
      *
      * @param instanceID the id of this instance in reference to the VAO it's contained in
@@ -130,7 +136,7 @@ public abstract class Enemy extends CraterCollectionElem {
 
     /** Unlike setTranslate, this moves the character from it's current position
      *
-     * @param deltaX how much to translate in the deltX direction from the current position
+     * @param deltaX how much to translate in the X direction from the current position
      * @param deltaY how much to translate in the y direction from the current position
      */
     public void translateFromPos(float deltaX,float deltaY){
@@ -168,19 +174,6 @@ public abstract class Enemy extends CraterCollectionElem {
         this.stunnedMillis = Math.max(this.stunnedMillis,stunnedMillis);
     }
 
-    /** Preparing drawing period
-     *
-     */
-    public static void prepareDraw(){
-        VISUAL_REPRESENTATION.prepareDraw(0);
-    }
-
-    /** Ends the drawing period
-     *
-     */
-    public static void endDrawing(){
-        VISUAL_REPRESENTATION.endDraw();
-    }
 
     /** translates the TexturedRect
      *
@@ -205,14 +198,11 @@ public abstract class Enemy extends CraterCollectionElem {
      * @param damage the amount to damage, use negative to heal
      */
     public void damage(int damage){
+        new RedShader(this,RedShader.DEFAULT_LEN);
+
         this.health -= damage;
     }
 
-    /** Draw the actual enemy
-     *
-     * @param parentMatrix the parent matrix
-     */
-    public abstract void drawIntermediate(float[] parentMatrix);
 
     /** Gets the speed of the enemy
      *
@@ -381,8 +371,7 @@ public abstract class Enemy extends CraterCollectionElem {
                     this.millisSinceAttack = 0;
                 }
                 //Log.d("PLAYER","X: " +this.getDeltaX() + " px " + player.getDeltaX() + " Y: " + this.getDeltaY() + " py " + player.getDeltaY() +  " len " + minLength + " cl "  +clippedLength);
-                int frameNum = (int) (((int) (this.millisSinceCreation % (this.mpf * this.framesPerRotation)))/this.mpf);
-                this.setFrame( 180 / (float) Math.PI * MathOps.getAngle((targetX - this.getDeltaX()) / minLength, (targetY - this.getDeltaY()) / minLength),frameNum);
+                this.rotation = 180 / (float) Math.PI * MathOps.getAngle((targetX - this.getDeltaX()) / minLength, (targetY - this.getDeltaY()) / minLength);
             } else {
 
                 if (minLength < this.getAttackRange() && attacks.size() < 1 && this.millisSinceAttack > ATTACK_MILLIS) {//todo this is hardcoded
@@ -390,8 +379,7 @@ public abstract class Enemy extends CraterCollectionElem {
                     this.millisSinceAttack = 0;
                 }
                 //Log.d("PLAYER","X: " +this.getDeltaX() + " px " + player.getDeltaX() + " Y: " + this.getDeltaY() + " py " + player.getDeltaY() +  " len " + minLength + " cl "  +clippedLength);
-                int frameNum = (int) (((int) (this.millisSinceCreation % (this.mpf * this.framesPerRotation)))/this.mpf);
-                this.setFrame( 180 / (float) Math.PI * MathOps.getAngle((targetX - this.getDeltaX()) / minLength, (targetY - this.getDeltaY()) / minLength),frameNum);
+                this.rotation = 180 / (float) Math.PI * MathOps.getAngle((targetX - this.getDeltaX()) / minLength, (targetY - this.getDeltaY()) / minLength);
             }
 
             //incase the path is still trying to be figured out
@@ -401,6 +389,9 @@ public abstract class Enemy extends CraterCollectionElem {
 
             this.lastTarget = supplyIndex;
         }
+        int frameNum = (int) (((int) (this.millisSinceCreation % (this.mpf * this.framesPerRotation)))/this.mpf);
+        this.setFrame(this.rotation ,frameNum);
+
 
         for (Attack attack: this.attacks){
             attack.attemptAttack(player);

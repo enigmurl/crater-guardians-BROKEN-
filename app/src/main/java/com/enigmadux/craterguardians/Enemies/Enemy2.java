@@ -64,10 +64,8 @@ public class Enemy2 extends Enemy {
 
     @Override
     public void setFrame(float rotation, int frameNum) {
-        float translationX = MathOps.getTextureBufferTranslationX(frameNum,framesPerRotation);
-        float translationY = MathOps.getTextureBufferTranslationY(rotation,numRotationOrientations);
-        VISUAL_REPRESENTATION.setTextureDelta(translationX,translationY);
-        //VISUAL_REPRESENTATION.loadTextureBuffer(MathOps.getTextureBuffer(rotation,frameNum,framesPerRotation,numRotationOrientations));
+        this.deltaTextureX =  MathOps.getTextureBufferTranslationX(frameNum,framesPerRotation);
+        this.deltaTextureY = MathOps.getTextureBufferTranslationY(rotation,numRotationOrientations);
         this.offsetDegrees = MathOps.getOffsetDegrees(rotation,numRotationOrientations);
     }
 
@@ -122,19 +120,6 @@ public class Enemy2 extends Enemy {
         Matrix.scaleM(blankInstanceInfo,0,2 * Enemy2.CHARACTER_RADIUS,2 * Enemy2.CHARACTER_RADIUS,0);
     }
 
-
-    /** Draws the enemy, and all sub components
-     *
-     * @param parentMatrix used to translate from model to world space
-     */
-    public void drawIntermediate(float[] parentMatrix) {
-
-        Matrix.translateM(finalMatrix,0,parentMatrix,0,this.getDeltaX(),this.getDeltaY(),0);
-        Matrix.scaleM(finalMatrix,0,Enemy2.CHARACTER_RADIUS,Enemy2.CHARACTER_RADIUS,0);
-
-        Enemy.VISUAL_REPRESENTATION.setShader(this.shader[0],this.shader[1],this.shader[2],this.shader[3]);
-        VISUAL_REPRESENTATION.draw(finalMatrix);
-    }
 
     /** This tells the maximum health of any character; what to initialize the health to
      *

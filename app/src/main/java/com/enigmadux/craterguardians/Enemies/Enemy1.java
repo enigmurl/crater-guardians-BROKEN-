@@ -33,9 +33,6 @@ public class Enemy1 extends Enemy {
      */
     public static final float CHARACTER_RADIUS = 0.15f;
 
-    //parent matrix * translation matrix
-    private float[] finalMatrix = new float[16];
-
     /** Default Constructor
      *
      */
@@ -48,6 +45,10 @@ public class Enemy1 extends Enemy {
         this.deltaTextureX =  MathOps.getTextureBufferTranslationX(frameNum,framesPerRotation);
         this.deltaTextureY = MathOps.getTextureBufferTranslationY(rotation,numRotationOrientations);
         this.offsetDegrees = MathOps.getOffsetDegrees(rotation,numRotationOrientations);
+    }
+
+    public void setRotation(float rotation){
+
     }
 
     @Override
@@ -64,22 +65,6 @@ public class Enemy1 extends Enemy {
     }
 
 
-
-    /** Draws the enemy, and all sub components
-     *
-     * @param parentMatrix used to translate from model to world space
-     */
-    public void drawIntermediate(float[] parentMatrix) {
-        //super.draw(gl,parentMatrix);
-        //Matrix.setIdentityM(translationMatrix,0);
-        //Matrix.translateM(translationMatrix,0,this.getDeltaX(),this.getDeltaY(),0);
-        Matrix.translateM(finalMatrix,0,parentMatrix,0,this.getDeltaX(),this.getDeltaY(),0);
-        Matrix.scaleM(finalMatrix,0,Enemy1.CHARACTER_RADIUS,Enemy1.CHARACTER_RADIUS,0);
-        //Matrix.multiplyMM(finalMatrix,0,parentMatrix,0,translationMatrix,0);
-
-        //Enemy.VISUAL_REPRESENTATION.setShader(this.shader[0],this.shader[1],this.shader[2],this.shader[3]);
-        //Enemy.VISUAL_REPRESENTATION.draw(finalMatrix);
-    }
 
     /** Updates the transform
      *

@@ -1,6 +1,7 @@
 package com.enigmadux.craterguardians.Animations;
 
 import com.enigmadux.craterguardians.BaseCharacter;
+import com.enigmadux.craterguardians.Enemies.Enemy;
 
 /** Shades a component red for a couple of seconds
  *
@@ -14,6 +15,9 @@ public class RedShader extends TransitionAnim {
 
     //the component that needs to be hidden
     private BaseCharacter baseCharacter;
+
+    //if it's an enemy that needs to be hidden
+    private Enemy enemy;
     /** Default constructor
      *
      * @param baseCharacter The said component that needs to be shaded red
@@ -26,12 +30,28 @@ public class RedShader extends TransitionAnim {
         HANDLER.postDelayed(this,millis);
     }
 
+    /** Default constructor
+     *
+     * @param baseCharacter The said component that needs to be shaded red
+     * @param millis how long to delay the un shading of the component
+     */
+    public RedShader(Enemy baseCharacter, long millis){
+        super();
+        this.enemy = baseCharacter;
+        this.enemy.setShader(1.0f,GB_VALUE,GB_VALUE,1);
+        HANDLER.postDelayed(this,millis);
+    }
+
+
 
     /** Hides the enigmadux component
      *
      */
     @Override
     public void run() {
-        this.baseCharacter.setShader(1.0f,1,1,1);
+        if (this.baseCharacter != null)
+            this.baseCharacter.setShader(1.0f,1,1,1);
+        else
+            this.enemy.setShader(1.0f,1,1,1);
     }
 }

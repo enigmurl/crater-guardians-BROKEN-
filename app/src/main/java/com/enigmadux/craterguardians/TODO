@@ -57,8 +57,6 @@ todo PRIORITY:
         balance game environemnet
         optimization - look into instancing, also https://stackoverflow.com/questions/4853856/why-are-draw-calls-expensive, explains that we shouldn't be drawing small amounts of quads
         player levels
-    2/8/20 GOALS:
-        Make it so you can actually delete objects in VAOs, after we get that fully working, then
     make spawners one class, where there is a type parameter
 
     seee why the shaders aren't allowed in and out keywords, among other things

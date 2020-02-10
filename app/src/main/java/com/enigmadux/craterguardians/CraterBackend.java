@@ -33,17 +33,12 @@ import com.enigmadux.craterguardians.GUI.ProgressBar;
 import com.enigmadux.craterguardians.GameObjects.Plateau;
 import com.enigmadux.craterguardians.GameObjects.Supply;
 import com.enigmadux.craterguardians.GameObjects.ToxicLake;
-import com.enigmadux.craterguardians.Spawners.Enemy1Spawner;
-import com.enigmadux.craterguardians.Spawners.Enemy2Spawner;
-import com.enigmadux.craterguardians.Spawners.Enemy3Spawner;
 import com.enigmadux.craterguardians.Spawners.Spawner;
 
 import java.util.Iterator;
 import java.util.List;
 
 import enigmadux2d.core.EnigmaduxComponent;
-import enigmadux2d.core.renderEngine.MeshRenderer;
-import enigmadux2d.core.renderEngine.ModelLoader;
 import enigmadux2d.core.gameObjects.VaoCollection;
 import enigmadux2d.core.shapes.TexturedRect;
 
@@ -288,11 +283,6 @@ public class CraterBackend {
      */
     private  volatile long tutorialCurrentMillis = 0;
 
-    /** A vao where supplies data is written too
-     *
-     */
-    private VaoCollection suppliesCollection;
-
     /** Default Constructor
      *
      * @param context any non null Context, used to access resources
@@ -305,7 +295,8 @@ public class CraterBackend {
                          VaoCollection suppliesCollection,
                          VaoCollection toxicLakeCollection,
                          VaoCollection enemiesCollection,
-                         VaoCollection spawnerCollection){
+                         VaoCollection spawnerCollection,
+                         VaoCollection plateauCollection){
         this.context = context;
         this.renderer = renderer;
 
@@ -322,7 +313,7 @@ public class CraterBackend {
         this.playerData = new PlayerData(context);
         this.levelData = new LevelData(context);
 
-        this.gameMap = new GameMap(context,this,suppliesCollection,toxicLakeCollection,enemiesCollection,spawnerCollection,this.renderer.collectionsRenderer);
+        this.gameMap = new GameMap(context,this,suppliesCollection,toxicLakeCollection,enemiesCollection,spawnerCollection,plateauCollection,this.renderer.collectionsRenderer);
 
 
         attackJoyStick = new TexturedRect(ATTACK_JOY_STICK_CENTER[0]-JOY_STICK_IMAGE_WIDTH/2, ATTACK_JOY_STICK_CENTER[1]-JOY_STICK_IMAGE_WIDTH/2,scaleX * JOY_STICK_IMAGE_WIDTH,scaleY * JOY_STICK_IMAGE_WIDTH);
@@ -987,7 +978,8 @@ public class CraterBackend {
             float endTarget = this.renderer.getDefaultCameraZ() * LayoutConsts.SCREEN_HEIGHT/LayoutConsts.SCREEN_WIDTH;
 
             //because at the beggining pre game zoom millies is at the max rather than at 0 it's inverted the squared is for acceleration
-            float currentRad = (float) Math.pow((float) this.preGameZoomMillis/CraterBackend.PRE_GAME_MILLIES,2) * (startTarget - endTarget) + endTarget;
+            float currentRad = (float) (Math.pow((double) this.preGameZoomMillis/CraterBackend.PRE_GAME_MILLIES,2) * (startTarget - endTarget) + endTarget);
+            Log.d("CAMERA:","CAlled");
             return endTarget/currentRad;
 
         }
@@ -1267,6 +1259,8 @@ public class CraterBackend {
                                 synchronized (CraterBackend.ANIMATIONS_LOCK) {
                                     this.gameMap.getAnimations().add(new DeathAnim(enemy.getDeltaX(), enemy.getDeltaY(), enemy.getWidth(), enemy.getHeight()));
                                     itr.remove();
+
+                                    this.gameMap.getEnemiesVao().deleteInstance(enemy.getInstanceID());
                                     SoundLib.playPlayerKillSoundEffect();
                                 }
                             }
@@ -1294,6 +1288,7 @@ public class CraterBackend {
                     while (itr.hasNext()) {
                         Spawner spawner = (Spawner) itr.next();
                         if (!spawner.isAlive()) {
+                            this.gameMap.getSpawnerVao().deleteInstance(spawner.getInstanceID());
                             itr.remove();
                         }
 
@@ -1320,6 +1315,7 @@ public class CraterBackend {
                             synchronized (CraterBackend.ANIMATIONS_LOCK) {
                                 this.gameMap.getAnimations().add(new DeathAnim(supply.getDeltaX(), supply.getDeltaY(), supply.getWidth(), supply.getHeight()));
                             }
+                            this.gameMap.getSuppliesVao().deleteInstance(supply.getInstanceID());
                             itr.remove();
                         }
                     }

@@ -11,6 +11,7 @@ import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.nio.FloatBuffer;
 import java.nio.IntBuffer;
+import java.util.Arrays;
 
 /** Is able to draw multiple of the same model, store
  *
@@ -68,28 +69,6 @@ public abstract class VaoCollection {
      */
     private static final int FLOATS_PER_2D_VERTEX = 2;
 
-    /** This matrix basically hides any object, by shrinking it to 0, and then moving it offscreen, it shouldn't
-     * be too expensive I believe. Note that it's transposed so it's equivalent to
-     * First matrix translates, second matrix makes it all go to [0,0,0], So together they make it go to 0,0,0, and then
-     * move it off the screen, which is just the first matrix.
-     *
-     * [0 0 0 2]     [0 0 0 0]   [0 0 0 2]
-     * [0 0 0 0]     [0 0 0 0]   [0 0 0 0]
-     * [0 0 0 0]  *  [0 0 0 0] = [0 0 0 0]
-     * [0 0 0 1]     [0 0 0 1]   [0 0 0 1]
-     * transposed this is
-     *
-     * 0 0 0 0
-     * 0 0 0 0
-     * 0 0 0 0
-     * 2 0 0 1
-     */
-    private static final float[] HIDE_MATRIX = new float[] {
-            0, 0, 0, 0,
-            0, 0, 0, 0,
-            0, 0, 0, 0,
-            2, 0, 0, 1,
-    };
 
 
 
@@ -132,6 +111,11 @@ public abstract class VaoCollection {
     //this is the amount of floats thats needed to model a single instance
     private int floatsPerInstance;
 
+    //because elements can be deleted, we need to map instanceIDs with the corresponding index in the array
+    private int[] indexMap;
+    //here are the ids that are already taken, so we can't give them out anymore
+    private boolean[] takenIds;
+
 
     /** Default Constructor. Note that it assumed that indices, vertices, and texture cords, are all being used.
      * And you must provide them.
@@ -157,7 +141,14 @@ public abstract class VaoCollection {
         //make a vbo list of the amount needed
         this.vboList = new int[vbosNeeded];
 
+
+        //the amount of floats per instance
         this.floatsPerInstance = floatsPerInstance;
+
+        //because elements can be deleted, we need to map instanceIDs with the corresponding index in the array
+        this.indexMap = new int[numEntities];
+        //here are the ids already taken
+        this.takenIds = new boolean[numEntities];
 
         //first allocate the memory
         ByteBuffer pureByteBuffer = ByteBuffer.allocateDirect(numEntities  * this.floatsPerInstance * Float.SIZE/Byte.SIZE);
@@ -309,11 +300,32 @@ public abstract class VaoCollection {
      *
      */
     public void updateInstance(int instanceId,float[] instanceData){
-        int offset = instanceId *  this.floatsPerInstance;
+        int offset = this.indexMap[instanceId] *  this.floatsPerInstance;
 
         //copy the passed in data to our global data efficiently
         System.arraycopy(instanceData, 0, this.instancedData, offset, this.floatsPerInstance);
 
+    }
+    /** Creates a blank instance, and returns the id, use the id so you can change the properties of that instance later
+     *
+     * @return the id of the instance created
+     */
+    public int addInstance(){
+        //find first non taken id
+        int id = 0;
+        while (this.takenIds[id]){
+            id++;
+        }
+
+        //link the id with it's position in the array
+        this.indexMap[id] = this.numInstances;
+        //one more instance created, and the id is taken
+        this.numInstances++;
+        this.takenIds[id] = true;
+
+        Log.d("VAO COLECTION:", "num instances: " + this.numInstances);
+
+        return id;
     }
 
     /** Hides an instance, because shifting it down, is pretty expensive and, makes lots of stuff more complicated.
@@ -322,21 +334,39 @@ public abstract class VaoCollection {
      *
      * @param instanceId the id of the element that needs to be hidden,
      */
-    public void hideInstance(int instanceId){
-        //this is where the matrix starts
-        int offset = instanceId * this.floatsPerInstance;
+    public void deleteInstance(int instanceId){
 
-        //copy the hide matrix to the instance data
-        System.arraycopy(VaoCollection.HIDE_MATRIX,0,this.instancedData,offset,VaoCollection.HIDE_MATRIX.length);
+        //one instance less
+        this.numInstances--;
+
+        //id is no longer taken
+        this.takenIds[instanceId] = false;
+
+
+        //now shift all the ones to the right.
+        for (int elementID = 0; elementID< this.indexMap.length;elementID++){
+            //if the index is greater than the index at the deleted item, shift it down
+            if (this.indexMap[elementID] > this.indexMap[instanceId]){
+                this.indexMap[elementID]--;
+            }
+
+        }
+
     }
 
     /** After a particular round has been played, it may be best to clear the entire vao, rather that just hiding specific
      * elements. This clears the entire array, and the amount of instances starts back at 0.
-     * Note by clearing it does not mean that the data is lost, just that it wont be used, like when indexing is deleted
+     * Note by clearing it does not mean that the data is lost (some is however, not all), just that it wont be used, like when indexing is deleted
      * on a hard drive.
      *
      */
     public void clearInstanceData(){
+        //reset all taken ids
+        this.takenIds = new boolean[this.takenIds.length];
+        //reset the index map
+        this.indexMap = new int[this.indexMap.length];
+
+        //no more instances are alive
         this.numInstances = 0;
     }
 
@@ -364,13 +394,7 @@ public abstract class VaoCollection {
     }
 
 
-    /** Creates a blank instance, and returns the id, use the id so you can change the properties of that instance later
-     *
-     * @return the id of the instance created
-     */
-    public int addInstance(){
-        return this.numInstances++;
-    }
+
 
 
     /** Creates an empty VAO and returns the ID. It also binds the VAO by default, so you don't have to worry about

@@ -72,7 +72,7 @@ public class GameMap extends EnigmaduxComponent {
     private VaoCollection toxicLakeCollection;
     private VaoCollection enemiesCollection;
     private VaoCollection spawnerCollection;
-
+    private VaoCollection plateausCollection;
 
     private MeshRenderer meshRenderer;
 
@@ -85,6 +85,7 @@ public class GameMap extends EnigmaduxComponent {
                    VaoCollection toxicLakeCollection,
                    VaoCollection enemiesCollection,
                    VaoCollection spawnerCollection,
+                   VaoCollection plateausColleciton,
                    MeshRenderer meshRenderer) {
         super(0,0,0,0);//deltX,y,w,h, are never really used
         this.context = context;
@@ -96,6 +97,7 @@ public class GameMap extends EnigmaduxComponent {
         this.toxicLakeCollection = toxicLakeCollection;
         this.enemiesCollection = enemiesCollection;
         this.spawnerCollection = spawnerCollection;
+        this.plateausCollection = plateausColleciton;
 
         this.meshRenderer = meshRenderer;
 
@@ -152,8 +154,12 @@ public class GameMap extends EnigmaduxComponent {
         if (plateaus.size() > 0) {
             synchronized (CraterBackend.PLATEAU_LOCK) {
                 for (int i = 0, size = this.plateaus.size();i < size; i++){
-                    plateaus.get(i).draw(parentMatrix);
+                    plateaus.get(i).updateInstanceInfo(bufferData,parentMatrix);
+                    plateausCollection.updateInstance(plateaus.get(i).getInstanceID(),bufferData);
+                    //plateaus.get(i).draw(parentMatrix);
                 }
+                plateausCollection.updateInstancedVbo();
+                this.meshRenderer.renderCollection(this.plateausCollection);
                 //for (Plateau plateau : this.plateaus) {
                 //  plateau.draw(gl, parentMatrix);
                 //}
@@ -234,9 +240,9 @@ public class GameMap extends EnigmaduxComponent {
                     this.enemiesCollection.updateInstancedVbo();
                     this.meshRenderer.renderCollection(this.enemiesCollection);
 //                    Enemy.endDrawing();
-//                    for (int i = 0, size = this.enemies.size();i < size; i++){
-//                        enemies.get(i).draw(parentMatrix);
-//                    }
+                    for (int i = 0, size = this.enemies.size();i < size; i++){
+                        enemies.get(i).draw(parentMatrix);
+                    }
                     enemiesTIME += System.currentTimeMillis() - start;
 
                     //for (Enemy enemy : this.enemies) {
@@ -467,7 +473,8 @@ public class GameMap extends EnigmaduxComponent {
                 float x4 = level_data.nextFloat();
                 float y4 = level_data.nextFloat();
 
-                plateaus.add(new Plateau(
+                int instanceID = this.plateausCollection.addInstance();
+                plateaus.add(new Plateau(instanceID,
                         x1, y1,
                         x2, y2,
                         x3, y3,
@@ -515,10 +522,11 @@ public class GameMap extends EnigmaduxComponent {
             this.spawners.clear();
         }
         synchronized (CraterBackend.PLATEAU_LOCK) {
+            this.plateausCollection.clearInstanceData();
             this.plateaus.clear();
         }
         synchronized (CraterBackend.TOXICLAKE_LOCK) {
-            this.suppliesVao.clearInstanceData();
+            this.toxicLakeCollection.clearInstanceData();
             this.toxicLakes.clear();
         }
         synchronized (CraterBackend.SUPPLIES_LOCK) {
@@ -617,6 +625,20 @@ public class GameMap extends EnigmaduxComponent {
      */
     public VaoCollection getEnemiesVao(){
         return this.enemiesCollection;
+    }
+    /** Gets the vao of Spawner vertex data
+     *
+     * @return spawner vertex data
+     */
+    public VaoCollection getSpawnerVao(){
+        return this.spawnerCollection;
+    }
+    /** Gets the vao of supplies vertex data
+     *
+     * @return supplies vertex data
+     */
+    public VaoCollection getSuppliesVao(){
+        return this.suppliesVao;
     }
 
     /** Nothing in a game map needs to respond to touch events, so this always returns false

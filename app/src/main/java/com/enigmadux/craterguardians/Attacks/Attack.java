@@ -70,7 +70,7 @@ public abstract class Attack {
 
     public void attemptAttack(Enemy enemy){
         if (isFinished) return;
-        if (this.isHit(enemy)) return;
+        if (! this.isHit(enemy)) return;
         this.onHitEnemy( enemy);
 
         float cos = (float) Math.cos(attackAngle);

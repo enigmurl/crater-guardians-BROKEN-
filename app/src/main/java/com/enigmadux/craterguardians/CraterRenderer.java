@@ -23,6 +23,7 @@ import com.enigmadux.craterguardians.GUI.HomeButton;
 import com.enigmadux.craterguardians.GUI.InGameTextbox;
 import com.enigmadux.craterguardians.GUI.MatieralsBar;
 import com.enigmadux.craterguardians.GUI.ProgressBar;
+import com.enigmadux.craterguardians.GameObjects.Plateau;
 import com.enigmadux.craterguardians.gameLib.CraterVaoCollection;
 
 import java.util.ArrayList;
@@ -216,6 +217,8 @@ public class CraterRenderer extends EnigmaduxGLRenderer {
     long debugGameScreenMillis = System.currentTimeMillis();
 
 
+
+
     /** This does the openGL work on collections
      *
      */
@@ -238,6 +241,15 @@ public class CraterRenderer extends EnigmaduxGLRenderer {
      *
      */
     private VaoCollection enemiesVao;
+    /** This is a vao that contains data about the plateaus graphically wise
+     *
+     */
+    private VaoCollection plateausVao;
+
+    /** This is a vao that contains data about vertex data for the first type of attacks
+     *
+     */
+    private VaoCollection attackType1Vao;
 
 
 
@@ -294,7 +306,7 @@ public class CraterRenderer extends EnigmaduxGLRenderer {
         suppliesVao = new CraterVaoCollection(3,CraterRenderer.QUAD_VERTICES,CraterRenderer.QUAD_TEXTURE_CORDS,CraterRenderer.QUAD_INDICES);
         suppliesVao.loadTexture(this.context,R.drawable.supply_top_view);
 
-        enemiesVao = new CraterVaoCollection(50,CraterRenderer.QUAD_VERTICES,
+        enemiesVao = new CraterVaoCollection(500,CraterRenderer.QUAD_VERTICES,
                 new float[] {
 
                     0,(Enemy1.NUM_ROTATION_ORIENTATIONS-1f)/Enemy1.NUM_ROTATION_ORIENTATIONS,
@@ -309,6 +321,9 @@ public class CraterRenderer extends EnigmaduxGLRenderer {
 
         spawnersVao = new CraterVaoCollection(6,CraterRenderer.QUAD_VERTICES,CraterRenderer.QUAD_TEXTURE_CORDS,CraterRenderer.QUAD_INDICES);
         spawnersVao.loadTexture(this.context,R.drawable.enemy1_spawner);
+
+        plateausVao = new CraterVaoCollection(20, Plateau.VERTICES,Plateau.TEX_CORDS,CraterRenderer.QUAD_INDICES);
+        plateausVao.loadTexture(this.context,R.drawable.plateau);
 
 
 
@@ -466,6 +481,7 @@ public class CraterRenderer extends EnigmaduxGLRenderer {
             Log.d("FRONTENDTHREAD:","percentage under 60:"  + ((float) under60/updateCount));
             Log.d("FRONTENDTHREAD:","under 60s:"  + under60s);
 
+            Log.d("FRONTENDTHREAD:","Total Time:"  + ((System.currentTimeMillis() - debugStartMillis)/this.updateCount));
             Log.d("FRONTENDTHREAD:","Game screen Time:"  + (this.debugGameScreenMillis/this.updateCount) + " percentage: " + (this.debugGameScreenMillis/(double) (System.currentTimeMillis() - debugStartMillis)));
 
             debugStartMillis = System.currentTimeMillis();
@@ -491,6 +507,30 @@ public class CraterRenderer extends EnigmaduxGLRenderer {
         }
 
 
+
+    }
+
+    private void drawPlateaus(){
+
+    }
+
+    private void drawToxicLakes(){
+
+    }
+
+    private void drawSupplies() {
+
+    }
+
+    private void drawSpawners(){
+
+    }
+
+    private void drawEnemies(){
+
+    }
+
+    private void drawPlayer(){
 
     }
 
@@ -565,7 +605,7 @@ public class CraterRenderer extends EnigmaduxGLRenderer {
         switch (step) {
             case 0:
                 this.backend = new CraterBackend(context, this,this.suppliesVao,this.toxicLakeVao,this.enemiesVao
-                ,this.spawnersVao);
+                ,this.spawnersVao,this.plateausVao);
                 this.craterBackendThread.setBackend(this.backend);
                 break;
             case 1:

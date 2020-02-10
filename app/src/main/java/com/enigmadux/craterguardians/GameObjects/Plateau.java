@@ -7,10 +7,11 @@ import com.enigmadux.craterguardians.BaseCharacter;
 import com.enigmadux.craterguardians.Enemies.Enemy;
 import com.enigmadux.craterguardians.MathOps;
 import com.enigmadux.craterguardians.R;
+import com.enigmadux.craterguardians.gameLib.CraterCollectionElem;
 
 import enigmadux2d.core.shapes.TexturedRect;
 
-public class Plateau{
+public class Plateau extends CraterCollectionElem {
     //the points, see constructor details for more
     private float[][] points;
 
@@ -21,6 +22,26 @@ public class Plateau{
      */
     private static TexturedRect VISUAL_REPRESENTATION = new TexturedRect(0, 0, 0,0);
 
+    /** Vertices of the standard quad
+     *
+     */
+    public static final float[] VERTICES = new float[] {
+            0,0,0,
+            1,0,0,
+            0,1,0,
+            0,0,1,
+
+    };
+    /** texture cords of the quad
+     *
+     */
+    public static final float[] TEX_CORDS = new float[] {
+            0,1,
+            0,0,
+            1,1,
+            1,0
+
+    };
 
     static {
         VISUAL_REPRESENTATION.loadVertexBuffer(new float[] {
@@ -42,6 +63,7 @@ public class Plateau{
      *  open gl coordinates; should be in form of x1,y1,x2,y2,x3,y3,x4,y4. Additionally, the vertices should be in the order of bottom left,top left,bottom right,top right
 
      *
+     * @param instanceID the id of the plateau with respects to the vao it's in
      * @param x1 bottomLeft openGL deltX
      * @param y1 bottomLeft openGL y
      * @param x2 topLeft openGL deltX
@@ -51,7 +73,8 @@ public class Plateau{
      * @param x4 topRight openGL deltX
      * @param y4 topRight openGL y
      */
-    public Plateau(float x1, float y1, float x2, float y2, float x3, float y3, float x4, float y4) {
+    public Plateau(int instanceID,float x1, float y1, float x2, float y2, float x3, float y3, float x4, float y4) {
+        super(instanceID);
         this.points = new float[][] {{x1,y1},{x2,y2},{x3,y3},{x4,y4}};
 
 
@@ -115,6 +138,21 @@ public class Plateau{
 
     }
 
+    /** Updates the matrix
+     *
+     * @param blankInstanceInfo this is where the instance data should be written too. Rather than creating many arrays,
+     *                          we can reuse the same one. Anyways, write all data to appropriate locations in this array,
+     *                          which should match the format of the VaoCollection you are using
+     * @param uMVPMatrix This is a the model view projection matrix. It performs all outside calculations, make sure to
+     *                   not modify this matrix, as this will cause other instances to get modified in unexpected ways.
+     *                   Rather use method calls like Matrix.translateM(blankInstanceInfo,0,uMVPMatrix,0,dX,dY,dZ), which
+     *                   essentially leaves the uMVPMatrix unchanged, but the translated matrix is dumped into the blankInstanceInfo
+     */
+    @Override
+    public void updateInstanceTransform(float[] blankInstanceInfo, float[] uMVPMatrix) {
+        Matrix.multiplyMM(blankInstanceInfo,0,uMVPMatrix,0,translatorMatrix,0);
+
+    }
 
     /** Loads the texture for all instances
      *

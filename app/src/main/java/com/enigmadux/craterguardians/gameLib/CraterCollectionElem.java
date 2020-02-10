@@ -93,7 +93,7 @@ public abstract class CraterCollectionElem extends CollectionElem {
 
     /** Gets the center position in openGL space
      *
-     * @return the center deltX position distance from origin
+     * @return the center x position distance from origin
      */
     public float getDeltaX() {
         return this.deltaX;
@@ -105,5 +105,20 @@ public abstract class CraterCollectionElem extends CollectionElem {
      */
     public float getDeltaY() {
         return this.deltaY;
+    }
+
+    /** Sets the shader, which basically filters out specific channels of the texture.
+     * 0 means none of that channel is shown (transparent), 1 is fully opaque
+     *
+     * @param r the filter of the red channel
+     * @param b the filter of the blue channel
+     * @param g the filter of the green channel
+     * @param a the filter of the alpha channel
+     */
+    public void setShader(float r,float b,float g,float a){
+        this.shader[0] = r;
+        this.shader[1] = b;
+        this.shader[2] = g;
+        this.shader[3] = a;
     }
 }

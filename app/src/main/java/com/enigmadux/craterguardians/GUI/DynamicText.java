@@ -40,12 +40,20 @@ public class DynamicText {
 
     }
 
+    /** Creates the texture atlas
+     *
+     */
+    private void createAtlas(){
+
+    }
+
 
     /** Draws text. Note /n Characters are not supported
      *
      * @param text the text that needs to be rendered, escape characters like /n and /t not supported
      */
     public void renderText(String text){
+
 
     }
 
