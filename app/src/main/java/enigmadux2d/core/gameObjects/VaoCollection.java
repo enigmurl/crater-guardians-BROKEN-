@@ -474,7 +474,7 @@ public abstract class VaoCollection {
 
         //finally unbind the current VBO, specifying the type of buffer, and telling the pointer 0, which means to unbind
         //whatever we currently have.
-        //GLES30.glBindBuffer(GLES30.GL_ARRAY_BUFFER,0);
+        GLES30.glBindBuffer(GLES30.GL_ARRAY_BUFFER,0);
 
         this.numVboAssigned++;
       }

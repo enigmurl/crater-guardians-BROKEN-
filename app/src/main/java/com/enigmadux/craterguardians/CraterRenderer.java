@@ -17,25 +17,27 @@ import com.enigmadux.craterguardians.Characters.Player;
 import com.enigmadux.craterguardians.Enemies.Enemy1;
 import com.enigmadux.craterguardians.FileStreams.PlayerData;
 import com.enigmadux.craterguardians.FileStreams.SettingsData;
-import com.enigmadux.craterguardians.GUI.Button;
-import com.enigmadux.craterguardians.GUI.CharacterSelect;
-import com.enigmadux.craterguardians.GUI.HomeButton;
-import com.enigmadux.craterguardians.GUI.InGameTextbox;
-import com.enigmadux.craterguardians.GUI.MatieralsBar;
-import com.enigmadux.craterguardians.GUI.ProgressBar;
+import com.enigmadux.craterguardians.GUILib.Button;
+import com.enigmadux.craterguardians.GUILib.CharacterSelect;
+import com.enigmadux.craterguardians.GUILib.HomeButton;
+import com.enigmadux.craterguardians.GUILib.InGameTextbox;
+import com.enigmadux.craterguardians.GUILib.MatieralsBar;
+import com.enigmadux.craterguardians.GUILib.ProgressBar;
+import com.enigmadux.craterguardians.GUIs.testingGui.TesterButton;
+import com.enigmadux.craterguardians.GUIs.testingGui.TesterLayout;
 import com.enigmadux.craterguardians.GameObjects.Plateau;
 import com.enigmadux.craterguardians.gameLib.CraterVaoCollection;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
 
 import enigmadux2d.core.EnigmaduxComponent;
 import enigmadux2d.core.EnigmaduxGLRenderer;
-import enigmadux2d.core.models.Mesh;
-import enigmadux2d.core.models.TexturedModel;
+import enigmadux2d.core.quadRendering.QuadRenderer;
+import enigmadux2d.core.quadRendering.QuadTexture;
 import enigmadux2d.core.renderEngine.MeshRenderer;
-import enigmadux2d.core.renderEngine.ModelLoader;
 
 import enigmadux2d.core.gameObjects.VaoCollection;
 import enigmadux2d.core.shapes.TexturedRect;
@@ -251,6 +253,15 @@ public class CraterRenderer extends EnigmaduxGLRenderer {
      */
     private VaoCollection attackType1Vao;
 
+    /** Instanced data is rendered using this
+     *
+     */
+    private MeshRenderer vaoCollectionsRenderer;
+
+    /** Single, non instanced quads, are rendered using this
+     *
+     */
+    private QuadRenderer quadRenderer;
 
 
     /** Constructor to set the handed over context
@@ -326,8 +337,6 @@ public class CraterRenderer extends EnigmaduxGLRenderer {
         plateausVao.loadTexture(this.context,R.drawable.plateau);
 
 
-
-        //if this is the first time
         if (! this.loadingStarted) {
             TexturedRect.loadProgram();
             this.loadingScreen.loadGLTexture(this.context, R.drawable.loading_screen);
@@ -492,7 +501,6 @@ public class CraterRenderer extends EnigmaduxGLRenderer {
         }
 
 
-
     }
 
     /** Helps draw portions of the game map that is not covered in the game layout. Mostly stuff that have a variable amount
@@ -505,6 +513,19 @@ public class CraterRenderer extends EnigmaduxGLRenderer {
         if (this.backend.getCurrentGameState() == CraterBackend.GAME_STATE_TUTORIAL ){
             this.gameMapTutorialLayout.draw(this.vPMatrix);
         }
+
+        //draw plateaus
+
+        //draw toxic lakes
+
+        //draw supplies
+
+        //draw spawners
+
+        //draw enemies
+
+        //draw player
+
 
 
 
@@ -565,10 +586,12 @@ public class CraterRenderer extends EnigmaduxGLRenderer {
 
 
             this.pauseButton.draw(this.vPMatrix);
-            this.pauseGameLayout.draw(this.vPMatrix);
 
 
         }
+
+        this.pauseGameLayout.draw(this.vPMatrix);
+
     }
 
     /** Gets the Default camera position. The greater the value the farther away the camera "is";
@@ -1015,9 +1038,10 @@ public class CraterRenderer extends EnigmaduxGLRenderer {
      */
     public boolean onTouch(MotionEvent e){
         try {
-            if (!this.fullHomeScreenLayout.onTouch(e) &&
+            if (!pauseGameLayout.onTouch(e) &&
+                    !this.pauseGameLayout.isVisible() &&
+                    !this.fullHomeScreenLayout.onTouch(e) &&
                     !pauseButton.onTouch(e) &&
-                    !pauseGameLayout.onTouch(e) &&
                     !pauseGameLayout.isVisible() &&
                     (gameScreenLayout.isVisible() || levelSelectLayout.isVisible())) {
                 backend.onTouch(e);
@@ -1034,6 +1058,7 @@ public class CraterRenderer extends EnigmaduxGLRenderer {
      */
     public void onPause(){
         if (this.craterBackendThread != null) {
+            this.pauseGameLayout.show();
             this.craterBackendThread.setPause(true);
         }
 
@@ -1044,9 +1069,6 @@ public class CraterRenderer extends EnigmaduxGLRenderer {
      *
      */
     public void onResume(){
-        if (this.craterBackendThread != null) {
-            this.craterBackendThread.setPause(false);
-        }
     }
 
     private class RenderingThread {

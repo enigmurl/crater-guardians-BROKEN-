@@ -1,14 +1,11 @@
-package com.enigmadux.craterguardians.GUI;
+package com.enigmadux.craterguardians.GUILib;
 
-import android.content.Context;
-import android.opengl.Matrix;
 import android.view.MotionEvent;
 
 import com.enigmadux.craterguardians.CraterBackend;
 import com.enigmadux.craterguardians.CraterRenderer;
 import com.enigmadux.craterguardians.LayoutConsts;
 import com.enigmadux.craterguardians.MathOps;
-import com.enigmadux.craterguardians.R;
 import com.enigmadux.craterguardians.SoundLib;
 
 

@@ -9,7 +9,7 @@ import com.enigmadux.craterguardians.AngleAimers.TriangleAimer;
 import com.enigmadux.craterguardians.Animations.EvolveAnimation;
 import com.enigmadux.craterguardians.Attacks.KaiserAttack;
 import com.enigmadux.craterguardians.MathOps;
-import com.enigmadux.craterguardians.GUI.ProgressBar;
+import com.enigmadux.craterguardians.GUILib.ProgressBar;
 import com.enigmadux.craterguardians.R;
 
 import enigmadux2d.core.shapes.TexturedRect;
@@ -30,7 +30,7 @@ public class Kaiser extends Player {
     private static final float FPS = 8;
 
     //a constant that represents the maximum health of KAISER
-    private static final int MAXIMUM_HEALTH = 200;
+    private static final int MAXIMUM_HEALTH = 200000;
     //a constant that represents how many attacks kaiser can perform before reloading
     private static final int NUM_ATTACKS  = 5;
     //a constant that represents how long in millis it takes to reload all attacks;

@@ -1,18 +1,11 @@
 package com.enigmadux.craterguardians.GameObjects;
 
-import android.content.Context;
 import android.opengl.Matrix;
-import android.view.MotionEvent;
 
-import com.enigmadux.craterguardians.GUI.ProgressBar;
+import com.enigmadux.craterguardians.GUILib.ProgressBar;
 import com.enigmadux.craterguardians.MathOps;
-import com.enigmadux.craterguardians.R;
 import com.enigmadux.craterguardians.SoundLib;
 import com.enigmadux.craterguardians.gameLib.CraterCollectionElem;
-
-import enigmadux2d.core.EnigmaduxComponent;
-import enigmadux2d.core.renderEngine.MeshRenderer;
-import enigmadux2d.core.shapes.TexturedRect;
 
 /** This is what the robots are trying to steal
  *

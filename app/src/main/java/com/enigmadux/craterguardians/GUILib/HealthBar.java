@@ -1,4 +1,4 @@
-package com.enigmadux.craterguardians.GUI;
+package com.enigmadux.craterguardians.GUILib;
 
 import android.content.Context;
 import android.opengl.Matrix;

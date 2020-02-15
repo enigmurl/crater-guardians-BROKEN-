@@ -1,11 +1,10 @@
 package com.enigmadux.craterguardians.Spawners;
 
 
-import android.opengl.Matrix;
 import android.util.Log;
 
 import com.enigmadux.craterguardians.Enemies.Enemy;
-import com.enigmadux.craterguardians.GUI.ProgressBar;
+import com.enigmadux.craterguardians.GUILib.ProgressBar;
 import com.enigmadux.craterguardians.MathOps;
 import com.enigmadux.craterguardians.gameLib.CraterCollectionElem;
 

@@ -7,7 +7,7 @@ import com.enigmadux.craterguardians.Animations.RedShader;
 import com.enigmadux.craterguardians.Attacks.Attack;
 import com.enigmadux.craterguardians.BaseCharacter;
 import com.enigmadux.craterguardians.EnemyMap;
-import com.enigmadux.craterguardians.GUI.HealthBar;
+import com.enigmadux.craterguardians.GUILib.HealthBar;
 import com.enigmadux.craterguardians.MathOps;
 import com.enigmadux.craterguardians.GameObjects.Supply;
 import com.enigmadux.craterguardians.R;

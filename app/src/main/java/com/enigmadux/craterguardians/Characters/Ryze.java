@@ -9,7 +9,7 @@ import com.enigmadux.craterguardians.AngleAimers.TriRectAimer;
 import com.enigmadux.craterguardians.Animations.EvolveAnimation;
 import com.enigmadux.craterguardians.Attacks.RyzeAttack;
 import com.enigmadux.craterguardians.MathOps;
-import com.enigmadux.craterguardians.GUI.ProgressBar;
+import com.enigmadux.craterguardians.GUILib.ProgressBar;
 import com.enigmadux.craterguardians.R;
 
 import enigmadux2d.core.shapes.TexturedRect;

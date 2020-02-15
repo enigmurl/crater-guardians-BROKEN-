@@ -9,7 +9,7 @@ import com.enigmadux.craterguardians.Animations.EvolveAnimation;
 import com.enigmadux.craterguardians.Attacks.Attack;
 import com.enigmadux.craterguardians.BaseCharacter;
 import com.enigmadux.craterguardians.Enemies.Enemy;
-import com.enigmadux.craterguardians.GUI.ProgressBar;
+import com.enigmadux.craterguardians.GUILib.ProgressBar;
 import com.enigmadux.craterguardians.R;
 import com.enigmadux.craterguardians.SoundLib;
 import com.enigmadux.craterguardians.Spawners.Spawner;
@@ -161,9 +161,8 @@ public abstract class Player extends BaseCharacter {
         }
 
         //TODO Concurrent modification happening here sometimes also on line 178 a null pointer was thrown
-        for (Attack attack: this.attacks){
-            if (attack == null) continue;
-            attack.draw(parentMatrix);
+        for (int i = 0,size = this.attacks.size();i<size;i++){
+            this.attacks.get(i).draw(parentMatrix);
         }
         //Matrix.setIdentityM(this.translationMatrix,0);
         //Matrix.translateM(this.translationMatrix,0,this.getDeltaX(),this.getDeltaY(),0);
@@ -171,34 +170,36 @@ public abstract class Player extends BaseCharacter {
 
 
         //does the flashing animation
-        if (this.numAttacks == 0){
-            for (int i = 0;i < maxAttacks;i++){
-                Matrix.setIdentityM(translationMatrix,0);
-                Matrix.translateM(translationMatrix,0,this.getDeltaX() + this.getRadius() * 2 * ((float) i/maxAttacks  -0.5f),this.getDeltaY() + this.getRadius(),0 );//0.05 is half of the
-                Matrix.multiplyMM(scalarTranslationMatrix,0,translationMatrix,0,scalarMatrix,0);
-                Matrix.multiplyMM(finalMatrix,0,parentMatrix,0,scalarTranslationMatrix,0);
+//        if (this.numAttacks == 0){
+            //ATTACK_VISUAL.setShader(0.5f,1,1,getAmmoBarAlpha ((float) (reloadTime - millisTillFinishedReloading)/reloadTime));
 
-                ATTACK_VISUAL.setShader(0.5f,1,1,getAmmoBarAlpha ((float) (reloadTime - millisTillFinishedReloading)/reloadTime));
-                ATTACK_VISUAL.draw(finalMatrix);
-            }
-        } else {
-            for (int i = 0;i < numAttacks;i++){
-                Matrix.setIdentityM(translationMatrix,0);
-                Matrix.translateM(translationMatrix,0,this.getDeltaX() + this.getRadius() * 2 * ((float) i/maxAttacks  -0.5f),this.getDeltaY() + this.getRadius(),0 );//0.05 is half of the
-                Matrix.multiplyMM(scalarTranslationMatrix,0,translationMatrix,0,scalarMatrix,0);
-                Matrix.multiplyMM(finalMatrix,0,parentMatrix,0,scalarTranslationMatrix,0);
+//            for (int i = 0;i < maxAttacks;i++){
+//                Matrix.setIdentityM(translationMatrix,0);
+//                Matrix.translateM(translationMatrix,0,this.getDeltaX() + this.getRadius() * 2 * ((float) i/maxAttacks  -0.5f),this.getDeltaY() + this.getRadius(),0 );//0.05 is half of the
+//                Matrix.multiplyMM(scalarTranslationMatrix,0,translationMatrix,0,scalarMatrix,0);
+//                Matrix.multiplyMM(finalMatrix,0,parentMatrix,0,scalarTranslationMatrix,0);
+//
+//                ATTACK_VISUAL.draw(finalMatrix);
+//            }
+//        } else {
+            //ATTACK_VISUAL.setShader(1,1,1,1);
 
-                ATTACK_VISUAL.setShader(1,1,1,1);
-                ATTACK_VISUAL.draw(finalMatrix);
-            }
-        }
+//            for (int i = 0;i < numAttacks;i++){
+//                Matrix.setIdentityM(translationMatrix,0);
+//                Matrix.translateM(translationMatrix,0,this.getDeltaX() + this.getRadius() * 2 * ((float) i/maxAttacks  -0.5f),this.getDeltaY() + this.getRadius(),0 );//0.05 is half of the
+//                Matrix.multiplyMM(scalarTranslationMatrix,0,translationMatrix,0,scalarMatrix,0);
+//                Matrix.multiplyMM(finalMatrix,0,parentMatrix,0,scalarTranslationMatrix,0);
+//
+//                ATTACK_VISUAL.draw(finalMatrix);
+//            }
+//        }
 
 
-
-        this.attackAngleAimer.setPosition(this.getDeltaX(),this.getDeltaY());
-        this.attackAngleAimer.draw(parentMatrix);
-        this.attackChargeUp.update(this.attackChargeUp.getCurrentHitPoints(),this.getDeltaX()-this.getRadius(),this.getDeltaY() + this.getRadius() + 0.1f);
-        this.attackChargeUp.draw(parentMatrix);
+//
+//        this.attackAngleAimer.setPosition(this.getDeltaX(),this.getDeltaY());
+//        this.attackAngleAimer.draw(parentMatrix);
+//        this.attackChargeUp.update(this.attackChargeUp.getCurrentHitPoints(),this.getDeltaX()-this.getRadius(),this.getDeltaY() + this.getRadius() + 0.1f);
+//        this.attackChargeUp.draw(parentMatrix);
 
         if (this.evolveAnimation != null) this.evolveAnimation.draw(parentMatrix);
 

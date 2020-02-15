@@ -1,7 +1,6 @@
 package com.enigmadux.craterguardians;
 
 import android.content.Context;
-import android.opengl.Matrix;
 import android.util.Log;
 import android.view.MotionEvent;
 
@@ -227,8 +226,8 @@ public class GameMap extends EnigmaduxComponent {
                 //}
             }
             spawnersTIME += System.currentTimeMillis() - start;
-            start = System.currentTimeMillis();
             if (enemies.size() > 0) {
+                start = System.currentTimeMillis();
                 synchronized (CraterBackend.ENEMIES_LOCK) {
                     enemiesSynchroTIME += System.currentTimeMillis() - start;
                     start = System.currentTimeMillis();
@@ -241,7 +240,7 @@ public class GameMap extends EnigmaduxComponent {
                     this.meshRenderer.renderCollection(this.enemiesCollection);
 //                    Enemy.endDrawing();
                     for (int i = 0, size = this.enemies.size();i < size; i++){
-                        enemies.get(i).draw(parentMatrix);
+                        //enemies.get(i).draw(parentMatrix);
                     }
                     enemiesTIME += System.currentTimeMillis() - start;
 
@@ -273,7 +272,7 @@ public class GameMap extends EnigmaduxComponent {
                 float x = this.player.getDeltaX();
                 float y = this.player.getDeltaY();
                 this.player.setTranslate(this.cameraX,this.cameraY);
-                this.player.draw(parentMatrix);
+                //this.player.draw(parentMatrix);
                 this.player.setTranslate(x,y);
             }
         }
@@ -318,31 +317,31 @@ public class GameMap extends EnigmaduxComponent {
         int fileName;
         switch (levelNum) {
             case 1:
-                fileName = R.raw.level_1;
+                fileName = R.raw.level_01;
                 break;
             case 2:
-                fileName = R.raw.level_2;
+                fileName = R.raw.level_02;
                 break;
             case 3:
-                fileName = R.raw.level_3;
+                fileName = R.raw.level_03;
                 break;
             case 4:
-                fileName = R.raw.level_4;
+                fileName = R.raw.level_04;
                 break;
             case 5:
-                fileName = R.raw.level_5;
+                fileName = R.raw.level_05;
                 break;
             case 6:
-                fileName = R.raw.level_6;
+                fileName = R.raw.level_06;
                 break;
             case 7:
-                fileName = R.raw.level_7;
+                fileName = R.raw.level_07;
                 break;
             case 8:
-                fileName = R.raw.level_8;
+                fileName = R.raw.level_08;
                 break;
             case 9:
-                fileName = R.raw.level_9;
+                fileName = R.raw.level_09;
                 break;
             case 10:
                 fileName = R.raw.level_10;
