@@ -111,6 +111,7 @@ public abstract class ShaderProgram {
     protected void writeUniformVec4(int location,float x,float y,float z,float w){
         //ask openGL to write the four values
         GLES30.glUniform4f(location,x,y,z,w);
+
     }
 
     /** Writes a boolean value to a uniform value, but since it's written in C, it first makes it 1 or 0 based on

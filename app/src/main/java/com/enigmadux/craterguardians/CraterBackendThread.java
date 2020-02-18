@@ -127,4 +127,12 @@ public class CraterBackendThread extends Thread {
     public void setPause(boolean pausedState){
         this.paused = pausedState;
     }
+
+    /** Gets the backend object that this thread updates
+     *
+     * @return the Backend object
+     */
+    public CraterBackend getBackend(){
+        return this.backend;
+    }
 }

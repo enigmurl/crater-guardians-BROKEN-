@@ -263,4 +263,13 @@ public class Ryze extends Player {
     public String toString() {
         return "Ryze";
     }
+
+    /** Gets the pointer to the ryze info
+     *
+     * @return gets the pointer to the ryze icon
+     */
+    @Override
+    public int getPlayerIcon() {
+        return R.drawable.ryze_info;
+    }
 }

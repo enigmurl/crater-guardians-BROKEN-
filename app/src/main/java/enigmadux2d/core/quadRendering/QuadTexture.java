@@ -7,6 +7,11 @@ import android.opengl.GLES30;
 import android.opengl.GLUtils;
 import android.opengl.Matrix;
 import android.util.Log;
+import android.util.SparseIntArray;
+
+import com.enigmadux.craterguardians.R;
+
+import java.util.HashMap;
 
 /** This is where the actual texture of the quad is stored. As well as instance specfic info
  *
@@ -14,11 +19,42 @@ import android.util.Log;
  * @version BETA
  */
 public class QuadTexture {
+
+
+    /** Rather than having multiple quads with the same texture, this maps Android texture pointers ( R.drawable.x), to
+     * openGL ones. This way we don't assign the duplicate memory
+     *
+     */
+    private static SparseIntArray androidToGLTextureMap = new SparseIntArray();
+
     //this is where the texture pointer is stored
-    private int[] texture = new int[1];
+    protected int[] texture = new int[1];
 
     //scales and translates the mesh appropriately
     private final float[] scalarTranslationM = new float[16];
+
+    /** Center X
+     *
+     */
+    protected float x;
+    /** Center Y
+     *
+     */
+    protected float y;
+    /** Width
+     *
+     */
+    protected float w;
+    /** Height
+     *
+     */
+    protected float h;
+
+    /** This shader limits specific channels regarding RGBA, from 0 to 1, where 0 is fully transparent, 1 opaque
+     *
+     */
+    protected float[] shader = new float[] {1,1,1,1};
+
 
     /** Default Constructor, most likely will only work in a GL THREAD
      *
@@ -30,6 +66,11 @@ public class QuadTexture {
      * @param h the height of the texture
      */
     public QuadTexture(Context context,int texturePointer,float x,float y,float w,float h){
+        this.x = x;
+        this.y = y;
+        this.w = w;
+        this.h = h;
+
 
         //set identity
         Matrix.setIdentityM(scalarTranslationM,0);
@@ -40,28 +81,72 @@ public class QuadTexture {
         //and finally translate it
         //now actually load the texture
 
-        //first convert the image file into a bitmap
-        Bitmap texture = BitmapFactory.decodeResource(context.getResources(),texturePointer);
-
-        //create a texture id at the specified location in the array
-        GLES30.glGenTextures(1,this.texture,0);
-
-        //now bind it with the array
-        GLES30.glBindTexture(GLES30.GL_TEXTURE_2D, this.texture[0]);
-
-        // create nearest filtered texture
-        GLES30.glTexParameteri(GLES30.GL_TEXTURE_2D, GLES30.GL_TEXTURE_MIN_FILTER, GLES30.GL_LINEAR);
-        GLES30.glTexParameteri(GLES30.GL_TEXTURE_2D, GLES30.GL_TEXTURE_MAG_FILTER, GLES30.GL_LINEAR);
-
-
-        // Use Android GLUtils to specify a two-dimensional texture image from our bitmap
-        GLUtils.texImage2D(GLES30.GL_TEXTURE_2D, 0, texture, 0);
-
-
-        //bitmap no longer needed
-        texture.recycle();
+        this.loadAndroidTexturePointer(context,texturePointer);
     }
 
+
+    /** Default Constructor, most likely will only work in a GL THREAD
+     *
+     * @param texturePointer an OPEN GL texture pointer, this is different from R.drawable.*, as menntioned in first constructor
+     * @param x the center x position of the texture
+     * @param y the center y position of the texture
+     * @param w the width of the texture
+     * @param h the height of the texture
+     */
+    public QuadTexture(int texturePointer,float x,float y,float w,float h) {
+        this.x = x;
+        this.y = y;
+        this.w = w;
+        this.h = h;
+
+
+        //set identity
+        Matrix.setIdentityM(scalarTranslationM,0);
+        //translate the matrix, I really don't understand why translation comes first, but it works
+        Matrix.translateM(scalarTranslationM,0,x,y,0);
+        //now scale it, which again should come first, but for some reason this works, other one doesn't
+        Matrix.scaleM(scalarTranslationM,0,w,h,1);
+        //and finally translate it
+
+        this.texture[0] = texturePointer;
+    }
+
+    /** load an ANDROID texture pointer (R.drawable.*)
+     *
+     * @param context any context that can get resources
+     * @param texturePointer the ANDROID pointer to the image
+     */
+    public void loadAndroidTexturePointer(Context context,int texturePointer){
+        int indexOfPointer = QuadTexture.androidToGLTextureMap.indexOfKey(texturePointer);
+        if (indexOfPointer < 0) {
+            //first convert the image file into a bitmap
+            Bitmap texture = BitmapFactory.decodeResource(context.getResources(), texturePointer);
+
+            //create a texture id at the specified location in the array
+            GLES30.glGenTextures(1, this.texture, 0);
+
+            //now bind it with the array
+            GLES30.glBindTexture(GLES30.GL_TEXTURE_2D, this.texture[0]);
+
+            // create nearest filtered texture
+            GLES30.glTexParameteri(GLES30.GL_TEXTURE_2D, GLES30.GL_TEXTURE_MIN_FILTER, GLES30.GL_LINEAR);
+            GLES30.glTexParameteri(GLES30.GL_TEXTURE_2D, GLES30.GL_TEXTURE_MAG_FILTER, GLES30.GL_LINEAR);
+
+
+            // Use Android GLUtils to specify a two-dimensional texture image from our bitmap
+            GLUtils.texImage2D(GLES30.GL_TEXTURE_2D, 0, texture, 0);
+
+
+            //bitmap no longer needed
+            texture.recycle();
+
+            //add it to our banking
+            QuadTexture.androidToGLTextureMap.put(texturePointer,this.texture[0]);
+
+        } else {
+            this.texture[0] = QuadTexture.androidToGLTextureMap.get(texturePointer);
+        }
+    }
 
 
 
@@ -81,5 +166,30 @@ public class QuadTexture {
      */
     public void dumpOutputMatrix(float[] dumpMatrix,float[] mvpMatrix){
         Matrix.multiplyMM(dumpMatrix,0,mvpMatrix,0,this.scalarTranslationM,0);
+    }
+
+    /** Gets the shader which limits channels regarding RGBA
+     *
+     * @return a 4 float vector, which specifies how much to multiply the RGBA channels
+     */
+    public float[] getShader(){
+        return this.shader;
+    }
+
+
+    /** Recycles the components by telling open gl to delete the texture
+     *
+     *
+     */
+    public void recycle(){
+       GLES30.glDeleteTextures(1,this.texture,0);
+    }
+
+
+    /** Deletes the sparse int array, in the event that textures need to be reloaded
+     *
+     */
+    public static void resetTextures(){
+        androidToGLTextureMap = new SparseIntArray();
     }
 }

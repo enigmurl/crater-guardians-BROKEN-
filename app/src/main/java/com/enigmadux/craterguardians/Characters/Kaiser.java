@@ -286,4 +286,14 @@ public class Kaiser extends Player {
     public String toString() {
         return "Kaiser";
     }
+
+
+    /** Gets the pointer to the kaiser info
+     *
+     * @return gets the pointer to the kaiser icon
+     */
+    @Override
+    public int getPlayerIcon() {
+        return R.drawable.kaiser_info;
+    }
 }

@@ -10,7 +10,11 @@ import java.util.ArrayList;
 import enigmadux2d.core.shaders.GUIShader;
 
 /** Renders quads, and because buttons share a lot of the same texture, renders those as well
+ * COMMON DEBUGS:
+ *  Make sure you change the rendering methods for both single quad rendering, and multi quad rendering (this caused a big head ache before ;( )
  *
+ * @author Manu Bhat
+ * @version BETA
  */
 public class QuadRenderer {
 
@@ -47,14 +51,21 @@ public class QuadRenderer {
 
     }
 
+    /** Starts the rendering process, by attaching our shader
+     *
+     */
+    public void startRendering(){
+        //use our shader program
+        GLES30.glUseProgram(this.guiShader.getProgramID());
+
+    }
+
     /** Renders a single quad. Should only be used if you only want to render a single quad, otherwise, this is inefficient
      *
      * @param quad the texture that needs to be rendered
      * @param uMVPmatrix a 4x4 matrix that represents the model view projection matrix
      */
     public void renderQuad(QuadTexture quad,float[] uMVPmatrix){
-        //use our shader program
-        GLES30.glUseProgram(this.guiShader.getProgramID());
 
         //bind the vao
         GLES30.glBindVertexArray(this.mesh.getVaoID());
@@ -68,6 +79,8 @@ public class QuadRenderer {
         this.guiShader.writeMatrix(this.instanceTransformation);
         //then write the texture
         this.guiShader.writeTexture(quad.getTexture());
+        //then write the shader variable
+        this.guiShader.writeShader(quad.getShader());
 
         //finally draw the quad
         GLES30.glDrawArrays(GLES30.GL_TRIANGLE_STRIP,0,this.mesh.getVertexCount());
@@ -81,10 +94,10 @@ public class QuadRenderer {
     /** Renders multiple quads. This is slightly more efficient, because it doesn't have to resend vertex information,
      * just texture information.
      *
-     * @param quads an arraylist of the textures to be rendered
-     * @param uMVPmatrix a 4x4 matrix that represents the model view projection matrix
+     * @param quads an array list of the textures to be rendered
+     * @param uMVPmatrix a 4x4 matrix that represents the    model view projection matrix
      */
-    public void renderQuads(ArrayList<QuadTexture> quads,float[] uMVPmatrix){
+    public void renderQuads(ArrayList<? extends QuadTexture> quads,float[] uMVPmatrix){
         //use our shader program
         GLES30.glUseProgram(this.guiShader.getProgramID());
 
@@ -100,6 +113,8 @@ public class QuadRenderer {
             this.guiShader.writeMatrix(this.instanceTransformation);
             //then write the texture
             this.guiShader.writeTexture(quads.get(i).getTexture());
+            //then write the shader variable
+            this.guiShader.writeShader(quads.get(i).getShader());
 
             //finally draw the quad
 

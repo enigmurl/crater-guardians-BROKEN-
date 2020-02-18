@@ -1,6 +1,9 @@
 package com.enigmadux.craterguardians.GUILib;
 
+import android.content.Context;
 import android.view.MotionEvent;
+
+import java.util.HashMap;
 
 import enigmadux2d.core.quadRendering.QuadRenderer;
 
@@ -17,14 +20,7 @@ import enigmadux2d.core.quadRendering.QuadRenderer;
  * @author Manu Bhat
  * @version BETA
  */
-public interface GUILayout {
-
-
-    /** Gets the name of the GUILayout, which should be unique to this layout
-     *
-     * @return the name (id) of this layout
-     */
-    String getName();
+public interface GUILayout extends VisibilitySwitch {
 
     /** Render Components given the parent matrix, and the renderer
     *  @param uMVPMatrix the matrix that describes the model view projection transformations
@@ -40,4 +36,11 @@ public interface GUILayout {
      */
     boolean onTouch(MotionEvent e);
 
+
+    /** Due to complexities with references, this can't be in the constructor
+     *
+     * @param context a context object used to load resources
+     * @param allLayouts a hash map that links layout names with actual objects
+     */
+    void loadComponents(Context context, HashMap<String,GUILayout> allLayouts);
 }

@@ -1,7 +1,10 @@
 package enigmadux2d.core.shaders;
 
 import android.content.Context;
+import android.opengl.GLES30;
 import android.util.Log;
+
+import java.util.Arrays;
 
 import enigmadux2d.core.quadRendering.QuadMesh;
 
@@ -28,10 +31,17 @@ public class GUIShader extends ShaderProgram {
      */
     private static final String TEXTURE_KEYWORD = "Texture";
 
+    /** The keyword used for the shader (channel filter), located in the fragment shader file
+     *
+     */
+    private static final String SHADER_KEYWORD = "shader";
+
     //pointer to the texture variable in the fragment shader file
     private int textureLocation;
     //pointer to the matrix in the vertex shader file
     private int matrixLocation;
+    //pointer to the "shader" variable in the fragment shader file, which filters channels
+    private int shaderLocation;
 
 
     /** Default constructor
@@ -63,6 +73,9 @@ public class GUIShader extends ShaderProgram {
         this.textureLocation = this.getUniformLocation(GUIShader.TEXTURE_KEYWORD);
         //get the matrix location
         this.matrixLocation = this.getUniformLocation(GUIShader.MATRIX_KEYWORD);
+        //get the shader location
+        this.shaderLocation = this.getUniformLocation(GUIShader.SHADER_KEYWORD);
+        Log.d("SHADER","Shader loc: " + this.shaderLocation);
     }
 
     /** Writes the texture, and binds it to the shader
@@ -79,5 +92,13 @@ public class GUIShader extends ShaderProgram {
      */
     public void writeMatrix(float[] matrix){
         super.writeMatrix(this.matrixLocation,matrix);
+    }
+
+    /** Writes the shader uniform variable, which filters RGBA channels
+     *
+     * @param shader a four float vector that represents the actual shader
+     */
+    public void writeShader(float[] shader){
+        GLES30.glUniform4fv(this.shaderLocation,1,shader,0);
     }
 }

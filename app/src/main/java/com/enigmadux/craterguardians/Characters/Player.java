@@ -134,6 +134,9 @@ public abstract class Player extends BaseCharacter {
      */
     protected abstract ProgressBar createAttackChargeUp();
 
+
+
+
     /** Helper method that helps computes the alpha during the flashing animation: todo make it so values where the reload time is high it does more flashes as to keep each wavelength the same
      *
      * @param t amount of time thats passed by (from 0 to 1)
@@ -427,6 +430,12 @@ public abstract class Player extends BaseCharacter {
      * @return the level of this type of variable
      */
     public abstract int getPlayerLevel();
+
+    /** Gets the pointer (R.drawable.*) to the icon of the player
+     *
+     * @return the pointer (R.drawable.*) to the icon of the player
+     */
+    public abstract int getPlayerIcon();
 
     /** Sees if the player is evolving so the backend can pause everything else
      *

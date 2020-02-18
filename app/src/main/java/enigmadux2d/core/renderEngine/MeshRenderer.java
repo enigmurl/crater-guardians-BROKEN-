@@ -44,15 +44,21 @@ public class MeshRenderer {
 
     }
 
+    /** Starts the rendering process, by attaching our shader
+     *
+     */
+    public void startRendering(){
+        //bind the program we made earlier that has our shaders on it
+        GLES30.glUseProgram(this.shaderProgram.getProgramID());
+
+    }
+
 
     /** Renders a collection of the same object using instancing
      *
      * @param instances the instances to be rendered
      */
     public void renderCollection(VaoCollection instances){
-        //bind the program we made earlier that has our shaders on it
-        GLES30.glUseProgram(this.shaderProgram.getProgramID());
-
         //first bind the vertex array
         GLES30.glBindVertexArray(instances.getVaoID());
 
