@@ -29,7 +29,7 @@ import enigmadux2d.core.EnigmaduxComponent;
  */
 public class TexturedRect extends EnigmaduxComponent {
     //the maximum dimension of a bitmap allowed
-    private static final int MAX_DIMENIONS = 512;
+    private static final int MAX_DIMENIONS = 1024;
 
    private static final String vertexShaderCode =
            "precision mediump float;" +

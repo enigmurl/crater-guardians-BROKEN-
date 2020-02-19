@@ -21,6 +21,8 @@ import com.enigmadux.craterguardians.GUILib.Button;
 import com.enigmadux.craterguardians.GUILib.GUILayout;
 import com.enigmadux.craterguardians.GUILib.InGameTextbox;
 import com.enigmadux.craterguardians.GUILib.ProgressBar;
+import com.enigmadux.craterguardians.GUILib.dynamicText.DynamicText;
+import com.enigmadux.craterguardians.GUILib.dynamicText.TextMesh;
 import com.enigmadux.craterguardians.GUIs.characterSelect.CharacterSelectLayout;
 import com.enigmadux.craterguardians.GUIs.homeScreen.HomeScreen;
 import com.enigmadux.craterguardians.GUIs.inGameScreen.InGameScreen;
@@ -207,6 +209,12 @@ public class CraterRenderer extends EnigmaduxGLRenderer {
     private GUIDataWrapper guiData;
 
     private HashMap<String,GUILayout> layoutHashMap;
+
+    /** Dynamic text
+     *
+     */
+    private DynamicText text;
+    private TextMesh testMesh;
 
     /** Constructor to set the handed over context
      *
@@ -398,9 +406,6 @@ public class CraterRenderer extends EnigmaduxGLRenderer {
         //if loading hasn't rendered return
         if (this.renderLoadingScreen()) return;
 
-        this.guiData.renderData(this.vPMatrix,this.quadRenderer);
-
-
         if ((this.backend.getCurrentGameState() != CraterBackend.GAME_STATE_HOMESCREEN) && this.gameScreenLayout.isVisible()) {
 
                 float deltaX = this.player.getDeltaX();
@@ -466,6 +471,8 @@ public class CraterRenderer extends EnigmaduxGLRenderer {
 
         }
         this.guiData.renderData(this.vPMatrix,this.quadRenderer);
+        Matrix.scaleM(this.vPMatrix,0,0.125f,0.25f,0);
+        this.text.renderText(this.testMesh,this.vPMatrix);
     }
 
     /** Gets the Default camera position. The greater the value the farther away the camera "is";
@@ -534,6 +541,7 @@ public class CraterRenderer extends EnigmaduxGLRenderer {
                 break;
             case 6:
                 Log.d("RENDERER","Loading step: 6");
+
                 this.player = new Kaiser();
                 this.backend.setPlayer(this.player);
 
@@ -599,7 +607,10 @@ public class CraterRenderer extends EnigmaduxGLRenderer {
 
 
                 homeScreen.setVisibility(true);
-
+            case 10:
+                this.text = new DynamicText(this.context,R.drawable.baloo_bhaina_texture_atlas,R.raw.baloo_bhaina_atlas);
+                this.testMesh = this.text.generateTextMesh("TeST.!<5>",new float[]{1,1,1,1});
+            case 11:
                 this.loadingCompleted = true;
                 break;
         }

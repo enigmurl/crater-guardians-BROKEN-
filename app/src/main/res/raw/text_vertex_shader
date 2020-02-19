@@ -1,0 +1,13 @@
+precision mediump float;
+
+uniform mat4 mvpMatrix;
+
+attribute vec4 position;
+attribute vec2 texture_cord;
+
+varying vec2 texture_cord_pass;
+
+void main(){
+    gl_Position = mvpMatrix * position;
+    texture_cord_pass = texture_cord;
+}

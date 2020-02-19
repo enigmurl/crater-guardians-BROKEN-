@@ -110,6 +110,33 @@ public class QuadTexture {
 
         this.texture[0] = texturePointer;
     }
+//    /** Default Constructor, most likely will only work in a GL THREAD
+//     *
+//     * @param texture a bitmap representing the image
+//     * @param x the center x position of the texture
+//     * @param y the center y position of the texture
+//     * @param w the width of the texture
+//     * @param h the height of the texture
+//     */
+//    public QuadTexture(Bitmap texture,float x,float y,float w,float h){
+//        //create a texture id at the specified location in the array
+//        GLES30.glGenTextures(1, this.texture, 0);
+//
+//        //now bind it with the array
+//        GLES30.glBindTexture(GLES30.GL_TEXTURE_2D, this.texture[0]);
+//
+//        // create nearest filtered texture
+//        GLES30.glTexParameteri(GLES30.GL_TEXTURE_2D, GLES30.GL_TEXTURE_MIN_FILTER, GLES30.GL_LINEAR);
+//        GLES30.glTexParameteri(GLES30.GL_TEXTURE_2D, GLES30.GL_TEXTURE_MAG_FILTER, GLES30.GL_LINEAR);
+//
+//
+//        // Use Android GLUtils to specify a two-dimensional texture image from our bitmap
+//        GLUtils.texImage2D(GLES30.GL_TEXTURE_2D, 0, texture, 0);
+//
+//
+//        //bitmap no longer needed
+//        texture.recycle();
+//    }
 
     /** load an ANDROID texture pointer (R.drawable.*)
      *

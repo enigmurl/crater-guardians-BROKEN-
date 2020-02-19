@@ -65,6 +65,16 @@ public abstract class ShaderProgram {
         //just ask openGL for the uniform location
         return GLES30.glGetUniformLocation(this.programID,uniformName);
     }
+    /** Gets a attribute location so that the uniform value can be changed later on
+     *
+     * @param attributeName the string value in the code that the variable is named
+     * @return the location of the attribute variable (well the int represents the location, use this number for other methods
+     *         in this class when it asks for the location)
+     */
+    protected int getAttributeLocation(String attributeName){
+        //just ask openGL for the attribute location
+        return GLES30.glGetAttribLocation(this.programID,attributeName);
+    }
 
     /**  Writes a float value to a uniform variable
      *
