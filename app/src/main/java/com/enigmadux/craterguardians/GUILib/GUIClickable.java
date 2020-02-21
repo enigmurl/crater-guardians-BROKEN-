@@ -2,9 +2,10 @@ package com.enigmadux.craterguardians.GUILib;
 
 import android.content.Context;
 import android.opengl.Matrix;
-import android.util.Log;
 import android.view.MotionEvent;
 
+import com.enigmadux.craterguardians.GUILib.dynamicText.DynamicText;
+import com.enigmadux.craterguardians.GUILib.dynamicText.TextMesh;
 import com.enigmadux.craterguardians.LayoutConsts;
 import com.enigmadux.craterguardians.MathOps;
 
@@ -20,6 +21,11 @@ import enigmadux2d.core.quadRendering.QuadTexture;
  *
  */
 public abstract class GUIClickable extends QuadTexture implements VisibilitySwitch {
+
+    /** Rounded Button corner radius / width of entire image
+     *
+     */
+    private static final float ROUNDED_CORNER_SIZE = 77f/256;
 
     /**
      * The scale factor when it's pushed down
@@ -38,27 +44,58 @@ public abstract class GUIClickable extends QuadTexture implements VisibilitySwit
      */
     private final float[] scalarMatrix = new float[16];
 
+    /** This translates the text to the appropriate place
+     *
+     */
+    private final float[] textTranslationMatrix = new float[16];
+    /** Scales the text to the appropriate place
+     *
+     */
+    private final float[] textScalarMatrix = new float[16];
+    /** Transforms the text to the appropriate location
+     *
+     */
+    private final float[] textTransformationMatrix = new float[16];
+
     /**
      * This is where intermediate dumping of the the matrices is put into
      */
     private final float[] finalMatrix = new float[16];
 
 
+    /** Text that will be shown to the screen,it's really just vertices and texture cords if it's null, no text is rendered
+     *
+     */
+    private TextMesh visibleText;
+
+    /** This is the actual text that needs to be rendered
+     *
+     */
+    private String text;
+
+    /** The height of the text that should be rendered
+     *
+     */
+    private float fontSize;
+
     /**
      * Default Constructor
-     *
      * @param context        any context that can get resources
      * @param texturePointer a texture pointer in the form of R.drawable.*;
      * @param x              the center x position of the texture
      * @param y              the center y position of the texture
      * @param w              the width of the texture (which will be scaled down to accommodate screen size
      * @param h              the height of the texture
+     * @param isRounded      if the button is rounded, it will use the default button values,
      */
-    protected GUIClickable(Context context, int texturePointer, float x, float y, float w, float h) {
+    protected GUIClickable(Context context, int texturePointer, float x, float y, float w, float h, boolean isRounded) {
         super(context, texturePointer, x, y, w * LayoutConsts.SCREEN_HEIGHT/LayoutConsts.SCREEN_WIDTH, h);
         Matrix.setIdentityM(this.scalarMatrix, 0);
         Matrix.scaleM(this.scalarMatrix, 0, GUIClickable.BUTTON_DOWN_SCALEFACTOR, GUIClickable.BUTTON_DOWN_SCALEFACTOR, 0);
 
+        if (isRounded){
+            this.enableRounding();
+        }
     }
 
     /** Default Constructor, most likely will only work in a GL THREAD
@@ -73,6 +110,21 @@ public abstract class GUIClickable extends QuadTexture implements VisibilitySwit
         super(texturePointer, x, y, w * LayoutConsts.SCREEN_HEIGHT/LayoutConsts.SCREEN_WIDTH, h);
         Matrix.setIdentityM(this.scalarMatrix, 0);
         Matrix.scaleM(this.scalarMatrix, 0, GUIClickable.BUTTON_DOWN_SCALEFACTOR, GUIClickable.BUTTON_DOWN_SCALEFACTOR, 0);
+    }
+
+    /** Enables rounded corners with the radius provided (relative to a unit square
+     *
+     * @param cornerSize radius of corner/totalWidth
+     */
+    public void enableRounding(float cornerSize){
+        this.cornerSize = cornerSize;
+    }
+
+    /** Enables default value rounding
+     *
+     */
+    public void enableRounding(){
+        this.enableRounding(GUIClickable.ROUNDED_CORNER_SIZE);
     }
 
 
@@ -161,6 +213,31 @@ public abstract class GUIClickable extends QuadTexture implements VisibilitySwit
         }
     }
 
+    /** Renders text, if there is any
+     *
+     * @param renderer the renderer with the font's loaded and such
+     * @param parentMatrix the mvp matrix that describe model view projection transformations
+     */
+    public void renderText(DynamicText renderer,float[] parentMatrix){
+        if (this.text != null && (this.visibleText == null || ! this.visibleText.getActualText().equals(this.text))){
+            this.visibleText = renderer.generateTextMesh(this.text,LayoutConsts.CRATER_FLOAT_TEXT_COLOR);
+
+        }
+        if (this.visibleText != null) {
+            float additionalScale = (this.isDown) ?  GUIClickable.BUTTON_DOWN_SCALEFACTOR:1;
+            Matrix.setIdentityM(textTranslationMatrix,0);
+            //3/2 for the y component bc idk
+            Matrix.translateM(textTranslationMatrix,0,-additionalScale *this.fontSize * LayoutConsts.SCREEN_HEIGHT / LayoutConsts.SCREEN_WIDTH * this.visibleText.getW()/2 + this.x,-additionalScale * this.fontSize * 3 *this.visibleText.getH()/2 + this.y,0);
+            Matrix.setIdentityM(textScalarMatrix,0);
+            Matrix.scaleM(textScalarMatrix,0,additionalScale *this.fontSize * LayoutConsts.SCREEN_HEIGHT / LayoutConsts.SCREEN_WIDTH, additionalScale * this.fontSize, 1);
+            Matrix.multiplyMM(textTransformationMatrix,0,textTranslationMatrix,0,textScalarMatrix,0);
+            Matrix.multiplyMM(finalMatrix,0,parentMatrix,0,textTransformationMatrix,0);
+
+            renderer.renderText(this.visibleText, finalMatrix);
+        }
+    }
+
+
     /** Handles touch events
      *
      * @param e  motion event object that describes the touch event
@@ -180,4 +257,20 @@ public abstract class GUIClickable extends QuadTexture implements VisibilitySwit
         }
         return false;
     }
+
+
+    /** Updates the new text
+     *
+     * @param newText the new text that should be rendered
+     * @param fontSize the height of the font
+     */
+    public void updateText(String newText,float fontSize){
+        this.text = newText;
+        this.fontSize = fontSize;
+
+    }
+
+
+
+
 }

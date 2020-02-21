@@ -32,12 +32,13 @@ public class PostGameVisibilityButton extends VisibilityInducedButton {
      * @param objectToHide the object that should be hidden
      * @param objectToShow the object that should be shown when the button is pressed
      * @param backendThread the backend thread
+     * @param isRounded if the corners are rounded
      */
     public PostGameVisibilityButton(Context context, int texturePointer,
                                        float x, float y, float w, float h,
                                        PostGameLayout objectToHide, GUILayout objectToShow,
-                                       CraterBackendThread backendThread) {
-        super(context, texturePointer, x, y, w, h, objectToHide, objectToShow);
+                                       CraterBackendThread backendThread,boolean isRounded) {
+        super(context, texturePointer, x, y, w, h, objectToHide, objectToShow, false);
 
         this.backendThread = backendThread;
     }

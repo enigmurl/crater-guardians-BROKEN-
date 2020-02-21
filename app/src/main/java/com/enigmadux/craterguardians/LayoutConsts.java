@@ -10,6 +10,11 @@ public class LayoutConsts {
      *
      */
     public static final int CRATER_TEXT_COLOR = 0xFFFFFFAA;// 0xFF99462D;
+
+    /** Serves as the color of the majority of the text, in float[] form
+     *
+     */
+    public static final float[] CRATER_FLOAT_TEXT_COLOR = new float[] {1,1,0.664f,1};
     /** Serves as the color of the level buttons, the color is black
      *
      */

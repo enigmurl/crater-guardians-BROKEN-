@@ -2,10 +2,19 @@ precision mediump float;
 uniform vec4 shader;
 uniform sampler2D Texture;
 
+uniform float cornerSize;
+uniform float aspectRatio;
 
 varying lowp vec2 pass_textureCord;
 
 
 void main() {
-    gl_FragColor = shader *  texture2D(Texture,pass_textureCord);
+
+    float u = (cornerSize == 0.0) ? 0.0:
+                (pass_textureCord.x < cornerSize/aspectRatio) ? pass_textureCord.x * aspectRatio:
+                (pass_textureCord.x > 1.0- cornerSize/aspectRatio) ? 1.0 - (1.0 - pass_textureCord.x) * aspectRatio:
+                (pass_textureCord.x - cornerSize/aspectRatio) * (1.0 - 2.0 * cornerSize)/(1.0 - 2.0 * cornerSize/aspectRatio) + cornerSize;
+
+
+    gl_FragColor = shader *  texture2D(Texture,(cornerSize == 0.0) ? pass_textureCord:vec2(u,pass_textureCord.y));
 }

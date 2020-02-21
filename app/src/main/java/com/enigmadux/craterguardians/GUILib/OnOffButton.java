@@ -30,7 +30,7 @@ public class OnOffButton extends GUIClickable {
      * @param h              the height of the texture
      */
     public OnOffButton(Context context,int texturePointer,float x,float y,float w,float h){
-        super(context, texturePointer, x, y, w, h);
+        super(context, texturePointer, x, y, w, h, false);
         this.shader = OnOffButton.OFF_SHADER;
     }
     /** Handles when the user slides off the button

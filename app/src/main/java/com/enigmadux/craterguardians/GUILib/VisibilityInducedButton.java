@@ -1,7 +1,6 @@
 package com.enigmadux.craterguardians.GUILib;
 
 import android.content.Context;
-import android.util.Log;
 import android.view.MotionEvent;
 
 
@@ -30,11 +29,12 @@ public class VisibilityInducedButton extends GUIClickable {
      * @param h the height of the texture
      * @param objectToHide the object that should be hidden
      * @param objectToShow the object that should be shown when the button is presssed
+     * @param isRounded if the image has rounded off corners
      */
     public VisibilityInducedButton(Context context, int texturePointer,
-                                      float x, float y, float w, float h,
-                                      VisibilitySwitch objectToHide,VisibilitySwitch objectToShow) {
-        super(context, texturePointer, x, y, w, h);
+                                   float x, float y, float w, float h,
+                                   VisibilitySwitch objectToHide, VisibilitySwitch objectToShow, boolean isRounded) {
+        super(context, texturePointer, x, y, w, h, isRounded);
 
         this.objectToHide = objectToHide;
         this.objectToShow = objectToShow;

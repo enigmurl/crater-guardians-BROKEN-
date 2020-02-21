@@ -4,6 +4,7 @@ import android.content.Context;
 import android.view.MotionEvent;
 
 import com.enigmadux.craterguardians.GUILib.GUILayout;
+import com.enigmadux.craterguardians.GUILib.dynamicText.DynamicText;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -115,12 +116,13 @@ public class GUIDataWrapper {
      *
      * @param mvpMatrix the parent matrix, though there might not be that much data since it's just GUIs
      * @param quadRenderer a renderer that can display quads to the screen
+     * @param textRenderer renders text components
      */
-    public void renderData(float[] mvpMatrix, QuadRenderer quadRenderer){
+    public void renderData(float[] mvpMatrix, QuadRenderer quadRenderer, DynamicText textRenderer){
         quadRenderer.startRendering();
         for (int i = 0,size = layouts.size();i<size;i++){
             //render current layout
-            this.layouts.get(i).render(mvpMatrix,quadRenderer);
+            this.layouts.get(i).render(mvpMatrix,quadRenderer, textRenderer);
         }
     }
 

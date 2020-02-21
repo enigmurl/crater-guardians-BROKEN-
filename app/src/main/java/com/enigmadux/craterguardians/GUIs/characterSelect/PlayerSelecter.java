@@ -38,7 +38,7 @@ public class PlayerSelecter extends GUIClickable {
     public PlayerSelecter(Context context, int texturePointer,
                           float x, float y, float w, float h,
                           Player player,CharacterSelectLayout characterSelectLayout) {
-        super(context, texturePointer, x, y, w, h);
+        super(context, texturePointer, x, y, w, h, false);
 
         //assign attributes
         this.mPlayer = player;

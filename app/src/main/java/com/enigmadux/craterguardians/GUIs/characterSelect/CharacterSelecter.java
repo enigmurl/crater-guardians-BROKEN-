@@ -4,9 +4,9 @@ import android.content.Context;
 import android.view.MotionEvent;
 
 import com.enigmadux.craterguardians.Characters.Player;
-import com.enigmadux.craterguardians.CraterBackend;
 import com.enigmadux.craterguardians.CraterRenderer;
 import com.enigmadux.craterguardians.GUILib.GUIClickable;
+import com.enigmadux.craterguardians.values.STRINGS;
 
 
 /** This actually selects the current character, by telling crater renderer
@@ -34,12 +34,13 @@ public class CharacterSelecter extends GUIClickable {
      * @param y              the center y position of the texture
      * @param w              the width of the texture (which will be scaled down to accommodate screen size
      * @param h              the height of the texture
-     * @param renderer        A Backend object used to change the current player
+     * @param renderer       A Backend object used to change the current player
+     * @param isRounded      if the object has rounded corners
      */
     public CharacterSelecter(Context context, int texturePointer,
                           float x, float y, float w, float h,
-                             CraterRenderer renderer) {
-        super(context, texturePointer, x, y, w, h);
+                             CraterRenderer renderer,boolean isRounded) {
+        super(context, texturePointer, x, y, w, h, isRounded);
 
         this.renderer = renderer;
     }
@@ -99,5 +100,6 @@ public class CharacterSelecter extends GUIClickable {
      */
     public void updateCurrentPlayer(Player newPlayer){
         this.currentPlayer = newPlayer;
+        this.updateText(STRINGS.CHARACTER_SELECTER_TEXT + newPlayer,0.1f);
     }
 }

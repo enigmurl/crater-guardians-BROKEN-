@@ -6,6 +6,7 @@ import android.view.MotionEvent;
 import com.enigmadux.craterguardians.CraterBackendThread;
 import com.enigmadux.craterguardians.GUILib.GUIClickable;
 import com.enigmadux.craterguardians.GUILib.GUILayout;
+import com.enigmadux.craterguardians.GUILib.dynamicText.DynamicText;
 import com.enigmadux.craterguardians.R;
 import com.enigmadux.craterguardians.values.STRINGS;
 
@@ -69,12 +70,14 @@ public class PostGameLayout implements GUILayout {
         this.clickables.add(new PostGameVisibilityButton(context, R.drawable.home_button,
                 0,-0.4f,0.4f,0.4f,
                 this,allLayouts.get(STRINGS.HOME_SCREEN_LAYOUT_ID)
-                ,this.backend));
+                ,this.backend,false));
 
         //go to levels
-        this.clickables.add(new PostGameVisibilityButton(context, R.drawable.button_background,
+        PostGameVisibilityButton levelsButton = new PostGameVisibilityButton(context, R.drawable.button_background,
                 0,0.1f,0.4f,0.4f,
-                this,allLayouts.get(STRINGS.LEVEL_SELECT_LAYOUT_ID),this.backend));
+                this,allLayouts.get(STRINGS.LEVEL_SELECT_LAYOUT_ID),this.backend,true);
+        levelsButton.updateText(STRINGS.BACK_TO_LEVELS_BUTTON,0.1f);
+        this.clickables.add(levelsButton);
 
         //play next level
         this.clickables.add(new PlayNextLevel(context,R.drawable.resume_button,
@@ -117,15 +120,18 @@ public class PostGameLayout implements GUILayout {
     }
 
     /** Renders sub components
-     *
-     * @param uMVPMatrix the matrix that describes the model view projection transformations
+     *  @param uMVPMatrix the matrix that describes the model view projection transformations
      * @param renderer the renderer that will be passed on using recursion, unless it's a level 0 (direct components), where it
+     * @param textRenderer this renders text efficiently as opposed to rendering quads
      */
     @Override
-    public void render(float[] uMVPMatrix, QuadRenderer renderer) {
+    public void render(float[] uMVPMatrix, QuadRenderer renderer, DynamicText textRenderer) {
         if (this.isVisible) {
             renderer.renderQuad(this.background,uMVPMatrix);
             renderer.renderQuads(this.clickables, uMVPMatrix);
+            for (int i = 0,size = this.clickables.size();i<size;i++){
+                this.clickables.get(i).renderText(textRenderer,uMVPMatrix);
+            }
         }
     }
 

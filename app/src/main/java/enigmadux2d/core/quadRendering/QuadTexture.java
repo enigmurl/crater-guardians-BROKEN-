@@ -9,6 +9,7 @@ import android.opengl.Matrix;
 import android.util.Log;
 import android.util.SparseIntArray;
 
+import com.enigmadux.craterguardians.LayoutConsts;
 import com.enigmadux.craterguardians.R;
 
 import java.util.HashMap;
@@ -54,6 +55,11 @@ public class QuadTexture {
      *
      */
     protected float[] shader = new float[] {1,1,1,1};
+
+    /**float 0 to 1, represenitng radius of corner/ widht of texture in square form
+     *
+     */
+    protected float cornerSize;
 
 
     /** Default Constructor, most likely will only work in a GL THREAD
@@ -201,6 +207,23 @@ public class QuadTexture {
      */
     public float[] getShader(){
         return this.shader;
+    }
+
+    /** Gets the corner size
+     *
+     * @return float 0 to 1, represenitng radius of corner/ widht of texture in square form
+     */
+    public float getCornerSize(){
+        return this.cornerSize;
+    }
+
+    /** Gets the aspect ratio when finally displayed to the screen;
+     *
+     * @return the aspect ratio when finally displayed to the screen
+     *
+     */
+    public float getAspectRatio(){
+        return this.w/this.h * LayoutConsts.SCREEN_WIDTH/LayoutConsts.SCREEN_HEIGHT;
     }
 
 

@@ -7,7 +7,6 @@ import com.enigmadux.craterguardians.CraterBackend;
 import com.enigmadux.craterguardians.CraterBackendThread;
 import com.enigmadux.craterguardians.GUILib.GUILayout;
 import com.enigmadux.craterguardians.GUILib.VisibilityInducedButton;
-import com.enigmadux.craterguardians.GUILib.VisibilitySwitch;
 
 /** Enters either the game, or the home screen/ level select
  *
@@ -33,12 +32,13 @@ public class PauseScreenVisibilityButton extends VisibilityInducedButton {
      * @param objectToHide the object that should be hidden
      * @param objectToShow the object that should be shown when the button is pressed
      * @param backendThread the backend thread
+     * @param isRounded whether or not it has rounded corners
      */
     public PauseScreenVisibilityButton(Context context, int texturePointer,
                                        float x, float y, float w, float h,
                                        PauseGameLayout objectToHide, GUILayout objectToShow,
-                                       CraterBackendThread backendThread) {
-        super(context, texturePointer, x, y, w, h, objectToHide, objectToShow);
+                                       CraterBackendThread backendThread, boolean isRounded) {
+        super(context, texturePointer, x, y, w, h, objectToHide, objectToShow, isRounded);
 
         this.backendThread = backendThread;
     }

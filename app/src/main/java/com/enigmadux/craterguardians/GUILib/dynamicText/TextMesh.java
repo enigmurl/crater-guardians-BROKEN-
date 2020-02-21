@@ -38,16 +38,39 @@ public class TextMesh {
      */
     private IntBuffer elementArray;
 
+    /** The actual text that this displays
+     *
+     */
+    private String actualText;
+
+    /** The calculated widht
+     *
+     */
+    private float w;
+    /** The calculated height
+     *
+     */
+    private float h;
+
     /** A text mesh
      *
+     * @param actualText the actual text that this display
      * @param vertices the vertices, in a normal fashion
      * @param textureCords the texture cords, in a normal fashion GLES30.TRIANGLES ()
      * @param shader a shader in the form of rgba that dictates color
      */
-    public TextMesh(float[] vertices,float[] textureCords,float[] shader){
+    public TextMesh(String actualText,float[] vertices,float[] textureCords,float[] shader){
+        this.actualText = actualText;
         this.vertices = this.pushDataInFloatBuffer(vertices);
         this.textureCords = this.pushDataInFloatBuffer(textureCords);
         this.shader = shader;
+
+
+        //[x,y,z...x,      y,      z ]
+        //[0,1,2...len - 3,len - 2,len - 1]
+        this.w = vertices[vertices.length - 3] - vertices[0];
+        //for now it's always 1
+        this.h = 1;
 
         int[] elementArray = new int[vertices.length/2];
 
@@ -141,5 +164,29 @@ public class TextMesh {
      */
     public IntBuffer getElementArray() {
         return elementArray;
+    }
+
+    /** Gets the actual text that this displays
+     *
+     * @return the actual text that this displays
+     */
+    public String getActualText() {
+        return actualText;
+    }
+
+    /** gets the width of the mesh
+     *
+     * @return the height of the mesh
+     */
+    public float getW(){
+        return this.w;
+    }
+
+    /** Gets the height of the mesh
+     *
+     * @return the height of the mesh
+     */
+    public float getH(){
+        return this.h;
     }
 }

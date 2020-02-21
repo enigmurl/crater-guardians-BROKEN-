@@ -5,12 +5,11 @@ import android.view.MotionEvent;
 
 import com.enigmadux.craterguardians.CraterBackend;
 import com.enigmadux.craterguardians.CraterBackendThread;
-import com.enigmadux.craterguardians.FileStreams.LevelData;
 import com.enigmadux.craterguardians.GUILib.GUIClickable;
 import com.enigmadux.craterguardians.GUILib.GUILayout;
 import com.enigmadux.craterguardians.GUILib.VisibilityInducedButton;
+import com.enigmadux.craterguardians.GUILib.dynamicText.DynamicText;
 import com.enigmadux.craterguardians.GUIs.inGameScreen.InGameScreen;
-import com.enigmadux.craterguardians.GUIs.pauseGameScreen.PauseGameLayout;
 import com.enigmadux.craterguardians.GameMap;
 import com.enigmadux.craterguardians.LayoutConsts;
 import com.enigmadux.craterguardians.R;
@@ -91,7 +90,7 @@ public class LevelSelectLayout implements GUILayout {
         //the home button);
         this.clickables.add(new VisibilityInducedButton(context, R.drawable.home_button,
                 0,-0.4f,0.4f,0.4f,
-                this,allLayouts.get(STRINGS.HOME_SCREEN_LAYOUT_ID)));
+                this,allLayouts.get(STRINGS.HOME_SCREEN_LAYOUT_ID), false));
 
 
         float scaleX = (float) LayoutConsts.SCREEN_HEIGHT/LayoutConsts.SCREEN_WIDTH;
@@ -110,14 +109,17 @@ public class LevelSelectLayout implements GUILayout {
     }
 
     /** Renders sub components
-     *
-     * @param uMVPMatrix the matrix that describes the model view projection transformations
+     *  @param uMVPMatrix the matrix that describes the model view projection transformations
      * @param renderer the renderer that will be passed on using recursion, unless it's a level 0 (direct components), where it
-     */
+     * @param textRenderer this renders text efficiently as opposed to rendering quads
+ e     */
     @Override
-    public void render(float[] uMVPMatrix, QuadRenderer renderer) {
+    public void render(float[] uMVPMatrix, QuadRenderer renderer, DynamicText textRenderer) {
         if (this.isVisible) {
             renderer.renderQuads(this.clickables, uMVPMatrix);
+            for (int i = 0,size = this.clickables.size();i<size;i++){
+                this.clickables.get(i).renderText(textRenderer,uMVPMatrix);
+            }
         }
     }
 

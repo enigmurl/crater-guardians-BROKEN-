@@ -81,6 +81,8 @@ public class QuadRenderer {
         this.guiShader.writeTexture(quad.getTexture());
         //then write the shader variable
         this.guiShader.writeShader(quad.getShader());
+        //write aspect ratio
+        this.guiShader.writeCornerInfo(quad.getCornerSize(),quad.getAspectRatio());
 
         //finally draw the quad
         GLES30.glDrawArrays(GLES30.GL_TRIANGLE_STRIP,0,this.mesh.getVertexCount());
@@ -115,6 +117,8 @@ public class QuadRenderer {
             this.guiShader.writeTexture(quads.get(i).getTexture());
             //then write the shader variable
             this.guiShader.writeShader(quads.get(i).getShader());
+            //write aspect ratio
+            this.guiShader.writeCornerInfo(quads.get(i).getCornerSize(),quads.get(i).getAspectRatio());
 
             //finally draw the quad
 

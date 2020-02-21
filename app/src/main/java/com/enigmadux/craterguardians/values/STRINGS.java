@@ -42,6 +42,29 @@ public class STRINGS {
      */
     public static final String POST_GAME_LAYOUT_ID = "POST_GAME";
 
+    //these are stuff that need to be updated per locale
+    /** The text of the character select button in the home screen
+     *
+     */
+    public static final String CHARACTER_SELECT_BUTTON_TEXT = "Choose Character";
+    /** The text of the level select button in the home screen
+     *
+     */
+    public static final String LEVEL_SELECT_BUTTON_TEXT = "Choose Level";
+    /** The base of value of the character select button in the character select layout
+     *
+     */
+    public static final String CHARACTER_SELECTER_TEXT = "Select: ";
+
+    /** The base value of a level button
+     *
+     */
+    public static final String LEVEL_BUTTON_BASE_TEXT  = "Level: ";
+
+    /** The text that is displayed in the pause, and post game layouts, that indicates to go back to the level select layout
+     *
+     */
+    public static final String BACK_TO_LEVELS_BUTTON = "Choose Another Level";
 
 
 

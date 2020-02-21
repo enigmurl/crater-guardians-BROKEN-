@@ -21,6 +21,10 @@ import enigmadux2d.core.shaders.TextShader;
 
 /** Draws text on the spot rather than having to reload
  *
+ * DEBUG MAJOR NOTICE
+ * MAJOR NOTICE:::: ********||||||||||||||||||||||||||***************||||||||||||||*********
+ * FONT CREATES SPACES AS " ", WHICH THE SCANNER SKIPS OVER, SO YOU MUST RENAME IT TOO &space; for it too work
+ *
  * @author Manu Bhat
  * @version BETA
  *
@@ -30,12 +34,12 @@ public class DynamicText {
     /** xml escape characters
      *
      */
-    private static final String[] ESCAPE_CHARACTERS = new String[] {"&lt;", "&amp;", "&gt;", "&quot;","&apos;"};
+    private static final String[] ESCAPE_CHARACTERS = new String[] {"&lt;", "&amp;", "&gt;", "&quot;","&apos;","space"};
 
     /** String counter parts
      *
      */
-    private static final char[] ESCAPE_COUNTERPARTS = new char[] {'<','&','>','\"','\''};
+    private static final char[] ESCAPE_COUNTERPARTS = new char[] {'<','&','>','\"','\'',' '};
 
     /** Max length of a string (in characters)
      *
@@ -299,10 +303,12 @@ public class DynamicText {
             positions[12*i + 4] = y - h;
             positions[12*i + 6] = x + w;
             positions[12*i + 7] = y;
-            positions[12*i + 9] = x+w;
+            positions[12*i + 9] = x + w;
             positions[12*i + 10] = y - h;
 
-
+            if (text.charAt(i) == ' '){
+                Log.d("DYNAMIC TEXT SPACE","X travel: " + dynamicChar.xTravel);
+            }
             offsetX += dynamicChar.xTravel;
 
         }
@@ -311,7 +317,7 @@ public class DynamicText {
         Log.d("DYNAMIC TEXT","Positions: " + Arrays.toString(positions));
         Log.d("DYNAMIC TEXT","Texture cords: " + Arrays.toString(textureCords));
 
-        return new TextMesh(positions,textureCords,shader);
+        return new TextMesh(text,positions,textureCords,shader);
     }
 
 

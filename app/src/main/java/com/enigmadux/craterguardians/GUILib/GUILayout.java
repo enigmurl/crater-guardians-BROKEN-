@@ -3,6 +3,8 @@ package com.enigmadux.craterguardians.GUILib;
 import android.content.Context;
 import android.view.MotionEvent;
 
+import com.enigmadux.craterguardians.GUILib.dynamicText.DynamicText;
+
 import java.util.HashMap;
 
 import enigmadux2d.core.quadRendering.QuadRenderer;
@@ -22,11 +24,12 @@ import enigmadux2d.core.quadRendering.QuadRenderer;
  */
 public interface GUILayout extends VisibilitySwitch {
 
-    /** Render Components given the parent matrix, and the renderer
-    *  @param uMVPMatrix the matrix that describes the model view projection transformations
-    * @param renderer the renderer that will be passed on using recursion, unless it's a level 0 (direct components), where it
+    /** Render Components given the parent matrix, and the renderer, as well as text components
+     * @param uMVPMatrix the matrix that describes the model view projection transformations
+     * @param renderer the renderer that will be passed on using recursion, unless it's a level 0 (direct components), where it
+     * @param textRenderer this renders text efficiently as opposed to rendering quads
      */
-    void render(float[] uMVPMatrix, QuadRenderer renderer);
+    void render(float[] uMVPMatrix, QuadRenderer renderer, DynamicText textRenderer);
 
 
     /** On a touch event, this processes it

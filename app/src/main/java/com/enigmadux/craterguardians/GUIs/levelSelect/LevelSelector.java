@@ -9,6 +9,7 @@ import com.enigmadux.craterguardians.CraterBackendThread;
 import com.enigmadux.craterguardians.GUILib.GUIClickable;
 import com.enigmadux.craterguardians.GUILib.GUILayout;
 import com.enigmadux.craterguardians.SoundLib;
+import com.enigmadux.craterguardians.values.STRINGS;
 
 /** When pressed, it goes into the game with the corresponding level number
  *
@@ -58,7 +59,7 @@ public class LevelSelector extends GUIClickable {
     public LevelSelector(Context context, int texturePointer, float x, float y, float w, float h,
                          LevelSelectLayout levelSelectLayout, GUILayout inGameScreen,
                          CraterBackendThread backendThread, int levelNum) {
-        super(context, texturePointer, x, y, w, h);
+        super(context, texturePointer, x, y, w, h, false);
 
         this.levelSelectLayout = levelSelectLayout;
         this.inGameScreen = inGameScreen;
@@ -66,6 +67,8 @@ public class LevelSelector extends GUIClickable {
         this.backendThread = backendThread;
 
         this.levelNum = levelNum;
+
+        this.updateText(STRINGS.LEVEL_BUTTON_BASE_TEXT + levelNum,0.05f);
     }
 
 

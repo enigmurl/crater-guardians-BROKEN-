@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <Font size="45" family="Baloo Bhaina" height="161" style="Regular">
- <Char width="16" offset="-2 93" rect="1 54 4 4" code=" "/>
+ <Char width="16" offset="-2 93" rect="1 54 4 4" code="space"/>
  <Char width="24" offset="2 40" rect="6 1 20 58" code="!"/>
  <Char width="33" offset="0 40" rect="27 1 33 25" code="&quot;"/>
  <Char width="18" offset="0 40" rect="61 1 18 25" code="'"/>

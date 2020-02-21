@@ -4,14 +4,13 @@ import android.content.Context;
 import android.util.Log;
 import android.view.MotionEvent;
 
-import com.enigmadux.craterguardians.Character;
 import com.enigmadux.craterguardians.Characters.Player;
-import com.enigmadux.craterguardians.CraterBackend;
 import com.enigmadux.craterguardians.CraterRenderer;
 import com.enigmadux.craterguardians.FileStreams.PlayerData;
 import com.enigmadux.craterguardians.GUILib.GUIClickable;
 import com.enigmadux.craterguardians.GUILib.GUILayout;
 import com.enigmadux.craterguardians.GUILib.VisibilityInducedButton;
+import com.enigmadux.craterguardians.GUILib.dynamicText.DynamicText;
 import com.enigmadux.craterguardians.LayoutConsts;
 import com.enigmadux.craterguardians.R;
 import com.enigmadux.craterguardians.values.STRINGS;
@@ -101,7 +100,7 @@ public class CharacterSelectLayout implements GUILayout {
         //the home button);
         this.clickables.add(new VisibilityInducedButton(context, R.drawable.home_button,
                 0,-0.4f,0.4f,0.4f,
-                this,allLayouts.get(STRINGS.HOME_SCREEN_LAYOUT_ID)));
+                this,allLayouts.get(STRINGS.HOME_SCREEN_LAYOUT_ID), false));
 
         float scaleX = (float) LayoutConsts.SCREEN_HEIGHT/LayoutConsts.SCREEN_WIDTH;
         for (int i = 0;i<CharacterSelectLayout.CHARACTERS.length;i++){
@@ -122,7 +121,8 @@ public class CharacterSelectLayout implements GUILayout {
 
         this.characterSelecter = new CharacterSelecter(context,R.drawable.button_background,
                 -0.5f,-0.5f,0.8f,0.4f,
-                this.renderer);
+                this.renderer, true);
+        this.characterSelecter.updateText(STRINGS.CHARACTER_SELECTER_TEXT,0.1f);
 
         this.clickables.add(this.characterSelecter);
 
@@ -144,14 +144,17 @@ public class CharacterSelectLayout implements GUILayout {
         }
     }
     /** Renders all components if they are visible
-     *
-     * @param uMVPMatrix the matrix that describes the model view projection transformations
+     *  @param uMVPMatrix the matrix that describes the model view projection transformations
      * @param renderer the renderer that will be passed on using recursion, unless it's a level 0 (direct components), where it
+     * @param textRenderer this renders text efficiently as opposed to rendering quads
      */
     @Override
-    public void render(float[] uMVPMatrix, QuadRenderer renderer) {
+    public void render(float[] uMVPMatrix, QuadRenderer renderer, DynamicText textRenderer) {
         if (this.isVisible){
             renderer.renderQuads(this.clickables,uMVPMatrix);
+            for (int i = 0,size = this.clickables.size();i<size;i++){
+                this.clickables.get(i).renderText(textRenderer,uMVPMatrix);
+            }
         }
     }
 

@@ -13,6 +13,25 @@ import enigmadux2d.core.quadRendering.QuadMesh;
  * @author Manu Bhat
  * @version BETA
  *
+ * BACKUP
+ * //uniform mat4 mvpMatrix;
+ * //uniform float cornerSize;
+ * //uniform float aspectRatio;
+ *
+ * //attribute vec3 position;
+ *
+ * //varying vec2 pass_textureCord;
+ *
+ * //void main() {
+ *     //pass_textureCord = vec2(position.x+0.5,0.5 - position.y);
+ *     //if (pass_textureCord.x < cornerSize){
+ *         //pass_textureCord.x /= aspectRatio;
+ *     //}
+ *     //if (pass_textureCord.x > 1. - cornerSize){
+ *     //    pass_textureCord.x = 1. - (1. -pass_textureCord.x)/aspectRatio;
+ *     //}
+ *     //gl_Position = mvpMatrix * vec4(position,1);
+ * //}
  */
 public class GUIShader extends ShaderProgram {
 
@@ -36,12 +55,27 @@ public class GUIShader extends ShaderProgram {
      */
     private static final String SHADER_KEYWORD = "shader";
 
+    /** The keyword used for the corner size located in the vertex shader file
+     *
+     */
+    private static final String CORNER_KEYWORD = "cornerSize";
+
+    /** The keyword used for the aspect ratio variable locate in the vertex shader file
+     *
+     */
+    private static final String ASPECT_KEYWORD = "aspectRatio";
+
+
     //pointer to the texture variable in the fragment shader file
     private int textureLocation;
     //pointer to the matrix in the vertex shader file
     private int matrixLocation;
     //pointer to the "shader" variable in the fragment shader file, which filters channels
     private int shaderLocation;
+    //pointer to the "cornerSize" variable in the vertex shader file
+    private int cornerSizeLocation;
+    //pointer to "aspectRatio" variable in the vertex shader
+    private int aspectRatio;
 
 
     /** Default constructor
@@ -75,7 +109,11 @@ public class GUIShader extends ShaderProgram {
         this.matrixLocation = this.getUniformLocation(GUIShader.MATRIX_KEYWORD);
         //get the shader location
         this.shaderLocation = this.getUniformLocation(GUIShader.SHADER_KEYWORD);
-        Log.d("SHADER","Shader loc: " + this.shaderLocation);
+        //get the corner location
+        this.cornerSizeLocation = this.getUniformLocation(GUIShader.CORNER_KEYWORD);
+        //get the aspect ratio location
+        this.aspectRatio = this.getUniformLocation(GUIShader.ASPECT_KEYWORD);
+        Log.d("SHADER","Shader loc: " + this.shaderLocation + " corner size: " + this.cornerSizeLocation + " aspect ratio "+ aspectRatio);
     }
 
     /** Writes the texture, and binds it to the shader
@@ -100,5 +138,15 @@ public class GUIShader extends ShaderProgram {
      */
     public void writeShader(float[] shader){
         GLES30.glUniform4fv(this.shaderLocation,1,shader,0);
+    }
+
+    /** Writes info about corners, for most quads it's not neccesary
+     *
+     * @param cornerSize the size of a single corner/ width (in square form)
+     * @param aspectRatio w/h of the rectangle * w/h of the screen
+     */
+    public void writeCornerInfo(float cornerSize,float aspectRatio){
+        super.writeUniformFloat(this.cornerSizeLocation,cornerSize);
+        super.writeUniformFloat(this.aspectRatio,aspectRatio);
     }
 }

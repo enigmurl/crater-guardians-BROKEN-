@@ -37,7 +37,7 @@ public class PlayNextLevel extends GUIClickable {
      */
     public PlayNextLevel(Context context, int texturePointer, float x, float y, float w, float h,
                          CraterBackend backend, PostGameLayout postGameLayout) {
-        super(context, texturePointer, x, y, w, h);
+        super(context, texturePointer, x, y, w, h, false);
         this.backend = backend;
 
         this.postGameLayout = postGameLayout;

@@ -22,7 +22,6 @@ import com.enigmadux.craterguardians.GUILib.GUILayout;
 import com.enigmadux.craterguardians.GUILib.InGameTextbox;
 import com.enigmadux.craterguardians.GUILib.ProgressBar;
 import com.enigmadux.craterguardians.GUILib.dynamicText.DynamicText;
-import com.enigmadux.craterguardians.GUILib.dynamicText.TextMesh;
 import com.enigmadux.craterguardians.GUIs.characterSelect.CharacterSelectLayout;
 import com.enigmadux.craterguardians.GUIs.homeScreen.HomeScreen;
 import com.enigmadux.craterguardians.GUIs.inGameScreen.InGameScreen;
@@ -155,9 +154,7 @@ public class CraterRenderer extends EnigmaduxGLRenderer {
 
     int updateCount = 0;
     int under60 = 0;
-    List<Long> under60s = new ArrayList<Long>();
     long lastMillis = System.currentTimeMillis();
-    long debugGameScreenMillis = System.currentTimeMillis();
 
 
 
@@ -210,11 +207,10 @@ public class CraterRenderer extends EnigmaduxGLRenderer {
 
     private HashMap<String,GUILayout> layoutHashMap;
 
-    /** Dynamic text
+    /** Dynamic textRenderer that renders text
      *
      */
-    private DynamicText text;
-    private TextMesh testMesh;
+    private DynamicText textRenderer;
 
     /** Constructor to set the handed over context
      *
@@ -415,7 +411,6 @@ public class CraterRenderer extends EnigmaduxGLRenderer {
             Matrix.multiplyMM(vPMatrix,0,orthographicM,0,this.cameraTranslationM,0);
             this.gameScreenLayout.draw(this.vPMatrix);
         }
-//        // Reset the Model view Matri
         //draws all on screen components
         Matrix.setLookAtM(this.cameraTranslationM, 0, 0, 0, 1, 0, 0, 0, 0, 1f, 0);
         Matrix.scaleM(this.cameraTranslationM, 0, CAMERA_Z, CAMERA_Z * LayoutConsts.SCREEN_HEIGHT / LayoutConsts.SCREEN_WIDTH, 0);//too offset the orthographic projection for areas where it isnt needed
@@ -425,7 +420,6 @@ public class CraterRenderer extends EnigmaduxGLRenderer {
 
         if (System.currentTimeMillis() - lastMillis  >  1000/60f){
             under60++;
-            under60s.add((long) (1000f/(System.currentTimeMillis() - lastMillis)));
         }
         this.lastMillis = System.currentTimeMillis();
         updateCount++;
@@ -435,16 +429,12 @@ public class CraterRenderer extends EnigmaduxGLRenderer {
         if (System.currentTimeMillis() - debugStartMillis > 10000){
             Log.d("FRONTENDTHREAD:","Frames per second:"  + (1000 * updateCount/(double) (System.currentTimeMillis() - debugStartMillis)));
             Log.d("FRONTENDTHREAD:","percentage under 60:"  + ((float) under60/updateCount));
-            Log.d("FRONTENDTHREAD:","under 60s:"  + under60s);
 
             Log.d("FRONTENDTHREAD:","Total Time:"  + ((System.currentTimeMillis() - debugStartMillis)/this.updateCount));
-            Log.d("FRONTENDTHREAD:","Game screen Time:"  + (this.debugGameScreenMillis/this.updateCount) + " percentage: " + (this.debugGameScreenMillis/(double) (System.currentTimeMillis() - debugStartMillis)));
 
             debugStartMillis = System.currentTimeMillis();
             updateCount = 0;
             under60 = 0;
-            under60s.clear();
-            this.debugGameScreenMillis = 0;
         }
 
 
@@ -470,9 +460,8 @@ public class CraterRenderer extends EnigmaduxGLRenderer {
             this.battleStartIndicator.draw(this.vPMatrix);
 
         }
-        this.guiData.renderData(this.vPMatrix,this.quadRenderer);
+        this.guiData.renderData(this.vPMatrix,this.quadRenderer,this.textRenderer);
         Matrix.scaleM(this.vPMatrix,0,0.125f,0.25f,0);
-        this.text.renderText(this.testMesh,this.vPMatrix);
     }
 
     /** Gets the Default camera position. The greater the value the farther away the camera "is";
@@ -608,8 +597,7 @@ public class CraterRenderer extends EnigmaduxGLRenderer {
 
                 homeScreen.setVisibility(true);
             case 10:
-                this.text = new DynamicText(this.context,R.drawable.baloo_bhaina_texture_atlas,R.raw.baloo_bhaina_atlas);
-                this.testMesh = this.text.generateTextMesh("TeST.!<5>",new float[]{1,1,1,1});
+                this.textRenderer = new DynamicText(this.context,R.drawable.baloo_bhaina_texture_atlas,R.raw.baloo_bhaina_atlas);
             case 11:
                 this.loadingCompleted = true;
                 break;

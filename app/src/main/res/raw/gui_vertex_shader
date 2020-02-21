@@ -1,10 +1,16 @@
+precision highp float;
 uniform mat4 mvpMatrix;
+
 
 attribute vec3 position;
 
 varying vec2 pass_textureCord;
 
 void main() {
-    pass_textureCord = vec2(position.x+0.5,0.5 - position.y);
     gl_Position = mvpMatrix * vec4(position,1);
+    float u = (position.x + 0.5);
+    float v = (0.5 - position.y);
+    pass_textureCord = vec2(u,v);
+
 }
+

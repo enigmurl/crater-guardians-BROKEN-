@@ -223,6 +223,8 @@ public class GameMap extends EnigmaduxComponent {
                 }
 
             }
+            //shaders get reset
+            meshRenderer.startRendering();
 
 
         }
