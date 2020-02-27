@@ -102,7 +102,10 @@ public class SoundLib {
      */
     public static void pauseAllMedia(){
         try {
-            SoundLib.muteAllMedia();
+            SoundLib.lobbyMusic.setVolume(0,0);
+            SoundLib.gameMusic.setVolume(0,0);
+            SoundLib.victoryMusic.setVolume(0,0);
+            SoundLib.lossMusic.setVolume(0,0);
         } catch (NullPointerException e){
             Log.d("SOUND_LIB","null pointer",e);
         }
@@ -115,7 +118,12 @@ public class SoundLib {
      */
     public static void resumeAllMedia(){
         try {
-            SoundLib.unMuteAllMedia();
+            if (playMusic) {
+                SoundLib.lobbyMusic.setVolume(1, 1);
+                SoundLib.gameMusic.setVolume(1, 1);
+                SoundLib.victoryMusic.setVolume(1, 1);
+                SoundLib.lossMusic.setVolume(1, 1);
+            }
         } catch (NullPointerException e){
             Log.d("SOUND_LIB","null pointer",e);
         }
@@ -125,6 +133,7 @@ public class SoundLib {
      * todo do it for everything
      */
     public static void muteAllMedia(){
+        SoundLib.playMusic = false;
 
         SoundLib.lobbyMusic.setVolume(0,0);
         SoundLib.gameMusic.setVolume(0,0);
@@ -136,7 +145,7 @@ public class SoundLib {
      *
      */
     public static void unMuteAllMedia(){
-        if (! SoundLib.playMusic) return;
+        SoundLib.playMusic = true;
 
         SoundLib.lobbyMusic.setVolume(1,1);
         SoundLib.gameMusic.setVolume(1,1);
@@ -149,10 +158,11 @@ public class SoundLib {
      * @param state true means to start playing, false means to end playing
      */
     public static void setStateLobbyMusic(boolean state){
-        if (! SoundLib.playMusic) return;
-
         if (state){
             SoundLib.lobbyMusic.start();
+            if (! SoundLib.playMusic){
+                SoundLib.lobbyMusic.setVolume(0,0);
+            }
         } else if (SoundLib.lobbyMusic.isPlaying()){
             SoundLib.lobbyMusic.pause();
             SoundLib.lobbyMusic.seekTo(0);
@@ -164,11 +174,12 @@ public class SoundLib {
      * @param state true means to start playing, false means to end playing
      */
     public static void setStateGameMusic(boolean state){
-        if (! SoundLib.playMusic) return;
-
-
         if (state){
             SoundLib.gameMusic.start();
+            if (! SoundLib.playMusic){
+                SoundLib.muteAllMedia();
+                SoundLib.gameMusic.setVolume(0,0);
+            }
         } else if (SoundLib.gameMusic.isPlaying()){
             SoundLib.gameMusic.pause();
             SoundLib.gameMusic.seekTo(0);
@@ -180,10 +191,14 @@ public class SoundLib {
      * @param state true means to start playing, false means to end playing
      */
     public static void setStateVictoryMusic(boolean state){
-        if (! SoundLib.playMusic) return;
-
+        Log.d("SOUND LIB:","MUSIC STATE: " + playMusic);
         if (state){
             SoundLib.victoryMusic.start();
+            if (! SoundLib.playMusic){
+                Log.d("SOUND LIB:","Muting victory: ");
+                SoundLib.muteAllMedia();
+                SoundLib.victoryMusic.setVolume(0,0);
+            }
         } else if (SoundLib.victoryMusic.isPlaying()) {
             SoundLib.victoryMusic.pause();
             SoundLib.victoryMusic.seekTo(0);
@@ -195,10 +210,11 @@ public class SoundLib {
      * @param state true means to start playing, false means to end playing
      */
     public static void setStateLossMusic(boolean state){
-        if (! SoundLib.playMusic) return;
-
         if (state){
             SoundLib.lossMusic.start();
+            if (! SoundLib.playMusic){
+                SoundLib.lossMusic.setVolume(0,0);
+            }
         } else if (SoundLib.lossMusic.isPlaying()){
             SoundLib.lossMusic.pause();
             SoundLib.lossMusic.seekTo(0);
@@ -372,13 +388,6 @@ public class SoundLib {
         }
     }
 
-    /** Sets whether or not playing music, true means music will be played, false means music wont be played
-     *
-     * @param playMusic whether or not to play music
-     */
-    public static void setPlayMusic(boolean playMusic){
-        SoundLib.playMusic = playMusic;
-    }
 
     /** Sets whether or not playing music, true means music will be played, false means music wont be played
      *

@@ -217,7 +217,7 @@ public class GameMap extends EnigmaduxComponent {
                     enemies.get(i).updateInstanceInfo(bufferData,parentMatrix);
                     this.enemiesCollection.updateInstance(enemies.get(i).getInstanceID(),bufferData);
                 }
-                this.enemiesCollection.updateInstancedVbo();
+
                 for (int i = 0, size = this.enemies.size();i < size; i++){
                     enemies.get(i).draw(parentMatrix);
                 }
@@ -228,6 +228,7 @@ public class GameMap extends EnigmaduxComponent {
 
 
         }
+        this.enemiesCollection.updateInstancedVbo();
         this.meshRenderer.renderCollection(this.enemiesCollection);
         //todo this may have to go back into the synchronized section
 

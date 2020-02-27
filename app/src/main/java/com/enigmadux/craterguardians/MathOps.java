@@ -1,5 +1,7 @@
 package com.enigmadux.craterguardians;
 
+import com.enigmadux.craterguardians.values.LayoutConsts;
+
 /** Performs useful math operations
  * @author Manu Bhat
  * @version BETA

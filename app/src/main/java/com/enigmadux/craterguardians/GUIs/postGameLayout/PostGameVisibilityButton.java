@@ -38,7 +38,7 @@ public class PostGameVisibilityButton extends VisibilityInducedButton {
                                        float x, float y, float w, float h,
                                        PostGameLayout objectToHide, GUILayout objectToShow,
                                        CraterBackendThread backendThread,boolean isRounded) {
-        super(context, texturePointer, x, y, w, h, objectToHide, objectToShow, false);
+        super(context, texturePointer, x, y, w, h, objectToHide, objectToShow, isRounded);
 
         this.backendThread = backendThread;
     }

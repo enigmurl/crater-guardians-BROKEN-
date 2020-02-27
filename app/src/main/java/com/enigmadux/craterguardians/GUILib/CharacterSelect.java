@@ -8,7 +8,7 @@ import com.enigmadux.craterguardians.Characters.Player;
 import com.enigmadux.craterguardians.CraterBackend;
 import com.enigmadux.craterguardians.CraterRenderer;
 import com.enigmadux.craterguardians.FileStreams.PlayerData;
-import com.enigmadux.craterguardians.LayoutConsts;
+import com.enigmadux.craterguardians.values.LayoutConsts;
 import com.enigmadux.craterguardians.MathOps;
 import com.enigmadux.craterguardians.R;
 

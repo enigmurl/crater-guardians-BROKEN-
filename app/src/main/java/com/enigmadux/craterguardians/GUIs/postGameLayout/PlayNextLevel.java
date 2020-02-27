@@ -4,6 +4,7 @@ import android.content.Context;
 import android.view.MotionEvent;
 
 import com.enigmadux.craterguardians.CraterBackend;
+import com.enigmadux.craterguardians.CraterBackendThread;
 import com.enigmadux.craterguardians.GUILib.GUIClickable;
 import com.enigmadux.craterguardians.SoundLib;
 
@@ -18,7 +19,7 @@ public class PlayNextLevel extends GUIClickable {
     /** The backend object that we use to get into the game
      *
      */
-    private CraterBackend backend;
+    private CraterBackendThread backend;
 
     /** The post game layout that will be hidden when this is released
      *
@@ -36,7 +37,7 @@ public class PlayNextLevel extends GUIClickable {
      * @param h              the height of the texture
      */
     public PlayNextLevel(Context context, int texturePointer, float x, float y, float w, float h,
-                         CraterBackend backend, PostGameLayout postGameLayout) {
+                         CraterBackendThread backend, PostGameLayout postGameLayout) {
         super(context, texturePointer, x, y, w, h, false);
         this.backend = backend;
 
@@ -76,8 +77,10 @@ public class PlayNextLevel extends GUIClickable {
     public boolean onHardRelease(MotionEvent e) {
         this.isDown = false;
 
-        backend.loadLevel();
-        backend.setCurrentGameState(CraterBackend.GAME_STATE_INGAME);
+
+        this.backend.setPause(false);
+        this.backend.getBackend().loadLevel();
+        this.backend.getBackend().setCurrentGameState(CraterBackend.GAME_STATE_INGAME);
 
         SoundLib.setStateGameMusic(true);
         SoundLib.setStateLossMusic(false);

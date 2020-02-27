@@ -11,7 +11,7 @@ import com.enigmadux.craterguardians.GUILib.VisibilityInducedButton;
 import com.enigmadux.craterguardians.GUILib.dynamicText.DynamicText;
 import com.enigmadux.craterguardians.GUIs.inGameScreen.InGameScreen;
 import com.enigmadux.craterguardians.GameMap;
-import com.enigmadux.craterguardians.LayoutConsts;
+import com.enigmadux.craterguardians.values.LayoutConsts;
 import com.enigmadux.craterguardians.R;
 import com.enigmadux.craterguardians.SoundLib;
 import com.enigmadux.craterguardians.values.STRINGS;
@@ -150,7 +150,7 @@ public class LevelSelectLayout implements GUILayout {
             SoundLib.setStateGameMusic(false);
             SoundLib.setStateVictoryMusic(false);
             SoundLib.setStateLossMusic(false);
-            SoundLib.setStateGameMusic(true);
+            SoundLib.setStateLobbyMusic(true);
             this.backend.getBackend().setCurrentGameState(CraterBackend.GAME_STATE_LEVELSELECT);
             //hide the pause button
             this.inGameLayout.setVisibility(false);

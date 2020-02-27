@@ -74,7 +74,7 @@ public class PostGameLayout implements GUILayout {
 
         //go to levels
         PostGameVisibilityButton levelsButton = new PostGameVisibilityButton(context, R.drawable.button_background,
-                0,0.1f,0.4f,0.4f,
+                0,0.1f,1.9f,0.4f,
                 this,allLayouts.get(STRINGS.LEVEL_SELECT_LAYOUT_ID),this.backend,true);
         levelsButton.updateText(STRINGS.BACK_TO_LEVELS_BUTTON,0.1f);
         this.clickables.add(levelsButton);
@@ -82,7 +82,7 @@ public class PostGameLayout implements GUILayout {
         //play next level
         this.clickables.add(new PlayNextLevel(context,R.drawable.resume_button,
                 0,0.75f,0.4f,0.4f,
-                this.backend.getBackend(),this));
+                this.backend,this));
 
         this.background = new QuadTexture(context,R.drawable.layout_background,0,0,2,2);
 
@@ -112,6 +112,10 @@ public class PostGameLayout implements GUILayout {
     public void setVisibility(boolean visibility) {
 
         this.isVisible = visibility;
+        if (visibility){
+            //pause backend
+            this.backend.setPause(true);
+        }
 
 
         for (int i = this.clickables.size()-1;i>= 0;i--){

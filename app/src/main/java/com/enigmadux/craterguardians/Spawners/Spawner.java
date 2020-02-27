@@ -11,6 +11,7 @@ import com.enigmadux.craterguardians.gameLib.CraterCollectionElem;
 import java.util.List;
 
 import enigmadux2d.core.gameObjects.VaoCollection;
+import enigmadux2d.core.quadRendering.QuadTexture;
 
 /**
  * @author Manu Bhat
@@ -41,6 +42,11 @@ public abstract class Spawner extends CraterCollectionElem {
 
     //the amount of milli seconds since the last spawn
     protected long millisSinceLastSpawn;
+
+    /** A Blue or orange circle
+     *
+     */
+    private QuadTexture stateIndicator;
 
 
 

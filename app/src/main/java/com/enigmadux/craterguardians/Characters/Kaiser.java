@@ -34,7 +34,7 @@ public class Kaiser extends Player {
     //a constant that represents how many attacks kaiser can perform before reloading
     private static final int NUM_ATTACKS  = 5;
     //a constant that represents how long in millis it takes to reload all attacks;
-    private static final long MILLIS_PER_RELOAD = 1000;
+    private static final long MILLIS_PER_RELOAD = 2000;
 
     //this says how much damage is needed to be dealt, in order to charge an evolution
     private static final int[] NUM_DAMAGE_FOR_EVOLUTION = new int[] {150,400};
@@ -46,7 +46,7 @@ public class Kaiser extends Player {
 
 
     //the attack damage at each stage of evolution at level 1
-    private static final float[] DAMAGE = new float[] {5,7,25};
+    private static final float[] DAMAGE = new float[] {10,14,50};
 
 
 

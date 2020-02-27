@@ -9,7 +9,7 @@ import android.support.v4.content.res.ResourcesCompat;
 import android.util.Log;
 import android.view.MotionEvent;
 
-import com.enigmadux.craterguardians.LayoutConsts;
+import com.enigmadux.craterguardians.values.LayoutConsts;
 import com.enigmadux.craterguardians.R;
 import com.enigmadux.craterguardians.SoundLib;
 

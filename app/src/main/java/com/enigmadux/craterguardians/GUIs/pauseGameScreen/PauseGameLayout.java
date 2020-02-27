@@ -67,7 +67,7 @@ public class PauseGameLayout implements GUILayout {
 
         //go to levels
         PauseScreenVisibilityButton levelButton = new PauseScreenVisibilityButton(context, R.drawable.button_background,
-                0,0.1f,0.4f,0.4f,
+                0,0.1f,1.9f,0.4f,
                 this,allLayouts.get(STRINGS.LEVEL_SELECT_LAYOUT_ID),
                 this.backendThread, true);
         levelButton.updateText(STRINGS.BACK_TO_LEVELS_BUTTON,0.1f);

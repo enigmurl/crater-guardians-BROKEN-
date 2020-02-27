@@ -27,13 +27,13 @@ import com.enigmadux.craterguardians.FileStreams.LevelData;
 import com.enigmadux.craterguardians.FileStreams.PlayerData;
 import com.enigmadux.craterguardians.GUILib.Button;
 import com.enigmadux.craterguardians.GUILib.HealthBar;
-import com.enigmadux.craterguardians.GUILib.HomeButton;
 import com.enigmadux.craterguardians.GUILib.InGameTextbox;
 import com.enigmadux.craterguardians.GUILib.ProgressBar;
 import com.enigmadux.craterguardians.GameObjects.Plateau;
 import com.enigmadux.craterguardians.GameObjects.Supply;
 import com.enigmadux.craterguardians.GameObjects.ToxicLake;
 import com.enigmadux.craterguardians.Spawners.Spawner;
+import com.enigmadux.craterguardians.values.LayoutConsts;
 
 import java.util.Iterator;
 import java.util.List;
@@ -719,6 +719,9 @@ public class CraterBackend {
 
                 this.DEBUGenemyTime += System.currentTimeMillis() - start;
             }
+
+
+            this.DEBUGenemyTime += System.currentTimeMillis() - start;
 
             start = System.currentTimeMillis();
             synchronized (CraterBackend.TOXICLAKE_LOCK) {

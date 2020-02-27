@@ -55,8 +55,13 @@ public class SettingsData {
         try (Scanner stdin = new Scanner(this.context.openFileInput(SettingsData.SETTINGS))) {
 
             //first get music on or off
-            SoundLib.setPlayMusic(stdin.nextBoolean());
-
+            if (stdin.nextBoolean()){
+                Log.d("SOUND LIB:","settings setting MUSIC STATE: " + true);
+                SoundLib.unMuteAllMedia();
+            } else {
+                Log.d("SOUND LIB:","settings setting MUSIC STATE: " + false );
+                SoundLib.muteAllMedia();
+            }
 
             //second get sound effects on or off
             SoundLib.setPlaySoundEffects(stdin.nextBoolean());

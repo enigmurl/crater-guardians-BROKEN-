@@ -4,7 +4,7 @@ import android.content.Context;
 import android.view.MotionEvent;
 
 import com.enigmadux.craterguardians.FileStreams.PlayerData;
-import com.enigmadux.craterguardians.LayoutConsts;
+import com.enigmadux.craterguardians.values.LayoutConsts;
 import com.enigmadux.craterguardians.R;
 
 import enigmadux2d.core.EnigmaduxComponent;

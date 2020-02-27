@@ -11,7 +11,7 @@ import com.enigmadux.craterguardians.GUILib.GUIClickable;
 import com.enigmadux.craterguardians.GUILib.GUILayout;
 import com.enigmadux.craterguardians.GUILib.VisibilityInducedButton;
 import com.enigmadux.craterguardians.GUILib.dynamicText.DynamicText;
-import com.enigmadux.craterguardians.LayoutConsts;
+import com.enigmadux.craterguardians.values.LayoutConsts;
 import com.enigmadux.craterguardians.R;
 import com.enigmadux.craterguardians.values.STRINGS;
 

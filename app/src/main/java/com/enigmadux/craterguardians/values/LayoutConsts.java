@@ -1,4 +1,4 @@
-package com.enigmadux.craterguardians;
+package com.enigmadux.craterguardians.values;
 
 /** Holds lots of colors, strings, and other constants related to the layout, that multiple classes may refer to
  *
@@ -15,10 +15,12 @@ public class LayoutConsts {
      *
      */
     public static final float[] CRATER_FLOAT_TEXT_COLOR = new float[] {1,1,0.664f,1};
+
+
     /** Serves as the color of the level buttons, the color is black
      *
      */
-    public static final int LEVEL_TEXT_COLOR = 0xFF000000;// 0xFF99462D;
+    public static final float[] LEVEL_FLOAT_TEXT_COLOR = new float[] {0,0,0,1};// 0xFF99462D;
 
     /** The width of the screen in pixels, it is set by the Renderer
      *

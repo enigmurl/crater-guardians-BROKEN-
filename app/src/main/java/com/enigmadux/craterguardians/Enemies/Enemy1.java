@@ -27,17 +27,42 @@ public class Enemy1 extends Enemy {
     //a constant that represents the attack range of this enemy
     private static final float ATTACK_RANGE = 2f;
 
+    /** The chance that the enemy will be small
+     *
+     */
+    private static final float SMALL_SIZE_PERCENTAGE = 0.1f;
+
+    /** The chance that the enemy will be large, the chance that its normal is 1 - small_% - large_%
+     *
+     */
+    private static final float LARGE_SIZE_PERCENTAGE = 0.2f;
 
     /** The radius in openGL terms of this enemy
      *
      */
-    public static final float CHARACTER_RADIUS = 0.15f;
+    private static final float CHARACTER_RADIUS = 0.15f;
 
+
+    /** Radius of this character
+     *
+     */
+    private float radius;
     /** Default Constructor
      *
      */
     public Enemy1(int instanceID){
         super(instanceID,NUM_ROTATION_ORIENTATIONS,FRAMES_PER_ROTATION,FPS);
+
+
+        double randVal = Math.random();
+        if (randVal < SMALL_SIZE_PERCENTAGE){
+            this.radius = CHARACTER_RADIUS/2;
+        } else if (randVal < SMALL_SIZE_PERCENTAGE + LARGE_SIZE_PERCENTAGE){
+            this.radius = CHARACTER_RADIUS * 2;
+        } else {
+            this.radius = CHARACTER_RADIUS;
+        }
+
     }
 
     @Override
@@ -55,7 +80,7 @@ public class Enemy1 extends Enemy {
     public void attack(float angle) {
         // for now we are having it only 1 attack at a time
         if (this.attacks.size() == 0) {
-            this.attacks.add(new Enemy1Attack(this.getDeltaX(), this.getDeltaY(), 5, angle, ATTACK_RANGE, 0.2f, 250));
+            this.attacks.add(new Enemy1Attack(this.getDeltaX(), this.getDeltaY(), (int) (5  * this.radius/CHARACTER_RADIUS), angle, ATTACK_RANGE * this.radius/CHARACTER_RADIUS, 0.2f, 250));
         }
     }
 
@@ -79,7 +104,7 @@ public class Enemy1 extends Enemy {
     @Override
     public void updateInstanceTransform(float[] blankInstanceInfo, float[] uMVPMatrix) {
         Matrix.translateM(blankInstanceInfo,0,uMVPMatrix,0,this.getDeltaX(),this.getDeltaY(),0);
-        Matrix.scaleM(blankInstanceInfo,0,2 * Enemy1.CHARACTER_RADIUS,2 * Enemy1.CHARACTER_RADIUS,0);
+        Matrix.scaleM(blankInstanceInfo,0,2 * radius,2 * radius,0);
     }
 
     /** This tells the maximum health of any character; what to initialize the health to
@@ -97,7 +122,7 @@ public class Enemy1 extends Enemy {
      */
     @Override
     public float getRadius() {
-        return Enemy1.CHARACTER_RADIUS;
+        return this.radius;
     }
 
     /** Gets the speed of the enemy

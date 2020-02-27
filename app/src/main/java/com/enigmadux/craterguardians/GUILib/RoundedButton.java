@@ -2,7 +2,7 @@ package com.enigmadux.craterguardians.GUILib;
 
 import android.content.Context;
 
-import com.enigmadux.craterguardians.LayoutConsts;
+import com.enigmadux.craterguardians.values.LayoutConsts;
 import com.enigmadux.craterguardians.R;
 
 import enigmadux2d.core.shapes.TexturedRect;

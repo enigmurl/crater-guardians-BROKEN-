@@ -57,8 +57,14 @@ todo PRIORITY:
         balance game environemnet
         optimization - look into instancing, also https://stackoverflow.com/questions/4853856/why-are-draw-calls-expensive, explains that we shouldn't be drawing small amounts of quads
         player levels
-    make spawners one class, where there is a type parameter
-
+    2/23/20:
+        1) Add shaders too stuff like level buttons, finish up UI (complete?)
+        2) Work on updated enemy class
+        3) Try disabling enemys updating and seeing if that makes a difference, if it's 60 fps with that, then we need to
+            optimize backend not frontend
+    2/24/20:
+        1) Implement Shields
+        2) Implement Three Phase Spawners, + Work on their graphics to fit with it
     seee why the shaders aren't allowed in and out keywords, among other things
 
     OPTIMIZATIONS:

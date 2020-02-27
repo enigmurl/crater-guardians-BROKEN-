@@ -6,13 +6,9 @@ import android.graphics.BitmapFactory;
 import android.opengl.GLES30;
 import android.opengl.GLUtils;
 import android.opengl.Matrix;
-import android.util.Log;
 import android.util.SparseIntArray;
 
-import com.enigmadux.craterguardians.LayoutConsts;
-import com.enigmadux.craterguardians.R;
-
-import java.util.HashMap;
+import com.enigmadux.craterguardians.values.LayoutConsts;
 
 /** This is where the actual texture of the quad is stored. As well as instance specfic info
  *

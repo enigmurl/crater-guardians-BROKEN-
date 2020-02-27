@@ -33,10 +33,10 @@ import com.enigmadux.craterguardians.GameObjects.Plateau;
 import com.enigmadux.craterguardians.gameLib.CraterVaoCollection;
 import com.enigmadux.craterguardians.gameLib.GUIDataWrapper;
 import com.enigmadux.craterguardians.gameLib.InstancedDataWrapper;
+import com.enigmadux.craterguardians.values.LayoutConsts;
 
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 
 import enigmadux2d.core.EnigmaduxGLRenderer;
 import enigmadux2d.core.quadRendering.QuadRenderer;
@@ -555,7 +555,6 @@ public class CraterRenderer extends EnigmaduxGLRenderer {
             case 8:
                 Log.d("RENDERER","Loading step: 8");
                 //todo, this may cause it to play the music for an enigma second
-                SoundLib.setStateLobbyMusic(true);
                 this.settingsData.loadSettingsFile();
                 break;
             case 9:
@@ -567,26 +566,27 @@ public class CraterRenderer extends EnigmaduxGLRenderer {
                 SettingsScreen settingsScreen = new SettingsScreen(this.settingsData);
                 CharacterSelectLayout characterSelectLayout = new CharacterSelectLayout(this );
                 LevelSelectLayout levelSelectLayout = new LevelSelectLayout(this.craterBackendThread);
-                PauseGameLayout pauseGameLayout = new PauseGameLayout(this.craterBackendThread);
                 InGameScreen inGameScreen = new InGameScreen();
                 PostGameLayout postGameLayout = new PostGameLayout(this.craterBackendThread);
+                PauseGameLayout pauseGameLayout = new PauseGameLayout(this.craterBackendThread);
 
 
                 this.layoutHashMap.put(HomeScreen.ID,homeScreen);
                 this.layoutHashMap.put(SettingsScreen.ID,settingsScreen);
                 this.layoutHashMap.put(CharacterSelectLayout.ID,characterSelectLayout);
                 this.layoutHashMap.put(LevelSelectLayout.ID,levelSelectLayout);
-                this.layoutHashMap.put(PauseGameLayout.ID,pauseGameLayout);
                 this.layoutHashMap.put(InGameScreen.ID,inGameScreen);
                 this.layoutHashMap.put(PostGameLayout.ID,postGameLayout);
+                this.layoutHashMap.put(PauseGameLayout.ID,pauseGameLayout);
+
 
                 layouts.add(homeScreen);
                 layouts.add(settingsScreen);
                 layouts.add(characterSelectLayout);
                 layouts.add(levelSelectLayout);
-                layouts.add(pauseGameLayout);
                 layouts.add(inGameScreen);
                 layouts.add(postGameLayout);
+                layouts.add(pauseGameLayout);
 
 
                 this.quadRenderer = new QuadRenderer(this.context,R.raw.gui_vertex_shader,R.raw.gui_fragment_shader);

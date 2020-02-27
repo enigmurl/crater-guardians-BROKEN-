@@ -6,9 +6,12 @@ import android.view.MotionEvent;
 
 import com.enigmadux.craterguardians.CraterBackend;
 import com.enigmadux.craterguardians.CraterBackendThread;
+import com.enigmadux.craterguardians.FileStreams.LevelData;
+import com.enigmadux.craterguardians.FileStreams.PlayerData;
 import com.enigmadux.craterguardians.GUILib.GUIClickable;
 import com.enigmadux.craterguardians.GUILib.GUILayout;
 import com.enigmadux.craterguardians.SoundLib;
+import com.enigmadux.craterguardians.values.LayoutConsts;
 import com.enigmadux.craterguardians.values.STRINGS;
 
 /** When pressed, it goes into the game with the corresponding level number
@@ -17,6 +20,22 @@ import com.enigmadux.craterguardians.values.STRINGS;
  * @version BETA
  */
 public class LevelSelector extends GUIClickable {
+
+
+    /** Color of when the level is unlocked but not completed (RGBA)
+     *
+     */
+    private static float[] UNLOCKED_SHADER = new float[] {1,1,1,1};
+
+    /** Color of when the level is unlocked and completed (RGBA)
+     *
+     */
+    private static float[] COMPLETED_SHADER = new float[] {0.5f,1,0.5f,1};
+
+    /** Color of when level is not unlocked
+     *
+     */
+    private static float[] LOCKED_SHADER = new float[] {1,0.5f,0.5f,1};
 
     /** The level select layout that will be hidden after
      *
@@ -68,9 +87,22 @@ public class LevelSelector extends GUIClickable {
 
         this.levelNum = levelNum;
 
-        this.updateText(STRINGS.LEVEL_BUTTON_BASE_TEXT + levelNum,0.05f);
+
+        this.textColor = LayoutConsts.LEVEL_FLOAT_TEXT_COLOR;
+        this.updateText(STRINGS.LEVEL_BUTTON_BASE_TEXT + levelNum,h/10);
+
     }
 
+    /** Sees if the level is unlocked AND the touch event intersects
+     *
+     * @param e the motion event that describes the position, and type of the touch event
+     * @return if the button is pressed
+     */
+    @Override
+    public boolean isPressed(MotionEvent e) {
+        //-1 because it's offset
+        return super.isPressed(e) && LevelData.getUnlockedLevels()[this.levelNum -1];
+    }
 
     /** Called when the button is pressed
      *
@@ -116,5 +148,27 @@ public class LevelSelector extends GUIClickable {
         SoundLib.setStateGameMusic(true);
 
         return true;
+    }
+
+
+    /** Updates shaders and visibility
+     *
+     * @param visible whether to be drawn or not
+     */
+    @Override
+    public void setVisibility(boolean visible) {
+        super.setVisibility(visible);
+        if (visible){
+            boolean unlocked = LevelData.getUnlockedLevels()[this.levelNum-1];
+            boolean completed = LevelData.getCompletedLevels()[this.levelNum-1];
+
+            if (unlocked && completed){
+                this.shader = LevelSelector.COMPLETED_SHADER;
+            } else if (unlocked) {
+                this.shader = LevelSelector.UNLOCKED_SHADER;
+            } else {
+                this.shader = LevelSelector.LOCKED_SHADER;
+            }
+        }
     }
 }

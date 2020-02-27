@@ -3,7 +3,7 @@ package com.enigmadux.craterguardians.GUIs.homeScreen;
 import android.content.Context;
 
 import com.enigmadux.craterguardians.GUILib.VisibilitySwitch;
-import com.enigmadux.craterguardians.LayoutConsts;
+import com.enigmadux.craterguardians.values.LayoutConsts;
 
 import enigmadux2d.core.quadRendering.QuadTexture;
 

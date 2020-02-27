@@ -156,7 +156,7 @@ public class HomeScreen implements GUILayout {
             SoundLib.setStateGameMusic(false);
             SoundLib.setStateVictoryMusic(false);
             SoundLib.setStateLossMusic(false);
-            SoundLib.setStateGameMusic(true);
+            SoundLib.setStateLobbyMusic(true);
 
             this.characterDisplay.loadAndroidTexturePointer(this.context,this.backend.getPlayer().getPlayerIcon());
             this.backend.setCurrentGameState(CraterBackend.GAME_STATE_HOMESCREEN);

@@ -53,7 +53,7 @@ public class MusicSwitch extends OnOffButton {
     public boolean onHardRelease(MotionEvent e) {
         super.onHardRelease(e);
         //tell sound lib
-        SoundLib.setPlayMusic(this.isOn());
+        //SoundLib.setPlayMusic(this.isOn());
         if (this.isOn()){
             SoundLib.unMuteAllMedia();
         } else {

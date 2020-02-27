@@ -4,7 +4,7 @@ import android.view.MotionEvent;
 
 import com.enigmadux.craterguardians.CraterBackend;
 import com.enigmadux.craterguardians.CraterRenderer;
-import com.enigmadux.craterguardians.LayoutConsts;
+import com.enigmadux.craterguardians.values.LayoutConsts;
 import com.enigmadux.craterguardians.MathOps;
 import com.enigmadux.craterguardians.SoundLib;
 

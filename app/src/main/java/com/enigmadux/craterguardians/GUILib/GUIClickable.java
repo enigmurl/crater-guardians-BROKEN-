@@ -6,7 +6,8 @@ import android.view.MotionEvent;
 
 import com.enigmadux.craterguardians.GUILib.dynamicText.DynamicText;
 import com.enigmadux.craterguardians.GUILib.dynamicText.TextMesh;
-import com.enigmadux.craterguardians.LayoutConsts;
+import com.enigmadux.craterguardians.SoundLib;
+import com.enigmadux.craterguardians.values.LayoutConsts;
 import com.enigmadux.craterguardians.MathOps;
 
 import enigmadux2d.core.quadRendering.QuadTexture;
@@ -77,6 +78,11 @@ public abstract class GUIClickable extends QuadTexture implements VisibilitySwit
      *
      */
     private float fontSize;
+
+    /** Text color that subclasses can change
+     *
+     */
+    protected float[] textColor = LayoutConsts.CRATER_FLOAT_TEXT_COLOR;
 
     /**
      * Default Constructor
@@ -220,7 +226,7 @@ public abstract class GUIClickable extends QuadTexture implements VisibilitySwit
      */
     public void renderText(DynamicText renderer,float[] parentMatrix){
         if (this.text != null && (this.visibleText == null || ! this.visibleText.getActualText().equals(this.text))){
-            this.visibleText = renderer.generateTextMesh(this.text,LayoutConsts.CRATER_FLOAT_TEXT_COLOR);
+            this.visibleText = renderer.generateTextMesh(this.text,this.textColor);
 
         }
         if (this.visibleText != null) {
@@ -246,8 +252,10 @@ public abstract class GUIClickable extends QuadTexture implements VisibilitySwit
     public boolean onTouch(MotionEvent e) {
         if (this.isPressed(e)) {
             if (this.isDown() && e.getActionMasked() == MotionEvent.ACTION_UP) {
+                this.defaultReleaseAction();
                 this.onHardRelease(e);
             } else if (e.getActionMasked() == MotionEvent.ACTION_DOWN) {
+                this.defaultPressAction();
                 this.onPress(e);
             }
             return true;
@@ -267,7 +275,20 @@ public abstract class GUIClickable extends QuadTexture implements VisibilitySwit
     public void updateText(String newText,float fontSize){
         this.text = newText;
         this.fontSize = fontSize;
+    }
 
+    /** The default action on button press, just playing the sound effect for now
+     *
+     */
+    protected void defaultPressAction(){
+        SoundLib.playButtonSelectedSoundEffect();
+    }
+
+    /** The default action on button release, just playing the sound effect for now
+     *
+     */
+    protected void defaultReleaseAction(){
+        SoundLib.playButtonReleasedSoundEffect();
     }
 
 

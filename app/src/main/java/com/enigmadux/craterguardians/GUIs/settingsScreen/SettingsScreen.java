@@ -79,7 +79,7 @@ public class SettingsScreen implements GUILayout {
     /** Renders sub components
      *  @param uMVPMatrix the matrix that describes the model view projection transformations
      * @param renderer the renderer that will be passed on using recursion, unless it's a level 0 (direct components), where it
-     * @param textRenderer
+     * @param textRenderer renders the text
      */
     @Override
     public void render(float[] uMVPMatrix, QuadRenderer renderer, DynamicText textRenderer) {
