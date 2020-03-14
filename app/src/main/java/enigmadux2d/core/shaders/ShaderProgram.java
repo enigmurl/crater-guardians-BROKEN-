@@ -20,6 +20,8 @@ public abstract class ShaderProgram {
     private static final String TAG = "SHADER PROGRAM";
 
 
+    //the current used program id
+    public static int currentProgram;
 
 
     //this is the ID that the program we create has. We can use it to actually render stuff with our shaders
@@ -53,6 +55,16 @@ public abstract class ShaderProgram {
      */
     public int getProgramID() {
         return this.programID;
+    }
+
+    /** Optimized use of programs
+     *
+     */
+    public void useProgram(){
+        if (ShaderProgram.currentProgram != this.programID){
+            GLES30.glUseProgram(this.programID);
+            ShaderProgram.currentProgram = this.programID;
+        }
     }
 
     /** Gets a uniform location so that the uniform value can be changed later on

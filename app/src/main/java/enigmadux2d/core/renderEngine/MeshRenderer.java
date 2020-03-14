@@ -49,7 +49,7 @@ public class MeshRenderer {
      */
     public void startRendering(){
         //bind the program we made earlier that has our shaders on it
-        GLES30.glUseProgram(this.shaderProgram.getProgramID());
+        this.shaderProgram.useProgram();
 
     }
 
@@ -137,7 +137,8 @@ public class MeshRenderer {
      */
     private void passInShaderParameters(InGameModel modelToBeRendered){
         //bind the program we made earlier that has our shaders on it
-        GLES30.glUseProgram(this.shaderProgram.getProgramID());
+        //we don't actually need to though it's done outside
+        //this.shaderProgram.useProgram();
 
         TexturedModel texturedModel = modelToBeRendered.getTexturedModel();
 

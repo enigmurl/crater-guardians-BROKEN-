@@ -55,7 +55,7 @@ public class Enemy2 extends Enemy {
     /** Default Constructor
      *
      */
-    public Enemy2(int instanceID){
+    public Enemy2(int instanceID,boolean isOrange){
         super(instanceID,NUM_ROTATION_ORIENTATIONS,FRAMES_PER_ROTATION,FPS);
 
 
@@ -68,6 +68,13 @@ public class Enemy2 extends Enemy {
             this.radius = CHARACTER_RADIUS;
         }
 
+
+        if (isOrange){
+            this.setShader(1,0.5f,0,1);
+        } else {
+            this.setShader(0,0,1,1);
+        }
+
     }
 
     /** Loads the texture of the sprite sheet
@@ -75,13 +82,6 @@ public class Enemy2 extends Enemy {
      * @param context context used to grab the actual image from res
      */
     public static void loadGLTexture(Context context) {
-        VISUAL_REPRESENTATION.loadGLTexture(context,R.drawable.enemy1_sprite_sheet);//todo
-        VISUAL_REPRESENTATION.loadTextureBuffer(new float[] {
-                0,1,
-                0,(NUM_ROTATION_ORIENTATIONS-1f)/NUM_ROTATION_ORIENTATIONS,
-                1/(float) FRAMES_PER_ROTATION,1,
-                1/(float) FRAMES_PER_ROTATION,(NUM_ROTATION_ORIENTATIONS-1f)/NUM_ROTATION_ORIENTATIONS,
-        });
     }
 
     @Override

@@ -64,8 +64,28 @@ todo PRIORITY:
             optimize backend not frontend
     2/24/20:
         1) Implement Shields
-        2) Implement Three Phase Spawners, + Work on their graphics to fit with it
     seee why the shaders aren't allowed in and out keywords, among other things
+
+  //todo see how to deal with skipping over spawns, most likely we have to make it like a "juice" system
+        //    where you don't do based on times, but amount of juice required, however you can't use juice from
+        //    different color
+    //rEST:
+    mostly just bug fixes (such as enemy mapping)
+    1) Shield (actual content) (3/8/20)
+        Do this by intersecting all of the enemy attacks.
+        complete
+    2) Blue and Orange Enemies (3/15/20)
+        NOTE: Spawners drawing is currently disabled to benchmark
+    3) Add upgrade, and info buttons to character select layout, make it more intuitive, improve GUIs in general (3/29/20)
+    4) Add weights to the level data (so enemies know smart paths, fix enemies not having paths sometimes) (4/12/20)
+    5) Creates levels, character data, attacks etc (5/3/20)
+    6) Graphics (hopefully ryan can be doing these along side before that, so same date) (5/3/20)
+    //note finals and ap stuff around here, so possible delay slightly
+    7) Sound Effects (and music) (5/17/20)
+    8) Release (nut) (6/8/20)
+
+    9) Somewhere along the way transfer stuff to the world class
+
 
     OPTIMIZATIONS:
         1) don't focus too much on the matrix multiplication i don't think that's the bad part (small)

@@ -251,7 +251,7 @@ public class DynamicText {
      * @param mvpMatrix the matrix
      */
     public void renderText(TextMesh textMesh,float[] mvpMatrix){
-        GLES30.glUseProgram(this.shader.getProgramID());
+        this.shader.useProgram();
 
 
         this.shader.writeVertexData(textMesh.getVertices(),textMesh.getTextureCords());

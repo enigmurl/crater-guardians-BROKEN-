@@ -33,9 +33,6 @@ public abstract class Enemy extends CraterCollectionElem {
     //whether or not it can move, it may not be able to move because it's attacking (Enemy 2)
     protected boolean canMove = true;
 
-    //visual is shared by all objects as they all have the same sprite
-    protected static TexturedRect VISUAL_REPRESENTATION = new TexturedRect(-1,-1,2,2);
-
 
     //the distance the enemy must be before moving onto the next node
     private static final float MIN_DISTANCE = 0.1f;
@@ -127,7 +124,7 @@ public abstract class Enemy extends CraterCollectionElem {
      */
     public void draw(float[] parentMatrix) {
         for (int i = 0;i<attacks.size();i++) {
-            attacks.get(i).draw(parentMatrix);
+             attacks.get(i).draw(parentMatrix);
         }
 
 
@@ -155,14 +152,7 @@ public abstract class Enemy extends CraterCollectionElem {
      * @param context context used to grab the actual image from res
      */
     public static void loadGLTexture(Context context) {
-        VISUAL_REPRESENTATION.loadGLTexture(context, R.drawable.enemy1_sprite_sheet);
 
-        VISUAL_REPRESENTATION.loadTextureBuffer(new float[] {
-                0,1,
-                0,(NUM_ROTATION_ORIENTATIONS-1f)/NUM_ROTATION_ORIENTATIONS,
-                1/(float) FRAMES_PER_ROTATION,1,
-                1/(float) FRAMES_PER_ROTATION,(NUM_ROTATION_ORIENTATIONS-1f)/NUM_ROTATION_ORIENTATIONS,
-        });
     }
 
     /** Knocks back the enemy and stuns it

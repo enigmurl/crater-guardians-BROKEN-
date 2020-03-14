@@ -1,17 +1,14 @@
 package com.enigmadux.craterguardians.Spawners;
 
-import android.content.Context;
 import android.opengl.Matrix;
 
 import com.enigmadux.craterguardians.Enemies.Enemy;
 import com.enigmadux.craterguardians.Enemies.Enemy1;
-import com.enigmadux.craterguardians.R;
 
 import java.util.ArrayList;
 import java.util.List;
 
 import enigmadux2d.core.gameObjects.VaoCollection;
-import enigmadux2d.core.shapes.TexturedRect;
 
 /** Spawns enemy 1
  * @author Manu Bhat
@@ -23,20 +20,9 @@ public class Enemy1Spawner extends Spawner {
 
 
 
-    /** Constructor used for waves, this is in future will be the only one TODO actually implement this
-     * @param instanceId the instanceID with respects to the vao this is in
-     * @param x the open gl coordinate of the spawner, left most edge deltX coordinate e.g. (1.0f, -0.5f, 0.0f ,0.1f)
-     * @param y the open gl coordinate of the spawner, bottom most y coordinate e.g. (1.0f,-0.5f, 0.0f, 0.1f)
-     * @param w the width of the spawner (distance from left edge to right edge) in open gl coordinate terms e.g (1.0f, 1.5f) Should be positive
-     * @param h the height of the spawner (distance from top edge to bottom edge) in open gl coordinate terms e.g (1.0f, 1.5f) should be positive
-     * @param numSpawns for each spawn location specified by times: how many enemies are spawning
-     * @param times the milliseconds at which a spawn will happen
-     * @param totalWaveTime the total milli seconds of a wave, this means that after the sai amount of milliseconds, the cycle will repeat
-     * @param decayTime the amount of time it takes to decay
-     * @param health the health of the spawner
-     */
-    public Enemy1Spawner(int instanceId, float x, float y, float w, float h, short[] numSpawns, long[] times, long totalWaveTime, long decayTime, int health){
-        super(instanceId,x,y,w,h,numSpawns,times,totalWaveTime,decayTime,health);
+
+    public Enemy1Spawner(int instanceId, float x, float y, float w, float h, int orangeEndHealth, int blue1EndHealth, int maxHealth, long blue1, long orange, long blue2, short[] numBlueSpawns, long[] blueSpawnJuice, short[] numOrangeSpawns, long[] orangeSpawnJuice) {
+        super(instanceId, x, y, w, h, orangeEndHealth, blue1EndHealth, maxHealth, blue1, orange, blue2, numBlueSpawns, blueSpawnJuice, numOrangeSpawns, orangeSpawnJuice);
         //translates to appropriate coordinates
         final float[] translationMatrix = new float[16];
         //scales to appropriate size
@@ -49,30 +35,8 @@ public class Enemy1Spawner extends Spawner {
         Matrix.scaleM(scalarMatrix,0,w,h,0);
 
         Matrix.multiplyMM(translationScalarMatrix,0,translationMatrix,0,scalarMatrix,0);
-
     }
 
-
-
-
-    /** Returns a list of enemies
-     *
-     * @param numEnemies the amount of enemies in the wave
-     * @param enemiesCollection the VAO of enemies graphical data, they will automatically be added
-     * @return a list of enemies
-     */
-    @Override
-    public List<Enemy> spawnEnemies(int numEnemies, VaoCollection enemiesCollection) {
-        List<Enemy> enemies = new ArrayList<>();
-        for (int i = 0;i<numEnemies;i++){
-            float x = this.deltaX + (this.width/2 * (1 + (float) Math.cos(Math.PI * 2* i / numEnemies)));
-            float y = this.deltaY + (this.height/2 * (1  + (float) Math.sin(Math.PI * 2* i / numEnemies)));
-            int id = enemiesCollection.addInstance();
-            enemies.add(new Enemy1(id));
-            enemies.get(i).setTranslate(x,y);
-        }
-        return enemies;
-    }
     /** Do not directly call this method, only super class should directly call
      *
      * @param blankInstanceInfo this is where the instance data should be written too. Rather than creating many arrays,
@@ -89,7 +53,30 @@ public class Enemy1Spawner extends Spawner {
     }
 
 
+    @Override
+    public List<Enemy> spawnBlueEnemies(int numEnemies, VaoCollection enemiesCollection) {
+        List<Enemy> enemies = new ArrayList<>();
+        for (int i = 0;i<numEnemies;i++){
+            float x = this.deltaX + (this.width/2 * (1 + (float) Math.cos(Math.PI * 2* i / numEnemies)));
+            float y = this.deltaY + (this.height/2 * (1  + (float) Math.sin(Math.PI * 2* i / numEnemies)));
+            int id = enemiesCollection.addInstance();
+            enemies.add(new Enemy1(id,false));
+            enemies.get(i).setTranslate(x,y);
+        }
+        return enemies;
+    }
 
-
+    @Override
+    public List<Enemy> spawnOrangeEnemies(int numEnemies, VaoCollection enemiesCollection) {
+        List<Enemy> enemies = new ArrayList<>();
+        for (int i = 0;i<numEnemies;i++){
+            float x = this.deltaX + (this.width/2 * (1 + (float) Math.cos(Math.PI * 2* i / numEnemies)));
+            float y = this.deltaY + (this.height/2 * (1  + (float) Math.sin(Math.PI * 2* i / numEnemies)));
+            int id = enemiesCollection.addInstance();
+            enemies.add(new Enemy1(id,true));
+            enemies.get(i).setTranslate(x,y);
+        }
+        return enemies;
+    }
 }
 

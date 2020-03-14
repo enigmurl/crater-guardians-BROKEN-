@@ -173,8 +173,16 @@ public class Enemy3Attack extends Attack {
 
     @Override
     public void onHitPlayer(Player player) {
-        float hypotenuse = (float) Math.hypot(player.getDeltaX() - this.x,player.getDeltaY() - this.y);
-        player.damage(player.getAttackDamage(this.damage, MathOps.getAngle((this.x - player.getDeltaX())/hypotenuse,(this.y - player.getDeltaY())/hypotenuse)));
+        float angleRadians = this.attackAngle + 2 * (float) Math.PI * (float) finishedMillis/millis;
+
+        float cos = (float) Math.cos(angleRadians) * this.radius;
+        float sin = (float) Math.sin(angleRadians) * this.radius;
+
+        float x1 = this.x ;
+        float y1 = this.y ;
+        float x2 = this.x + cos;
+        float y2 = this.y + sin;
+        player.damage(player.getAttackDamage(this.damage, x1,y1,x2,y2));
     }
     @Override
     public void onHitEnemy(Enemy enemy) {
@@ -193,5 +201,19 @@ public class Enemy3Attack extends Attack {
     @Override
     public void onAttackFinished() {
         //nothing needed to be done
+    }
+
+    @Override
+    public boolean intersectsShield(Player player) {
+        float angleRadians = this.attackAngle + 2 * (float) Math.PI * (float) finishedMillis/millis;
+
+        float cos = (float) Math.cos(angleRadians) * this.radius;
+        float sin = (float) Math.sin(angleRadians) * this.radius;
+
+        float x1 = this.x ;
+        float y1 = this.y ;
+        float x2 = this.x + cos;
+        float y2 = this.y + sin;
+        return player.intersectsWith(x1,y1,x2,y2);
     }
 }

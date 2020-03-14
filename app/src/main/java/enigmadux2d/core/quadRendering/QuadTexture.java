@@ -149,7 +149,15 @@ public class QuadTexture {
         int indexOfPointer = QuadTexture.androidToGLTextureMap.indexOfKey(texturePointer);
         if (indexOfPointer < 0) {
             //first convert the image file into a bitmap
-            Bitmap texture = BitmapFactory.decodeResource(context.getResources(), texturePointer);
+            BitmapFactory.Options options = new BitmapFactory.Options();
+            options.inScaled = false;
+            options.inPremultiplied = false;
+            options.inPreferredConfig = Bitmap.Config.ARGB_8888;
+            Bitmap texture = BitmapFactory.decodeResource(context.getResources(), texturePointer,options);
+            texture.setHasAlpha(true);
+
+            texture = Bitmap.createBitmap(texture);
+
 
             //create a texture id at the specified location in the array
             GLES30.glGenTextures(1, this.texture, 0);
@@ -203,6 +211,20 @@ public class QuadTexture {
      */
     public float[] getShader(){
         return this.shader;
+    }
+
+    /** Set the shader which limits channels regarding RGBA
+     *
+     * @param r the filter on red (0 to 1)
+     * @param g the filter on green (0 to 1)
+     * @param b the filter on blue (0 to 1)
+     * @param a the filter on alpha (0 to 1)
+     */
+    public void setShader(float r,float g,float b, float a){
+        this.shader[0] = r;
+        this.shader[1] = g;
+        this.shader[2] = b;
+        this.shader[3] = a;
     }
 
     /** Gets the corner size

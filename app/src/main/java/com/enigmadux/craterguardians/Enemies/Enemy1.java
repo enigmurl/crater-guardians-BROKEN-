@@ -50,7 +50,7 @@ public class Enemy1 extends Enemy {
     /** Default Constructor
      *
      */
-    public Enemy1(int instanceID){
+    public Enemy1(int instanceID,boolean isOrange){
         super(instanceID,NUM_ROTATION_ORIENTATIONS,FRAMES_PER_ROTATION,FPS);
 
 
@@ -63,6 +63,12 @@ public class Enemy1 extends Enemy {
             this.radius = CHARACTER_RADIUS;
         }
 
+
+        if (isOrange){
+            this.setShader(1,0.5f,0,1);
+        } else {
+            this.setShader(0,0,1,1);
+        }
     }
 
     @Override

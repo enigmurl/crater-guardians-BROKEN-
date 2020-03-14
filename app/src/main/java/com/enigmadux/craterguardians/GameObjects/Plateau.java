@@ -17,11 +17,6 @@ public class Plateau extends CraterCollectionElem {
 
 
 
-    /**
-     * Hold the texture, vertex coordinates are initialized right below this
-     */
-    private static TexturedRect VISUAL_REPRESENTATION = new TexturedRect(0, 0, 0,0);
-
     /** Vertices of the standard quad
      *
      */
@@ -43,16 +38,6 @@ public class Plateau extends CraterCollectionElem {
 
     };
 
-    static {
-        VISUAL_REPRESENTATION.loadVertexBuffer(new float[] {
-                0,0,0,
-                1,0,0,
-                0,1,0,
-                0,0,1,
-
-        });
-
-    }
     //parentMatrix * translatorMatrix
     private final float[] finalMatrix = new float[16];
     //maps the static visual's vertex personalized for this class
@@ -134,7 +119,7 @@ public class Plateau extends CraterCollectionElem {
             Matrix.multiplyMV(returnVec,0,finalMatrix,0,currentVec,0);
             Log.d("PLATEAU:", "CORD " + i  + " : " + Arrays.toString(returnVec));
         }*/
-        VISUAL_REPRESENTATION.draw(finalMatrix);
+        //VISUAL_REPRESENTATION.draw(finalMatrix);
 
     }
 
@@ -159,7 +144,6 @@ public class Plateau extends CraterCollectionElem {
      * @param context used to access resources
      */
     public static void loadGLTexture(Context context) {
-        VISUAL_REPRESENTATION.loadGLTexture(context, R.drawable.plateau);
     }
 
 

@@ -107,6 +107,9 @@ public class CraterRenderer extends EnigmaduxGLRenderer {
     //visual image of the attack JoyStick Backend does all the manipulation, it is only draw here
     private TexturedRect attackJoyStick;
 
+    //defense
+    private TexturedRect defenseJoyStick;
+
     //textbox that says "Battle!" at the start of each level
     private InGameTextbox battleStartIndicator;
 
@@ -190,7 +193,7 @@ public class CraterRenderer extends EnigmaduxGLRenderer {
     /** Single, non instanced quads, are rendered using this
      *
      */
-    private QuadRenderer quadRenderer;
+    QuadRenderer quadRenderer;
 
 
 
@@ -260,6 +263,8 @@ public class CraterRenderer extends EnigmaduxGLRenderer {
         this.collectionsRenderer = new MeshRenderer();
         this.collectionsRenderer.loadShaders(this.context,R.raw.basic_vertex_shader,R.raw.basic_frag_shader);
 
+
+        this.quadRenderer = new QuadRenderer(this.context,R.raw.gui_vertex_shader,R.raw.gui_fragment_shader);
 
 
         suppliesVao = new CraterVaoCollection(3,CraterRenderer.QUAD_VERTICES,CraterRenderer.QUAD_TEXTURE_CORDS,CraterRenderer.QUAD_INDICES);
@@ -451,6 +456,7 @@ public class CraterRenderer extends EnigmaduxGLRenderer {
 //
             this.attackJoyStick.draw(this.vPMatrix);
             this.movementJoyStick.draw(this.vPMatrix);
+            this.defenseJoyStick.draw(this.vPMatrix);
 
             this.evolveButton.draw(this.vPMatrix);
 
@@ -536,6 +542,7 @@ public class CraterRenderer extends EnigmaduxGLRenderer {
 
                 this.movementJoyStick = this.backend.getMovementJoyStick();
                 this.attackJoyStick = this.backend.getAttackJoyStick();
+                this.defenseJoyStick = this.backend.getDefenseJoyStick();
                 this.evolveButton = this.backend.getEvolveButton();
 
                 this.gameScreenLayout = this.backend.getGameScreenLayout();
@@ -589,7 +596,6 @@ public class CraterRenderer extends EnigmaduxGLRenderer {
                 layouts.add(pauseGameLayout);
 
 
-                this.quadRenderer = new QuadRenderer(this.context,R.raw.gui_vertex_shader,R.raw.gui_fragment_shader);
 
                 this.guiData = new GUIDataWrapper(layouts);
                 this.guiData.loadComponents(this.context,this.layoutHashMap);

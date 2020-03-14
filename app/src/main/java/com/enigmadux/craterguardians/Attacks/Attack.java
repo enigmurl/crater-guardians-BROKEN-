@@ -89,7 +89,14 @@ public abstract class Attack {
             SoundLib.playEnemyDamagePlayerSoundEffect();
 
         }
+        if (this.intersectsShield((Player) character)){
+            this.isFinished = true;
+        }
 
+    }
+
+    public boolean intersectsShield(Player player){
+        return false;
     }
 
     /** Should only be called for player attack's

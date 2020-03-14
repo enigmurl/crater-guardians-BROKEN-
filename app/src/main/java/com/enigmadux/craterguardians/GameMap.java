@@ -24,6 +24,7 @@ import java.util.concurrent.locks.ReentrantLock;
 
 import enigmadux2d.core.EnigmaduxComponent;
 import enigmadux2d.core.gameObjects.VaoCollection;
+import enigmadux2d.core.quadRendering.QuadRenderer;
 import enigmadux2d.core.renderEngine.MeshRenderer;
 import enigmadux2d.core.shapes.TexturedRect;
 
@@ -83,6 +84,7 @@ public class GameMap extends EnigmaduxComponent {
     private VaoCollection plateausCollection;
 
     private MeshRenderer meshRenderer;
+    private QuadRenderer quadRenderer;
 
     /** Creates a GameMap Instance
      *
@@ -95,7 +97,7 @@ public class GameMap extends EnigmaduxComponent {
                    VaoCollection enemiesCollection,
                    VaoCollection spawnerCollection,
                    VaoCollection plateausColleciton,
-                   MeshRenderer meshRenderer) {
+                   MeshRenderer meshRenderer,QuadRenderer quadRenderer) {
         super(0,0,0,0);//deltX,y,w,h, are never really used
         this.context = context;
 
@@ -108,6 +110,7 @@ public class GameMap extends EnigmaduxComponent {
         this.plateausCollection = plateausColleciton;
 
         this.meshRenderer = meshRenderer;
+        this.quadRenderer = quadRenderer;
 
         this.show();
     }
@@ -199,16 +202,20 @@ public class GameMap extends EnigmaduxComponent {
 
 
 
-        synchronized (CraterBackend.SPAWNER_LOCK) {
-            for (int i = 0, size = this.spawners.size(); i < size; i++) {
-                this.spawners.get(i).updateInstanceInfo(bufferData, parentMatrix);
+//        synchronized (CraterBackend.SPAWNER_LOCK) {
+//            this.quadRenderer.startRendering();
+//            for (int i = 0, size = this.spawners.size(); i < size; i++) {
+//                this.spawners.get(i).draw(parentMatrix,this.quadRenderer);
+//                this.spawners.get(i).updateInstanceInfo(bufferData, parentMatrix);
+//
+//                this.spawnerCollection.updateInstance(this.spawners.get(i).getInstanceID(), bufferData);
+//            }
+//        }
+//
+//        this.spawnerCollection.updateInstancedVbo();
+//        this.meshRenderer.startRendering();
+//        this.meshRenderer.renderCollection(this.spawnerCollection);
 
-                this.spawnerCollection.updateInstance(this.spawners.get(i).getInstanceID(), bufferData);
-            }
-            this.spawnerCollection.updateInstancedVbo();
-        }
-
-        this.meshRenderer.renderCollection(this.spawnerCollection);
 
 
         if (enemies.size() > 0) {
@@ -243,11 +250,14 @@ public class GameMap extends EnigmaduxComponent {
         }
 
 
+
         synchronized (CraterBackend.PLAYER_LOCK) {
             float x = this.player.getDeltaX();
             float y = this.player.getDeltaY();
             this.player.setTranslate(this.cameraX,this.cameraY);
             this.player.draw(parentMatrix);
+            this.quadRenderer.startRendering();
+            this.player.drawQuads(parentMatrix,this.quadRenderer);
             this.player.setTranslate(x,y);
 
         }
@@ -370,40 +380,54 @@ public class GameMap extends EnigmaduxComponent {
         int numSpawners = level_data.nextInt();
         synchronized (CraterBackend.SPAWNER_LOCK) {
             for (int i = 0; i < numSpawners; i++) {
+                Log.d("SPAWNER","Iteration " + i);
                 float x = level_data.nextFloat();
                 float y = level_data.nextFloat();
                 float w = level_data.nextFloat();
                 float h = level_data.nextFloat();
                 String type = level_data.next();
-                //how long a wave is
-                long waveTime = level_data.nextLong();
-                //the amount of spawns in a wave
-                int numSpawns = level_data.nextInt();
-                short[] spawnsPerSubWave = new short[numSpawns];
-                long[] timesOfSubWave = new long[numSpawns];
-                for (int j = 0;j<numSpawns;j++){
-                    timesOfSubWave[j] = level_data.nextLong();
-                    spawnsPerSubWave[j] = level_data.nextShort();
+                long blue1 = level_data.nextLong();
+                long orange = level_data.nextLong();
+                long blue2 = level_data.nextLong();
+
+                int maxHealth = level_data.nextInt();
+                int endBlue1Health = level_data.nextInt();
+                int endOrangeHealth = level_data.nextInt();
+
+                int numOrangeWaves = level_data.nextInt();
+                short[] numOrangeSpawns = new short[numOrangeWaves];
+                long[] orangeSpawnTimes = new long[numOrangeWaves];
+                for (int j=0;j<numOrangeWaves;j++){
+                    numOrangeSpawns[j] = level_data.nextShort();
+                    orangeSpawnTimes[j] = level_data.nextLong();
                 }
 
-                //long spawnTime = level_data.nextLong();
-                long decayTime = level_data.nextInt();
-                int hitPoints = level_data.nextInt();
+                int numBlueWaves = level_data.nextInt();
+                short[] numBlueSpawns = new short[numBlueWaves];
+                long[] blueSpawnTimes = new long[numBlueWaves];
+                for (int j=0;j<numBlueWaves;j++){
+                    numBlueSpawns[j] = level_data.nextShort();
+                    blueSpawnTimes[j] = level_data.nextLong();
+                }
+
+
+
+
 
                 int instanceID = this.spawnerCollection.addInstance();
 
                 switch (type) {
                     case "ENEMY_TYPE_1":
-                        //spawners.add(new Enemy1Spawner(deltX, y, w, h, spawnTime, hitPoints));
-                        spawners.add(new Enemy1Spawner(instanceID, x, y, w, h,spawnsPerSubWave,timesOfSubWave,waveTime, decayTime, hitPoints));
+                        spawners.add(new Enemy1Spawner(instanceID, x, y, w, h,endOrangeHealth,endBlue1Health,maxHealth,blue1,orange,blue2,
+                                numBlueSpawns,blueSpawnTimes,numOrangeSpawns,orangeSpawnTimes));
                         break;
                     case "ENEMY_TYPE_2":
-                        //spawners.add(new Enemy2Spawner(deltX, y, w, h, spawnTime, hitPoints));
-                        spawners.add(new Enemy2Spawner(instanceID,x, y, w, h,spawnsPerSubWave,timesOfSubWave,waveTime, decayTime, hitPoints));
+                        spawners.add(new Enemy2Spawner(instanceID, x, y, w, h,endOrangeHealth,endBlue1Health,maxHealth,blue1,orange,blue2,
+                                numBlueSpawns,blueSpawnTimes,numOrangeSpawns,orangeSpawnTimes));
                         break;
                     case "ENEMY_TYPE_3":
-                        spawners.add(new Enemy3Spawner(instanceID,x, y, w, h,spawnsPerSubWave,timesOfSubWave,waveTime, decayTime, hitPoints));
-                        //spawners.add(new Enemy3Spawner(deltX, y, w, h, spawnTime, hitPoints));
+                        spawners.add(new Enemy3Spawner(instanceID, x, y, w, h,endOrangeHealth,endBlue1Health,maxHealth,blue1,orange,blue2,
+                                numBlueSpawns,blueSpawnTimes,numOrangeSpawns,orangeSpawnTimes));
                         break;
                 }
             }

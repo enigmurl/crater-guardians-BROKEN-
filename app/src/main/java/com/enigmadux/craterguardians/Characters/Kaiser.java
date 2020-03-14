@@ -8,9 +8,13 @@ import com.enigmadux.craterguardians.AngleAimers.AngleAimer;
 import com.enigmadux.craterguardians.AngleAimers.TriangleAimer;
 import com.enigmadux.craterguardians.Animations.EvolveAnimation;
 import com.enigmadux.craterguardians.Attacks.KaiserAttack;
+import com.enigmadux.craterguardians.Enemies.Enemy;
 import com.enigmadux.craterguardians.MathOps;
 import com.enigmadux.craterguardians.GUILib.ProgressBar;
 import com.enigmadux.craterguardians.R;
+import com.enigmadux.craterguardians.Spawners.Spawner;
+
+import java.util.List;
 
 import enigmadux2d.core.shapes.TexturedRect;
 
@@ -30,11 +34,14 @@ public class Kaiser extends Player {
     private static final float FPS = 8;
 
     //a constant that represents the maximum health of KAISER
-    private static final int MAXIMUM_HEALTH = 200000;
+    private static final int MAXIMUM_HEALTH = 2000;
     //a constant that represents how many attacks kaiser can perform before reloading
-    private static final int NUM_ATTACKS  = 5;
+    private static final int NUM_ATTACKS  = 15;
     //a constant that represents how long in millis it takes to reload all attacks;
     private static final long MILLIS_PER_RELOAD = 2000;
+
+    //a constant representing the amount of milliseconds between successive attacks
+    private static final long ATTACK_BUFFER  = 200;
 
     //this says how much damage is needed to be dealt, in order to charge an evolution
     private static final int[] NUM_DAMAGE_FOR_EVOLUTION = new int[] {150,400};
@@ -46,13 +53,13 @@ public class Kaiser extends Player {
 
 
     //the attack damage at each stage of evolution at level 1
-    private static final float[] DAMAGE = new float[] {10,14,50};
+    private static final float[] DAMAGE = new float[] {10,14,22};
 
 
 
 
     //the level of the this player
-    public static int PLAYER_LEVEL = 0;
+    private static int PLAYER_LEVEL = 0;
 
 
     //visual is shared by all objects as they all have the same sprite, (all gens are saved here), 3 textures, 1 for each gen
@@ -67,6 +74,11 @@ public class Kaiser extends Player {
 
     //parent matrix * translation matrix
     private float[] finalMatrix = new float[16];
+
+    /** THe amount of millisecond since last attack
+     *
+     */
+    private long millisSinceLastAttack = 0;
 
 
 
@@ -163,8 +175,9 @@ public class Kaiser extends Player {
         super.attack(angle);
         this.attackAngleAimer.hide();
 
-        if (this.numAttacks > 0 && this.attacks.size() == 0) {
+        if (this.numAttacks > 0 && this.millisSinceLastAttack > Kaiser.ATTACK_BUFFER) {
             this.numAttacks --;
+            this.millisSinceLastAttack = 0;
 
             int damage = (int) (DAMAGE[this.evolveGen] * (1 + (float) this.attackChargeUp.getCurrentHitPoints()/(NUM_ATTACKS * 1000)));
             if (this.evolveGen == 0)
@@ -295,5 +308,11 @@ public class Kaiser extends Player {
     @Override
     public int getPlayerIcon() {
         return R.drawable.kaiser_info;
+    }
+
+    @Override
+    public void update(long dt, float rotation, List<Enemy> enemies, List<Spawner> spawners) {
+        super.update(dt, rotation, enemies, spawners);
+        this.millisSinceLastAttack += dt;
     }
 }

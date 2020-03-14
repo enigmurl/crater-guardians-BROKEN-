@@ -193,9 +193,46 @@ public class Enemy1Attack extends Attack {
 
     @Override
     public void onHitPlayer(Player player) {
-        float hypotenuse = (float) Math.hypot(player.getDeltaX() - this.x,player.getDeltaY() - this.y);
-        player.damage(player.getAttackDamage(this.damage, MathOps.getAngle((this.x - player.getDeltaX())/hypotenuse,(this.y - player.getDeltaY())/hypotenuse)));
+        float originalXvalue = length * (float) finishedMillis/millis;
+        float originalYValue = width/2f;
+
+        float cos = (float) Math.cos(attackAngle);
+        float sin = (float) Math.sin(attackAngle);
+
+        float x1 = this.x + cos * originalXvalue - sin * originalYValue;
+        float y1 = this.y + sin * originalXvalue + cos * originalYValue;
+        float x2 = this.x + cos * originalXvalue + sin * originalYValue;
+        float y2 = this.y + sin * originalXvalue - cos * originalYValue;
+        player.damage(player.getAttackDamage(this.damage, x1,y1,x2,y2));
     }
+
+    @Override
+    public boolean intersectsShield(Player player) {
+        float originalXvalue = length * (float) finishedMillis/millis;
+        float originalYValue = width/2f;
+
+        float cos = (float) Math.cos(attackAngle);
+        float sin = (float) Math.sin(attackAngle);
+
+        float x1 = this.x + cos * originalXvalue - sin * originalYValue;
+        float y1 = this.y + sin * originalXvalue + cos * originalYValue;
+        float x2 = this.x + cos * originalXvalue + sin * originalYValue;
+        float y2 = this.y + sin * originalXvalue - cos * originalYValue;
+
+
+        float xValue2 = length * (float) finishedMillis/millis + width;
+
+        float x3 = this.x + cos * xValue2 - sin * originalYValue;
+        float y3 = this.y + sin * xValue2 + cos * originalYValue;
+        float x4 = this.x + cos * xValue2 + sin * originalYValue;
+        float y4 = this.y + sin * xValue2 - cos * originalYValue;
+
+        return  player.intersectsWith(x1,y1,x2,y2) ||
+                player.intersectsWith(x3,y3,x4,y4) ||
+                player.intersectsWith(x1,y1,x3,y3) ||
+                player.intersectsWith(x2,y2,x4,y4);
+    }
+
     @Override
     public void onHitEnemy(Enemy enemy) {
         //pass nothing needs to be done

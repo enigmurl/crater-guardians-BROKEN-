@@ -30,6 +30,7 @@ import com.enigmadux.craterguardians.GUILib.HealthBar;
 import com.enigmadux.craterguardians.GUILib.InGameTextbox;
 import com.enigmadux.craterguardians.GUILib.ProgressBar;
 import com.enigmadux.craterguardians.GameObjects.Plateau;
+import com.enigmadux.craterguardians.GameObjects.Shield;
 import com.enigmadux.craterguardians.GameObjects.Supply;
 import com.enigmadux.craterguardians.GameObjects.ToxicLake;
 import com.enigmadux.craterguardians.Spawners.Spawner;
@@ -79,6 +80,8 @@ public class CraterBackend {
     private static final float[] MOVEMENT_JOY_STICK_CENTER = {-0.4f,-0.6f};
     //the center coordinate of attack joy stick (openGL coordinates)
     private static final float[] ATTACK_JOY_STICK_CENTER = {0.6f,-0.4f};
+    //the center coordinate of attack joy stick (openGL coordinates)
+    private static final float[] SHIELD_JOY_STICK_CENTER = {0.4f,-0.6f};
     //the diameter of the movement and attack joysticks
     private static final float JOY_STICK_IMAGE_WIDTH = 0.2f;
     //the maximum length they can extend too
@@ -136,6 +139,19 @@ public class CraterBackend {
     private boolean attackJoyStickDown = false;
     //how to identify which pointer corresponds to the attack joystick
     private int attackJoyStickPointer;
+
+    //visual joystick
+    private TexturedRect defenseJoyStick;
+
+    //openGl deltX coordinate of the attack joystick
+    private float defenseJoyStickX;
+    //openGL y coordinate of the attack joystick
+    private float defenseJoyStickY;
+    //whether the attack joystick is being activated
+    private boolean defenseJoyStickDown = false;
+    //how to identify which pointer corresponds to the defense joystick
+    private int defenseJoyStickPointer;
+
 
     //visual joystick
     private TexturedRect movementJoyStick;
@@ -234,12 +250,12 @@ public class CraterBackend {
         this.playerData = new PlayerData(context);
         this.levelData = new LevelData(context);
 
-        this.gameMap = new GameMap(context,this,suppliesCollection,toxicLakeCollection,enemiesCollection,spawnerCollection,plateauCollection,this.renderer.collectionsRenderer);
+        this.gameMap = new GameMap(context,this,suppliesCollection,toxicLakeCollection,enemiesCollection,spawnerCollection,plateauCollection,this.renderer.collectionsRenderer,this.renderer.quadRenderer);
 
 
         attackJoyStick = new TexturedRect(ATTACK_JOY_STICK_CENTER[0]-JOY_STICK_IMAGE_WIDTH/2, ATTACK_JOY_STICK_CENTER[1]-JOY_STICK_IMAGE_WIDTH/2,scaleX * JOY_STICK_IMAGE_WIDTH,scaleY * JOY_STICK_IMAGE_WIDTH);
         movementJoyStick = new TexturedRect(MOVEMENT_JOY_STICK_CENTER[0]-JOY_STICK_IMAGE_WIDTH/2, MOVEMENT_JOY_STICK_CENTER[1]-JOY_STICK_IMAGE_WIDTH/2,scaleX * JOY_STICK_IMAGE_WIDTH,scaleY* JOY_STICK_IMAGE_WIDTH);
-
+        defenseJoyStick = new TexturedRect(SHIELD_JOY_STICK_CENTER[0]-JOY_STICK_IMAGE_WIDTH/2, SHIELD_JOY_STICK_CENTER[1]-JOY_STICK_IMAGE_WIDTH/2,scaleX * JOY_STICK_IMAGE_WIDTH,scaleY * JOY_STICK_IMAGE_WIDTH);
 
 
 
@@ -386,6 +402,7 @@ public class CraterBackend {
     public void loadTextures(){
         //inputs
         this.attackJoyStick.loadGLTexture(this.context,R.drawable.test);
+        this.defenseJoyStick.loadGLTexture(this.context,R.drawable.test);
         this.movementJoyStick.loadGLTexture(this.context,R.drawable.test);
         this.evolveButton.loadGLTexture(this.context,R.drawable.evolve_button);
 
@@ -417,6 +434,7 @@ public class CraterBackend {
         //others (lakes + plateaus)
         Plateau.loadGLTexture(this.context);
         ProgressBar.loadGLTexture(this.context);
+        Spawner.loadGLTexture(this.context);
         HealthBar.loadGLTexture(this.context);
 
         InGameTextbox.loadFont(this.context);
@@ -467,6 +485,12 @@ public class CraterBackend {
     public TexturedRect getMovementJoyStick(){
         return this.movementJoyStick;
     }
+
+
+    /** Gets the Defense joy stick
+     *
+     */
+    public TexturedRect getDefenseJoyStick() {return this.defenseJoyStick;}
 
     /** Gets the battle start Indicator textbox
      *
@@ -565,6 +589,8 @@ public class CraterBackend {
         this.movementJoyStickY = 0;
         this.attackJoyStickX = 0;
         this.attackJoyStickY = 0;
+        this.defenseJoyStickX = 0;
+        this.defenseJoyStickY = 0;
         this.attackJoyStickDown = false;
         this.movementJoyStickDown = false;
     }
@@ -644,7 +670,12 @@ public class CraterBackend {
 
         this.attackJoyStick.setTranslate(this.attackJoyStickX, this.attackJoyStickY);
         this.movementJoyStick.setTranslate(this.movementJoyStickX, this.movementJoyStickY);
-
+        this.defenseJoyStick.setTranslate(this.defenseJoyStickX,this.defenseJoyStickY);
+        float mag = (float) Math.hypot(this.defenseJoyStickX/scaleX,this.defenseJoyStickY/scaleY);
+        if (mag > 0) {
+            float shieldRot =180f / (float) Math.PI * MathOps.getAngle(this.defenseJoyStickX/(mag*scaleX),this.defenseJoyStickY/(scaleY * mag));
+            this.player.setShieldRotation(shieldRot);
+        }
 
         if (this.currentGameState == CraterBackend.GAME_STATE_INGAME) {
 
@@ -788,6 +819,13 @@ public class CraterBackend {
             //lock is needed for the added attacks
             synchronized (CraterBackend.PLAYER_LOCK) {
                 start = System.currentTimeMillis();
+                if (this.attackJoyStickDown && ! this.player.isEvolving()){
+                    //can't attack while evolving
+                    float hypotenuse = (float) Math.hypot(this.attackJoyStickX/scaleX,this.attackJoyStickY/scaleY);
+
+                    this.player.attack(MathOps.getAngle(attackJoyStickX / (scaleX * hypotenuse), attackJoyStickY / (scaleY * hypotenuse)));
+                }
+
                 //translate player based on inputs from movement stick
                 this.player.translateFromPos(dt * this.movementJoyStickX / (1000 * scaleX) * this.player.getCharacterSpeed(), dt * this.movementJoyStickY / (scaleY * 1000) * this.player.getCharacterSpeed());
 
@@ -920,6 +958,7 @@ public class CraterBackend {
 
         int pointerInd  = e.getActionIndex();
         float x = MathOps.getOpenGLX(e.getX(pointerInd));
+        float y = MathOps.getOpenGLY(e.getY(pointerInd));
 
         if (e.getActionMasked() == MotionEvent.ACTION_POINTER_DOWN || e.getActionMasked() == MotionEvent.ACTION_DOWN){
             //assign joystick pointers
@@ -930,9 +969,18 @@ public class CraterBackend {
 
             } else if (! evolveButton.onTouch(e)){
                 //assign attack
-                this.attackJoyStickPointer = e.getPointerId(pointerInd);
-                this.attackJoyStickDown = true;
-                this.player.showAngleAimer();
+                float distA = (float) Math.hypot(x - ATTACK_JOY_STICK_CENTER[0],y - ATTACK_JOY_STICK_CENTER[1]);
+                float distD = (float) Math.hypot(x - SHIELD_JOY_STICK_CENTER[0],y - SHIELD_JOY_STICK_CENTER[1]);
+
+                if (distA < distD) {
+                    this.attackJoyStickPointer = e.getPointerId(pointerInd);
+                    this.attackJoyStickDown = true;
+                    this.player.showAngleAimer();
+                } else {
+                    this.defenseJoyStickPointer = e.getPointerId(pointerInd);
+                    this.defenseJoyStickDown = true;
+                    this.player.setShieldState(true);
+                }
             }
 
         } else if (e.getActionMasked() == MotionEvent.ACTION_POINTER_UP || e.getActionMasked() == MotionEvent.ACTION_UP || e.getActionMasked() == MotionEvent.ACTION_CANCEL){
@@ -945,12 +993,11 @@ public class CraterBackend {
             if  (e.getPointerId(pointerInd) == this.attackJoyStickPointer && this.attackJoyStickDown){
                 this.attackJoyStickDown = false;
                 float hypotenuse = (float) Math.hypot(this.attackJoyStickX/scaleX,this.attackJoyStickY/scaleY);
-                //can't attack while evolving
-                if (! this.player.isEvolving()) {
-                    synchronized (CraterBackend.PLAYER_LOCK) {
-                        this.player.attack(MathOps.getAngle(attackJoyStickX / (scaleX * hypotenuse), attackJoyStickY / (scaleY * hypotenuse)));
-                    }
-                }
+
+            }
+            if (e.getPointerId(pointerInd) == this.defenseJoyStickPointer && this.defenseJoyStickDown){
+                this.defenseJoyStickDown = false;
+                this.player.setShieldState(false);
             }
 
         }
@@ -994,6 +1041,23 @@ public class CraterBackend {
         } else {
             this.attackJoyStickX = 0;
             this.attackJoyStickY = 0;
+        }
+
+        if (this.defenseJoyStickDown) {
+            this.defenseJoyStickX = (MathOps.getOpenGLX(e.getX(e.findPointerIndex(this.defenseJoyStickPointer))) - SHIELD_JOY_STICK_CENTER[0]);
+            this.defenseJoyStickY = (MathOps.getOpenGLY(e.getY(e.findPointerIndex(this.defenseJoyStickPointer))) - SHIELD_JOY_STICK_CENTER[1]);
+
+
+
+            float hypotenuse = (float) Math.hypot(this.defenseJoyStickX/scaleX,this.defenseJoyStickY/scaleY);
+
+            if (hypotenuse > CraterBackend.JOY_STICK_MAX_RADIUS){
+                this.defenseJoyStickX *= CraterBackend.JOY_STICK_MAX_RADIUS/hypotenuse;
+                this.defenseJoyStickY *= CraterBackend.JOY_STICK_MAX_RADIUS/hypotenuse;
+            }
+        } else {
+            this.defenseJoyStickX = 0;
+            this.defenseJoyStickY = 0;
         }
 
         //if evolving no need to hide

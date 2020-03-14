@@ -21,6 +21,7 @@ import java.nio.ShortBuffer;
 import javax.microedition.khronos.opengles.GL10;
 
 import enigmadux2d.core.EnigmaduxComponent;
+import enigmadux2d.core.shaders.ShaderProgram;
 
 /** An Enigmadux rect. Used for drawing, collision detection, and more
  *
@@ -202,7 +203,6 @@ public class TexturedRect extends EnigmaduxComponent {
         // creates OpenGL ES program executables
         GLES30.glLinkProgram(mProgram);
 
-        GLES30.glUseProgram(mProgram);
     }
 
 
@@ -428,7 +428,10 @@ public class TexturedRect extends EnigmaduxComponent {
      * @param frameNum the frameNum in the texture
      */
     public void prepareDraw(int frameNum){
-        GLES30.glUseProgram(mProgram);
+        if (mProgram != ShaderProgram.currentProgram) {
+            GLES30.glUseProgram(mProgram);
+            ShaderProgram.currentProgram = mProgram;
+        }
 
         // Point to our buffers
         GLES30.glEnableVertexAttribArray(verticesHandle);

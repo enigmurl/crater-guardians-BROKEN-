@@ -10,6 +10,7 @@ import com.enigmadux.craterguardians.Attacks.Attack;
 import com.enigmadux.craterguardians.BaseCharacter;
 import com.enigmadux.craterguardians.Enemies.Enemy;
 import com.enigmadux.craterguardians.GUILib.ProgressBar;
+import com.enigmadux.craterguardians.GameObjects.Shield;
 import com.enigmadux.craterguardians.R;
 import com.enigmadux.craterguardians.SoundLib;
 import com.enigmadux.craterguardians.Spawners.Spawner;
@@ -17,6 +18,7 @@ import com.enigmadux.craterguardians.Spawners.Spawner;
 import java.util.Iterator;
 import java.util.List;
 
+import enigmadux2d.core.quadRendering.QuadRenderer;
 import enigmadux2d.core.shapes.TexturedRect;
 
 public abstract class Player extends BaseCharacter {
@@ -25,6 +27,13 @@ public abstract class Player extends BaseCharacter {
      *
      */
     public static final float CHARACTER_RADIUS = 0.1f;
+
+
+    //the shield sweep and radius (standard)
+    private static final float SHIELD_SWEEP = 90f;
+    //shield radius
+    private static final float SHIELD_RADIUS = CHARACTER_RADIUS * 2;
+
 
     /** THe amount of milliseconds the evolving animation takes
      *
@@ -89,13 +98,21 @@ public abstract class Player extends BaseCharacter {
     //the level of this character in upgradability
     protected int level;
 
+
+    //the shield that blocks attacks
+    private static Shield shield;
+    //if shiled is on
+    private boolean shieldOn;
+
+    //degrees of rotation of shield
+    private float shieldRotation;
+
     /** Default constructor
-     *
-     * @param numRotationOrientations the amount of angles that the character is rendered at e.g 4 would mean 0,90,180,270
+     *  @param numRotationOrientations the amount of angles that the character is rendered at e.g 4 would mean 0,90,180,270
      * @param framesPerRotation in each orientation, how many frames is the animations
      * @param fps the amount of frames displayed in a single second
      */
-    public Player(int numRotationOrientations, int framesPerRotation,float fps){
+    public Player(int numRotationOrientations, int framesPerRotation, float fps){
         super(numRotationOrientations, framesPerRotation, fps);
 
         this.attackAngleAimer = this.createAngleAimer();
@@ -111,6 +128,7 @@ public abstract class Player extends BaseCharacter {
 
         //this basically indicates it has never evolved.
         this.millisSinceEvolve = Player.EVOLVE_MILLIS;
+
     }
 
 
@@ -120,6 +138,7 @@ public abstract class Player extends BaseCharacter {
      */
     public static void loadGLTexture(Context context) {
         ATTACK_VISUAL.loadGLTexture(context, R.drawable.ammo_visual);
+        shield = new Shield(Player.SHIELD_SWEEP,Player.SHIELD_RADIUS,context);
     }
 
     /** The sub class should create and return an angle aimer that matches the attack shape
@@ -163,6 +182,7 @@ public abstract class Player extends BaseCharacter {
             return;
         }
 
+        shield.setState(this.shieldOn);
         //TODO Concurrent modification happening here sometimes also on line 178 a null pointer was thrown
         for (int i = 0,size = this.attacks.size();i<size;i++){
             this.attacks.get(i).draw(parentMatrix);
@@ -206,6 +226,23 @@ public abstract class Player extends BaseCharacter {
 
         if (this.evolveAnimation != null) this.evolveAnimation.draw(parentMatrix);
 
+    }
+
+    public void drawQuads(float[] parentMatrix,QuadRenderer quadRenderer){
+        shield.setTranslation(this.getDeltaX(),this.getDeltaY());
+        shield.setMidAngle(this.shieldRotation);
+        shield.draw(parentMatrix,quadRenderer);
+    }
+
+
+    public void setShieldState(boolean isOn){
+        shield.setState(isOn);
+        this.shieldOn = isOn;
+    }
+
+    //shield rotaion is degrees
+    public void setShieldRotation(float shieldRotation){
+        this.shieldRotation = shieldRotation;
     }
 
     @Override
@@ -329,7 +366,7 @@ public abstract class Player extends BaseCharacter {
         this.speedEffectMillis = speedEffectMillis;
     }
 
-    /** If enough damage was dealed, and the evolve button is pressed, the player evolves to a superior state
+    /** If enough damage was dealt, and the evolve button is pressed, the player evolves to a superior state
      *
      * @return Whether or not it evolved (true = evolved, false = not)
      */
@@ -366,12 +403,29 @@ public abstract class Player extends BaseCharacter {
      * When an attack wants to damage the player, it needs to see if it hits the shield todo because only the middle angle is taken into account, there are false positive and negatives
      *
      * @param startingDamage how much damage it would do if there was no shield
-     * @param angle the angle in radians, in relation to the player, as in, what angle does the enemy attack make with the player
+     * @param x0 line 0 x
+     * @param y0 line 0 y
+     * @param x1 line 1 x
+     * @param y1 line 1 y
      * @return the damage to be applied to the player depending on the shield
      */
-    public int getAttackDamage(int startingDamage,float angle) {
+    public int getAttackDamage(int startingDamage, float x0, float y0, float x1, float y1) {
+        shield.setState(this.shieldOn);
+        shield.setTranslation(this.getDeltaX(),this.getDeltaY());
+        shield.setMidAngle(this.shieldRotation);
+        if (shield.intersects(x0,y0,x1,y1)){
+            return 0;
+        }
 
         return startingDamage;
+    }
+
+
+    public boolean intersectsWith( float x0, float y0, float x1, float y1){
+        shield.setState(this.shieldOn);
+        shield.setTranslation(this.getDeltaX(),this.getDeltaY());
+        shield.setMidAngle(this.shieldRotation);
+        return shield.intersects(x0,y0,x1,y1);
     }
 
     /** Whether or not the health is greater than 0, also plays sound effect if it's dead

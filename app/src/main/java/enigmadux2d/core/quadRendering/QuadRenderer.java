@@ -56,7 +56,7 @@ public class QuadRenderer {
      */
     public void startRendering(){
         //use our shader program
-        GLES30.glUseProgram(this.guiShader.getProgramID());
+        this.guiShader.useProgram();
 
     }
 
@@ -100,8 +100,6 @@ public class QuadRenderer {
      * @param uMVPmatrix a 4x4 matrix that represents the    model view projection matrix
      */
     public void renderQuads(ArrayList<? extends QuadTexture> quads,float[] uMVPmatrix){
-        //use our shader program
-        GLES30.glUseProgram(this.guiShader.getProgramID());
 
         //bind the vao
         GLES30.glBindVertexArray(this.mesh.getVaoID());
