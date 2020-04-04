@@ -6,6 +6,7 @@ attribute vec3 position;
 
 varying vec2 pass_textureCord;
 
+
 void main() {
     gl_Position = mvpMatrix * vec4(position,1);
     float u = (position.x + 0.5);

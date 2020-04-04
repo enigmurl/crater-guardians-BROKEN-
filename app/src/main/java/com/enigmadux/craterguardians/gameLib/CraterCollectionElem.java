@@ -1,5 +1,7 @@
 package com.enigmadux.craterguardians.gameLib;
 
+import com.enigmadux.craterguardians.worlds.World;
+
 import enigmadux2d.core.gameObjects.CollectionElem;
 
 /** This is a collection element tailored to Crater Guardians. That is,
@@ -52,6 +54,12 @@ public abstract class CraterCollectionElem extends CollectionElem {
         super(instanceID);
     }
 
+    /** Fully updates the instance
+     *
+     * dt is milliseconds
+     * world hass al the information
+     */
+    public abstract void update(long dt, World world);
 
     /** Updates the instance info into the float[].
      *

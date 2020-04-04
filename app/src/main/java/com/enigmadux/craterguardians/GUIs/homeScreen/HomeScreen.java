@@ -4,20 +4,26 @@ import android.content.Context;
 import android.util.Log;
 import android.view.MotionEvent;
 
-import com.enigmadux.craterguardians.CraterBackend;
+import com.enigmadux.craterguardians.CraterRenderer;
 import com.enigmadux.craterguardians.GUILib.GUIClickable;
 import com.enigmadux.craterguardians.GUILib.GUILayout;
+import com.enigmadux.craterguardians.GUILib.MatieralBar;
 import com.enigmadux.craterguardians.GUILib.VisibilityInducedButton;
 import com.enigmadux.craterguardians.GUILib.dynamicText.DynamicText;
 import com.enigmadux.craterguardians.GUIs.inGameScreen.InGameScreen;
 import com.enigmadux.craterguardians.R;
-import com.enigmadux.craterguardians.SoundLib;
+import com.enigmadux.craterguardians.players.Kaiser;
+import com.enigmadux.craterguardians.players.TutorialPlayer;
+import com.enigmadux.craterguardians.util.SoundLib;
+import com.enigmadux.craterguardians.values.LayoutConsts;
+import com.enigmadux.craterguardians.worlds.World;
 import com.enigmadux.craterguardians.values.STRINGS;
 
 import java.util.ArrayList;
 import java.util.HashMap;
 
-import enigmadux2d.core.quadRendering.QuadRenderer;
+import enigmadux2d.core.quadRendering.GuiRenderer;
+import enigmadux2d.core.quadRendering.QuadTexture;
 
 /** The default Layout that the user opens up too
  *
@@ -37,6 +43,8 @@ public class HomeScreen implements GUILayout {
      */
     private ArrayList<GUIClickable> clickables;
 
+    private ArrayList<QuadTexture> renderables;
+
 
     /** Theres only one static display, so no need for an array list.
      *  This tells the user the
@@ -47,7 +55,7 @@ public class HomeScreen implements GUILayout {
     /** Backend object used to query the state
      *
      */
-    private CraterBackend backend;
+    private CraterRenderer craterRenderer;
 
     /** Whether or not to draw the screen
      *
@@ -64,13 +72,16 @@ public class HomeScreen implements GUILayout {
      */
     private GUILayout inGameLayout;
 
+    private MatieralBar matieralBar;
+
     /** Default Constructor
      *
-     * @param backend the backend object used so we can query the state of the current palyer
+     * @param craterRenderer the backend object used so we can query the state of the current palyer
      */
-    public HomeScreen(CraterBackend backend){
+    public HomeScreen(CraterRenderer craterRenderer){
         this.clickables = new ArrayList<>();
-        this.backend = backend;
+        this.renderables = new ArrayList<>();
+        this.craterRenderer = craterRenderer;
     }
 
     /** Due to complexities with references, this can't be in the constructor
@@ -82,7 +93,7 @@ public class HomeScreen implements GUILayout {
     public void loadComponents(Context context, HashMap<String,GUILayout> allLayouts){
         //the firstButton (settings button);
         this.clickables.add(new VisibilityInducedButton(context, R.drawable.settings_button,
-                0.8f,0.8f,0.2f,0.2f,
+                1 - 0.15f * LayoutConsts.SCALE_X,0.85f,0.2f,0.2f,
                 this,allLayouts.get(STRINGS.SETTINGS_LAYOUT_ID), false));
         //second button is the character select layout
         VisibilityInducedButton characterSelectButton = new VisibilityInducedButton(context,R.drawable.button_background,
@@ -93,7 +104,7 @@ public class HomeScreen implements GUILayout {
 
 
         //third one is a display, but not a clickable
-        this.characterDisplay = new CharacterDisplay(context,this.backend.getPlayer().getPlayerIcon(),
+        this.characterDisplay = new CharacterDisplay(context,this.craterRenderer.getWorld().getPlayer().getPlayerIcon(),
                 0,0.75f,0.4f,0.4f);
 
 
@@ -104,6 +115,11 @@ public class HomeScreen implements GUILayout {
                 this,allLayouts.get(STRINGS.LEVEL_SELECT_LAYOUT_ID), true);
         levelSelectButton.updateText(STRINGS.LEVEL_SELECT_BUTTON_TEXT,0.1f);
         this.clickables.add(levelSelectButton);
+
+        matieralBar = new MatieralBar(context);
+        this.renderables.addAll(this.clickables);
+        this.renderables.addAll(matieralBar.getRenderables());
+        this.renderables.add(this.characterDisplay);
 
         this.context = context;
 
@@ -117,17 +133,16 @@ public class HomeScreen implements GUILayout {
      * @param textRenderer this renders text efficiently as opposed to rendering quads
      */
     @Override
-    public void render(float[] uMVPMatrix, QuadRenderer renderer, DynamicText textRenderer) {
+    public void render(float[] uMVPMatrix, GuiRenderer renderer, DynamicText textRenderer) {
         if (this.isVisible) {
-            renderer.renderQuads(this.clickables, uMVPMatrix);
-            renderer.renderQuad(this.characterDisplay,uMVPMatrix);
+            renderer.renderQuads(this.renderables, uMVPMatrix);
             for (int i = 0,size = this.clickables.size();i<size;i++){
                 this.clickables.get(i).renderText(textRenderer,uMVPMatrix);
             }
+            matieralBar.renderText(textRenderer,uMVPMatrix);
 
         }
     }
-
 
     /** Handles touch events
      *
@@ -158,17 +173,31 @@ public class HomeScreen implements GUILayout {
             SoundLib.setStateLossMusic(false);
             SoundLib.setStateLobbyMusic(true);
 
-            this.characterDisplay.loadAndroidTexturePointer(this.context,this.backend.getPlayer().getPlayerIcon());
-            this.backend.setCurrentGameState(CraterBackend.GAME_STATE_HOMESCREEN);
+            this.characterDisplay.setGLTexture(QuadTexture.loadAndroidTexturePointer(this.context,this.craterRenderer.getWorld().getPlayer().getPlayerIcon()));
+            this.craterRenderer.getWorld().setState(World.STATE_GUI);
 
             //hide the pause button
             this.inGameLayout.setVisibility(false);
             Log.d("HOME SCREEN","Set visibility");
+
+            //if it's tutorial, want to change it to kaiser instead
+            if (this.craterRenderer.getWorld().getPlayer() instanceof TutorialPlayer){
+                this.craterRenderer.getWorld().setPlayer(new Kaiser());
+            }
         }
 
-        for (int i = this.clickables.size()-1;i>= 0;i--){
-            this.clickables.get(i).setVisibility(visibility);
+        for (int i = this.renderables.size()-1;i>= 0;i--){
+            this.renderables.get(i).setVisibility(visibility);
         }
     }
 
+    public MatieralBar getMatieralBar(){
+        return this.matieralBar;
+    }
+
+    @Override
+    public boolean isVisible() {
+        return isVisible;
+    }
 }
+

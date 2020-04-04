@@ -3,23 +3,30 @@ package com.enigmadux.craterguardians.GUIs.levelSelect;
 import android.content.Context;
 import android.view.MotionEvent;
 
-import com.enigmadux.craterguardians.CraterBackend;
-import com.enigmadux.craterguardians.CraterBackendThread;
+import com.enigmadux.craterguardians.CraterRenderer;
 import com.enigmadux.craterguardians.GUILib.GUIClickable;
 import com.enigmadux.craterguardians.GUILib.GUILayout;
+import com.enigmadux.craterguardians.GUILib.ImageText;
+import com.enigmadux.craterguardians.GUILib.Text;
+import com.enigmadux.craterguardians.GUILib.TextRenderable;
 import com.enigmadux.craterguardians.GUILib.VisibilityInducedButton;
+import com.enigmadux.craterguardians.GUILib.VisibilitySwitch;
 import com.enigmadux.craterguardians.GUILib.dynamicText.DynamicText;
 import com.enigmadux.craterguardians.GUIs.inGameScreen.InGameScreen;
 import com.enigmadux.craterguardians.GameMap;
+import com.enigmadux.craterguardians.players.Kaiser;
+import com.enigmadux.craterguardians.players.TutorialPlayer;
 import com.enigmadux.craterguardians.values.LayoutConsts;
 import com.enigmadux.craterguardians.R;
-import com.enigmadux.craterguardians.SoundLib;
+import com.enigmadux.craterguardians.util.SoundLib;
 import com.enigmadux.craterguardians.values.STRINGS;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 
-import enigmadux2d.core.quadRendering.QuadRenderer;
+import enigmadux2d.core.quadRendering.GuiRenderer;
+import enigmadux2d.core.quadRendering.QuadTexture;
 
 /** This is where the player selects the level
  *
@@ -38,6 +45,7 @@ public class LevelSelectLayout implements GUILayout {
      *
      */
     private static final float SIDE_MARGINS = 0.2f;
+    private static final float TOP_MARGIN = 0.6f;
 
     /** The space between consecutive icons (for the y axis, for x it's scale)
      *
@@ -55,6 +63,12 @@ public class LevelSelectLayout implements GUILayout {
      */
     private ArrayList<GUIClickable> clickables;
 
+    private ArrayList<QuadTexture> renderables;
+
+    private ArrayList<TextRenderable> textRenderables;
+
+    private ArrayList<VisibilitySwitch> allComponents;
+
     /** Whether or not to draw the screen
      *
      */
@@ -63,7 +77,7 @@ public class LevelSelectLayout implements GUILayout {
     /** Backend object used to go into the actual game
      *
      */
-    private CraterBackendThread backend;
+    private CraterRenderer craterRenderer;
 
 
     /** The layout in game that we need to hide some times
@@ -73,11 +87,13 @@ public class LevelSelectLayout implements GUILayout {
 
     /** Default Constructor
      *
-     * @param backendThread the backend thread
      */
-    public LevelSelectLayout(CraterBackendThread backendThread){
+    public LevelSelectLayout(CraterRenderer craterRenderer){
         this.clickables = new ArrayList<>();
-        this.backend = backendThread;
+        this.renderables = new ArrayList<>();
+        textRenderables = new ArrayList<>();
+        allComponents = new ArrayList<>();
+        this.craterRenderer = craterRenderer;
     }
 
     /** Due to complexities with references, this can't be in the constructor
@@ -88,22 +104,37 @@ public class LevelSelectLayout implements GUILayout {
     @Override
     public void loadComponents(Context context, HashMap<String,GUILayout> allLayouts){
         //the home button);
-        this.clickables.add(new VisibilityInducedButton(context, R.drawable.home_button,
+        VisibilityInducedButton homeButton = new VisibilityInducedButton(context, R.drawable.home_button,
                 0,-0.4f,0.4f,0.4f,
-                this,allLayouts.get(STRINGS.HOME_SCREEN_LAYOUT_ID), false));
+                this,allLayouts.get(STRINGS.HOME_SCREEN_LAYOUT_ID), false);
+        this.clickables.add(homeButton);
+        this.allComponents.add(homeButton);
 
+        float h = (ICON_WIDTH) * (int) (((GameMap.NUM_LEVELS*LayoutConsts.SCALE_X * (ICON_WIDTH + ICON_MARGINS))/(2 - SIDE_MARGINS)));
+        ImageText background = new ImageText(context,R.drawable.button_background,0,1-TOP_MARGIN - h/2,(2 - SIDE_MARGINS/2)/LayoutConsts.SCALE_X,h +  2 * ICON_MARGINS + ICON_WIDTH,true);
+        this.renderables.add(background);
 
         float scaleX = (float) LayoutConsts.SCREEN_HEIGHT/LayoutConsts.SCREEN_WIDTH;
 
         for (int i = 0;i < GameMap.NUM_LEVELS;i++){
-            float x = -1 + SIDE_MARGINS + ((i*scaleX * (ICON_WIDTH + ICON_MARGINS)) % (2 - 2 * SIDE_MARGINS));
-            float y = 1- SIDE_MARGINS -  ICON_WIDTH * (int) ((i*scaleX * (ICON_WIDTH + ICON_MARGINS))/(2 - 2 * SIDE_MARGINS));
-            this.clickables.add(new LevelSelector(context,R.drawable.level_button_background,
+            float x =-1 +SIDE_MARGINS +  (i*scaleX * (ICON_WIDTH + ICON_MARGINS)) % (2 - SIDE_MARGINS);
+            float y = 1- TOP_MARGIN -  ICON_WIDTH * (int) (((i*scaleX * (ICON_WIDTH + ICON_MARGINS))/(2 - SIDE_MARGINS)));
+            LevelSelector levelSelector = new LevelSelector(context,R.drawable.level_button_background,
                     x,y,ICON_WIDTH,ICON_WIDTH,
                     this,allLayouts.get(InGameScreen.ID),
-                    this.backend,i+1));
-        }
+                    this.craterRenderer,i+1);
+            this.clickables.add(levelSelector);
+            this.textRenderables.add(levelSelector);
 
+        }
+        this.renderables.addAll(this.clickables);
+
+        ImageText title = new ImageText(context,R.drawable.button_background,-0.5f,0.8f,1.5f,0.2f,true);
+        title.updateText("Select Level:",0.1f);
+        this.textRenderables.add(title);
+        this.renderables.add(title);
+        this.allComponents.addAll(this.textRenderables);
+        this.allComponents.add(background);
         this.inGameLayout = allLayouts.get(InGameScreen.ID);
 
     }
@@ -114,11 +145,11 @@ public class LevelSelectLayout implements GUILayout {
      * @param textRenderer this renders text efficiently as opposed to rendering quads
  e     */
     @Override
-    public void render(float[] uMVPMatrix, QuadRenderer renderer, DynamicText textRenderer) {
+    public void render(float[] uMVPMatrix, GuiRenderer renderer, DynamicText textRenderer) {
         if (this.isVisible) {
-            renderer.renderQuads(this.clickables, uMVPMatrix);
-            for (int i = 0,size = this.clickables.size();i<size;i++){
-                this.clickables.get(i).renderText(textRenderer,uMVPMatrix);
+            renderer.renderQuads(this.renderables, uMVPMatrix);
+            for (int i = 0,size = this.textRenderables.size();i<size;i++){
+                this.textRenderables.get(i).renderText(textRenderer,uMVPMatrix);
             }
         }
     }
@@ -151,13 +182,22 @@ public class LevelSelectLayout implements GUILayout {
             SoundLib.setStateVictoryMusic(false);
             SoundLib.setStateLossMusic(false);
             SoundLib.setStateLobbyMusic(true);
-            this.backend.getBackend().setCurrentGameState(CraterBackend.GAME_STATE_LEVELSELECT);
             //hide the pause button
             this.inGameLayout.setVisibility(false);
+
+            //if it's tutorial, want to change it to kaiser instead
+            if (this.craterRenderer.getWorld().getPlayer() instanceof TutorialPlayer){
+                this.craterRenderer.getWorld().setPlayer(new Kaiser());
+            }
         }
 
-        for (int i = this.clickables.size()-1;i>= 0;i--){
-            this.clickables.get(i).setVisibility(visibility);
+        for (int i = this.allComponents.size()-1;i>= 0;i--){
+            this.allComponents.get(i).setVisibility(visibility);
         }
+    }
+
+    @Override
+    public boolean isVisible() {
+        return isVisible;
     }
 }

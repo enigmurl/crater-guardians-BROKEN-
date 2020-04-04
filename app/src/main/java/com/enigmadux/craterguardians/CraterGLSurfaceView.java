@@ -69,4 +69,12 @@ public class CraterGLSurfaceView extends EnigmaduxGLSurfaceView {
     public void onResume() {
         mRenderer.onResume();
     }
+
+    public void onStart(){
+        mRenderer.onStart();
+    }
+
+    public void onStop(){
+        mRenderer.onStop();
+    }
 }

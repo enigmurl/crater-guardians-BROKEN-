@@ -6,10 +6,10 @@
 //import android.view.MotionEvent;
 //
 //import com.enigmadux.craterguardians.GUILib.GUIClickable;
-//import com.enigmadux.craterguardians.MathOps;
+//import com.enigmadux.craterguardians.util.MathOps;
 //import com.enigmadux.craterguardians.R;
 //
-//import enigmadux2d.core.quadRendering.QuadRenderer;
+//import enigmadux2d.core.quadRendering.GuiRenderer;
 //import enigmadux2d.core.quadRendering.QuadTexture;
 //
 ///** Tests the GUIClickable abstract class
@@ -104,7 +104,7 @@
 //    }
 //
 //    @Override
-//    public void render(float[] uMVPMatrix, QuadRenderer renderer) {
+//    public void render(float[] uMVPMatrix, GuiRenderer renderer) {
 //        if (! this.isVisible) return;
 //        if (this.isDown){
 //            Matrix.multiplyMM(finalMatrix,0,uMVPMatrix,0,this.tsM,0);

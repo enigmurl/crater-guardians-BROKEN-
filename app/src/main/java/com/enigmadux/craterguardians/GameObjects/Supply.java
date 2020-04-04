@@ -2,9 +2,11 @@ package com.enigmadux.craterguardians.GameObjects;
 
 import android.opengl.Matrix;
 
-import com.enigmadux.craterguardians.GUILib.ProgressBar;
-import com.enigmadux.craterguardians.MathOps;
-import com.enigmadux.craterguardians.SoundLib;
+import com.enigmadux.craterguardians.Animations.DeathAnim;
+import com.enigmadux.craterguardians.Animations.RedShader;
+import com.enigmadux.craterguardians.util.MathOps;
+import com.enigmadux.craterguardians.util.SoundLib;
+import com.enigmadux.craterguardians.worlds.World;
 import com.enigmadux.craterguardians.gameLib.CraterCollectionElem;
 
 /** This is what the robots are trying to steal
@@ -21,12 +23,13 @@ public class Supply extends CraterCollectionElem {
     private float r;
     //the amount of damage it can take dieing
     private int health;
-    //visually display the heatlth
-    private ProgressBar healthDisplay;
 
     //matrices
     //scalar matrix scales it according to the radius
     private final float[] translationScalarMatrix = new float[16];
+
+    //turns it red when damaged;
+    private RedShader currentShader;
 
     /**  Default constructor
      *
@@ -47,8 +50,6 @@ public class Supply extends CraterCollectionElem {
         this.height = r/2;
         this.health = health;
 
-        this.healthDisplay = new ProgressBar(health,this.r,r/5);
-        this.healthDisplay.update(this.health,this.deltaX-this.r/2,this.deltaY + r );
 
         Matrix.setIdentityM(translationScalarMatrix,0);
         Matrix.translateM(translationScalarMatrix,0,this.deltaX,this.deltaY,0);
@@ -77,7 +78,7 @@ public class Supply extends CraterCollectionElem {
      *
      * @return whether it has more than 0 health or not
      */
-    public boolean isAlive(){
+    private boolean isAlive(){
         if (health > 0){
             return true;
         } else {
@@ -92,7 +93,10 @@ public class Supply extends CraterCollectionElem {
      */
     public void damage(int damage){
         this.health -= damage;
-        this.healthDisplay.update(this.health,this.deltaX-this.r/2,this.deltaY + r );
+        if (this.currentShader != null){
+            this.currentShader.cancel();
+        }
+        this.currentShader = new RedShader(this,RedShader.DEFAULT_LEN);
     }
 
     /** Sees if a line intersects this hitbox
@@ -108,5 +112,14 @@ public class Supply extends CraterCollectionElem {
     }
 
 
-
+    @Override
+    public void update(long dt, World world) {
+        //nothing needs to be updated
+        if (! isAlive()){
+            world.getSupplies().delete(this);
+            synchronized (World.animationLock) {
+                world.getAnims().add(new DeathAnim(this.getDeltaX(),this.getDeltaY(),2 * this.r,2 * this.r));
+            }
+        }
+    }
 }

@@ -3,7 +3,7 @@ package com.enigmadux.craterguardians.GUIs.pauseGameScreen;
 import android.content.Context;
 import android.view.MotionEvent;
 
-import com.enigmadux.craterguardians.CraterBackendThread;
+import com.enigmadux.craterguardians.CraterRenderer;
 import com.enigmadux.craterguardians.GUILib.GUIClickable;
 import com.enigmadux.craterguardians.GUILib.GUILayout;
 import com.enigmadux.craterguardians.GUILib.dynamicText.DynamicText;
@@ -13,7 +13,7 @@ import com.enigmadux.craterguardians.values.STRINGS;
 import java.util.ArrayList;
 import java.util.HashMap;
 
-import enigmadux2d.core.quadRendering.QuadRenderer;
+import enigmadux2d.core.quadRendering.GuiRenderer;
 
 /** Layout shown when the game is paused
  *
@@ -41,15 +41,14 @@ public class PauseGameLayout implements GUILayout {
     /** Backend object used to go into the actual game
      *
      */
-    private CraterBackendThread backendThread;
+    private CraterRenderer craterRenderer;
 
     /** Default Constructor
      *
-     * @param backendThread the backendThread thread so it can be un paused
      */
-    public PauseGameLayout(CraterBackendThread backendThread){
+    public PauseGameLayout(CraterRenderer craterRenderer){
         this.clickables = new ArrayList<>();
-        this.backendThread = backendThread;
+        this.craterRenderer = craterRenderer;
     }
 
     /** Loads components
@@ -63,13 +62,13 @@ public class PauseGameLayout implements GUILayout {
         this.clickables.add(new PauseScreenVisibilityButton(context, R.drawable.home_button,
                 0,-0.4f,0.4f,0.4f,
                 this,allLayouts.get(STRINGS.HOME_SCREEN_LAYOUT_ID),
-                this.backendThread,false));
+                this.craterRenderer,false));
 
         //go to levels
         PauseScreenVisibilityButton levelButton = new PauseScreenVisibilityButton(context, R.drawable.button_background,
                 0,0.1f,1.9f,0.4f,
                 this,allLayouts.get(STRINGS.LEVEL_SELECT_LAYOUT_ID),
-                this.backendThread, true);
+                this.craterRenderer, true);
         levelButton.updateText(STRINGS.BACK_TO_LEVELS_BUTTON,0.1f);
         this.clickables.add(levelButton);
 
@@ -77,7 +76,7 @@ public class PauseGameLayout implements GUILayout {
         this.clickables.add(new PauseScreenVisibilityButton(context,R.drawable.resume_button,
                 0,0.75f,0.4f,0.4f,
                 this,null,
-                this.backendThread,false));
+                this.craterRenderer,false));
 
 
     }
@@ -105,7 +104,7 @@ public class PauseGameLayout implements GUILayout {
     public void setVisibility(boolean visibility) {
         //if this is being seen, the game should be paused
         if (visibility) {
-            this.backendThread.setPause(true);
+            this.craterRenderer.getCraterBackendThread().setPause(true);
         }
 
 
@@ -123,7 +122,7 @@ public class PauseGameLayout implements GUILayout {
      * @param textRenderer this renders text efficiently as opposed to rendering quads
      */
     @Override
-    public void render(float[] uMVPMatrix, QuadRenderer renderer, DynamicText textRenderer) {
+    public void render(float[] uMVPMatrix, GuiRenderer renderer, DynamicText textRenderer) {
         if (this.isVisible) {
             renderer.renderQuads(this.clickables, uMVPMatrix);
             for (int i = 0,size = this.clickables.size();i<size;i++){
@@ -132,4 +131,8 @@ public class PauseGameLayout implements GUILayout {
         }
     }
 
+    @Override
+    public boolean isVisible() {
+        return isVisible;
+    }
 }

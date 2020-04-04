@@ -3,9 +3,6 @@ package com.enigmadux.craterguardians.Animations;
 import android.content.Context;
 import android.opengl.Matrix;
 
-import com.enigmadux.craterguardians.R;
-
-import enigmadux2d.core.shapes.TexturedRect;
 
 /** Played when player or enemy dies
  *
@@ -14,7 +11,7 @@ import enigmadux2d.core.shapes.TexturedRect;
  * @author Manu Bhat
  * @version BETA
  */
-public class ToxicBubble extends Animation {
+public class ToxicBubble {
 
     /** The amount of frames in the animation
      *
@@ -24,7 +21,7 @@ public class ToxicBubble extends Animation {
 
 
     //visual is shared by all objects as they all have the same sprite
-    private static TexturedRect VISUAL_REPRESENTATION = new TexturedRect(0,0,1,1,ToxicBubble.NUM_FRAMES);
+    //private static TexturedRect VISUAL_REPRESENTATION = new TexturedRect(0,0,1,1,ToxicBubble.NUM_FRAMES);
 
 
     //the length of the animation in milliseconds
@@ -46,8 +43,7 @@ public class ToxicBubble extends Animation {
      * @param animationLength  the length of the animation in milliseconds
      */
     public ToxicBubble(float x,float y,float w,float h,long animationLength){
-        super(x-w/2,y-h/2,w,h);
-
+        //super(x-w/2,y-h/2,w,h);
         this.animationLength = animationLength;
 
         Matrix.setIdentityM(translationScalarMatrix,0);
@@ -60,11 +56,11 @@ public class ToxicBubble extends Animation {
      *
      * @param context any nonnull context*/
     public static void loadGLTexture(Context context){
-        VISUAL_REPRESENTATION.loadGLTexture(context, R.drawable.bubbleanim_frame_0,0);
-        VISUAL_REPRESENTATION.loadGLTexture(context, R.drawable.bubbleanim_frame_1,1);
-        VISUAL_REPRESENTATION.loadGLTexture(context, R.drawable.bubbleanim_frame_2,2);
-        VISUAL_REPRESENTATION.loadGLTexture(context, R.drawable.bubbleanim_frame_3,3);
-        VISUAL_REPRESENTATION.loadGLTexture(context, R.drawable.bubbleanim_frame_4,4);
+//        VISUAL_REPRESENTATION.loadGLTexture(context, R.drawable.bubbleanim_frame_0,0);
+//        VISUAL_REPRESENTATION.loadGLTexture(context, R.drawable.bubbleanim_frame_1,1);
+//        VISUAL_REPRESENTATION.loadGLTexture(context, R.drawable.bubbleanim_frame_2,2);
+//        VISUAL_REPRESENTATION.loadGLTexture(context, R.drawable.bubbleanim_frame_3,3);
+//        VISUAL_REPRESENTATION.loadGLTexture(context, R.drawable.bubbleanim_frame_4,4);
         //this is once we made it sprite sheet based
 //        VISUAL_REPRESENTATION.loadTextureBuffer(new float[] {
 //                0,1,
@@ -78,19 +74,19 @@ public class ToxicBubble extends Animation {
      *
      * @param parentMatrix matrix that represents how to manipulate it to the world coordinates
      */
-    @Override
+    //@Override
     public void draw(float[] parentMatrix) {
         Matrix.multiplyMM(this.finalMatrix,0,parentMatrix,0,this.translationScalarMatrix,0);
 
         int frameNum = Math.min(ToxicBubble.NUM_FRAMES-1, (int) (this.currentPosition* ToxicBubble.NUM_FRAMES/this.animationLength));
-        VISUAL_REPRESENTATION.draw(this.finalMatrix,frameNum);
+        //VISUAL_REPRESENTATION.draw(this.finalMatrix,frameNum);
     }
 
     /** Updates to the currentFrame
      *
      * @param dt milliseconds since last call of update
      */
-    @Override
+    //@Override
     public void update(long dt) {
         this.currentPosition += dt;
     }
@@ -99,7 +95,7 @@ public class ToxicBubble extends Animation {
      *
      * @return whether or not the animation is finished
      */
-    @Override
+    //@Override
     public boolean isFinished() {
         return this.currentPosition>this.animationLength;
     }

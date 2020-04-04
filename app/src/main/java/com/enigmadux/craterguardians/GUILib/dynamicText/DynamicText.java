@@ -16,6 +16,7 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Scanner;
 
+import enigmadux2d.core.shaders.ShaderProgram;
 import enigmadux2d.core.shaders.TextShader;
 
 
@@ -78,7 +79,7 @@ public class DynamicText {
      */
     private TextShader shader;
 
-    /** The max test size is generated, and then mipmaps are used from there
+    /** The max joystick_icon size is generated, and then mipmaps are used from there
      *
      * @param context a context object used to load resources
      * @param imagePointer a R.drawable.* that points to the texture atlas
@@ -251,6 +252,8 @@ public class DynamicText {
      * @param mvpMatrix the matrix
      */
     public void renderText(TextMesh textMesh,float[] mvpMatrix){
+        ShaderProgram.NUM_DRAW_CALLS++;
+
         this.shader.useProgram();
 
 

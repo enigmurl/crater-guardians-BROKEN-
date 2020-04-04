@@ -3,6 +3,8 @@ package com.enigmadux.craterguardians;
 
 import android.os.Bundle;
 
+import com.enigmadux.craterguardians.util.SoundLib;
+
 import enigmadux2d.core.EnigmaduxActivity;
 
 /** The Main Activity for this app. It's the entry point to the app.
@@ -24,7 +26,6 @@ public class CraterActivity extends EnigmaduxActivity {
         // as the ContentView for this Activity
         enigmaduxGLSurfaceView = new CraterGLSurfaceView(this);
         setContentView(enigmaduxGLSurfaceView);
-
 
 
     }
@@ -55,7 +56,7 @@ public class CraterActivity extends EnigmaduxActivity {
     @Override
     public void onStart(){
         super.onStart();
-
+        this.enigmaduxGLSurfaceView.onStart();
 
     }
 
@@ -65,5 +66,6 @@ public class CraterActivity extends EnigmaduxActivity {
     @Override
     public void onStop(){
         super.onStop();
+        this.enigmaduxGLSurfaceView.onStop();
     }
 }

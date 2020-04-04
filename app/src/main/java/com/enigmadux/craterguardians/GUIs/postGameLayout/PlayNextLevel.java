@@ -3,10 +3,12 @@ package com.enigmadux.craterguardians.GUIs.postGameLayout;
 import android.content.Context;
 import android.view.MotionEvent;
 
-import com.enigmadux.craterguardians.CraterBackend;
-import com.enigmadux.craterguardians.CraterBackendThread;
+import com.enigmadux.craterguardians.CraterRenderer;
 import com.enigmadux.craterguardians.GUILib.GUIClickable;
-import com.enigmadux.craterguardians.SoundLib;
+import com.enigmadux.craterguardians.GUILib.GUILayout;
+import com.enigmadux.craterguardians.GUIs.inGameScreen.InGameScreen;
+import com.enigmadux.craterguardians.util.SoundLib;
+import com.enigmadux.craterguardians.worlds.World;
 
 /** Plays either this level, or the next level if the player won
  *
@@ -19,12 +21,14 @@ public class PlayNextLevel extends GUIClickable {
     /** The backend object that we use to get into the game
      *
      */
-    private CraterBackendThread backend;
+    private CraterRenderer craterRenderer;
 
     /** The post game layout that will be hidden when this is released
      *
      */
     private PostGameLayout postGameLayout;
+
+    private GUILayout inGameScreen;
 
     /**
      * Default Constructor
@@ -37,11 +41,13 @@ public class PlayNextLevel extends GUIClickable {
      * @param h              the height of the texture
      */
     public PlayNextLevel(Context context, int texturePointer, float x, float y, float w, float h,
-                         CraterBackendThread backend, PostGameLayout postGameLayout) {
+                         CraterRenderer craterRenderer, PostGameLayout postGameLayout,GUILayout inGameScreen) {
         super(context, texturePointer, x, y, w, h, false);
-        this.backend = backend;
+        this.craterRenderer = craterRenderer;
 
         this.postGameLayout = postGameLayout;
+
+        this.inGameScreen = inGameScreen;
 
     }
 
@@ -77,10 +83,10 @@ public class PlayNextLevel extends GUIClickable {
     public boolean onHardRelease(MotionEvent e) {
         this.isDown = false;
 
-
-        this.backend.setPause(false);
-        this.backend.getBackend().loadLevel();
-        this.backend.getBackend().setCurrentGameState(CraterBackend.GAME_STATE_INGAME);
+        this.inGameScreen.setVisibility(true);
+        this.craterRenderer.getCraterBackendThread().setPause(false);
+        this.craterRenderer.getCraterBackendThread().getBackend().loadLevel();
+        this.craterRenderer.getCraterBackendThread().getBackend().setState(World.STATE_PREGAME);
 
         SoundLib.setStateGameMusic(true);
         SoundLib.setStateLossMusic(false);

@@ -6,8 +6,12 @@ import android.graphics.BitmapFactory;
 import android.opengl.GLES30;
 import android.opengl.GLUtils;
 import android.opengl.Matrix;
+import android.util.Log;
 import android.util.SparseIntArray;
 
+import com.enigmadux.craterguardians.GUILib.MatieralBar;
+import com.enigmadux.craterguardians.GUILib.VisibilitySwitch;
+import com.enigmadux.craterguardians.R;
 import com.enigmadux.craterguardians.values.LayoutConsts;
 
 /** This is where the actual texture of the quad is stored. As well as instance specfic info
@@ -15,7 +19,7 @@ import com.enigmadux.craterguardians.values.LayoutConsts;
  * @author Manu Bhat
  * @version BETA
  */
-public class QuadTexture {
+public class QuadTexture implements VisibilitySwitch {
 
 
     /** Rather than having multiple quads with the same texture, this maps Android texture pointers ( R.drawable.x), to
@@ -29,6 +33,9 @@ public class QuadTexture {
 
     //scales and translates the mesh appropriately
     private final float[] scalarTranslationM = new float[16];
+
+    //a buffer to the scalar matrix, as to make it so it optimal time
+    private final float[] bufferM = new float[16];
 
     /** Center X
      *
@@ -47,6 +54,12 @@ public class QuadTexture {
      */
     protected float h;
 
+    protected float textureDeltaX;
+    protected float textureDeltaY;
+    protected float textureW = 1;
+    protected float textureH = 1;
+    private float[] textureCordD = new float[4];
+
     /** This shader limits specific channels regarding RGBA, from 0 to 1, where 0 is fully transparent, 1 opaque
      *
      */
@@ -56,6 +69,8 @@ public class QuadTexture {
      *
      */
     protected float cornerSize;
+
+    protected boolean isVisible = true;
 
 
     /** Default Constructor, most likely will only work in a GL THREAD
@@ -83,7 +98,7 @@ public class QuadTexture {
         //and finally translate it
         //now actually load the texture
 
-        this.loadAndroidTexturePointer(context,texturePointer);
+        this.texture = QuadTexture.loadAndroidTexturePointer(context,texturePointer);
     }
 
 
@@ -112,42 +127,39 @@ public class QuadTexture {
 
         this.texture[0] = texturePointer;
     }
-//    /** Default Constructor, most likely will only work in a GL THREAD
-//     *
-//     * @param texture a bitmap representing the image
-//     * @param x the center x position of the texture
-//     * @param y the center y position of the texture
-//     * @param w the width of the texture
-//     * @param h the height of the texture
-//     */
-//    public QuadTexture(Bitmap texture,float x,float y,float w,float h){
-//        //create a texture id at the specified location in the array
-//        GLES30.glGenTextures(1, this.texture, 0);
-//
-//        //now bind it with the array
-//        GLES30.glBindTexture(GLES30.GL_TEXTURE_2D, this.texture[0]);
-//
-//        // create nearest filtered texture
-//        GLES30.glTexParameteri(GLES30.GL_TEXTURE_2D, GLES30.GL_TEXTURE_MIN_FILTER, GLES30.GL_LINEAR);
-//        GLES30.glTexParameteri(GLES30.GL_TEXTURE_2D, GLES30.GL_TEXTURE_MAG_FILTER, GLES30.GL_LINEAR);
-//
-//
-//        // Use Android GLUtils to specify a two-dimensional texture image from our bitmap
-//        GLUtils.texImage2D(GLES30.GL_TEXTURE_2D, 0, texture, 0);
-//
-//
-//        //bitmap no longer needed
-//        texture.recycle();
-//    }
+
+    public void setTransform(float x,float y,float w,float h){
+        this.x = x;
+        this.y = y;
+        this.w = w;
+        this.h = h;
+
+        Matrix.setIdentityM(bufferM,0);
+        //translate the matrix, I really don't understand why translation comes first, but it works
+        Matrix.translateM(bufferM,0,x,y,0);
+        //now scale it, which again should come first, but for some reason this works, other one doesn't
+        Matrix.scaleM(this.scalarTranslationM,0,bufferM,0,w,h,1);
+    }
+
+    public void setScale(float w,float h){
+        this.setTransform(x,y,w,h);
+    }
+
+    public void setCord(float x,float y){
+        this.setTransform(x,y,w,h);
+    }
 
     /** load an ANDROID texture pointer (R.drawable.*)
      *
      * @param context any context that can get resources
      * @param texturePointer the ANDROID pointer to the image
      */
-    public void loadAndroidTexturePointer(Context context,int texturePointer){
+    public static int[] loadAndroidTexturePointer(Context context,int texturePointer){
+        int[] returnArr = new int[1];
+
         int indexOfPointer = QuadTexture.androidToGLTextureMap.indexOfKey(texturePointer);
         if (indexOfPointer < 0) {
+
             //first convert the image file into a bitmap
             BitmapFactory.Options options = new BitmapFactory.Options();
             options.inScaled = false;
@@ -160,15 +172,17 @@ public class QuadTexture {
 
 
             //create a texture id at the specified location in the array
-            GLES30.glGenTextures(1, this.texture, 0);
+            GLES30.glGenTextures(1, returnArr, 0);
 
             //now bind it with the array
-            GLES30.glBindTexture(GLES30.GL_TEXTURE_2D, this.texture[0]);
+            GLES30.glBindTexture(GLES30.GL_TEXTURE_2D, returnArr[0]);
 
             // create nearest filtered texture
             GLES30.glTexParameteri(GLES30.GL_TEXTURE_2D, GLES30.GL_TEXTURE_MIN_FILTER, GLES30.GL_LINEAR);
             GLES30.glTexParameteri(GLES30.GL_TEXTURE_2D, GLES30.GL_TEXTURE_MAG_FILTER, GLES30.GL_LINEAR);
-
+            //make it TILABLE
+            GLES30.glTexParameteri(GLES30.GL_TEXTURE_2D, GLES30.GL_TEXTURE_WRAP_S, GLES30.GL_REPEAT);
+            GLES30.glTexParameteri(GLES30.GL_TEXTURE_2D, GLES30.GL_TEXTURE_WRAP_T, GLES30.GL_REPEAT);
 
             // Use Android GLUtils to specify a two-dimensional texture image from our bitmap
             GLUtils.texImage2D(GLES30.GL_TEXTURE_2D, 0, texture, 0);
@@ -178,11 +192,13 @@ public class QuadTexture {
             texture.recycle();
 
             //add it to our banking
-            QuadTexture.androidToGLTextureMap.put(texturePointer,this.texture[0]);
+            QuadTexture.androidToGLTextureMap.put(texturePointer,returnArr[0]);
 
         } else {
-            this.texture[0] = QuadTexture.androidToGLTextureMap.get(texturePointer);
+            returnArr[0] = QuadTexture.androidToGLTextureMap.get(texturePointer);
         }
+
+        return returnArr;
     }
 
 
@@ -193,6 +209,10 @@ public class QuadTexture {
      */
     public int getTexture(){
         return this.texture[0];
+    }
+
+    public void setGLTexture(int[] texture){
+        this.texture = texture;
     }
 
     /** This gives the output matrix given the input matrix, the output matrix describes how to transform the mesh to
@@ -227,6 +247,10 @@ public class QuadTexture {
         this.shader[3] = a;
     }
 
+    public void setAlpha(float a){
+        this.shader[3] = a;
+    }
+
     /** Gets the corner size
      *
      * @return float 0 to 1, represenitng radius of corner/ widht of texture in square form
@@ -244,6 +268,37 @@ public class QuadTexture {
         return this.w/this.h * LayoutConsts.SCREEN_WIDTH/LayoutConsts.SCREEN_HEIGHT;
     }
 
+    public float getX() {
+        return x;
+    }
+
+    public float getY() {
+        return y;
+    }
+
+    public float getW() {
+        return w;
+    }
+
+    public float getH() {
+        return h;
+    }
+
+    //dx,dY,w,h
+    float[] getTextureCord(){
+        textureCordD[0] = textureDeltaX;
+        textureCordD[1] = textureDeltaY;
+        textureCordD[2] = textureW;
+        textureCordD[3] = textureH;
+        return textureCordD;
+    }
+
+    public void setTextureCord(float dX,float dY,float w,float h){
+        this.textureDeltaX = dX;
+        this.textureDeltaY = dY;
+        this.textureW = w;
+        this.textureH = h;
+    }
 
     /** Recycles the components by telling open gl to delete the texture
      *
@@ -259,5 +314,14 @@ public class QuadTexture {
      */
     public static void resetTextures(){
         androidToGLTextureMap = new SparseIntArray();
+    }
+
+    @Override
+    public void setVisibility(boolean visibility) {
+        this.isVisible = visibility;
+    }
+
+    public boolean isVisible() {
+        return isVisible;
     }
 }

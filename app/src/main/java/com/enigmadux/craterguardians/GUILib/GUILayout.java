@@ -7,7 +7,7 @@ import com.enigmadux.craterguardians.GUILib.dynamicText.DynamicText;
 
 import java.util.HashMap;
 
-import enigmadux2d.core.quadRendering.QuadRenderer;
+import enigmadux2d.core.quadRendering.GuiRenderer;
 
 /** A GUILayout, Generally contains all that would be on screen at one particular frame
  *
@@ -29,7 +29,7 @@ public interface GUILayout extends VisibilitySwitch {
      * @param renderer the renderer that will be passed on using recursion, unless it's a level 0 (direct components), where it
      * @param textRenderer this renders text efficiently as opposed to rendering quads
      */
-    void render(float[] uMVPMatrix, QuadRenderer renderer, DynamicText textRenderer);
+    void render(float[] uMVPMatrix, GuiRenderer renderer, DynamicText textRenderer);
 
 
     /** On a touch event, this processes it

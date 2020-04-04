@@ -3,9 +3,10 @@ package com.enigmadux.craterguardians.GUIs.characterSelect;
 import android.content.Context;
 import android.view.MotionEvent;
 
-import com.enigmadux.craterguardians.Characters.Player;
 import com.enigmadux.craterguardians.CraterRenderer;
-import com.enigmadux.craterguardians.GUILib.GUIClickable;
+import com.enigmadux.craterguardians.GUILib.GUILayout;
+import com.enigmadux.craterguardians.GUILib.VisibilityInducedButton;
+import com.enigmadux.craterguardians.players.Player;
 import com.enigmadux.craterguardians.values.STRINGS;
 
 
@@ -14,11 +15,11 @@ import com.enigmadux.craterguardians.values.STRINGS;
  * @author Manu Bhat
  * @version BETA
  */
-public class CharacterSelecter extends GUIClickable {
+public class CharacterSelecter extends VisibilityInducedButton {
 
     /** Where we tell the updated player
      */
-    private CraterRenderer renderer;
+    private CraterRenderer craterRenderer;
 
     /** The current player, may differ from the value in the backend
      *
@@ -34,15 +35,15 @@ public class CharacterSelecter extends GUIClickable {
      * @param y              the center y position of the texture
      * @param w              the width of the texture (which will be scaled down to accommodate screen size
      * @param h              the height of the texture
-     * @param renderer       A Backend object used to change the current player
+     * @param craterRenderer       A Backend object used to change the current player
      * @param isRounded      if the object has rounded corners
      */
-    public CharacterSelecter(Context context, int texturePointer,
-                          float x, float y, float w, float h,
-                             CraterRenderer renderer,boolean isRounded) {
-        super(context, texturePointer, x, y, w, h, isRounded);
+    public CharacterSelecter(Context context, int texturePointer, CharacterSelectLayout characterSelectLayout, GUILayout homeScreen,
+                             float x, float y, float w, float h,
+                             CraterRenderer craterRenderer, boolean isRounded) {
+        super(context, texturePointer, x, y, w, h,characterSelectLayout,homeScreen, isRounded);
 
-        this.renderer = renderer;
+        this.craterRenderer = craterRenderer;
     }
 
     /** Makes sure that it won't be pressed if no character is selected
@@ -62,6 +63,7 @@ public class CharacterSelecter extends GUIClickable {
      */
     @Override
     public boolean onPress(MotionEvent e) {
+        super.onPress(e);
         this.isDown = true;
         return true;
     }
@@ -73,6 +75,7 @@ public class CharacterSelecter extends GUIClickable {
      */
     @Override
     public boolean onSoftRelease(MotionEvent e) {
+        super.onSoftRelease(e);
         this.isDown = false;
         return true;
     }
@@ -87,8 +90,9 @@ public class CharacterSelecter extends GUIClickable {
         this.isDown = false;
 
         //will not be called if the current player is null
-        this.renderer.setPlayer(this.currentPlayer);
-        return true;
+        this.craterRenderer.getWorld().setPlayer(this.currentPlayer);
+        //do super call last because you want to set the current player, then have the home screen update, otherwise the home screen wont update
+        return super.onHardRelease(e);
     }
 
 
@@ -100,6 +104,12 @@ public class CharacterSelecter extends GUIClickable {
      */
     public void updateCurrentPlayer(Player newPlayer){
         this.currentPlayer = newPlayer;
-        this.updateText(STRINGS.CHARACTER_SELECTER_TEXT + newPlayer,0.1f);
+        if (this.currentPlayer == null){
+            this.setVisibility(false);
+            this.updateText(null,0.05f);
+        } else {
+            this.setVisibility(true);
+            this.updateText(STRINGS.CHARACTER_SELECTER_TEXT + newPlayer,0.05f);
+        }
     }
 }

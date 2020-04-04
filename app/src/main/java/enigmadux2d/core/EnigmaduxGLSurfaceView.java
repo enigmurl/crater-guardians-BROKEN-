@@ -11,12 +11,7 @@ import android.view.MotionEvent;
  *
  */
 public abstract class EnigmaduxGLSurfaceView extends GLSurfaceView {
-    /** The Enigmadux renderer to be used:
-     * In your implementation of this class, It may be a good idea to override this is as it is just the base class
-     * If you want methods specific to the implemented renderer, then you would override this method.
-     *
-     */
-    protected EnigmaduxGLRenderer enigmaduxGLRenderer;
+
     /** Context that is mainly used for sub classes that extend this class. Any non null context should work.
      *
      */
@@ -49,6 +44,10 @@ public abstract class EnigmaduxGLSurfaceView extends GLSurfaceView {
      * @return whether or not you are interested in the rest of that event (everything from ACTION_DOWN to ACTION_UP or ACTION_CANCEL) (true means interested, false means not, other views get to read the event)
      */
     public abstract boolean onTouchEvent(MotionEvent e);
+
+    public abstract void onStop();
+
+    public abstract void onStart();
 
 
 

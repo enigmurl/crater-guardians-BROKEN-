@@ -3,10 +3,10 @@ package com.enigmadux.craterguardians.GUIs.pauseGameScreen;
 import android.content.Context;
 import android.view.MotionEvent;
 
-import com.enigmadux.craterguardians.CraterBackend;
-import com.enigmadux.craterguardians.CraterBackendThread;
+import com.enigmadux.craterguardians.CraterRenderer;
 import com.enigmadux.craterguardians.GUILib.GUILayout;
 import com.enigmadux.craterguardians.GUILib.VisibilityInducedButton;
+import com.enigmadux.craterguardians.worlds.World;
 
 /** Enters either the game, or the home screen/ level select
  *
@@ -20,7 +20,7 @@ public class PauseScreenVisibilityButton extends VisibilityInducedButton {
     /** Backend thread object used to go into the actual game
      *
      */
-    private CraterBackendThread backendThread;
+    private CraterRenderer craterRenderer;
 
     /** Default constructor
      * @param context any context that can get resources
@@ -31,16 +31,15 @@ public class PauseScreenVisibilityButton extends VisibilityInducedButton {
      * @param h the height of the texture
      * @param objectToHide the object that should be hidden
      * @param objectToShow the object that should be shown when the button is pressed
-     * @param backendThread the backend thread
      * @param isRounded whether or not it has rounded corners
      */
     public PauseScreenVisibilityButton(Context context, int texturePointer,
                                        float x, float y, float w, float h,
                                        PauseGameLayout objectToHide, GUILayout objectToShow,
-                                       CraterBackendThread backendThread, boolean isRounded) {
+                                       CraterRenderer craterRenderer, boolean isRounded) {
         super(context, texturePointer, x, y, w, h, objectToHide, objectToShow, isRounded);
 
-        this.backendThread = backendThread;
+        this.craterRenderer = craterRenderer;
     }
 
     /** Enters the specified layout
@@ -53,16 +52,17 @@ public class PauseScreenVisibilityButton extends VisibilityInducedButton {
         super.onHardRelease(e);
 
 
-        CraterBackend backend = this.backendThread.getBackend();
+        World backend = this.craterRenderer.getCraterBackendThread().getBackend();
         //this means we are going into the game
         if (this.objectToShow == null){
-            this.backendThread.setPause(false);
+            this.craterRenderer.getCraterBackendThread().setPause(false);
             backend.resetJoySticks();
         } else {
-            this.backendThread.setPause(true);
+            this.craterRenderer.getCraterBackendThread().setPause(true);
             //going to level screen or home screen
             backend.killEndGamePausePeriod();
-            backend.getGameScreenLayout().hide();
+            backend.setState(World.STATE_GUI);
+            //backend.getGameScreenLayout().hide();
         }
 
 

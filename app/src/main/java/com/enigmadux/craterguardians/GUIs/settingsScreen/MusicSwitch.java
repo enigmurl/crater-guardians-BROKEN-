@@ -5,7 +5,7 @@ import android.view.MotionEvent;
 
 import com.enigmadux.craterguardians.FileStreams.SettingsData;
 import com.enigmadux.craterguardians.GUILib.OnOffButton;
-import com.enigmadux.craterguardians.SoundLib;
+import com.enigmadux.craterguardians.util.SoundLib;
 
 
 /** Enables and disables music being played

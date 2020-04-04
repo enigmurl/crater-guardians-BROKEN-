@@ -1,0 +1,10 @@
+precision mediump float;
+uniform vec4 shader;
+uniform sampler2D Texture;
+
+varying lowp vec2 pass_textureCord;
+
+
+void main() {
+      gl_FragColor = shader * texture2D(Texture,pass_textureCord);
+}

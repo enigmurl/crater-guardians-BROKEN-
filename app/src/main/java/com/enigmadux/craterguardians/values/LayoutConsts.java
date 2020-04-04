@@ -31,4 +31,7 @@ public class LayoutConsts {
      */
     public static int SCREEN_HEIGHT = -1;
 
+
+    public static float SCALE_X = -1;
+    public static float SCALE_Y = -1;
 }

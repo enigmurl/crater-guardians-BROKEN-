@@ -3,17 +3,20 @@ package com.enigmadux.craterguardians.GUIs.postGameLayout;
 import android.content.Context;
 import android.view.MotionEvent;
 
-import com.enigmadux.craterguardians.CraterBackendThread;
+import com.enigmadux.craterguardians.CraterRenderer;
 import com.enigmadux.craterguardians.GUILib.GUIClickable;
 import com.enigmadux.craterguardians.GUILib.GUILayout;
 import com.enigmadux.craterguardians.GUILib.dynamicText.DynamicText;
+import com.enigmadux.craterguardians.GUIs.inGameScreen.InGameScreen;
 import com.enigmadux.craterguardians.R;
+import com.enigmadux.craterguardians.players.Kaiser;
+import com.enigmadux.craterguardians.players.TutorialPlayer;
 import com.enigmadux.craterguardians.values.STRINGS;
 
 import java.util.ArrayList;
 import java.util.HashMap;
 
-import enigmadux2d.core.quadRendering.QuadRenderer;
+import enigmadux2d.core.quadRendering.GuiRenderer;
 import enigmadux2d.core.quadRendering.QuadTexture;
 
 /** Layout shown after a game is finished win or loss
@@ -48,15 +51,14 @@ public class PostGameLayout implements GUILayout {
     /** Backend object
      *
      */
-    private CraterBackendThread backend;
+    private CraterRenderer craterRenderer;
 
     /** Default Constructor
      *
-     * @param backend a backend thread object
      */
-    public PostGameLayout(CraterBackendThread backend){
+    public PostGameLayout(CraterRenderer craterRenderer){
         this.clickables = new ArrayList<>();
-        this.backend = backend;
+        this.craterRenderer = craterRenderer;
     }
 
     /** Loads components
@@ -66,25 +68,25 @@ public class PostGameLayout implements GUILayout {
      */
     @Override
     public void loadComponents(Context context, HashMap<String, GUILayout> allLayouts) {
+        this.background = new QuadTexture(context,R.drawable.layout_background,0,0,2,2);
         //the home button);
         this.clickables.add(new PostGameVisibilityButton(context, R.drawable.home_button,
                 0,-0.4f,0.4f,0.4f,
                 this,allLayouts.get(STRINGS.HOME_SCREEN_LAYOUT_ID)
-                ,this.backend,false));
+                ,this.craterRenderer,false));
 
         //go to levels
         PostGameVisibilityButton levelsButton = new PostGameVisibilityButton(context, R.drawable.button_background,
                 0,0.1f,1.9f,0.4f,
-                this,allLayouts.get(STRINGS.LEVEL_SELECT_LAYOUT_ID),this.backend,true);
+                this,allLayouts.get(STRINGS.LEVEL_SELECT_LAYOUT_ID),this.craterRenderer,true);
         levelsButton.updateText(STRINGS.BACK_TO_LEVELS_BUTTON,0.1f);
         this.clickables.add(levelsButton);
 
         //play next level
         this.clickables.add(new PlayNextLevel(context,R.drawable.resume_button,
                 0,0.75f,0.4f,0.4f,
-                this.backend,this));
+                this.craterRenderer,this,allLayouts.get(InGameScreen.ID)));
 
-        this.background = new QuadTexture(context,R.drawable.layout_background,0,0,2,2);
 
 
     }
@@ -97,7 +99,6 @@ public class PostGameLayout implements GUILayout {
     @Override
     public boolean onTouch(MotionEvent e) {
         if (! this.isVisible) return false;
-
         for (int i = this.clickables.size()-1;i>= 0;i--){
             if (this.clickables.get(i).onTouch(e)) return true;
         }
@@ -114,7 +115,11 @@ public class PostGameLayout implements GUILayout {
         this.isVisible = visibility;
         if (visibility){
             //pause backend
-            this.backend.setPause(true);
+            this.craterRenderer.getCraterBackendThread().setPause(true);
+            //if it's tutorial, want to change it to kaiser instead
+            if (this.craterRenderer.getWorld().getPlayer() instanceof TutorialPlayer){
+                this.craterRenderer.getWorld().setPlayer(new Kaiser());
+            }
         }
 
 
@@ -129,7 +134,7 @@ public class PostGameLayout implements GUILayout {
      * @param textRenderer this renders text efficiently as opposed to rendering quads
      */
     @Override
-    public void render(float[] uMVPMatrix, QuadRenderer renderer, DynamicText textRenderer) {
+    public void render(float[] uMVPMatrix, GuiRenderer renderer, DynamicText textRenderer) {
         if (this.isVisible) {
             renderer.renderQuad(this.background,uMVPMatrix);
             renderer.renderQuads(this.clickables, uMVPMatrix);
@@ -139,6 +144,9 @@ public class PostGameLayout implements GUILayout {
         }
     }
 
-
+    @Override
+    public boolean isVisible() {
+        return isVisible;
+    }
 
 }

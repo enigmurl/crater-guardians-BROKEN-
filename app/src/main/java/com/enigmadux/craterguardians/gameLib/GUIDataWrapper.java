@@ -9,7 +9,7 @@ import com.enigmadux.craterguardians.GUILib.dynamicText.DynamicText;
 import java.util.ArrayList;
 import java.util.HashMap;
 
-import enigmadux2d.core.quadRendering.QuadRenderer;
+import enigmadux2d.core.quadRendering.GuiRenderer;
 
 /** This class helps draws GUIs, and other quadrilaterals
  *
@@ -50,81 +50,6 @@ public class GUIDataWrapper {
     }
 
 
-    /** Loading of data is buffered, in small steps, so we can draw the loading screen while we load stuff
-     *
-     * @return if the loading is complete
-     */
-    public boolean loadStep(){
-        GUILayout layoutToBeAdded = null;
-        switch (this.stepNum){
-            case 0:
-
-                break;
-            case 1:
-                break;
-            case 2:
-                break;
-            case 3:
-                break;
-            case 4:
-                break;
-            case 5:
-                break;
-            case 6:
-                break;
-            case 7:
-                break;
-            case 8:
-                break;
-            case 9:
-                break;
-            case 10:
-                break;
-            case 11:
-                break;
-            case 12:
-                break;
-            case 13:
-                break;
-            case 14:
-                break;
-            case 15:
-                break;
-            case 16:
-                break;
-            case 17:
-                break;
-            case 18:
-                break;
-            case 19:
-                break;
-        }
-        if (layoutToBeAdded != null){
-            this.layouts.add(layoutToBeAdded);
-        }
-
-        //one more step has been completed
-        this.stepNum++;
-
-        return (this.stepNum >= GUIDataWrapper.NUM_STEPS);
-    }
-
-
-
-
-    /** Renders All GUIs, specifically the layouts
-     *
-     * @param mvpMatrix the parent matrix, though there might not be that much data since it's just GUIs
-     * @param quadRenderer a renderer that can display quads to the screen
-     * @param textRenderer renders text components
-     */
-    public void renderData(float[] mvpMatrix, QuadRenderer quadRenderer, DynamicText textRenderer){
-        quadRenderer.startRendering();
-        for (int i = 0,size = layouts.size();i<size;i++){
-            //render current layout
-            this.layouts.get(i).render(mvpMatrix,quadRenderer, textRenderer);
-        }
-    }
 
     /** Handles touch events, by giving it to the ones highest on the screen first (rendered last)
      *

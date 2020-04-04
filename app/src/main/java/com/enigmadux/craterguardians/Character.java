@@ -27,6 +27,18 @@ public interface Character {
      */
     void setShader(float r, float b, float g, float a);
 
+    float getDeltaX();
+
+    float getDeltaY();
+
+    float getRadius();
+
+    float getCharacterSpeed();
+
+
+    void translateFromPos(float dX,float dY);
+
+    void setTranslate(float dX,float dY);
 
 
 

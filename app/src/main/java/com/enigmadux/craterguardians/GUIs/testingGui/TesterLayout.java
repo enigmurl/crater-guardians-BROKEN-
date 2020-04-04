@@ -6,7 +6,7 @@
 //
 //import com.enigmadux.craterguardians.GUILib.GUILayout;
 //
-//import enigmadux2d.core.quadRendering.QuadRenderer;
+//import enigmadux2d.core.quadRendering.GuiRenderer;
 //
 ///** Tests the GUILayout interface
 // *
@@ -30,7 +30,7 @@
 //     * @param renderer the renderer that will be passed on using recursion, unless it's a level 0 (direct components), where it
 //     */
 //    @Override
-//    public void render(float[] uMVPMatrix, QuadRenderer renderer) {
+//    public void render(float[] uMVPMatrix, GuiRenderer renderer) {
 //        this.button.render(uMVPMatrix,renderer);
 //    }
 //

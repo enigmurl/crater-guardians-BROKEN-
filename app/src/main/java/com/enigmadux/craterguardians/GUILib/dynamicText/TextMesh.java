@@ -64,7 +64,7 @@ public class TextMesh {
         this.vertices = this.pushDataInFloatBuffer(vertices);
         this.textureCords = this.pushDataInFloatBuffer(textureCords);
         this.shader = shader;
-
+        if (actualText.length() == 0) return;
 
         //[x,y,z...x,      y,      z ]
         //[0,1,2...len - 3,len - 2,len - 1]

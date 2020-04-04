@@ -2,13 +2,15 @@ package com.enigmadux.craterguardians.GUILib;
 
 import android.content.Context;
 import android.opengl.Matrix;
+import android.util.Log;
 import android.view.MotionEvent;
 
+import com.enigmadux.craterguardians.Animations.ButtonScalingAnim;
 import com.enigmadux.craterguardians.GUILib.dynamicText.DynamicText;
 import com.enigmadux.craterguardians.GUILib.dynamicText.TextMesh;
-import com.enigmadux.craterguardians.SoundLib;
+import com.enigmadux.craterguardians.util.SoundLib;
 import com.enigmadux.craterguardians.values.LayoutConsts;
-import com.enigmadux.craterguardians.MathOps;
+import com.enigmadux.craterguardians.util.MathOps;
 
 import enigmadux2d.core.quadRendering.QuadTexture;
 
@@ -21,7 +23,7 @@ import enigmadux2d.core.quadRendering.QuadTexture;
  * isDown must be handled by the sub class, as in when it's pressed it must become true, todo might want to change this in future
  *
  */
-public abstract class GUIClickable extends QuadTexture implements VisibilitySwitch {
+public abstract class GUIClickable extends QuadTexture implements VisibilitySwitch, TextRenderable {
 
     /** Rounded Button corner radius / width of entire image
      *
@@ -64,7 +66,7 @@ public abstract class GUIClickable extends QuadTexture implements VisibilitySwit
     private final float[] finalMatrix = new float[16];
 
 
-    /** Text that will be shown to the screen,it's really just vertices and texture cords if it's null, no text is rendered
+    /** ImageText that will be shown to the screen,it's really just vertices and texture cords if it's null, no text is rendered
      *
      */
     private TextMesh visibleText;
@@ -79,10 +81,16 @@ public abstract class GUIClickable extends QuadTexture implements VisibilitySwit
      */
     private float fontSize;
 
-    /** Text color that subclasses can change
+    /** ImageText color that subclasses can change
      *
      */
     protected float[] textColor = LayoutConsts.CRATER_FLOAT_TEXT_COLOR;
+
+    protected float textDeltaX;
+    protected float textDeltaY;
+
+    protected ButtonScalingAnim buttonScalingAnim;
+    private float scale = 1;
 
     /**
      * Default Constructor
@@ -96,8 +104,6 @@ public abstract class GUIClickable extends QuadTexture implements VisibilitySwit
      */
     protected GUIClickable(Context context, int texturePointer, float x, float y, float w, float h, boolean isRounded) {
         super(context, texturePointer, x, y, w * LayoutConsts.SCREEN_HEIGHT/LayoutConsts.SCREEN_WIDTH, h);
-        Matrix.setIdentityM(this.scalarMatrix, 0);
-        Matrix.scaleM(this.scalarMatrix, 0, GUIClickable.BUTTON_DOWN_SCALEFACTOR, GUIClickable.BUTTON_DOWN_SCALEFACTOR, 0);
 
         if (isRounded){
             this.enableRounding();
@@ -114,8 +120,6 @@ public abstract class GUIClickable extends QuadTexture implements VisibilitySwit
      */
     protected GUIClickable(int texturePointer,float x,float y,float w,float h) {
         super(texturePointer, x, y, w * LayoutConsts.SCREEN_HEIGHT/LayoutConsts.SCREEN_WIDTH, h);
-        Matrix.setIdentityM(this.scalarMatrix, 0);
-        Matrix.scaleM(this.scalarMatrix, 0, GUIClickable.BUTTON_DOWN_SCALEFACTOR, GUIClickable.BUTTON_DOWN_SCALEFACTOR, 0);
     }
 
     /** Enables rounded corners with the radius provided (relative to a unit square
@@ -141,8 +145,11 @@ public abstract class GUIClickable extends QuadTexture implements VisibilitySwit
      * @return if the touch event intersects this bounding box
      */
     public boolean isPressed(MotionEvent e) {
-        float x = MathOps.getOpenGLX(e.getX());
-        float y = MathOps.getOpenGLY(e.getY());
+        int pointerInd  = e.getActionIndex();
+
+        float x = MathOps.getOpenGLX(e.getX(pointerInd));
+        float y = MathOps.getOpenGLY(e.getY(pointerInd));
+
 
         return (this.isVisible &&
                 x > this.x - this.w / 2 &&
@@ -211,12 +218,11 @@ public abstract class GUIClickable extends QuadTexture implements VisibilitySwit
      */
     @Override
     public void dumpOutputMatrix(float[] dumpMatrix, float[] mvpMatrix) {
-        if (this.isDown) {
-            super.dumpOutputMatrix(this.finalMatrix, mvpMatrix);
-            Matrix.multiplyMM(dumpMatrix, 0, this.finalMatrix, 0, this.scalarMatrix, 0);
-        } else {
-            super.dumpOutputMatrix(dumpMatrix, mvpMatrix);
-        }
+        super.dumpOutputMatrix(this.finalMatrix, mvpMatrix);
+        Matrix.setIdentityM(this.scalarMatrix,0);
+        Matrix.scaleM(this.scalarMatrix,0,this.scale,this.scale,0);
+        Matrix.multiplyMM(dumpMatrix, 0, this.finalMatrix, 0, this.scalarMatrix, 0);
+
     }
 
     /** Renders text, if there is any
@@ -230,10 +236,10 @@ public abstract class GUIClickable extends QuadTexture implements VisibilitySwit
 
         }
         if (this.visibleText != null) {
-            float additionalScale = (this.isDown) ?  GUIClickable.BUTTON_DOWN_SCALEFACTOR:1;
+            float additionalScale = this.scale;
             Matrix.setIdentityM(textTranslationMatrix,0);
             //3/2 for the y component bc idk
-            Matrix.translateM(textTranslationMatrix,0,-additionalScale *this.fontSize * LayoutConsts.SCREEN_HEIGHT / LayoutConsts.SCREEN_WIDTH * this.visibleText.getW()/2 + this.x,-additionalScale * this.fontSize * 3 *this.visibleText.getH()/2 + this.y,0);
+            Matrix.translateM(textTranslationMatrix,0, additionalScale * this.textDeltaX-additionalScale *this.fontSize * LayoutConsts.SCREEN_HEIGHT / LayoutConsts.SCREEN_WIDTH * this.visibleText.getW()/2 + this.x,-additionalScale * this.fontSize * 3 * this.visibleText.getH()/2+ this.y + additionalScale * this.textDeltaY ,0);
             Matrix.setIdentityM(textScalarMatrix,0);
             Matrix.scaleM(textScalarMatrix,0,additionalScale *this.fontSize * LayoutConsts.SCREEN_HEIGHT / LayoutConsts.SCREEN_WIDTH, additionalScale * this.fontSize, 1);
             Matrix.multiplyMM(textTransformationMatrix,0,textTranslationMatrix,0,textScalarMatrix,0);
@@ -260,6 +266,7 @@ public abstract class GUIClickable extends QuadTexture implements VisibilitySwit
             }
             return true;
         } else if (this.isDown()) {
+            this.defaultSoftRelease();
             this.onSoftRelease(e);
             return true;
         }
@@ -273,8 +280,14 @@ public abstract class GUIClickable extends QuadTexture implements VisibilitySwit
      * @param fontSize the height of the font
      */
     public void updateText(String newText,float fontSize){
-        this.text = newText;
-        this.fontSize = fontSize;
+        if (newText == null ||newText.length() == 0){
+            this.visibleText = null;
+            this.text = null;
+        } else {
+            this.text = newText;
+            this.fontSize = fontSize;
+        }
+
     }
 
     /** The default action on button press, just playing the sound effect for now
@@ -282,6 +295,13 @@ public abstract class GUIClickable extends QuadTexture implements VisibilitySwit
      */
     protected void defaultPressAction(){
         SoundLib.playButtonSelectedSoundEffect();
+        if (buttonScalingAnim != null){
+            buttonScalingAnim.cancel();
+            buttonScalingAnim = new ButtonScalingAnim(this,ButtonScalingAnim.DEFAULT_MILLIS,this.buttonScalingAnim.getMillisLeft(),1,BUTTON_DOWN_SCALEFACTOR);
+        } else {
+            buttonScalingAnim = new ButtonScalingAnim(this,ButtonScalingAnim.DEFAULT_MILLIS,0,1,BUTTON_DOWN_SCALEFACTOR);
+        }
+
     }
 
     /** The default action on button release, just playing the sound effect for now
@@ -289,9 +309,23 @@ public abstract class GUIClickable extends QuadTexture implements VisibilitySwit
      */
     protected void defaultReleaseAction(){
         SoundLib.playButtonReleasedSoundEffect();
+        if (buttonScalingAnim != null){
+            buttonScalingAnim.cancel();
+            buttonScalingAnim = new ButtonScalingAnim(this,ButtonScalingAnim.DEFAULT_MILLIS,this.buttonScalingAnim.getMillisLeft(),scale,1);
+        }
+
     }
 
+    protected void defaultSoftRelease(){
+        if (buttonScalingAnim != null){
+            buttonScalingAnim.cancel();
+            buttonScalingAnim = new ButtonScalingAnim(this,ButtonScalingAnim.DEFAULT_MILLIS,this.buttonScalingAnim.getMillisLeft(),scale,1);
+        }
+    }
 
+    public void setScale(float t){
+        this.scale = t;
+    }
 
 
 }

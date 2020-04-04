@@ -2,6 +2,9 @@ package com.enigmadux.craterguardians.Spawners;
 
 /** Solves cubics to make math easy for spawner calculations (Using Langrage's Formula via https://www.desmos.com/calculator/dffnj2jbow)
  *
+ * Note, this will no longer be used because even if four points are all downwards, the slope
+ * may become positive, I am instead switching to bicubic interpolation
+ *
  * @author Manu Bhat
  * @version BETA
  */

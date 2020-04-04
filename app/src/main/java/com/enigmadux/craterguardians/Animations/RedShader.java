@@ -1,7 +1,7 @@
 package com.enigmadux.craterguardians.Animations;
 
-import com.enigmadux.craterguardians.BaseCharacter;
-import com.enigmadux.craterguardians.Enemies.Enemy;
+import com.enigmadux.craterguardians.Character;
+import com.enigmadux.craterguardians.gameLib.CraterCollectionElem;
 
 /** Shades a component red for a couple of seconds
  *
@@ -14,44 +14,45 @@ public class RedShader extends TransitionAnim {
 
 
     //the component that needs to be hidden
-    private BaseCharacter baseCharacter;
+    private Character character;
+    private CraterCollectionElem craterCollectionElem;
+
+    private boolean cancel = false;
 
     //if it's an enemy that needs to be hidden
-    private Enemy enemy;
     /** Default constructor
-     *
-     * @param baseCharacter The said component that needs to be shaded red
      * @param millis how long to delay the un shading of the component
      */
-    public RedShader(BaseCharacter baseCharacter, long millis){
+    public RedShader(Character s, long millis){
         super();
-        this.baseCharacter = baseCharacter;
-        this.baseCharacter.setShader(1.0f,GB_VALUE,GB_VALUE,1);
+        this.character = s;
+        s.setShader(1.0f,GB_VALUE,GB_VALUE,1);
         HANDLER.postDelayed(this,millis);
     }
-
-    /** Default constructor
-     *
-     * @param baseCharacter The said component that needs to be shaded red
-     * @param millis how long to delay the un shading of the component
-     */
-    public RedShader(Enemy baseCharacter, long millis){
+    public RedShader(CraterCollectionElem craterCollectionElem,long millis){
         super();
-        this.enemy = baseCharacter;
-        this.enemy.setShader(1.0f,GB_VALUE,GB_VALUE,1);
+        this.craterCollectionElem = craterCollectionElem;
+        craterCollectionElem.setShader(1.0f,GB_VALUE,GB_VALUE,1);
         HANDLER.postDelayed(this,millis);
     }
 
 
 
-    /** Hides the enigmadux component
+    /** Hides the enigmadux component todo, might wanna make it change back to original color
      *
      */
     @Override
     public void run() {
-        if (this.baseCharacter != null)
-            this.baseCharacter.setShader(1.0f,1,1,1);
-        else
-            this.enemy.setShader(1.0f,1,1,1);
+        if (! cancel) {
+            if (this.character != null) {
+                this.character.setShader(1, 1, 1, 1);
+            } else {
+                this.craterCollectionElem.setShader(1,1,1,1);
+            }
+        }
+    }
+
+    public void cancel(){
+        this.cancel = true;
     }
 }

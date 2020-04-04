@@ -1,19 +1,33 @@
 package com.enigmadux.craterguardians.GUIs.inGameScreen;
 
 import android.content.Context;
+import android.util.Log;
 import android.view.MotionEvent;
 
+import com.enigmadux.craterguardians.Animations.ZoomFadeIn;
+import com.enigmadux.craterguardians.CraterRenderer;
+import com.enigmadux.craterguardians.FileStreams.TutorialData;
 import com.enigmadux.craterguardians.GUILib.GUIClickable;
 import com.enigmadux.craterguardians.GUILib.GUILayout;
+import com.enigmadux.craterguardians.GUILib.Text;
+import com.enigmadux.craterguardians.GUILib.TextRenderable;
 import com.enigmadux.craterguardians.GUILib.VisibilityInducedButton;
+import com.enigmadux.craterguardians.GUILib.VisibilitySwitch;
 import com.enigmadux.craterguardians.GUILib.dynamicText.DynamicText;
+import com.enigmadux.craterguardians.GUIs.inGameScreen.defaultJoystickLayout.DefaultJoyStickLayout;
+import com.enigmadux.craterguardians.GUIs.inGameScreen.joystickLayouts.JoystickLayout;
+import com.enigmadux.craterguardians.GUIs.inGameScreen.tutorialHelpers.TutorialWrapper;
 import com.enigmadux.craterguardians.R;
+import com.enigmadux.craterguardians.worlds.World;
+import com.enigmadux.craterguardians.values.LayoutConsts;
 import com.enigmadux.craterguardians.values.STRINGS;
 
 import java.util.ArrayList;
 import java.util.HashMap;
 
+import enigmadux2d.core.quadRendering.GuiRenderer;
 import enigmadux2d.core.quadRendering.QuadRenderer;
+import enigmadux2d.core.quadRendering.QuadTexture;
 
 /** This is the layout in game that contains the pause button
  *
@@ -32,16 +46,36 @@ public class InGameScreen implements GUILayout {
      */
     private ArrayList<GUIClickable> clickables;
 
+    private ArrayList<QuadTexture> renderables = new ArrayList<>();
+
+    private TutorialWrapper tutorialWrapper;
+
+
+    private WinLossIndicator winLossIndicator;
+    private QuadTexture battleStartIndicator;
+
+
+    private CraterRenderer craterRenderer;
+
+
+    private VisibilityInducedButton pause;
+
     /** Whether or not to draw the screen
      *
      */
     private boolean isVisible;
 
 
+    private JoystickLayout joystickLayout;
+
     /** Default Constructor
      *
      */
-    public InGameScreen(){
+    public InGameScreen(CraterRenderer craterRenderer){
+        this.craterRenderer = craterRenderer;
+
+        this.joystickLayout = new DefaultJoyStickLayout(craterRenderer);
+
         this.clickables = new ArrayList<>();
     }
 
@@ -53,12 +87,26 @@ public class InGameScreen implements GUILayout {
     @Override
     public void loadComponents(Context context, HashMap<String, GUILayout> allLayouts) {
         //the pause button);
-        this.clickables.add(new VisibilityInducedButton(context, R.drawable.pause_button,
-                -0.8f,0.75f,0.4f,0.4f,
-                null,allLayouts.get(STRINGS.PAUSE_GAME_LAYOUT_ID), false));
+
+        float x =-1 + 0.15f * LayoutConsts.SCALE_X;
+        pause = new VisibilityInducedButton(context, R.drawable.pause_button,
+                x,0.85f,0.2f,0.2f,
+                null,allLayouts.get(STRINGS.PAUSE_GAME_LAYOUT_ID), false);
+        this.clickables.add(pause);
+        this.renderables.add(pause);
+
+        this.joystickLayout.init(context);
+        this.renderables.addAll(this.joystickLayout.getRenderables());
 
 
+        //win or loss
+        this.winLossIndicator = new WinLossIndicator(this.craterRenderer,context,0,0.5f,LayoutConsts.SCALE_X * 1.5f,1);
+        this.renderables.add(winLossIndicator);
+        //battle start
+        this.battleStartIndicator = new QuadTexture(context,R.drawable.battle_start,0,0.5f, LayoutConsts.SCALE_X * 1,1);
+        this.renderables.add(this.battleStartIndicator);
 
+        this.tutorialWrapper = new TutorialWrapper(context,this.craterRenderer.getCraterBackendThread(),this);
     }
 
     /** Handles touch events
@@ -70,8 +118,14 @@ public class InGameScreen implements GUILayout {
     public boolean onTouch(MotionEvent e) {
         if (! this.isVisible) return false;
 
+        if (tutorialWrapper.onTouch(e)) return true;
+
         for (int i = this.clickables.size()-1;i>= 0;i--){
             if (this.clickables.get(i).onTouch(e)) return true;
+        }
+
+        if (craterRenderer.getWorld().getCurrentGameState() == World.STATE_INGAME) {
+            this.joystickLayout.onTouch(e);
         }
         return false;
     }
@@ -83,10 +137,27 @@ public class InGameScreen implements GUILayout {
     @Override
     public void setVisibility(boolean visibility) {
         this.isVisible = visibility;
-
+        boolean tutorialVisibility = visibility && TutorialData.TUTORIAL_ENABLED;
+        this.tutorialWrapper.setVisiblility(tutorialVisibility);
 
         for (int i = this.clickables.size()-1;i>= 0;i--){
             this.clickables.get(i).setVisibility(visibility);
+        }
+        if (tutorialVisibility){
+            this.pause.setVisibility(false);
+        }
+    }
+
+
+    //its also rendered with a quad renderer for optimum performance
+    //additionally, the tilable can only be rendered with quad renderer, so I have just deleted the entire other render method
+    public void render(float[] uMVPMatrix, QuadRenderer renderer, DynamicText textRenderer) {
+        if (this.isVisible) {
+            renderer.renderQuads(this.renderables,uMVPMatrix);
+            for (int i = 0,size = this.clickables.size();i<size;i++){
+                this.clickables.get(i).renderText(textRenderer,uMVPMatrix);
+            }
+            this.tutorialWrapper.render(uMVPMatrix,renderer,textRenderer);
         }
     }
 
@@ -96,12 +167,43 @@ public class InGameScreen implements GUILayout {
      * @param textRenderer this renders text efficiently as opposed to rendering quads
      */
     @Override
-    public void render(float[] uMVPMatrix, QuadRenderer renderer, DynamicText textRenderer) {
-        if (this.isVisible) {
-            renderer.renderQuads(this.clickables, uMVPMatrix);
-            for (int i = 0,size = this.clickables.size();i<size;i++){
-                this.clickables.get(i).renderText(textRenderer,uMVPMatrix);
-            }
+    public void render(float[] uMVPMatrix, GuiRenderer renderer, DynamicText textRenderer) {
+//        if (this.isVisible) {
+//            for (int i = 0,size = this.clickables.size();i<size;i++){
+//                this.clickables.get(i).renderText(textRenderer,uMVPMatrix);
+//            }
+//            renderer.renderQuads(this.renderables,uMVPMatrix);
+//
+//        }
+        //U CAN ONLY RENDER THIS WITH A QUAD RENDERER
+    }
+
+    public void setWinLossVisibility(boolean visibility){
+        if (visibility){
+            new ZoomFadeIn(this.winLossIndicator,ZoomFadeIn.DEFAULT_MILLIS);
+        } else {
+            this.winLossIndicator.setVisibility(false);
         }
+    }
+
+    public void setBattleStartIndicatorVisibility(boolean visibility){
+        if (visibility){
+            new ZoomFadeIn(this.battleStartIndicator,ZoomFadeIn.DEFAULT_MILLIS);
+        } else {
+            this.battleStartIndicator.setVisibility(false);
+        }
+    }
+    public void resetJoySticks(){
+        this.joystickLayout.resetJoySticks();
+    }
+
+    public void update(World world,long dt){
+        this.joystickLayout.update(world, dt);
+        this.tutorialWrapper.update(world,dt);
+    }
+
+    @Override
+    public boolean isVisible() {
+        return isVisible;
     }
 }

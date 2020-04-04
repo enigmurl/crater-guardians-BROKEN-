@@ -1,6 +1,6 @@
 package com.enigmadux.craterguardians.Animations;
 
-import com.enigmadux.craterguardians.Enemies.Enemy;
+import com.enigmadux.craterguardians.enemies.Enemy;
 
 /** An helper class that moves a character over some time
  *
@@ -64,5 +64,7 @@ public class Knockback extends TransitionAnim {
             HANDLER.postDelayed(this,DELAY_MILLIS);
         }
     }
+
+
 
 }

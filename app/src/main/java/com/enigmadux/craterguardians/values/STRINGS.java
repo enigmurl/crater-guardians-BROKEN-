@@ -55,6 +55,14 @@ public class STRINGS {
      *
      */
     public static final String CHARACTER_SELECTER_TEXT = "Select: ";
+    /** The base of value of the character upgrade button in the character select layout
+     *
+     */
+    public static final String CHARACTER_UPGRADER_TEXT = "Level: ";
+    /** The base of value of the character upgrade button in the character select layout
+     *
+     */
+    public static final String CHARACTER_UPGRADER_SUFFIX_TEXT = " Upgrade for : ";
 
     /** The base value of a level button
      *
@@ -66,6 +74,7 @@ public class STRINGS {
      */
     public static final String BACK_TO_LEVELS_BUTTON = "Choose Another Level";
 
+    public static final String XP_PREFIX = " Experience: ";
 
 
 

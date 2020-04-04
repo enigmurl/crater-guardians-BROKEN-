@@ -2,13 +2,16 @@ package com.enigmadux.craterguardians;
 
 import android.util.Log;
 
-import com.enigmadux.craterguardians.Characters.Player;
 import com.enigmadux.craterguardians.GameObjects.Plateau;
 import com.enigmadux.craterguardians.GameObjects.ToxicLake;
+import com.enigmadux.craterguardians.players.Player;
+import com.enigmadux.craterguardians.util.MathOps;
 
 import java.util.ArrayList;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Locale;
+import java.util.Queue;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
@@ -41,23 +44,17 @@ public class EnemyMap {
     private List<ToxicLake> toxicLakes;
 
 
-    private long startTime;
-    private int calls;
-    private long runTime;
-
-    private long countRunTime;
 
     /** Default Constructor
      * @param plateaus all plateaus on the current level
      * @param toxicLakes all toxic lakes on the current level
-     * @param nodes the current node maps
+     * @param nodes the current node maps. NOTE, the format is node 0 must be the player spawn, then the supply nodes, WHICH MUST BE CONNECTED TO SOMETHING OTHER THAN THE NODE0
      */
     public EnemyMap (List<Plateau> plateaus, List<ToxicLake> toxicLakes, Node[] nodes){
         this.plateaus = plateaus;
         this.toxicLakes = toxicLakes;
         this.nodeMap = nodes;
 
-        this.startTime = System.currentTimeMillis();
     }
 
 
@@ -142,159 +139,7 @@ public class EnemyMap {
 
         return weight;
     }
-//
-//    /*
-//    private void createMap1(){
-//        //first create the nodes 4 for each toxic lake, 4 for each plateau
-//        //see every connection it can make with every other node, if it's possible
-//        //add it to neighbours
-//
-//        this.map1Nodes = new Node[1 + supplies.size() + 4 * (this.plateaus.size() + this.toxicLakes.size())];
-//
-//        int offset = 1;
-//        for (int i = 0;i<this.supplies.size();i++){
-//            this.map1Nodes[offset] = new Node(this.supplies.get(i).getX(),this.supplies.get(i).getX());
-//            offset++;
-//        }
-//
-//        float length = GRANULARITY_1 + EPSILON;
-//
-//        for (int i = 0;i<this.toxicLakes.size();i++){
-//            //the center deltX and y, plus the radius
-//            float deltX = this.toxicLakes.get(i).getX();
-//            float y = this.toxicLakes.get(i).getY();
-//            float r = this.toxicLakes.get(i).getWidth()/2;
-//
-//            this.map1Nodes[offset] = new Node(deltX,y + r + length);
-//            this.map1Nodes[offset+1] = new Node(deltX,y - r - length);
-//            this.map1Nodes[offset+2] = new Node(deltX - r - length,y);
-//            this.map1Nodes[offset+3] = new Node(deltX + r +length,y);
-//
-//
-//            offset += 4;
-//        }
-//
-//
-//        for (int i = 0;i<this.plateaus.size();i++){
-//            float[][] unBoundPoints = this.plateaus.get(i).getPoints();
-//            *//*  C1___C3
-//             *   |   |
-//             * C0|___|C2
-//             *//*
-//            float x0 = unBoundPoints[0][0];
-//            float y0 = unBoundPoints[0][1];
-//            float x1 = unBoundPoints[1][0];
-//            float y1 = unBoundPoints[1][1];
-//            float x2 = unBoundPoints[2][0];
-//            float y2 = unBoundPoints[2][1];
-//            float x3 = unBoundPoints[3][0];
-//            float y3 = unBoundPoints[3][1];
-//
-//            this.map1Nodes[offset]   = this.getPlateauNode(x0,y0,x3,y3,x1,y1,x2,y2,length);
-//            this.map1Nodes[offset+1] = this.getPlateauNode(x3,y3,x0,y0,x1,y1,x2,y2,length);
-//            this.map1Nodes[offset+2] = this.getPlateauNode(x1,y1,x2,y2,x3,y3,x0,y0,length);
-//            this.map1Nodes[offset+3] = this.getPlateauNode(x2,y2,x1,y1,x3,y3,x0,y0,length);
-//            offset += 4;
-//        }
-//
-//
-//
-//
-//        *//* No snipping for now as it's expensive and overactive
-//        for (Plateau plateau:this.plateaus){
-//            for (ToxicLake toxicLake:this.toxicLakes){
-//                for (int i = this.supplies.size();i<this.map1Nodes.length;i++){
-//                    Node node = this.map1Nodes[i];
-//                    if (node == null) continue;
-//                    if (Math.hypot(toxicLake.getX() - node.deltX,toxicLake.getY() - node.y) < toxicLake.getWidth()/2 + length){
-//                        this.map1Nodes[i] = null;
-//                        continue;
-//                    }
-//
-//                    if (plateau.intersectsCircle(node.deltX,node.y,length)){
-//                        this.map1Nodes[i] = null;
-//                    }
-//
-//                }
-//
-//            }
-//        }
-//        *//*
-//        for (int i = 1;i<this.map1Nodes.length;i++){
-//            if (this.map1Nodes[i] != null && Math.hypot(this.map1Nodes[i].deltX,this.map1Nodes[i].y) > this.radius) this.map1Nodes[i] = null;
-//        }
-//
-//        for (int i = 0;i<this.map1Nodes.length;i++){
-//            for (int j = i+1;j<this.map1Nodes.length;j++){
-//                int weightage = this.isValid(map1Nodes[i],map1Nodes[j],GRANULARITY_1);
-//                if (weightage != -1){
-//                    map1Nodes[i].addNeighbour(map1Nodes[j],weightage);
-//                    map1Nodes[j].addNeighbour(map1Nodes[i],weightage);
-//                }
-//            }
-//        }
-//
-//        Log.d("ENEMY MAP:","Completed");
-//
-//    }
-//
-//    *//** Given points on plateau it calculates where the
-//     *
-//     * @param x0 center deltX
-//     * @param y0 center y
-//     * @param x1 opposite deltX
-//     * @param y1 opposite y
-//     * @param x2 left deltX
-//     * @param y2 left y
-//     * @param x3 right deltX
-//     * @param y3 right y
-//     * @param length  the minimum distance away the node should be
-//     * @return a Node of where it should be based on parameters so that a  node outside of the plateau by a cleareence of length
-//     *//*
-//    private Node getPlateauNode(float x0,float y0,float x1,float y1,float x2,float y2,float x3,float y3,float length){
-//        //centering the coordinates
-//        x1 -= x0;
-//        x2 -= x0;
-//        x3 -= x0;
-//        y1 -= y0;
-//        y2 -= y0;
-//        y3 -= y0;
-//
-//        float[] scaledVec = this.bisector(x2,y2,x3,y3);
-//        float scalar = length/(float) Math.hypot(scaledVec[0],scaledVec[1]);
-//
-//        if (Math.hypot(x1,y1) > Math.hypot(x1-scaledVec[0],y1-scaledVec[1])){
-//            scalar = -scalar;
-//
-//
-//        }
-//        scaledVec[0] *= scalar;
-//        scaledVec[1] *= scalar;
-//
-//        return new Node(scaledVec[0] + x0,scaledVec[1] + y0);
-//
-//    }
-//
-//    private float[] bisector(float x0,float y0,float x1,float y1) {
-//        float hypot1 = (float) Math.hypot(x0,y0);
-//        float hypot2 = (float) Math.hypot(x1,y1);
-//
-//        return new float[] {hypot2 * x0 + hypot1*x1,hypot2 * y0 + hypot1*y1};
-//    }
-//
-//
-//    private void createMap2(){
-//        //first create the nodes
-//        //see every connection it can make with every other node, if it's possible
-//        //add it to neighbours
-//    }
-//
-//    private void createMap3(){
-//        //first create the nodes
-//        //see every connection it can make with every other node, if it's possible
-//        //add it to neighbours
-//    }
-//    */
+
 
     /** Each frame the player's position needs to be updated once, as opposed to finding it through each enemy
      *
@@ -308,13 +153,13 @@ public class EnemyMap {
         Node playerNode = new Node(player.getDeltaX(),player.getDeltaY());
 
         for (int i = 1;i<this.nodeMap.length;i++){
-            //0 for now todo
             float weightage = (float) this.isValid(playerNode,nodeMap[i],0);
-            if (weightage != -1){
+            if (weightage >= 0){
                 nodeMap[i].addNeighbour(playerNode,weightage);
                 playerNode.addNeighbour(nodeMap[i],weightage);
             }
         }
+
 
 
         this.nodeMap[0] = playerNode;
@@ -331,17 +176,9 @@ public class EnemyMap {
      * @param supplyIndex -1 if you're targeting the player, otherwise the index of the supply you want
      * @return a path of nodes that represent the path it must take. NOTE if the last Node is null, that means that the last node is  the Player, and appropriate action can be taken from there
      */
-    public List<Node> nextStepMap(float radius,float currentX,float currentY,int supplyIndex){
+    public Queue<Node> nextStepMap(float radius, float currentX, float currentY, int supplyIndex){
         //first get possibly nodes it can connect with through ray casting
         //get the weightages of each of those nodes
-        long startTime = System.currentTimeMillis();
-        calls ++;
-        if (startTime - this.startTime > 20 * 1000){
-            Log.d("PERCENTAGE TIME:", "TIME:" +  ((float) this.runTime/(startTime - this.startTime )) + "Average: ms" + (this.runTime/calls) + " calls: " + this.calls + " iinTime:" + this.countRunTime);
-            this.startTime = startTime;
-            calls = 0;
-        }
-
         Node start = new Node(currentX,currentY);
         float targetX = this.nodeMap[supplyIndex + 1].x;
         float targetY = this.nodeMap[supplyIndex + 1].y;
@@ -351,8 +188,10 @@ public class EnemyMap {
 
             float weightage = (float) this.isValid(start,nodeMap[i],GRANULARITY_1);
             //Log.d("ENEMY WEIGHT","weight: " + weightage + " length: "  +this.nodeMap.length);
-            if (weightage != -1){
-                nodeMap[i].addNeighbour(start,weightage);
+            if (weightage > 0){
+                //this seems to be causing problems as it lasts for the a* search even after this one,
+                //so I'm removing it, as i I don't even think a* edges hve to be bi drirectional
+                //nodeMap[i].addNeighbour(start,weightage);
                 start.addNeighbour(nodeMap[i],weightage);
             }
         }
@@ -370,28 +209,23 @@ public class EnemyMap {
         start.hCost = (float) Math.hypot(currentX - targetX,currentY - targetY);
 
         while (open.size() > 0){
-            long inStart = System.currentTimeMillis();
-
-            Node currentNode = open.get(0);
+            Node currentNode = open.remove(0);
             for (int i = 1;i<open.size();i++){
                 if (open.get(i).fCost() < currentNode.fCost() || (open.get(i).fCost() == currentNode.fCost() && open.get(i).hCost < currentNode.hCost)){
                     currentNode = open.get(i);
                 }
             }
-            this.countRunTime += System.currentTimeMillis() - inStart;
             //the plus 1 is to offset for the player node
             if (currentNode == nodeMap[supplyIndex + 1]){
-                List<Node> path = computePath(currentNode,start);
+                LinkedList<Node> path = computePath(currentNode,start);
                 if (supplyIndex == -1){
                     path.set(path.size()-1,null);
                 }
 
-                runTime += System.currentTimeMillis() - startTime;
 
                 return path;
             }
 
-            open.remove(currentNode);
             closed.add(currentNode);
 
             for (int i = 0;i<currentNode.connections.size();i++){
@@ -416,10 +250,9 @@ public class EnemyMap {
 
 
         //this makes it as if its pointing to the player as no suitable path was found
-        List<Node> path = new ArrayList<Node>();
+        Queue<Node> path = new LinkedList<>();
         path.add(null);
         path.add(null);
-        runTime += System.currentTimeMillis() - this.startTime;
 
         Log.d("ENEMY MAP:" ,"Player Position:" + this.nodeMap[0] + " Enemy Pos: "  + start  + " player connections: " + this.nodeMap[0].connections +  " enemy connections " +  start.connections + " supply index: " + supplyIndex);
 
@@ -432,8 +265,8 @@ public class EnemyMap {
      * @param start the starting node, also must be the exact reference
      * @return the path starting from the first node AFTER the starting position
      */
-    private List<Node> computePath(Node target,Node start){
-        List<Node> path = new ArrayList<>();
+    private LinkedList<Node> computePath(Node target,Node start){
+        LinkedList<Node> path = new LinkedList<>();
 
         while (target != start){
             path.add(0,target);
@@ -445,9 +278,9 @@ public class EnemyMap {
 
     public static class Node {
         /** The distance from the start to this node*/
-        public float gCost;
+        float gCost;
         /** The distance from the end to this node*/
-        public float hCost;
+        float hCost;
 
 
         /** The node that points to this*/
@@ -488,6 +321,9 @@ public class EnemyMap {
          *
          */
         public void reset(){
+            for (int i = 0;i < connections.size();i++){
+                connections.get(i).connections.remove(this);
+            }
             this.connections.clear();
             this.weights.clear();
         }
@@ -508,6 +344,7 @@ public class EnemyMap {
         public String toString(){
             return String.format(Locale.ENGLISH,"(%.2f , %.2f )",this.x,this.y);
         }
+
     }
     /** To string method used to display info to a gui
      *

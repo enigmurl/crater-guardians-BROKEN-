@@ -3,8 +3,7 @@ package com.enigmadux.craterguardians.FileStreams;
 import android.content.Context;
 import android.util.Log;
 
-import com.enigmadux.craterguardians.CraterRenderer;
-import com.enigmadux.craterguardians.SoundLib;
+import com.enigmadux.craterguardians.util.SoundLib;
 
 import java.io.IOException;
 import java.io.OutputStreamWriter;

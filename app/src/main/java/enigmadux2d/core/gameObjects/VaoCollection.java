@@ -13,6 +13,8 @@ import java.nio.FloatBuffer;
 import java.nio.IntBuffer;
 import java.util.Arrays;
 
+import enigmadux2d.core.quadRendering.QuadTexture;
+
 /** Is able to draw multiple of the same model, store
  *
  *
@@ -120,7 +122,7 @@ public abstract class VaoCollection {
     /** Default Constructor. Note that it assumed that indices, vertices, and texture cords, are all being used.
      * And you must provide them.
      *
-     * @param numEntities the maximum amount of entities that this VAO can store
+     * @param numEntities the maximum amount of rotatableEntities that this VAO can store
      * @param vertices an array of positions in the form of {x1,y1,z1,x2,y2,z2...,xn,yn,zn}. Rather than repeating
      *                  vertices, which takes lots of data, repeat the indices in the second parameter. This is where each
      *                  vertex is in model space.
@@ -193,6 +195,14 @@ public abstract class VaoCollection {
                 VaoCollection.TEXTURE_COORDINATE_DATA_DEFAULT_USAGE,
                 VaoCollection.FLOATS_PER_2D_VERTEX);
 
+        GLES30.glEnableVertexAttribArray(VaoCollection.VERTEX_ATTRIBUTE_SLOT);
+        GLES30.glEnableVertexAttribArray(VaoCollection.TEXTURE_COORDINATES_ATTRIBUTE_SLOT);
+        GLES30.glEnableVertexAttribArray(VaoCollection.VIEW_MATRIX_ATTRIBUTE_SLOT);
+        GLES30.glEnableVertexAttribArray(VaoCollection.VIEW_MATRIX_ATTRIBUTE_SLOT+1);
+        GLES30.glEnableVertexAttribArray(VaoCollection.VIEW_MATRIX_ATTRIBUTE_SLOT+2);
+        GLES30.glEnableVertexAttribArray(VaoCollection.VIEW_MATRIX_ATTRIBUTE_SLOT+3);
+        GLES30.glEnableVertexAttribArray(VaoCollection.ARGB_SHADER_ATTRIBUTE_SLOT);
+        GLES30.glEnableVertexAttribArray(VaoCollection.DELTA_TEXTURE_COORDINATES_ATTRIBUTE_SLOT);
 
         //VAO is done being handled and can be unbound
         this.unBindVAO();
@@ -203,6 +213,8 @@ public abstract class VaoCollection {
         //now set up all the data to instancedData, no data is being written, but the "links" are
 
         this.bindInstancedData();
+
+
 
 
     }
@@ -231,28 +243,7 @@ public abstract class VaoCollection {
      *                     please make the image width and height (pixels) powers of two, i.e. 64,128,1024...
      */
     public void loadTexture(Context context, int imagePointer){
-        //first convert the image file into a bitmap
-        Bitmap texture = BitmapFactory.decodeResource(context.getResources(),imagePointer);
-
-        //create a texture id at the specified location in the array
-        GLES30.glGenTextures(1,this.textureList,0);
-
-        //now bind it with the array
-        GLES30.glBindTexture(GLES30.GL_TEXTURE_2D, this.textureList[0]);
-
-        // create nearest filtered texture
-        GLES30.glTexParameteri(GLES30.GL_TEXTURE_2D, GLES30.GL_TEXTURE_MIN_FILTER, GLES30.GL_LINEAR);
-        GLES30.glTexParameteri(GLES30.GL_TEXTURE_2D, GLES30.GL_TEXTURE_MAG_FILTER, GLES30.GL_LINEAR);
-
-
-        // Use Android GLUtils to specify a two-dimensional texture image from our bitmap
-        GLUtils.texImage2D(GLES30.GL_TEXTURE_2D, 0, texture, 0);
-
-
-        //bitmap no longer needed
-        texture.recycle();
-
-
+        this.textureList = QuadTexture.loadAndroidTexturePointer(context,imagePointer);
     }
 
 
@@ -303,7 +294,11 @@ public abstract class VaoCollection {
         int offset = this.indexMap[instanceId] *  this.floatsPerInstance;
 
         //copy the passed in data to our global data efficiently
-        System.arraycopy(instanceData, 0, this.instancedData, offset, this.floatsPerInstance);
+        try {
+            System.arraycopy(instanceData, 0, this.instancedData, offset, this.floatsPerInstance);
+        } catch (Exception e){
+            Log.d("VAO COLLECITON","ARRAY OUT OF BOUNDS ID " + instanceId +  " offset: " + offset + " ids: " + Arrays.toString(this.indexMap),e);
+        }
 
     }
     /** Creates a blank instance, and returns the id, use the id so you can change the properties of that instance later
@@ -323,7 +318,7 @@ public abstract class VaoCollection {
         this.numInstances++;
         this.takenIds[id] = true;
 
-        Log.d("VAO COLECTION:", "num instances: " + this.numInstances);
+        Log.d("VAO COLECTION:", "num instances: " + this.numInstances + " with ID: " + id);
 
         return id;
     }
@@ -335,7 +330,7 @@ public abstract class VaoCollection {
      * @param instanceId the id of the element that needs to be hidden,
      */
     public void deleteInstance(int instanceId){
-
+        Log.d("VAO","DELETING " + instanceId);
         //one instance less
         this.numInstances--;
 

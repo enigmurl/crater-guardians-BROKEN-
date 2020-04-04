@@ -10,6 +10,7 @@ import enigmadux2d.core.gameObjects.VaoCollection;
 import enigmadux2d.core.models.InGameModel;
 import enigmadux2d.core.models.TexturedModel;
 import enigmadux2d.core.shaders.DefaultShader;
+import enigmadux2d.core.shaders.ShaderProgram;
 
 
 /** This draws a mesh to the screen. Todo need to upgrade this
@@ -59,19 +60,23 @@ public class MeshRenderer {
      * @param instances the instances to be rendered
      */
     public void renderCollection(VaoCollection instances){
+        ShaderProgram.NUM_DRAW_CALLS++;
+
         //first bind the vertex array
         GLES30.glBindVertexArray(instances.getVaoID());
 
         //enable all slots (not using static references, because it wouldn't make sense to create 4 for the matrices
         //but what we are enabling is the four columns of the matrix, the ARGB shader, and then the delta texture coords
-        GLES30.glEnableVertexAttribArray(VaoCollection.VERTEX_ATTRIBUTE_SLOT);
-        GLES30.glEnableVertexAttribArray(VaoCollection.TEXTURE_COORDINATES_ATTRIBUTE_SLOT);
-        GLES30.glEnableVertexAttribArray(VaoCollection.VIEW_MATRIX_ATTRIBUTE_SLOT);
-        GLES30.glEnableVertexAttribArray(VaoCollection.VIEW_MATRIX_ATTRIBUTE_SLOT+1);
-        GLES30.glEnableVertexAttribArray(VaoCollection.VIEW_MATRIX_ATTRIBUTE_SLOT+2);
-        GLES30.glEnableVertexAttribArray(VaoCollection.VIEW_MATRIX_ATTRIBUTE_SLOT+3);
-        GLES30.glEnableVertexAttribArray(VaoCollection.ARGB_SHADER_ATTRIBUTE_SLOT);
-        GLES30.glEnableVertexAttribArray(VaoCollection.DELTA_TEXTURE_COORDINATES_ATTRIBUTE_SLOT);
+        //see commment below about youtube comment for reason of disabling these line
+
+//        GLES30.glEnableVertexAttribArray(VaoCollection.VERTEX_ATTRIBUTE_SLOT);
+//        GLES30.glEnableVertexAttribArray(VaoCollection.TEXTURE_COORDINATES_ATTRIBUTE_SLOT);
+//        GLES30.glEnableVertexAttribArray(VaoCollection.VIEW_MATRIX_ATTRIBUTE_SLOT);
+//        GLES30.glEnableVertexAttribArray(VaoCollection.VIEW_MATRIX_ATTRIBUTE_SLOT+1);
+//        GLES30.glEnableVertexAttribArray(VaoCollection.VIEW_MATRIX_ATTRIBUTE_SLOT+2);
+//        GLES30.glEnableVertexAttribArray(VaoCollection.VIEW_MATRIX_ATTRIBUTE_SLOT+3);
+//        GLES30.glEnableVertexAttribArray(VaoCollection.ARGB_SHADER_ATTRIBUTE_SLOT);
+//        GLES30.glEnableVertexAttribArray(VaoCollection.DELTA_TEXTURE_COORDINATES_ATTRIBUTE_SLOT);
 
         //upload the texture to V RAM
         this.shaderProgram.writeTexture(instances.getTextureId());
@@ -80,17 +85,20 @@ public class MeshRenderer {
         IntBuffer elementArray = instances.getElementArrayBuffer();
         GLES30.glDrawElementsInstanced(GLES30.GL_TRIANGLES,elementArray.capacity(),GLES30.GL_UNSIGNED_INT,elementArray,instances.getNumInstances());
 
-        //de bind the vertex VBO as it's no longer needed
-        GLES30.glDisableVertexAttribArray(ModelLoader.VERTEX_ATTRIBUTE_SLOT);
-        //de bind the texture cord VBO as it's no longer needed
-        GLES30.glDisableVertexAttribArray(ModelLoader.TEXTURE_COORDINATES_ATTRIBUTE_SLOT);
-        //de bind instance attributes as well
-        GLES30.glDisableVertexAttribArray(VaoCollection.VIEW_MATRIX_ATTRIBUTE_SLOT);
-        GLES30.glDisableVertexAttribArray(VaoCollection.VIEW_MATRIX_ATTRIBUTE_SLOT+1);
-        GLES30.glDisableVertexAttribArray(VaoCollection.VIEW_MATRIX_ATTRIBUTE_SLOT+2);
-        GLES30.glDisableVertexAttribArray(VaoCollection.VIEW_MATRIX_ATTRIBUTE_SLOT+3);
-        GLES30.glDisableVertexAttribArray(VaoCollection.ARGB_SHADER_ATTRIBUTE_SLOT);
-        GLES30.glDisableVertexAttribArray(VaoCollection.DELTA_TEXTURE_COORDINATES_ATTRIBUTE_SLOT);
+
+        //according to a youtube comment if you enable it once, you never have to re enable it again, so I'm moving that stuff to the VaoCollection class and seeing if it works
+
+//        //de bind the vertex VBO as it's no longer needed
+//        GLES30.glDisableVertexAttribArray(ModelLoader.VERTEX_ATTRIBUTE_SLOT);
+//        //de bind the texture cord VBO as it's no longer needed
+//        GLES30.glDisableVertexAttribArray(ModelLoader.TEXTURE_COORDINATES_ATTRIBUTE_SLOT);
+//        //de bind instance attributes as well
+//        GLES30.glDisableVertexAttribArray(VaoCollection.VIEW_MATRIX_ATTRIBUTE_SLOT);
+//        GLES30.glDisableVertexAttribArray(VaoCollection.VIEW_MATRIX_ATTRIBUTE_SLOT+1);
+//        GLES30.glDisableVertexAttribArray(VaoCollection.VIEW_MATRIX_ATTRIBUTE_SLOT+2);
+//        GLES30.glDisableVertexAttribArray(VaoCollection.VIEW_MATRIX_ATTRIBUTE_SLOT+3);
+//        GLES30.glDisableVertexAttribArray(VaoCollection.ARGB_SHADER_ATTRIBUTE_SLOT);
+//        GLES30.glDisableVertexAttribArray(VaoCollection.DELTA_TEXTURE_COORDINATES_ATTRIBUTE_SLOT);
 
 
         //unbind the VAO as it's no longer needed, use the id 0 to tell openGL to disable the current VAO

@@ -9,4 +9,6 @@ public interface VisibilitySwitch {
 
 
     void setVisibility(boolean visibility);
+
+    boolean isVisible();
 }

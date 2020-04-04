@@ -22,6 +22,12 @@ public abstract class ShaderProgram {
 
     //the current used program id
     public static int currentProgram;
+    //current texture
+    private static int currentTexture = -1;
+
+    //DEBUG counts the amount of state changes
+    public static int NUM_STATE_CHANGES = 0;
+    public static int NUM_DRAW_CALLS = 0;
 
 
     //this is the ID that the program we create has. We can use it to actually render stuff with our shaders
@@ -64,8 +70,11 @@ public abstract class ShaderProgram {
         if (ShaderProgram.currentProgram != this.programID){
             GLES30.glUseProgram(this.programID);
             ShaderProgram.currentProgram = this.programID;
+
+            NUM_STATE_CHANGES++;
         }
     }
+
 
     /** Gets a uniform location so that the uniform value can be changed later on
      *

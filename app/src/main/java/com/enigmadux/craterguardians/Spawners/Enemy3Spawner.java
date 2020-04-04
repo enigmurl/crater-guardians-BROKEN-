@@ -1,15 +1,10 @@
 package com.enigmadux.craterguardians.Spawners;
 
+import android.content.Context;
 import android.opengl.Matrix;
 
-import com.enigmadux.craterguardians.Enemies.Enemy;
-import com.enigmadux.craterguardians.Enemies.Enemy3;
-
-import java.util.ArrayList;
-import java.util.List;
-
-import enigmadux2d.core.gameObjects.VaoCollection;
-import enigmadux2d.core.shapes.TexturedRect;
+import com.enigmadux.craterguardians.enemies.Enemy;
+import com.enigmadux.craterguardians.gameLib.CraterCollection;
 
 /** Spawns enemy 1
  * @author Manu Bhat
@@ -21,8 +16,8 @@ public class Enemy3Spawner extends Spawner {
     private final float[] translationScalarMatrix = new float[16];
 
 
-    public Enemy3Spawner(int instanceId, float x, float y, float w, float h, int orangeEndHealth, int blue1EndHealth, int maxHealth, long blue1, long orange, long blue2, short[] numBlueSpawns, long[] blueSpawnJuice, short[] numOrangeSpawns, long[] orangeSpawnJuice) {
-        super(instanceId, x, y, w, h, orangeEndHealth, blue1EndHealth, maxHealth, blue1, orange, blue2, numBlueSpawns, blueSpawnJuice, numOrangeSpawns, orangeSpawnJuice);
+    public Enemy3Spawner(Context context,int instanceId, float x, float y, float w, float h, int orangeEndHealth, int blue1EndHealth, int maxHealth, long blue1, long orange, long blue2, short[] numBlueSpawns, long[] blueSpawnJuice, short[] numOrangeSpawns, long[] orangeSpawnJuice) {
+        super(context,instanceId, x, y, w, h, orangeEndHealth, blue1EndHealth, maxHealth, blue1, orange, blue2, numBlueSpawns, blueSpawnJuice, numOrangeSpawns, orangeSpawnJuice);
         //translates to appropriate coordinates
         final float[] translationMatrix = new float[16];
         //scales to appropriate size
@@ -56,24 +51,24 @@ public class Enemy3Spawner extends Spawner {
 
 
     @Override
-    public List<Enemy> spawnBlueEnemies(int numEnemies, VaoCollection enemiesCollection) {
-        List<Enemy> enemies = new ArrayList<>();
+    public void spawnBlueEnemies(int numEnemies, CraterCollection<Enemy> blueEnemies) {
         for (int i = 0;i<numEnemies;i++){
-            int instanceID = enemiesCollection.addInstance();
-            enemies.add(new Enemy3(instanceID));
-            enemies.get(i).setTranslate(this.deltaX +this.width/2,this.deltaY+this.height/2);
+            float x = this.deltaX + (this.width/2  * (1 + (float) Math.cos(Math.PI * 2* i / numEnemies)));
+            float y = this.deltaY + (this.height/2 * (1 + (float) Math.sin(Math.PI * 2* i / numEnemies)));
+            int id = blueEnemies.getVertexData().addInstance();
+            //instanceData.add(new Enemy1(id,false));
+            //enemies.get(i).setTranslate(x,y);
         }
-        return enemies;
     }
 
     @Override
-    public List<Enemy> spawnOrangeEnemies(int numEnemies, VaoCollection enemiesCollection) {
-        List<Enemy> enemies = new ArrayList<>();
+    public void spawnOrangeEnemies(int numEnemies, CraterCollection<com.enigmadux.craterguardians.enemies.Enemy> orangeEnemies) {
         for (int i = 0;i<numEnemies;i++){
-            int instanceID = enemiesCollection.addInstance();
-            enemies.add(new Enemy3(instanceID));
-            enemies.get(i).setTranslate(this.deltaX +this.width/2,this.deltaY+this.height/2);
+            float x = this.deltaX + (this.width/2  * (1 + (float) Math.cos(Math.PI * 2* i / numEnemies)));
+            float y = this.deltaY + (this.height/2 * (1 + (float) Math.sin(Math.PI * 2* i / numEnemies)));
+            int id = orangeEnemies.getVertexData().addInstance();
+            //enemies.add(new Enemy1(id,true));
+            //enemies.get(i).setTranslate(x,y);
         }
-        return enemies;
     }
 }

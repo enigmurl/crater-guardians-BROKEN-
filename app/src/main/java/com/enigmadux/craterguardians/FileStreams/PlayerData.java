@@ -3,9 +3,10 @@ package com.enigmadux.craterguardians.FileStreams;
 import android.content.Context;
 import android.util.Log;
 
-import com.enigmadux.craterguardians.Characters.Kaiser;
-import com.enigmadux.craterguardians.Characters.Player;
-import com.enigmadux.craterguardians.Characters.Ryze;
+import com.enigmadux.craterguardians.GUILib.MatieralBar;
+import com.enigmadux.craterguardians.players.Kaiser;
+import com.enigmadux.craterguardians.players.Player;
+import com.enigmadux.craterguardians.players.Ryze;
 
 import java.io.IOException;
 import java.io.OutputStreamWriter;
@@ -14,7 +15,7 @@ import java.util.Scanner;
 
 public class PlayerData {
     //all character classes
-    public static final Player[] CHARACTERS = new Player[] {new Kaiser(),new Ryze()};
+    public static final Player[] CHARACTERS = new Player[] {new Kaiser(0,0),new Ryze(0,0)};
 
     //the path to the player levels + xp file
     private static final String PLAYER_DATA = "player_data";
@@ -80,13 +81,7 @@ public class PlayerData {
         } catch (IOException e) {
             Log.e("FRONTEND", "Error loading player data file ", e);
             this.writePlayerData();
-        } catch (IllegalAccessException e){
-            Log.e("FRONTEND","PlayerData file read failed, most likely corrupted file structure",e);
-            this.writePlayerData();
-        } catch (InstantiationException e){
-            Log.e("FRONTEND","PlayerData file read failed, most likely corrupted file structure",e);
-            this.writePlayerData();
-        } catch (ClassNotFoundException e){
+        } catch (IllegalAccessException | InstantiationException | ClassNotFoundException e){
             Log.e("FRONTEND","PlayerData file read failed, most likely corrupted file structure",e);
             this.writePlayerData();
         }
@@ -99,6 +94,7 @@ public class PlayerData {
      */
     public void updateXP(int experience){
         PlayerData.experience = experience;
+        MatieralBar.update();
         this.writePlayerData();
     }
 

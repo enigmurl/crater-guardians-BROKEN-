@@ -1,7 +1,8 @@
 package com.enigmadux.craterguardians;
 
-import android.os.Debug;
 import android.util.Log;
+
+import com.enigmadux.craterguardians.worlds.World;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -20,7 +21,7 @@ public class CraterBackendThread extends Thread {
 
 
     //the backend object
-    private CraterBackend backend;
+    private World backend;
     //the milliseconds of the last frame
     private long lastMillis;
 
@@ -29,7 +30,7 @@ public class CraterBackendThread extends Thread {
      *
      * @param backend backend object, it's ok if it's null so long as before it starts updating it's set
      */
-    public CraterBackendThread(CraterBackend backend){
+    public CraterBackendThread(World backend){
         super();
         this.backend = backend;
 
@@ -41,7 +42,7 @@ public class CraterBackendThread extends Thread {
      *
      * @param backend backend object
      */
-    public void setBackend(CraterBackend backend) {
+    public void setBackend(World backend) {
         this.backend = backend;
     }
 
@@ -132,7 +133,7 @@ public class CraterBackendThread extends Thread {
      *
      * @return the Backend object
      */
-    public CraterBackend getBackend(){
+    public World getBackend(){
         return this.backend;
     }
 }

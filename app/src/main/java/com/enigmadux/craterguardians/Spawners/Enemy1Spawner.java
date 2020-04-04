@@ -1,14 +1,12 @@
 package com.enigmadux.craterguardians.Spawners;
 
+import android.content.Context;
 import android.opengl.Matrix;
+import android.util.Log;
 
-import com.enigmadux.craterguardians.Enemies.Enemy;
-import com.enigmadux.craterguardians.Enemies.Enemy1;
-
-import java.util.ArrayList;
-import java.util.List;
-
-import enigmadux2d.core.gameObjects.VaoCollection;
+import com.enigmadux.craterguardians.enemies.Enemy;
+import com.enigmadux.craterguardians.enemies.Enemy1;
+import com.enigmadux.craterguardians.gameLib.CraterCollection;
 
 /** Spawns enemy 1
  * @author Manu Bhat
@@ -21,8 +19,8 @@ public class Enemy1Spawner extends Spawner {
 
 
 
-    public Enemy1Spawner(int instanceId, float x, float y, float w, float h, int orangeEndHealth, int blue1EndHealth, int maxHealth, long blue1, long orange, long blue2, short[] numBlueSpawns, long[] blueSpawnJuice, short[] numOrangeSpawns, long[] orangeSpawnJuice) {
-        super(instanceId, x, y, w, h, orangeEndHealth, blue1EndHealth, maxHealth, blue1, orange, blue2, numBlueSpawns, blueSpawnJuice, numOrangeSpawns, orangeSpawnJuice);
+    public Enemy1Spawner(Context context,int instanceId, float x, float y, float w, float h, int orangeEndHealth, int blue1EndHealth, int maxHealth, long blue1, long orange, long blue2, short[] numBlueSpawns, long[] blueSpawnJuice, short[] numOrangeSpawns, long[] orangeSpawnJuice) {
+        super(context,instanceId, x, y, w, h, orangeEndHealth, blue1EndHealth, maxHealth, blue1, orange, blue2, numBlueSpawns, blueSpawnJuice, numOrangeSpawns, orangeSpawnJuice);
         //translates to appropriate coordinates
         final float[] translationMatrix = new float[16];
         //scales to appropriate size
@@ -54,29 +52,29 @@ public class Enemy1Spawner extends Spawner {
 
 
     @Override
-    public List<Enemy> spawnBlueEnemies(int numEnemies, VaoCollection enemiesCollection) {
-        List<Enemy> enemies = new ArrayList<>();
+    public void spawnBlueEnemies(int numEnemies, CraterCollection<Enemy> blueEnemies) {
         for (int i = 0;i<numEnemies;i++){
-            float x = this.deltaX + (this.width/2 * (1 + (float) Math.cos(Math.PI * 2* i / numEnemies)));
-            float y = this.deltaY + (this.height/2 * (1  + (float) Math.sin(Math.PI * 2* i / numEnemies)));
-            int id = enemiesCollection.addInstance();
-            enemies.add(new Enemy1(id,false));
-            enemies.get(i).setTranslate(x,y);
+            float cos = (numEnemies == 1) ? 0 : (float) Math.cos(Math.PI * 2* i / numEnemies);
+            float sin = (numEnemies == 1) ? 0 : (float) Math.sin(Math.PI * 2 * i / numEnemies);
+            float x = this.deltaX + (this.width/2 * (1 + cos));
+            float y = this.deltaY + (this.height/2 * (1  + sin));
+            int id = blueEnemies.getVertexData().addInstance();
+            Log.d("VAO","SPAWNING BLUE " + id);
+            blueEnemies.getInstanceData().add(new Enemy1(id,x,y,true));
         }
-        return enemies;
     }
 
     @Override
-    public List<Enemy> spawnOrangeEnemies(int numEnemies, VaoCollection enemiesCollection) {
-        List<Enemy> enemies = new ArrayList<>();
+    public void spawnOrangeEnemies(int numEnemies, CraterCollection<Enemy> orangeEnemies) {
         for (int i = 0;i<numEnemies;i++){
-            float x = this.deltaX + (this.width/2 * (1 + (float) Math.cos(Math.PI * 2* i / numEnemies)));
-            float y = this.deltaY + (this.height/2 * (1  + (float) Math.sin(Math.PI * 2* i / numEnemies)));
-            int id = enemiesCollection.addInstance();
-            enemies.add(new Enemy1(id,true));
-            enemies.get(i).setTranslate(x,y);
+            float cos = (numEnemies == 1) ? 0 : (float) Math.cos(Math.PI * 2* i / numEnemies);
+            float sin = (numEnemies == 1) ? 0 : (float) Math.sin(Math.PI * 2 * i / numEnemies);
+            float x = this.deltaX + (this.width/2 * (1 + cos));
+            float y = this.deltaY + (this.height/2 * (1  + sin));
+            int id = orangeEnemies.getVertexData().addInstance();
+            Log.d("VAO","SPAWNING ORANGE " + id);
+            orangeEnemies.getInstanceData().add(new Enemy1(id,x,y,false));
         }
-        return enemies;
     }
 }
 

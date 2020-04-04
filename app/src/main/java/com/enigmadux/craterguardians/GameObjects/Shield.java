@@ -3,10 +3,14 @@ package com.enigmadux.craterguardians.GameObjects;
 import android.content.Context;
 import android.opengl.Matrix;
 
-import com.enigmadux.craterguardians.MathOps;
+import com.enigmadux.craterguardians.enemies.Enemy;
+import com.enigmadux.craterguardians.util.MathOps;
 import com.enigmadux.craterguardians.R;
+import com.enigmadux.craterguardians.util.SoundLib;
+import com.enigmadux.craterguardians.worlds.World;
 
-import enigmadux2d.core.quadRendering.QuadRenderer;
+import java.util.ArrayList;
+
 import enigmadux2d.core.quadRendering.QuadTexture;
 
 /** Visual for shield
@@ -14,10 +18,13 @@ import enigmadux2d.core.quadRendering.QuadTexture;
  * @author Manu Bhat
  * @version BETA
  */
-public class Shield {
-
+public class Shield extends QuadTexture {
+    public static final float DEFAULT_SWEEP = 90;
+    public static final float DEFAULT_RADIUS = 0.4f;
     //the percentage to extend out to
     private static final float SHIELD_EXTRA = 0.4f;
+    //an enemy of radius 1, will exert  directional force per second on the player
+    private static final float FORCE_PER_RADIUS = 1f;
 
 
 
@@ -39,11 +46,7 @@ public class Shield {
     private boolean isActive;
 
 
-    //the visible part
-    private QuadTexture quadTexture;
 
-    //the final matrix
-    private final float[] finalMatrix = new float[16];
     //intermediate scalar rotational matrix
     private final float[] translationalRotationalMatrix = new float[16];
 
@@ -57,6 +60,8 @@ public class Shield {
      * @param context anything that can be used to get resources
      */
     public Shield(float sweep, float radius, Context context){
+        //stuff initialized later
+        super(context,R.drawable.shield,-1,-1,-1,-1);
         this.sweep = sweep;
         this.radius = radius;
         float x2 = (float) Math.cos(this.midAngle + this.sweep/2) * radius + this.dX;
@@ -66,9 +71,11 @@ public class Shield {
 
         float dist = (float) Math.hypot(x3-x2,y3-y2);
 
+        this.setTransform(0,0,radius * Shield.SHIELD_EXTRA,dist);
+
+        this.isVisible = false;
 
 
-        this.quadTexture = new QuadTexture(context, R.drawable.shield,0,0,this.radius * Shield.SHIELD_EXTRA,dist);
     }
 
     /** Set the middle pointer angle
@@ -91,16 +98,16 @@ public class Shield {
     public boolean intersects(float x0,float y0,float x1,float y1){
         if (! isActive) return false;
         //need to multiply it, and offset it
-        float x2 = (float) Math.cos(this.midAngle + this.sweep/2) * radius + this.dX;
-        float y2 = (float) Math.sin(this.midAngle + this.sweep/2) * radius + this.dY;
-        float x3 = (float) Math.cos(this.midAngle - this.sweep/2) * radius + this.dX;
-        float y3 = (float) Math.sin(this.midAngle - this.sweep/2) * radius + this.dY;
+        float x2 = (float) Math.cos((Math.PI)/180f * (this.midAngle + this.sweep/2)) * radius + this.dX;
+        float y2 = (float) Math.sin((Math.PI)/180f * (this.midAngle + this.sweep/2)) * radius + this.dY;
+        float x3 = (float) Math.cos((Math.PI)/180f * (this.midAngle - this.sweep/2)) * radius + this.dX;
+        float y3 = (float) Math.sin((Math.PI)/180f * (this.midAngle - this.sweep/2)) * radius + this.dY;
 
 
-        float x4 = (float) Math.cos(this.midAngle + this.sweep/2) * (1 + Shield.SHIELD_EXTRA) * radius + this.dX;
-        float y4 = (float) Math.sin(this.midAngle + this.sweep/2) * (1 + Shield.SHIELD_EXTRA) * radius + this.dY;
-        float x5 = (float) Math.cos(this.midAngle - this.sweep/2) * (1 + Shield.SHIELD_EXTRA) * radius + this.dX;
-        float y5 = (float) Math.sin(this.midAngle - this.sweep/2) * (1 + Shield.SHIELD_EXTRA) * radius + this.dY;
+        float x4 = (float) Math.cos((Math.PI)/180f * (this.midAngle + this.sweep/2)) * (1 + Shield.SHIELD_EXTRA) * radius + this.dX;
+        float y4 = (float) Math.sin((Math.PI)/180f * (this.midAngle + this.sweep/2)) * (1 + Shield.SHIELD_EXTRA) * radius + this.dY;
+        float x5 = (float) Math.cos((Math.PI)/180f * (this.midAngle - this.sweep/2)) * (1 + Shield.SHIELD_EXTRA) * radius + this.dX;
+        float y5 = (float) Math.sin((Math.PI)/180f * (this.midAngle - this.sweep/2)) * (1 + Shield.SHIELD_EXTRA) * radius + this.dY;
 
         return  MathOps.lineIntersectsLine(x0,y0,x1,y1,x2,y2,x3,y3) ||
                 MathOps.lineIntersectsLine(x0,y0,x1,y1,x4,y4,x5,y5) ||
@@ -114,30 +121,94 @@ public class Shield {
      * @param isOn whether the shield is active or not
      */
     public void setState(boolean isOn){
-        this.isActive = isOn;
-    }
-
-
-    /** Draws the shield if it's active
-     *
-     * @param mvpMatrix the model view projection 4x4 matrix
-     * @param quadRenderer anything that can render quads
-     */
-    public void draw(float[] mvpMatrix, QuadRenderer quadRenderer){
-        if (this.isActive){
-            Matrix.setIdentityM(this.translationalRotationalMatrix,0);
-            Matrix.translateM(this.translationalRotationalMatrix,0,this.dX,this.dY,0);
-            Matrix.rotateM(this.translationalRotationalMatrix,0,this.midAngle,0,0,1);
-            Matrix.translateM(this.translationalRotationalMatrix,0,this.radius,0,0);
-
-
-            Matrix.multiplyMM(this.finalMatrix,0,mvpMatrix,0,this.translationalRotationalMatrix,0);
-            quadRenderer.renderQuad(this.quadTexture,this.finalMatrix);
+        if (isOn && ! isActive){
+            SoundLib.playPlayerSpawnShieldSoundEffect();
         }
+        this.isActive = isOn;
+        this.isVisible = this.isActive;
     }
 
-    public void setTranslation(float x,float y){
+
+
+    @Override
+    public void dumpOutputMatrix(float[] dumpMatrix, float[] mvpMatrix) {
+        Matrix.setIdentityM(this.translationalRotationalMatrix,0);
+        Matrix.translateM(this.translationalRotationalMatrix,0,this.x,this.y,0);
+        Matrix.rotateM(this.translationalRotationalMatrix,0,this.midAngle,0,0,1);
+        Matrix.translateM(this.translationalRotationalMatrix,0,this.radius,0,0);
+        Matrix.scaleM(this.translationalRotationalMatrix,0,this.w,this.h,0);
+
+        Matrix.multiplyMM(dumpMatrix,0,mvpMatrix,0,this.translationalRotationalMatrix,0);
+    }
+
+    //x,y,r = circle
+    public boolean intersectsCircle(float x,float y,float r){
+        if (! isActive) return false;
+        float x2 = (float) Math.cos((Math.PI)/180f * (this.midAngle + this.sweep/2)) * radius + this.dX;
+        float y2 = (float) Math.sin((Math.PI)/180f * (this.midAngle + this.sweep/2)) * radius + this.dY;
+        float x3 = (float) Math.cos((Math.PI)/180f * (this.midAngle - this.sweep/2)) * radius + this.dX;
+        float y3 = (float) Math.sin((Math.PI)/180f * (this.midAngle - this.sweep/2)) * radius + this.dY;
+
+
+        float x4 = (float) Math.cos((Math.PI)/180f * (this.midAngle + this.sweep/2)) * (1 + Shield.SHIELD_EXTRA) * radius + this.dX;
+        float y4 = (float) Math.sin((Math.PI)/180f * (this.midAngle + this.sweep/2)) * (1 + Shield.SHIELD_EXTRA) * radius + this.dY;
+        float x5 = (float) Math.cos((Math.PI)/180f * (this.midAngle - this.sweep/2)) * (1 + Shield.SHIELD_EXTRA) * radius + this.dX;
+        float y5 = (float) Math.sin((Math.PI)/180f * (this.midAngle - this.sweep/2)) * (1 + Shield.SHIELD_EXTRA) * radius + this.dY;
+        return  MathOps.segmentIntersectsCircle(x,y,r,x2,y2,x3,y3) ||
+                MathOps.segmentIntersectsCircle(x,y,r,x4,y4,x5,y5) ||
+                MathOps.segmentIntersectsCircle(x,y,r,x2,y2,x4,y4) ||
+                MathOps.segmentIntersectsCircle(x,y,r,x3,y3,x5,y5);
+    }
+
+    public void setTranslation(float x, float y){
         this.dX = x;
         this.dY = y;
     }
+
+    public void update(World world,long dt){
+        float forceX = 0;
+        float forceY = 0;
+        if (! isActive) return;
+        float x2 = (float) Math.cos((Math.PI)/180f * (this.midAngle + this.sweep/2)) * radius + this.dX;
+        float y2 = (float) Math.sin((Math.PI)/180f * (this.midAngle + this.sweep/2)) * radius + this.dY;
+        float x3 = (float) Math.cos((Math.PI)/180f * (this.midAngle - this.sweep/2)) * radius + this.dX;
+        float y3 = (float) Math.sin((Math.PI)/180f * (this.midAngle - this.sweep/2)) * radius + this.dY;
+
+
+        float x4 = (float) Math.cos((Math.PI)/180f * (this.midAngle + this.sweep/2)) * (1 + Shield.SHIELD_EXTRA) * radius + this.dX;
+        float y4 = (float) Math.sin((Math.PI)/180f * (this.midAngle + this.sweep/2)) * (1 + Shield.SHIELD_EXTRA) * radius + this.dY;
+        float x5 = (float) Math.cos((Math.PI)/180f * (this.midAngle - this.sweep/2)) * (1 + Shield.SHIELD_EXTRA) * radius + this.dX;
+        float y5 = (float) Math.sin((Math.PI)/180f * (this.midAngle - this.sweep/2)) * (1 + Shield.SHIELD_EXTRA) * radius + this.dY;
+        float rAngle = (float)(Math.PI)/180f * this.midAngle;
+        synchronized (World.blueEnemyLock) {
+            ArrayList<Enemy> blueEnemies = world.getBlueEnemies().getInstanceData();
+            for (int i = 0; i <blueEnemies.size(); i++) {
+                if (MathOps.clipCharacterEdge(blueEnemies.get(i),x2,y2,x3,y3) ||
+                        MathOps.clipCharacterEdge(blueEnemies.get(i),x4,y4,x5,y5)||
+                        MathOps.clipCharacterEdge(blueEnemies.get(i),x2,y2,x4,y4) ||
+                        MathOps.clipCharacterEdge(blueEnemies.get(i),x3,y3,x5,y5)) {
+                    forceX += Math.cos(rAngle) * blueEnemies.get(i).getRadius() * FORCE_PER_RADIUS;
+                    forceY += Math.sin(rAngle) * blueEnemies.get(i).getRadius() * FORCE_PER_RADIUS;
+
+                }
+            }
+        }
+        synchronized (World.orangeEnemyLock) {
+            ArrayList<Enemy> orangeEnemies = world.getOrangeEnemies().getInstanceData();
+            for (int i = 0; i <orangeEnemies.size(); i++) {
+                if (MathOps.clipCharacterEdge(orangeEnemies.get(i),x2,y2,x3,y3) ||
+                        MathOps.clipCharacterEdge(orangeEnemies.get(i),x4,y4,x5,y5)||
+                        MathOps.clipCharacterEdge(orangeEnemies.get(i),x2,y2,x4,y4) ||
+                        MathOps.clipCharacterEdge(orangeEnemies.get(i),x3,y3,x5,y5)) {
+                    forceX += Math.cos(rAngle) * orangeEnemies.get(i).getRadius() * FORCE_PER_RADIUS;
+                    forceY += Math.sin(rAngle) * orangeEnemies.get(i).getRadius() * FORCE_PER_RADIUS;
+
+                }
+            }
+        }
+        world.getPlayer().translateFromPos(-forceX * dt/1000,-forceY * dt/1000);
+    }
+
+
+
 }

@@ -1,22 +1,17 @@
 package com.enigmadux.craterguardians.GameObjects;
 
-import android.content.Context;
 import android.opengl.Matrix;
-import android.view.MotionEvent;
 
 import com.enigmadux.craterguardians.Animations.ToxicBubble;
-import com.enigmadux.craterguardians.Characters.Player;
-import com.enigmadux.craterguardians.Enemies.Enemy;
-import com.enigmadux.craterguardians.R;
-import com.enigmadux.craterguardians.SoundLib;
+import com.enigmadux.craterguardians.Character;
+import com.enigmadux.craterguardians.util.SoundLib;
+import com.enigmadux.craterguardians.worlds.World;
+import com.enigmadux.craterguardians.enemies.Enemy;
 import com.enigmadux.craterguardians.gameLib.CraterCollectionElem;
+import com.enigmadux.craterguardians.players.Player;
 
 import java.util.ArrayList;
 import java.util.Iterator;
-import java.util.List;
-
-import enigmadux2d.core.EnigmaduxComponent;
-import enigmadux2d.core.shapes.TexturedRect;
 
 /** Hurts and damages players, bots are immune to it though for now
  *
@@ -103,10 +98,8 @@ public class ToxicLake extends CraterCollectionElem {
     /** Tries to attack the enemies and the bots
      *
      * @param dt milliseconds since last call
-     * @param player the player it attempts to damage
-     * @param enemyList all enemies it attempts to damage
      */
-    public void update(long dt, Player player,List<Enemy> enemyList){
+    public void update(long dt, World world){
         //randomly add a toxic bubbles
         if (Math.random() < ToxicLake.TOXIC_BUBBLE_CHANCE){
             double r = Math.min(this.radius, Math.random() * (ToxicLake.TOXIC_BUBBLE_MAX_RADIUS - TOXIC_BUBBLE_MIN_RADIUS) + TOXIC_BUBBLE_MIN_RADIUS);
@@ -139,22 +132,33 @@ public class ToxicLake extends CraterCollectionElem {
         }
 
         if (currentMillis == 0) {
-            for (Enemy enemy : enemyList) {
+            for (Enemy enemy : world.getBlueEnemies().getInstanceData()){
                 if (enemy == null) continue;
-                if (Math.hypot(enemy.getDeltaX() - this.deltaX, enemy.getDeltaY() - this.deltaY) < this.radius + enemy.getWidth() / 2) {
+                if (Math.hypot(enemy.getDeltaX() - this.deltaX, enemy.getDeltaY() - this.deltaY) < this.radius + enemy.getRadius()) {
+                    enemy.damage(DAMAGE);
+                }
+            }
+            for (Enemy enemy : world.getOrangeEnemies().getInstanceData()){
+                if (enemy == null) continue;
+                if (Math.hypot(enemy.getDeltaX() - this.deltaX, enemy.getDeltaY() - this.deltaY) < this.radius + enemy.getRadius()) {
                     enemy.damage(DAMAGE);
                 }
             }
         }
 
-        if (Math.hypot(player.getDeltaX() - this.deltaX,player.getDeltaY() - this.deltaY) < this.radius + player.getWidth()/2){
+        Player player = world.getPlayer();
+        if (Math.hypot(player.getDeltaX() - this.deltaX,player.getDeltaY() - this.deltaY) < this.radius + player.getRadius()){
             if (currentMillis == 0) {
                 player.damage(DAMAGE);
                 SoundLib.playToxicLakeTickSoundEffect();
             }
-            player.addSpeedEffect(0.2f,200);//todo HARDCODED
+            if (! player.getActiveLakes().contains(this)){
+                player.getActiveLakes().add(this);
+            }
+        } else {
+            //checks if it's there internally
+            player.getActiveLakes().remove(this);
         }
-
 
     }
 
@@ -172,5 +176,10 @@ public class ToxicLake extends CraterCollectionElem {
     @Override
     public void updateInstanceTransform(float[] blankInstanceInfo, float[] uMVPMatrix) {
         Matrix.multiplyMM(blankInstanceInfo,0,uMVPMatrix,0,this.translationScalarMatrix,0);
+    }
+
+
+    public boolean intersectsCharacter(Character c) {
+        return Math.hypot(c.getDeltaX() - this.deltaX,c.getDeltaY() - this.deltaY) < this.radius + c.getRadius();
     }
 }

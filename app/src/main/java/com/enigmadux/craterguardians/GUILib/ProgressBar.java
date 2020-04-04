@@ -1,146 +1,79 @@
 package com.enigmadux.craterguardians.GUILib;
 
 import android.content.Context;
-import android.opengl.Matrix;
-import android.view.MotionEvent;
 
 import com.enigmadux.craterguardians.R;
+import com.enigmadux.craterguardians.util.MathOps;
+import com.enigmadux.craterguardians.values.LayoutConsts;
 
-import enigmadux2d.core.EnigmaduxComponent;
-import enigmadux2d.core.shapes.TexturedRect;
+import java.util.ArrayList;
 
-/** Displays hitPoints of characters and spawners
+import enigmadux2d.core.quadRendering.QuadTexture;
+
+/** DEBUG NOTE, this class is set in such a way that the first left half of the
+ * OVERLAY TEXTURE is what it would look like at full health, and the right half is what
+ * it would look like at no health
  *
- * @author Manu Bhat
- * @version BETA
  */
-public class ProgressBar extends EnigmaduxComponent  {
-    /** The bar that actually displays the hitPoints. The texture is shared by all instances, and tailored for each one
-     *
-     */
-    private static final TexturedRect BAR_VISUAL = new TexturedRect(0,0,1f,1f);
-    /** Displays the holder of the Bar, just for aesthetics
-     *
-     */
-    private static final TexturedRect BAR_HOLDER = new TexturedRect(0,0,1f,1f);
-
-    //the width of the bar in openGL terms
-    private final float w;
-    //the height of the bar in openGL terms
-    private final float h;
-
-    //the maximum hitPoints the bar contains
-    private int maxHitPoints;
-    //the current hitPoints the bar contains
-    private int currentHitPoints;
+public class ProgressBar implements RenderableCollection {
+    //percent of height, which is then inferred to widht
+    private static final float MARGIN_PERCENT = 0.1f;
 
 
-    //final Matrix = parentMatrix * translationScalarMatrix
-    private final float[] finalMatrix = new float[16];
-    //translates the hitPoints bar so it aligns with the enemy/spawner
-    private final float[] translationScalarMatrix = new float[16];
-    //translates the components
-    private final float[] translationMatrix = new float[16];
-    //scales the designated components
-    private final float[] scalarMatrix = new float[16];
+    private int maxValue;
+    private int currentValue;
+
+    protected ArrayList<QuadTexture> renderables = new ArrayList<>(2);
+    //background
+    private QuadTexture background;
+    //the bar on top of the background
+    private QuadTexture overlay;
 
 
-    /** Default Constructor
-     * @param hitPoints the maximum hitPoints the bar contains
-     * @param w the width of the bar in openGL terms
-     * @param h the height of the bar in openGL terms
-     */
-    public ProgressBar(int hitPoints, float w, float h){
-        super(0,0,w,h);
-        this.maxHitPoints = hitPoints;
-        this.w = w;
-        this.h = h;
 
+    private float overlayW;
+    private float overlayH;
+
+
+    //center x and y,
+    public ProgressBar(Context context,float x, float y, float w, float h, int maxValue){
+        this.maxValue = maxValue;
+        this.currentValue = maxValue;
+
+        this.background = new QuadTexture(context, R.drawable.hitpoints_bar_holder,x,y,w,h);
+        float hMargin = h * MARGIN_PERCENT;
+
+        this.overlayH = h - 2 * hMargin;
+        this.overlayW = w - 2 * hMargin * LayoutConsts.SCALE_X;
+        this.overlay = new QuadTexture(context,R.drawable.hitpoints_bar,x,y,overlayW,overlayH);
+        this.overlay.setTextureCord(0,0,0.5f,1);
+
+
+        this.renderables.add(background);
+        this.renderables.add(overlay);
     }
 
-    /** Loads the texture of the sprite sheet
-     *
-     * @param context context used to grab the actual image from res
-     */
-    public static void loadGLTexture(Context context) {
-        BAR_HOLDER.loadGLTexture(context, R.drawable.hitpoints_bar_holder);
-        BAR_VISUAL.loadGLTexture(context, R.drawable.hitpoints_bar);
+    public void setValue(int newValue){
+        this.currentValue = MathOps.clip(newValue,0,maxValue);
+        //float newW = (float) newValue/maxValue * this.overlayW;
+        //this.overlay.setTransform(this.x - this.overlayW/2 + newW/2,y,newW,overlayH);
+        this.overlay.setTextureCord((1-(float) (currentValue)/maxValue) * 0.5f,0,0.5f,1);
+        //this.overlay.setShader(1 - (float) newValue/maxValue,(float) newValue/maxValue,0,1);
     }
 
-    /** Called whenever the bar needs to be moved or the hitPoints has changed todo: split this into to functions 1 for translating 1 for hitpoints
-     *
-     * @param currentHitPoints the amount of damage the character can take before dieing should be less than max hitPoints, it will clip to 0, but not below max
-     * @param deltaX how much to translate the left edge from 0
-     * @param deltaY how much to translate the bottom edge from 0
-     */
-    public void update(int currentHitPoints,float deltaX,float deltaY){
-        this.currentHitPoints = Math.max(0,currentHitPoints);
-
-        Matrix.setIdentityM(translationMatrix,0);
-        Matrix.translateM(translationMatrix,0,deltaX,deltaY,0);
-
+    public void setMaxValue(int newMax){
+        //the overlay doesn't change bc the current value doesn't either
+        this.maxValue = newMax;
     }
 
-    /** Draws the holder and the actual hitPoints bar TODO: this is still laggy, it's better but could be better
-     *
-     * @param parentMatrix describes how to alter the bar from model to world space
-     */
-    public void draw(float[] parentMatrix){
-        if (! this.visible){
-            return;
-        }
 
-        BAR_VISUAL.setShader(1 - (float) currentHitPoints/maxHitPoints, (float) currentHitPoints/maxHitPoints,0,1);
-//
-        //it needs to be scaled vertically but horizontally just according to dimensions not hitpoints
-        Matrix.setIdentityM(scalarMatrix,0);
-        Matrix.scaleM(scalarMatrix,0,this.w,this.h,0);
-        Matrix.multiplyMM(translationScalarMatrix,0,translationMatrix,0,scalarMatrix,0);
-        Matrix.multiplyMM(finalMatrix,0,parentMatrix,0,translationScalarMatrix,0);
-
-//
-        BAR_HOLDER.draw(finalMatrix);
-
-        Matrix.setIdentityM(scalarMatrix,0);
-        Matrix.scaleM(scalarMatrix,0,(float) currentHitPoints/maxHitPoints * w,h,1);
-        Matrix.multiplyMM(translationScalarMatrix,0,translationMatrix,0,scalarMatrix,0);
-        Matrix.multiplyMM(finalMatrix,0,parentMatrix,0,translationScalarMatrix,0);
-        BAR_VISUAL.draw(finalMatrix);
-
-
+    public int getCurrentValue(){
+        return this.currentValue;
     }
 
-    /** Sets the maximum hitPoints
-     *
-     * @param maxHitPoints the maximum hitPoints the bar contains
-     */
-    public void setMaxHitPoints(int maxHitPoints) {
-        this.maxHitPoints = maxHitPoints;
-    }
-
-    /** gets the current hit points
-     *
-     * @return the current hit points of the bar
-     */
-    public int getCurrentHitPoints() {
-        return this.currentHitPoints;
-    }
-
-    /** gets the max hit points
-     *
-     * @return the max hit points of the bar
-     */
-    public int getMaxHitPoints() {
-        return this.maxHitPoints;
-    }
-
-    /** Used to implememt the method
-     *
-     * @param e the MotionEvent describing how the user interacted with the screen
-     * @return whether or not the touch event can be disposed
-     */
     @Override
-    public boolean onTouch(MotionEvent e) {
-        return false;
+    public ArrayList<QuadTexture> getRenderables() {
+        return this.renderables;
     }
 }
+
