@@ -89,6 +89,7 @@ public class SettingsScreen implements GUILayout {
         soundText.updateText("Sound FX",0.1f);
         title.updateText("Settings",0.1f);
 
+        this.renderables.add(new QuadTexture(context,R.drawable.gui_background,0,0,2,2));
         this.textRenderables.add(title);
         this.textRenderables.add(musicText);
         this.textRenderables.add(soundText);
@@ -100,7 +101,7 @@ public class SettingsScreen implements GUILayout {
 
         //the home button);
         this.clickables.add(new VisibilityInducedButton(context, R.drawable.home_button,
-                -1 + 0.15f * LayoutConsts.SCALE_X,0.85f,0.2f,0.2f,
+                1 - 0.15f * LayoutConsts.SCALE_X,0.85f,0.2f,0.2f,
                 this,allLayouts.get(STRINGS.HOME_SCREEN_LAYOUT_ID), false));
         //the music button
         this.clickables.add(new MusicSwitch(context,R.drawable.music_on_off_button,

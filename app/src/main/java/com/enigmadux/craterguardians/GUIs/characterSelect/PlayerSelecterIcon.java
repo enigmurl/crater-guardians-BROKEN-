@@ -13,7 +13,7 @@ import com.enigmadux.craterguardians.values.STRINGS;
  * @version BETA
  */
 public class PlayerSelecterIcon extends GUIClickable {
-    private static final float FONT_SIZE = 0.05f;
+    private static final float FONT_SIZE = 0.04f;
     private static final float TOP_MARGIN = 0.025f;
 
     /** The player that will be selected

@@ -22,6 +22,19 @@
 
 
     todo Current Queue:
+        4/6/20:
+            Finish Post Game, maybe create a different background layout (Pretty much finished)
+            Finish Settings (Just need to work on title, and maybe background)
+            Finish Material Bar
+            Finish Home Screen (might not be able to though)
+            Finish Character Select
+            Finish Level Select
+            Finish In Game Screen (first telemetry)
+        4/7/20:
+            Update Player Icons, player info, and finally level buttons
+
+        Finish 9 slide scaling, instead of what it is right now
+
         in game screen
                 --Make telemetry look decent
                 Go through each layout: (Settings, character select, level select, home)
@@ -29,6 +42,7 @@
             ---Joysticks need a background---, Also I think having a square rounded button (no gui renderer neccessary) for evolve icon would be nice
          get info bar looking good PRIORITY
 
+        Content (level stuff, should probably do that soon)
 
         Improving GUIs:
             Do the yellow and red color scheme like the tutorial layout
@@ -41,6 +55,11 @@
         3) Matieral Bar is a very bad solution, look into something more concrete perhaps wiht listeners
         4) It seems like you cannot have 0 enemies in a "wave" need to fix
         5) Make tutorial only three slides, prob remove the stuff about plateaus toxic lakes, replace with supplies, make the level oritented with it
+        6) Null objects for both playerAttacks as well as the animations, not sure why
+
+    Graphics Notes:
+        1) For Level background ask ryan to rescale it to 2048
+
     OPTIMIZATIONS:
         1) don't focus too much on the matrix multiplication i don't think that's the bad part (small)
         2) Don't load textures during the game, mainly for progress bars, but perhaps just rework text in general use a Typeface instead

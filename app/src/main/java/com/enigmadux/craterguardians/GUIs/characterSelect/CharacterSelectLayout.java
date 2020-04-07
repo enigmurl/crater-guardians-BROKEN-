@@ -42,7 +42,7 @@ public class CharacterSelectLayout implements GUILayout {
     /** The width of each icon
      *
      */
-    private static final float ICON_WIDTH = 0.4f;
+    private static final float ICON_WIDTH = 0.5f;
 
     /** THe left and right margins
      *
@@ -120,7 +120,10 @@ public class CharacterSelectLayout implements GUILayout {
      */
     @Override
     public void loadComponents(Context context, HashMap<String,GUILayout> allLayouts){
+        this.renderables.add(new QuadTexture(context,R.drawable.gui_background,0,0,2,2));
+        this.renderables.add(new ImageText(context,R.drawable.layout_background,0,0.2f,(2 - 1.6f * SIDE_MARGINS )/LayoutConsts.SCALE_X + ICON_WIDTH,0.8f,true));
 
+        this.allComponents.addAll(this.renderables);
         float scaleX = (float) LayoutConsts.SCREEN_HEIGHT/LayoutConsts.SCREEN_WIDTH;
         for (int i = 0;i<CharacterSelectLayout.CHARACTERS.length;i++){
 
@@ -132,7 +135,7 @@ public class CharacterSelectLayout implements GUILayout {
             Log.d("DEBUG","x: " + x);
             this.clickables.add(
                     new PlayerSelecterIcon(context,player.getPlayerIcon(),
-                            x,0.4f,ICON_WIDTH,ICON_WIDTH,
+                            x,0.2f,ICON_WIDTH,ICON_WIDTH,
                             player,this
                             )
             );
@@ -140,8 +143,9 @@ public class CharacterSelectLayout implements GUILayout {
 
         //the home button);
         this.clickables.add(new VisibilityInducedButton(context, R.drawable.home_button,
-                0,-0.4f,0.4f,0.4f,
+                1 - 0.15f * LayoutConsts.SCALE_X,0.85f,0.2f,0.2f,
                 this,allLayouts.get(STRINGS.HOME_SCREEN_LAYOUT_ID), false));
+
 
 
         this.characterSelecter = new CharacterSelecter(context,R.drawable.button_background,this,allLayouts.get(HomeScreen.ID),

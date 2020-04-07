@@ -44,7 +44,7 @@ public class DefaultJoyStickLayout extends JoystickLayout {
 
     //center x,y, then w, h
     private static final float[] PROGRESS_BAR_QUAD = new float[] {0,0.8f,1,0.2f};
-    private static final float[] AMMO_BAR_QUAD = new float[] {0,0.5f,1,0.1f};
+    private static final float[] AMMO_BAR_QUAD = new float[] {0,0.5f,0.4f,0.1f};
 
 
     private ProgressBar playerHealthBar;
@@ -91,7 +91,7 @@ public class DefaultJoyStickLayout extends JoystickLayout {
         this.attackJoyStick = new JoyStick(context, R.drawable.joystick_icon,ATTACK_JOY_STICK_CENTER[0],ATTACK_JOY_STICK_CENTER[1],
                 JOY_STICK_IMAGE_WIDTH/2,JOY_STICK_MAX_RADIUS,JOY_STICK_MAX_RADIUS * MIN_POWER,this);
         this.defenseJoyStick = new JoyStick(context, R.drawable.joystick_icon,SHIELD_JOY_STICK_CENTER[0],SHIELD_JOY_STICK_CENTER[1],
-                JOY_STICK_IMAGE_WIDTH/2,JOY_STICK_MAX_RADIUS,JOY_STICK_MAX_RADIUS * MIN_POWER,this);
+                JOY_STICK_IMAGE_WIDTH/2,JOY_STICK_MAX_RADIUS,0,this);
         this.movementJoyStick = new JoyStick(context, R.drawable.joystick_icon,MOVEMENT_JOY_STICK_CENTER[0],MOVEMENT_JOY_STICK_CENTER[1],
                 JOY_STICK_IMAGE_WIDTH/2,JOY_STICK_MAX_RADIUS,0,this);
 
@@ -122,17 +122,7 @@ public class DefaultJoyStickLayout extends JoystickLayout {
             numPlayerAttacks.setCurrentAmount(p.getNumLoadedAttacks());
         }
 
-        if (world.getPlayer().getEvolveCharge() == 1) {
-            evolveButton.setVisibility(true);
-            evolveButton.setShader(0,1,0,1);
-
-        } else if (world.getPlayer().getEvolveCharge() < 0){
-            evolveButton.setVisibility(false);
-        } else {
-            evolveButton.setVisibility(true);
-            float charge = world.getPlayer().getEvolveCharge();
-            evolveButton.setShader(charge,charge,charge,1);
-        }
+        evolveButton.update(world,dt);
 
 
     }

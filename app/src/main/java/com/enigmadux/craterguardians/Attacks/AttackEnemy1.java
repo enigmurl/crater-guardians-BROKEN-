@@ -6,7 +6,7 @@ import com.enigmadux.craterguardians.players.Player;
 
 public class AttackEnemy1 extends EnemyAttack {
     private static final float RADIUS = 0.2f;
-    private static final float LENGTH = 4f;
+    public static final float LENGTH = 2f;
     //per second
     private static final float SPEED = 1f;
 

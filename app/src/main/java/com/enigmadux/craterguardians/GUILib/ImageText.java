@@ -176,10 +176,17 @@ public class ImageText extends QuadTexture implements VisibilitySwitch, TextRend
             this.fontSize = fontSize;
         }
     }
+    public void setTextColor(float[] color){
+        this.textColor = color;
+    }
 
     public void setTextDelta(float textDeltaX,float textDeltaY){
         this.textDeltaX = textDeltaX;
         this.textDeltaY = textDeltaY;
+    }
+
+    public float getFontSize(){
+        return this.fontSize;
     }
 
 

@@ -90,7 +90,7 @@ public abstract class GUIClickable extends QuadTexture implements VisibilitySwit
     protected float textDeltaY;
 
     protected ButtonScalingAnim buttonScalingAnim;
-    private float scale = 1;
+    protected float scale = 1;
 
     /**
      * Default Constructor
@@ -325,6 +325,10 @@ public abstract class GUIClickable extends QuadTexture implements VisibilitySwit
 
     public void setScale(float t){
         this.scale = t;
+    }
+
+    public float getFontSize(){
+        return this.fontSize;
     }
 
 

@@ -3,18 +3,34 @@ package com.enigmadux.craterguardians.GUIs.characterSelect;
 import android.content.Context;
 import android.view.MotionEvent;
 
+import com.enigmadux.craterguardians.Animations.PopUp;
 import com.enigmadux.craterguardians.GUILib.GUIClickable;
 import com.enigmadux.craterguardians.players.Player;
 
 public class InfoDisplay extends GUIClickable {
 
     private Player player;
+    private PopUp popUpAnim;
+    private float orgW;
+    private float orgH;
 
     InfoDisplay(Context context, Player player, float x, float y, float w, float h, boolean isRounded) {
         super(context, player.getPlayerInfo(), x, y, w, h, isRounded);
+        this.orgW = this.w;
+        this.orgH = this.h;
         this.player = player;
     }
 
+    @Override
+    public void setVisibility(boolean visible) {
+        super.setVisibility(visible);
+        if (visible){
+            if (popUpAnim != null){
+                popUpAnim.cancel();
+            }
+            this.popUpAnim = new PopUp(PopUp.DEFAULT_MILLIS,orgW,orgH,this, 0);
+        }
+    }
 
     @Override
     public boolean onTouch(MotionEvent e) {

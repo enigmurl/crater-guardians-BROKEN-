@@ -133,6 +133,7 @@ public class Text implements TextRenderable {
         if (newText == null ||newText.length() == 0){
             this.visibleText = null;
             this.text = null;
+            this.fontSize = fontSize;
         } else {
             this.text = newText;
             this.fontSize = fontSize;
@@ -143,5 +144,12 @@ public class Text implements TextRenderable {
         this.textColor = color;
     }
 
+    public float getFontSize(){
+        return this.fontSize;
+    }
+
+    public String getText(){
+        return this.text;
+    }
 }
 

@@ -1,0 +1,29 @@
+Have a hitbox, that can be movable or immovable,
+
+every frame:
+    Create a Graph of intersections:
+        for each link:
+            if any are immovable:
+                treat all neighbouring stuff as max(state,semi immovable)
+            if any semi immovable has two or more immovables:
+                take the average of the clips, and now it's fully immovable
+
+            for each neighbouring component:
+                if both are immovable: continue;
+                if (one is immovable, other is semi immovable):
+                   clip semi immovable (keep a copy Node, that replaces this original one)
+
+
+
+            for each neighboring component:
+                if already handled: continue;
+                if (
+
+
+    each time something wants to move:
+        clip it with plateaus
+
+    each time enemy wants to move:
+        clip it with shield
+
+    Shields can only push, spawns out like a cone

@@ -55,7 +55,7 @@ public class World {
     //how long the pause after a win or loss is for smooth transitions
     private static final long PAUSE_MILLIS  = 5000;
     //how long the pre game period lasts
-    public static final long PRE_GAME_MILLIES = 1000;
+    public static final long PRE_GAME_MILLIES = 2000;
 
     //the vertices of a quad of size 1 by 1, centered around the origin
     private static final float[] QUAD_VERTICES = new float[] {
@@ -640,11 +640,11 @@ public class World {
                 LevelData.getUnlockedLevels()[levelNum] = true;
             }
         }
-        this.levelNum++;
 
-        this.playerData.updateXP(PlayerData.getExperience() + World.XP_GAIN_PER_LEVEL);
+        this.playerData.updateXP(PlayerData.getExperience() + getXpGainPerLevel(levelNum));
         this.levelData.writeLevelFiles();
 
+        this.levelNum++;
 
         SoundLib.setStateGameMusic(false);
         SoundLib.setStateVictoryMusic(true);
@@ -788,6 +788,13 @@ public class World {
 
     public EnemyMap getEnemyMap(){return  this.enemyMap; }
 
+    public int getLevelNum(){
+        return this.levelNum;
+    }
+
+    public static int getXpGainPerLevel(int level){
+        return World.XP_GAIN_PER_LEVEL * level;
+    }
 
 
 

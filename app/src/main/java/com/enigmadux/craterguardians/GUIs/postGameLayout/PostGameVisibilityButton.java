@@ -6,6 +6,7 @@ import android.view.MotionEvent;
 import com.enigmadux.craterguardians.CraterRenderer;
 import com.enigmadux.craterguardians.GUILib.GUILayout;
 import com.enigmadux.craterguardians.GUILib.VisibilityInducedButton;
+import com.enigmadux.craterguardians.util.SoundLib;
 import com.enigmadux.craterguardians.worlds.World;
 
 /** Enters either the game, or the home screen/ level select
@@ -57,12 +58,15 @@ public class PostGameVisibilityButton extends VisibilityInducedButton {
         if (this.objectToShow == null){
             this.craterRenderer.getCraterBackendThread().setPause(false);
             backend.resetJoySticks();
+
         } else {
             this.craterRenderer.getCraterBackendThread().setPause(true);
             //going to level screen or home screen
             backend.killEndGamePausePeriod();
             //backend.getGameScreenLayout().hide();
         }
+
+
 
 
 

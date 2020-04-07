@@ -4,9 +4,11 @@ import android.opengl.Matrix;
 import android.util.Log;
 
 import com.enigmadux.craterguardians.Animations.EnemySpawn;
+import com.enigmadux.craterguardians.Animations.Knockback;
 import com.enigmadux.craterguardians.Animations.RedShader;
 import com.enigmadux.craterguardians.Character;
 import com.enigmadux.craterguardians.EnemyMap;
+import com.enigmadux.craterguardians.GameObjects.Plateau;
 import com.enigmadux.craterguardians.GameObjects.Supply;
 import com.enigmadux.craterguardians.GameObjects.ToxicLake;
 import com.enigmadux.craterguardians.util.MathOps;
@@ -29,6 +31,9 @@ public abstract class Enemy extends CraterCollectionElem implements Character {
 
     //amount of distance required to query onto the next pos
     private static final float DIST_TILL_NEXT_POS = 0.3f;
+    //distance player had to move required to redirect
+    private static final float DIST_TILL_RESEARCH = 1f;
+
 
 
 
@@ -37,6 +42,8 @@ public abstract class Enemy extends CraterCollectionElem implements Character {
      *
      */
     private float r;
+
+    private float attackLen;
 
     /** This is the health variable, by default if it's over 0 that indicates this character is alive
      *
@@ -66,6 +73,19 @@ public abstract class Enemy extends CraterCollectionElem implements Character {
 
     //set to true in the spawning animation
     protected boolean isVisible = false;
+
+    private float velocityX;
+    private float velocityY;
+
+    //previous position
+    private float prevDeltaX;
+    private float prevDeltaY;
+
+    private Knockback knockback;
+
+    //if it's targetting player, where was it when it first tried it
+    private float playerStartX;
+    private float playerStartY;
     /** Default Constructor
      *
      * @param instanceID the id of the instance in reference to the vao it's in (received using VaoCollection.addInstance());
@@ -74,7 +94,7 @@ public abstract class Enemy extends CraterCollectionElem implements Character {
      * @param r the radius in openGL terms (half the width, half the height)
      * @param milliSeconds ms between attacks
      */
-    public Enemy(int instanceID,float x,float y,float r,boolean isBlue,long milliSeconds){
+    public Enemy(int instanceID,float x,float y,float r,float attackLen,boolean isBlue,long milliSeconds){
         super(instanceID);
 
         //assign variables to attributes
@@ -86,6 +106,7 @@ public abstract class Enemy extends CraterCollectionElem implements Character {
         this.height = r*2;
 
         this.isBlue = isBlue;
+        this.attackLen = attackLen;
 
         this.health = this.getMaxHealth();
 
@@ -174,7 +195,7 @@ public abstract class Enemy extends CraterCollectionElem implements Character {
         this.deltaY = y;
     }
 
-    public void setVisibiility(boolean isVisible){
+    public void setVisibility(boolean isVisible){
         this.isVisible = isVisible;
     }
 
@@ -206,22 +227,23 @@ public abstract class Enemy extends CraterCollectionElem implements Character {
         }
 
 
-        if (millisSinceLastAttack > this.attackRate){
+        if (readyToAttack()){
             PairIntFloat target = this.getNearestTarget(world);
             int maxIndex = target.first;
             float minDist = target.second;
+            if (minDist <= this.attackLen){
+                if (maxIndex == -1){
+                    float angle = MathOps.getAngle((world.getPlayer().getDeltaX() - this.getDeltaX())/minDist,(world.getPlayer().getDeltaY() - this.getDeltaY())/minDist);
+                    this.attack(world,angle);
 
-            if (maxIndex == -1){
-                float angle = MathOps.getAngle((world.getPlayer().getDeltaX() - this.getDeltaX())/minDist,(world.getPlayer().getDeltaY() - this.getDeltaY())/minDist);
-                this.attack(world,angle);
+                } else {
+                    Supply s =  world.getSupplies().getInstanceData().get(maxIndex);
+                    float angle = MathOps.getAngle((s.getDeltaX() - this.getDeltaX())/minDist,(s.getDeltaY() - this.getDeltaY())/minDist);
+                    this.attack(world,angle);
 
-            } else {
-                Supply s =  world.getSupplies().getInstanceData().get(maxIndex);
-                float angle = MathOps.getAngle((s.getDeltaX() - this.getDeltaX())/minDist,(s.getDeltaY() - this.getDeltaY())/minDist);
-                this.attack(world,angle);
-
+                }
+                this.millisSinceLastAttack = 0;
             }
-            this.millisSinceLastAttack = 0;
         }
         stunnedMillis -= dt;
         if (this.stunnedMillis <= 0) {
@@ -234,10 +256,18 @@ public abstract class Enemy extends CraterCollectionElem implements Character {
     protected void move(World world,long dt){
         float targetX;
         float targetY;
+        prevDeltaX = deltaX;
+        prevDeltaY = deltaY;
         //means that the player is the current target
         if (currentPath == null || currentPath.peek() == null){
             targetX = world.getPlayer().getDeltaX();
             targetY = world.getPlayer().getDeltaY();
+
+            if (Math.hypot(deltaX-targetX,deltaY - targetY) > this.attackLen && Math.hypot(playerStartX-targetX,playerStartY - targetY) > DIST_TILL_RESEARCH){
+                PairIntFloat target = this.getNearestTarget(world);
+                PathFinder pf = new PathFinder(world.getEnemyMap(),target.first,this.getDeltaX(),this.getDeltaY(),world.getPlayer());
+                pf.start();
+            }
         } else {
             targetX = this.currentPath.peek().x;
             targetY = this.currentPath.peek().y;
@@ -267,8 +297,26 @@ public abstract class Enemy extends CraterCollectionElem implements Character {
         if (slowed){
             clippedLength *= this.getSpeedInToxicLake();
         }
+
+        float startX = this.getDeltaX();
+        float startY = this.getDeltaY();
+
         this.translateFromPos(clippedLength * (targetX - this.getDeltaX()),clippedLength * (targetY - this.getDeltaY()) );
-        this.rotation = MathOps.getAngle( (targetX - this.getDeltaX())/(float) travelLen, (targetY - this.getDeltaY()/(float) travelLen));
+
+        //dont need lock bc not doing anything with it
+        ArrayList<Plateau> plateaus = world.getPlateaus().getInstanceData();
+        for (int i =0,size = plateaus.size();i < size;i++){
+            plateaus.get(i).clipCharacterPos(this);
+        }
+
+
+        float actualLen = (float) Math.hypot(this.getDeltaX() - startX,this.getDeltaY() - startY);
+
+        this.velocityX = (this.getDeltaX() - startX) * 1000/dt;
+        this.velocityY = (this.getDeltaY() - startY) * 1000/dt;
+
+        this.rotation = MathOps.getAngle( (this.getDeltaX() - startX)/actualLen, (this.getDeltaY() - startY)/actualLen);
+
 
     }
 
@@ -351,6 +399,8 @@ public abstract class Enemy extends CraterCollectionElem implements Character {
                         EnemyMap.LOCK.unlock();
                     }
                     if (currentPath== null  || currentPath.peek() == null){
+                        playerStartX = player.getDeltaX();
+                        playerStartY = player.getDeltaY();
                         Log.d("Enemy Path","Locked onto player x: " + x + " y: " + y + " deltaX: " + deltaX + " deltaY: " + deltaY);
                     }
                 }
@@ -393,8 +443,41 @@ public abstract class Enemy extends CraterCollectionElem implements Character {
     protected float getSpeedInToxicLake(){
         return 0.1f;
     }
+    //can be override
+    protected float getMass(){
+        return 10;
+    }
 
     public boolean isVisible() {
         return isVisible;
     }
+
+    public float getVelocityX(){
+        return velocityX;
+    }
+
+    public float getVelocityY() {
+        return velocityY;
+    }
+    public float getPrevDeltaX(){
+        return prevDeltaX;
+    }
+
+    public float getPrevDeltaY() {
+        return prevDeltaY;
+    }
+
+    public void addKnockback(Knockback k){
+        if (this.knockback != null){
+            knockback.cancel();
+        }
+        this.knockback = k;
+    }
+
+    //whether it should attack or not
+    private boolean readyToAttack(){
+        return millisSinceLastAttack > attackRate;
+    }
+
+
 }

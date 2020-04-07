@@ -103,15 +103,17 @@ public class LevelSelectLayout implements GUILayout {
      */
     @Override
     public void loadComponents(Context context, HashMap<String,GUILayout> allLayouts){
+        //background
+        this.renderables.add(new QuadTexture(context,R.drawable.gui_background,0,0,2,2));
         //the home button);
         VisibilityInducedButton homeButton = new VisibilityInducedButton(context, R.drawable.home_button,
-                0,-0.4f,0.4f,0.4f,
+                1 - 0.15f * LayoutConsts.SCALE_X,0.85f,0.2f,0.2f,
                 this,allLayouts.get(STRINGS.HOME_SCREEN_LAYOUT_ID), false);
         this.clickables.add(homeButton);
         this.allComponents.add(homeButton);
 
         float h = (ICON_WIDTH) * (int) (((GameMap.NUM_LEVELS*LayoutConsts.SCALE_X * (ICON_WIDTH + ICON_MARGINS))/(2 - SIDE_MARGINS)));
-        ImageText background = new ImageText(context,R.drawable.button_background,0,1-TOP_MARGIN - h/2,(2 - SIDE_MARGINS/2)/LayoutConsts.SCALE_X,h +  2 * ICON_MARGINS + ICON_WIDTH,true);
+        ImageText background = new ImageText(context,R.drawable.layout_background,0,1-TOP_MARGIN - h/2,(2 - SIDE_MARGINS/2)/LayoutConsts.SCALE_X,h +  2 * ICON_MARGINS + ICON_WIDTH,true);
         this.renderables.add(background);
 
         float scaleX = (float) LayoutConsts.SCREEN_HEIGHT/LayoutConsts.SCREEN_WIDTH;
@@ -177,7 +179,7 @@ public class LevelSelectLayout implements GUILayout {
     @Override
     public void setVisibility(boolean visibility) {
         this.isVisible = visibility;
-        if (this.isVisible){
+        if (visibility){
             SoundLib.setStateGameMusic(false);
             SoundLib.setStateVictoryMusic(false);
             SoundLib.setStateLossMusic(false);

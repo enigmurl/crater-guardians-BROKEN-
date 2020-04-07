@@ -91,13 +91,14 @@ public class HomeScreen implements GUILayout {
      */
     @Override
     public void loadComponents(Context context, HashMap<String,GUILayout> allLayouts){
+        this.renderables.add(new QuadTexture(context,R.drawable.gui_background,0,0,2,2));
         //the firstButton (settings button);
         this.clickables.add(new VisibilityInducedButton(context, R.drawable.settings_button,
                 1 - 0.15f * LayoutConsts.SCALE_X,0.85f,0.2f,0.2f,
                 this,allLayouts.get(STRINGS.SETTINGS_LAYOUT_ID), false));
         //second button is the character select layout
         VisibilityInducedButton characterSelectButton = new VisibilityInducedButton(context,R.drawable.button_background,
-                0,0.3f,1.5f,0.4f,
+                0,-0.3f,1.5f,0.4f,
                 this,allLayouts.get(STRINGS.CHARACTER_SELECT_LAYOUT_ID), true);
         characterSelectButton.updateText(STRINGS.CHARACTER_SELECT_BUTTON_TEXT,0.1f);
         this.clickables.add(characterSelectButton);
@@ -105,13 +106,13 @@ public class HomeScreen implements GUILayout {
 
         //third one is a display, but not a clickable
         this.characterDisplay = new CharacterDisplay(context,this.craterRenderer.getWorld().getPlayer().getPlayerIcon(),
-                0,0.75f,0.4f,0.4f);
+                0,0.45f,1f,1f);
 
 
 
         //fourth one is the level select button
         VisibilityInducedButton levelSelectButton = new VisibilityInducedButton(context,R.drawable.button_background,
-                0,-0.2f,1.5f,0.4f,
+                0,-0.75f,1.5f,0.4f,
                 this,allLayouts.get(STRINGS.LEVEL_SELECT_LAYOUT_ID), true);
         levelSelectButton.updateText(STRINGS.LEVEL_SELECT_BUTTON_TEXT,0.1f);
         this.clickables.add(levelSelectButton);

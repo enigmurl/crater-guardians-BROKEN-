@@ -15,6 +15,8 @@ import com.enigmadux.craterguardians.values.LayoutConsts;
 import enigmadux2d.core.quadRendering.QuadTexture;
 
 public class EvolveButton extends QuadTexture {
+    //millis
+    private static final long FLASHING_PERIOD = 1000;
 
     /**
      * The scale factor when it's pushed down
@@ -29,6 +31,9 @@ public class EvolveButton extends QuadTexture {
     private CraterRenderer craterRenderer;
 
     private boolean isDown;
+
+    //amount of millise conds since the evolve charge becomes 1
+    private long millisSinceInited = 0;
 
 
     /**
@@ -72,7 +77,7 @@ public class EvolveButton extends QuadTexture {
         return false;
     }
 
-    public boolean isPressed(MotionEvent e) {
+    private boolean isPressed(MotionEvent e) {
         int pointerInd  = e.getActionIndex();
         int id = e.getPointerId(pointerInd);
 
@@ -147,4 +152,34 @@ public class EvolveButton extends QuadTexture {
     private void defaultReleaseAction(){
         SoundLib.playButtonReleasedSoundEffect();
     }
-};
+
+    public void update(World world,long dt){
+        if (world.getPlayer().getEvolveCharge() == 1) {
+            this.setVisibility(true);
+            millisSinceInited+= dt;
+
+            this.setShader(this.getRed(),1,this.getBlue(),1);
+
+        } else if (world.getPlayer().getEvolveCharge() < 0){
+            this.setVisibility(false);
+            millisSinceInited = 0;
+        } else {
+            this.setVisibility(true);
+            float charge = world.getPlayer().getEvolveCharge();
+            this.setShader(1,charge,charge,1);
+            millisSinceInited = 0;
+        }
+
+    }
+
+    //gets red component when flashing
+    //2pi/n = flashingPeriod
+    //n = 2pi/flashingPeriod
+    private float getRed(){
+        return 0.375f * ((float) Math.sin((float) (2 * Math.PI * millisSinceInited)/FLASHING_PERIOD) + 1);
+
+    }
+    private float getBlue(){
+        return 0.375f * ((float) Math.sin((float) (2 * Math.PI * millisSinceInited)/FLASHING_PERIOD) + 1);
+    }
+}

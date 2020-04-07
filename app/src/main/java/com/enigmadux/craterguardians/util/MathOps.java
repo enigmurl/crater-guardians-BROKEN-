@@ -99,6 +99,13 @@ public class MathOps {
         return false;
     }
 
+
+    /** Sees if a point is in circle
+     *
+     */
+    public static boolean pointInCircle(float x,float y,float x0,float y0,float r0){
+        return Math.hypot(x0 - x,y0 - y) < r0;
+    }
     /** Clips the value to the range specified
      *
      * @param val value to be clipped

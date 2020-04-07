@@ -2,7 +2,6 @@ package com.enigmadux.craterguardians.GameObjects;
 
 import android.opengl.Matrix;
 
-import com.enigmadux.craterguardians.Animations.ToxicBubble;
 import com.enigmadux.craterguardians.Character;
 import com.enigmadux.craterguardians.util.SoundLib;
 import com.enigmadux.craterguardians.worlds.World;
@@ -10,8 +9,6 @@ import com.enigmadux.craterguardians.enemies.Enemy;
 import com.enigmadux.craterguardians.gameLib.CraterCollectionElem;
 import com.enigmadux.craterguardians.players.Player;
 
-import java.util.ArrayList;
-import java.util.Iterator;
 
 /** Hurts and damages players, bots are immune to it though for now
  *
@@ -23,33 +20,12 @@ public class ToxicLake extends CraterCollectionElem {
     /** How much damage it does at once
      *
      */
-    private static final int DAMAGE  = 4;
+    private static final int DAMAGE  = 10;
     /** The damage is discrete, not continuous so this says how many milliseconds before asserting a new damage
      *
      */
     private static final long MILLIS_BETWEEN_DAMAGE = 1000L;
 
-
-    /** On any given frame the chance that a bubble spawns
-     *
-     */
-    private static final float TOXIC_BUBBLE_CHANCE = 0.03f;
-    /** The smallest a bubble can be
-     *
-     */
-    private static final float TOXIC_BUBBLE_MIN_RADIUS = 0.03f;
-    /** The largest a bubble can be
-     *
-     */
-    private static final float TOXIC_BUBBLE_MAX_RADIUS = 0.1f;
-    /** THe shortest milliseconds an bubble popping can be
-     *
-     */
-    private static final long TOXIC_BUBBLE_MIN_ANIMLEN = 1200;
-    /** THe longest milliseconds an bubble popping can be
-     *
-     */
-    private static final long TOXIC_BUBBLE_MAX_ANIMLEN = 2000;
 
 
     //radius of the image (width/2)
@@ -61,10 +37,6 @@ public class ToxicLake extends CraterCollectionElem {
 
     //translationMatrix*scalarMatrix
     private final float[] translationScalarMatrix = new float[16];
-
-
-    //the bubbles on the toxic lake, should be an array list later on
-    private ArrayList<ToxicBubble> toxicBubbles = new ArrayList<>();
 
     /** Default Constructor
      *
@@ -100,31 +72,6 @@ public class ToxicLake extends CraterCollectionElem {
      * @param dt milliseconds since last call
      */
     public void update(long dt, World world){
-        //randomly add a toxic bubbles
-        if (Math.random() < ToxicLake.TOXIC_BUBBLE_CHANCE){
-            double r = Math.min(this.radius, Math.random() * (ToxicLake.TOXIC_BUBBLE_MAX_RADIUS - TOXIC_BUBBLE_MIN_RADIUS) + TOXIC_BUBBLE_MIN_RADIUS);
-            double magnitude = Math.random() * (this.radius - r);
-            double angle = Math.random() * 2 * Math.PI;
-
-            double x = magnitude * Math.cos(angle) + this.deltaX;
-            double y = magnitude * Math.sin(angle) + this.deltaY;
-
-            long animLength = (long) (Math.random() * (TOXIC_BUBBLE_MAX_ANIMLEN - TOXIC_BUBBLE_MIN_ANIMLEN) + TOXIC_BUBBLE_MIN_ANIMLEN);
-
-            this.toxicBubbles.add(new ToxicBubble((float) x,(float) y,(float) r*2,(float) r*2,animLength));
-
-        }
-
-        //update the mini bubbles
-        Iterator<ToxicBubble> toxicBubbleIterator = this.toxicBubbles.iterator();
-        while (toxicBubbleIterator.hasNext()){
-            ToxicBubble toxicBubble = toxicBubbleIterator.next();
-            if (toxicBubble.isFinished()){
-                toxicBubbleIterator.remove();
-            }
-            toxicBubble.update(dt);
-        }
-
 
         currentMillis += dt;
         if (currentMillis > MILLIS_BETWEEN_DAMAGE) {

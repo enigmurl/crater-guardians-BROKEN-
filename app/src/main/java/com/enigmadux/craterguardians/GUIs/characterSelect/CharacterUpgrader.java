@@ -58,7 +58,7 @@ public class CharacterUpgrader extends GUIClickable {
      */
     @Override
     public boolean isPressed(MotionEvent e) {
-        return this.currentPlayer != null && PlayerData.getExperience() >= Player.UPGRADE_COSTS[currentPlayer.getPlayerLevel()] && super.isPressed(e);
+        return this.currentPlayer != null && currentPlayer.getPlayerLevel() < Player.UPGRADE_COSTS.length && PlayerData.getExperience() >= Player.UPGRADE_COSTS[currentPlayer.getPlayerLevel()] && super.isPressed(e);
     }
 
     /** Called when user presses the button
@@ -94,9 +94,12 @@ public class CharacterUpgrader extends GUIClickable {
 
         //will not be called if the current player is null
         this.currentPlayer.setPlayerLevel(this.currentPlayer.getPlayerLevel() + 1);
-        this.updateText(STRINGS.CHARACTER_UPGRADER_SUFFIX_TEXT + Player.UPGRADE_COSTS[currentPlayer.getPlayerLevel()],0.05f);
-        this.playerData.updateXP(PlayerData.getExperience() - Player.UPGRADE_COSTS[currentPlayer.getPlayerLevel()]);
-
+        if (currentPlayer.getPlayerLevel() < Player.UPGRADE_COSTS.length) {
+            this.updateText(STRINGS.CHARACTER_UPGRADER_SUFFIX_TEXT + Player.UPGRADE_COSTS[currentPlayer.getPlayerLevel()], 0.05f);
+            this.playerData.updateXP(PlayerData.getExperience() - Player.UPGRADE_COSTS[currentPlayer.getPlayerLevel()]);
+        } else {
+            this.updateText("MAX LEVEL",0.05f);
+        }
         this.characterSelectLayout.updatePlayerIcons();
         this.updateShader();
         return true;
@@ -116,15 +119,19 @@ public class CharacterUpgrader extends GUIClickable {
             this.updateText(null,0.1f);
         } else {
             this.setVisibility(true);
-            this.updateText(STRINGS.CHARACTER_UPGRADER_SUFFIX_TEXT + Player.UPGRADE_COSTS[newPlayer.getPlayerLevel()],0.05f);
-
+            if (currentPlayer.getPlayerLevel() < Player.UPGRADE_COSTS.length) {
+                this.updateText(STRINGS.CHARACTER_UPGRADER_SUFFIX_TEXT + Player.UPGRADE_COSTS[currentPlayer.getPlayerLevel()], 0.05f);
+            } else {
+                this.updateText("MAX LEVEL",0.05f);
+            }
             this.updateShader();
 
         }
     }
 
     private void updateShader(){
-        if (PlayerData.getExperience() >= Player.UPGRADE_COSTS[currentPlayer.getPlayerLevel()]) {
+
+        if (currentPlayer.getPlayerLevel() < Player.UPGRADE_COSTS.length && PlayerData.getExperience() >= Player.UPGRADE_COSTS[currentPlayer.getPlayerLevel()]) {
             this.setShader(ON_SHADER[0], ON_SHADER[1], ON_SHADER[2], ON_SHADER[3]);
         } else {
             this.setShader(OFF_SHADER[0],OFF_SHADER[1],OFF_SHADER[2],OFF_SHADER[3]);

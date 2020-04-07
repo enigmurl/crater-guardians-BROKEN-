@@ -1,9 +1,9 @@
 package com.enigmadux.craterguardians.GUIs.inGameScreen.tutorialHelpers;
 
 import android.content.Context;
-import android.util.Log;
 import android.view.MotionEvent;
 
+import com.enigmadux.craterguardians.Animations.PopUp;
 import com.enigmadux.craterguardians.Animations.TransitionAnim;
 import com.enigmadux.craterguardians.CraterBackendThread;
 import com.enigmadux.craterguardians.GUILib.Text;
@@ -88,6 +88,7 @@ public abstract class TutorialPauseHelper extends TransitionAnim implements Visi
 
     @Override
     public void run(){
+        boolean firstTime = fadeInMillis < FADE_MILLIS;
         fadeInMillis += DELAY_MILLIS;
         if (fadeInMillis < FADE_MILLIS){
             //background
@@ -100,15 +101,21 @@ public abstract class TutorialPauseHelper extends TransitionAnim implements Visi
         for (int i = 0, size = texts.size(); i < size; i++) {
             texts.get(i).setVisibility(true);
         }
-        if (this.elapsedMillis > minMillis){
-            return;
+        if (firstTime) {
+            for (int i = 0, size = this.scalables.size(); i < size; i++) {
+                new PopUp(this.animMillis, orgWs[i],orgHs[i],this.scalables.get(i), 0);
+            }
         }
-        this.elapsedMillis += DELAY_MILLIS;
-        float scale =this.getScale(Math.min(elapsedMillis,animMillis)/(float) animMillis);
 
-        for (int i = 0,size = this.scalables.size();i<size;i++){
-            this.scalables.get(i).setScale(orgWs[i] * scale,orgHs[i] * scale);
-        }
+//        if (this.elapsedMillis > minMillis){
+//            return;
+//        }
+        this.elapsedMillis += DELAY_MILLIS;
+//        float scale =this.getScale(Math.min(elapsedMillis,animMillis)/(float) animMillis);
+//
+//        for (int i = 0,size = this.scalables.size();i<size;i++){
+//            this.scalables.get(i).setScale(orgWs[i] * scale,orgHs[i] * scale);
+//        }
         HANDLER.postDelayed(this,DELAY_MILLIS);
 
     }

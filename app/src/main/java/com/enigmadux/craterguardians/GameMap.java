@@ -25,7 +25,7 @@ public class GameMap {
 
 
     //because there is stuff a little outside the actual crater, we draw it slightly bigger
-    public static final float CRATER_VISUAL_SCALE = 1.25f;
+    public static final float CRATER_VISUAL_SCALE = 1.85f;
 
 
 
@@ -247,6 +247,8 @@ public class GameMap {
                         spawnerCollection.addInstance(new Enemy3Spawner(context,instanceID, x, y, w, h,endOrangeHealth,endBlue1Health,maxHealth,blue1,orange,blue2,
                                 numBlueSpawns,blueSpawnTimes,numOrangeSpawns,orangeSpawnTimes));
                         break;
+                    default:
+                        Log.d("GAME MAP","Level: " + levelNum + " incorrect spawner Type of " + type);
                 }
             }
         }

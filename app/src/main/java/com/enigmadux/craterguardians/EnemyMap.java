@@ -186,7 +186,7 @@ public class EnemyMap {
         for (int i = 1;i<this.nodeMap.length;i++){
             //Log.d("ENEMY WEIGHT","NULL POINTER: " + (this.nodeMap[i] == null));
 
-            float weightage = (float) this.isValid(start,nodeMap[i],GRANULARITY_1);
+            float weightage = (float) this.isValid(start,nodeMap[i],0);
             //Log.d("ENEMY WEIGHT","weight: " + weightage + " length: "  +this.nodeMap.length);
             if (weightage > 0){
                 //this seems to be causing problems as it lasts for the a* search even after this one,

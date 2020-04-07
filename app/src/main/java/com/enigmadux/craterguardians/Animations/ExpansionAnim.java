@@ -37,25 +37,6 @@ public class ExpansionAnim extends FrameTransitionAnim {
         start(16);
     }
 
-
-//    /** Hides the enigmadux component
-//     *
-//     */
-//    @Override
-//    public void run() {
-//        if (cancel){
-//            return;
-//        }
-//        float wid = ((float) millisLeft/totalMillis) * (minWidth - maxWidth) + maxWidth;
-//        float hgt = ((float) millisLeft/totalMillis) * (minHeight - maxHeight) + maxHeight;
-//
-//        this.quadTexture.setScale(wid,hgt);
-//        this.millisLeft -= DELAY_MILLIS;
-//        if (this.millisLeft > 0){
-//            HANDLER.postDelayed(this,DELAY_MILLIS);
-//        }
-//    }
-
     @Override
     void step() {
         float wid = ((float) millisLeft/totalMillis) * (minWidth - maxWidth) + maxWidth;

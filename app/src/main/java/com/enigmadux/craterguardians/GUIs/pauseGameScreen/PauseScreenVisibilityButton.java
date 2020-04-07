@@ -1,11 +1,16 @@
 package com.enigmadux.craterguardians.GUIs.pauseGameScreen;
 
 import android.content.Context;
+import android.util.Log;
 import android.view.MotionEvent;
 
+import com.enigmadux.craterguardians.Animations.Countdown;
+import com.enigmadux.craterguardians.Animations.ZoomFadeIn;
 import com.enigmadux.craterguardians.CraterRenderer;
 import com.enigmadux.craterguardians.GUILib.GUILayout;
+import com.enigmadux.craterguardians.GUILib.Text;
 import com.enigmadux.craterguardians.GUILib.VisibilityInducedButton;
+import com.enigmadux.craterguardians.GUILib.VisibilitySwitch;
 import com.enigmadux.craterguardians.worlds.World;
 
 /** Enters either the game, or the home screen/ level select
@@ -35,7 +40,7 @@ public class PauseScreenVisibilityButton extends VisibilityInducedButton {
      */
     public PauseScreenVisibilityButton(Context context, int texturePointer,
                                        float x, float y, float w, float h,
-                                       PauseGameLayout objectToHide, GUILayout objectToShow,
+                                       PauseGameLayout objectToHide, VisibilitySwitch objectToShow,
                                        CraterRenderer craterRenderer, boolean isRounded) {
         super(context, texturePointer, x, y, w, h, objectToHide, objectToShow, isRounded);
 
@@ -51,18 +56,18 @@ public class PauseScreenVisibilityButton extends VisibilityInducedButton {
     public boolean onHardRelease(MotionEvent e) {
         super.onHardRelease(e);
 
-
-        World backend = this.craterRenderer.getCraterBackendThread().getBackend();
+        World backend = this.craterRenderer.getWorld();
         //this means we are going into the game
-        if (this.objectToShow == null){
-            this.craterRenderer.getCraterBackendThread().setPause(false);
+        if (this.objectToShow instanceof Text){
             backend.resetJoySticks();
+            new Countdown((Text)this.objectToShow,3,this.craterRenderer.getCraterBackendThread());
+            // this needs to be done later
+
         } else {
             this.craterRenderer.getCraterBackendThread().setPause(true);
             //going to level screen or home screen
             backend.killEndGamePausePeriod();
             backend.setState(World.STATE_GUI);
-            //backend.getGameScreenLayout().hide();
         }
 
 

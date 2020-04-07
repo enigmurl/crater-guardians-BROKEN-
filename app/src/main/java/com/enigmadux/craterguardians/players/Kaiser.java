@@ -27,8 +27,8 @@ public class Kaiser extends Player {
     private static int PLAYER_LEVEL = 0;
 
 
-
-    public static QuadTexture visualRep;
+    private QuadTexture e1;
+    private QuadTexture e2;
 
     /**
      * Default Constructor
@@ -46,12 +46,24 @@ public class Kaiser extends Player {
     }
 
     public static void loadGLTexture(Context context){
-        visualRep = new QuadTexture(context,R.drawable.kaiser_sprite_sheet_e1,0,0,1,1);
+        QuadTexture.loadAndroidTexturePointer(context,R.drawable.kaiser_sprite_sheet_e1);
+        QuadTexture.loadAndroidTexturePointer(context,R.drawable.kaiser_sprite_sheet_e2);
+    }
+
+    @Override
+    public void spawn() {
+        super.spawn();
+        if (e1 != null && e2 != null) {
+            this.updateSprite();
+        }
     }
 
     @Override
     protected void addRotatableEntities(Context context) {
-        this.rotatableEntities.add(visualRep);
+        this.e1 = new QuadTexture(context,R.drawable.kaiser_sprite_sheet_e1,0,0,1,1);
+        this.e2 = new QuadTexture(context,R.drawable.kaiser_sprite_sheet_e2,0,0,1,1);
+        this.rotatableEntities.add(e1);
+        //e2 is added in evolve
     }
 
     //angle is in radians
@@ -104,7 +116,14 @@ public class Kaiser extends Player {
     public void setShader(float r, float b, float g, float a) {
         //technically it only affects the static, but theres only one so the shader will be affect that only
         //TODO make more general solution
-        visualRep.setShader(r, b, g, a);
+        switch (this.evolveGen) {
+            case 0:
+                e1.setShader(r, b, g, a);
+                break;
+            case 1:
+                e2.setShader(r, b, g, a);
+                break;
+        }
     }
 
     @Override
@@ -138,5 +157,21 @@ public class Kaiser extends Player {
         return "Kaiser";
     }
 
+    @Override
+    public void evolve(World world) {
+        super.evolve(world);
+        this.updateSprite();
+    }
 
+    private void updateSprite(){
+        switch (this.evolveGen){
+            case 0:
+                this.rotatableEntities.add(e1);
+                break;
+            case 1:
+                this.rotatableEntities.remove(e1);
+                this.rotatableEntities.add(e2);
+                break;
+        }
+    }
 }

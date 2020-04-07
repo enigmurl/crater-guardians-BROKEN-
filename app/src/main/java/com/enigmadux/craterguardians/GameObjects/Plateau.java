@@ -8,7 +8,9 @@ import com.enigmadux.craterguardians.worlds.World;
 import com.enigmadux.craterguardians.enemies.Enemy;
 import com.enigmadux.craterguardians.gameLib.CraterCollectionElem;
 
-
+/**
+ *  Does not support convex stuff
+ */
 public class Plateau extends CraterCollectionElem {
     //the points, see constructor details for more
     private float[][] points;
@@ -172,16 +174,8 @@ public class Plateau extends CraterCollectionElem {
     @Override
     public void update(long dt, World world) {
         //need to intersect everything, players are intersected inside the Player update method not here
-        synchronized (World.blueEnemyLock) {
-            for (Enemy e : world.getOrangeEnemies().getInstanceData()) {
-                this.clipCharacterPos(e);
-            }
-        }
-        synchronized (World.orangeEnemyLock) {
-            for (Enemy e : world.getBlueEnemies().getInstanceData()) {
-                this.clipCharacterPos(e);
-            }
-        }
+        //same with enemies
+        //so for now nothing nees to be done
     }
 }
 

@@ -12,7 +12,7 @@ public class Enemy1 extends Enemy {
     //a constant that represents how fast to play the animation in frames per second
     private static final float FPS = 16;
 
-    private static final float RADIUS = 0.3f;
+    private static final float RADIUS = 0.15f;
     //milliseconds between attacks
     private static final long ATTACK_RATE = 1000;
 
@@ -33,7 +33,7 @@ public class Enemy1 extends Enemy {
      * @param isBlue    if its blue
      */
     public Enemy1(int instanceID, float x, float y, boolean isBlue) {
-        super(instanceID, x, y, RADIUS, isBlue,ATTACK_RATE);
+        super(instanceID, x, y, RADIUS,AttackEnemy1.LENGTH, isBlue,ATTACK_RATE);
     }
 
 
@@ -71,4 +71,5 @@ public class Enemy1 extends Enemy {
         AttackEnemy1 a = new AttackEnemy1(id,this.getDeltaX(),this.getDeltaY(),angle);
         world.getEnemyAttacks().addInstance(a);
     }
+
 }

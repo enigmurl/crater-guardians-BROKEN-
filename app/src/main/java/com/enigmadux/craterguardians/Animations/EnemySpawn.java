@@ -38,7 +38,7 @@ public class EnemySpawn extends Animation {
     public EnemySpawn(Enemy original,float x, float y, float w, float h){
         //null context bc it isnt needed
         super(null, R.drawable.death_animation,x,y,w,h);
-        original.setVisibiility(false);
+        original.setVisibility(false);
         this.textureW = 1f/NUM_FRAMES;
         this.original = original;
     }
@@ -74,7 +74,7 @@ public class EnemySpawn extends Animation {
     @Override
     public void finish(World world) {
         super.finish(world);
-        original.setVisibiility(true);
+        original.setVisibility(true);
 
     }
 }

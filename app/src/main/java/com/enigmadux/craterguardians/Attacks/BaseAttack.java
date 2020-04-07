@@ -23,7 +23,7 @@ public abstract class BaseAttack extends CraterCollectionElem {
     private boolean isPlayerAttack;
     private final float[] scalarTranslationM = new float[16];
 
-    private long startMillis = System.currentTimeMillis();
+    private long ellapsedMillis;
     /**
      * Default Constructor
      *
@@ -54,6 +54,7 @@ public abstract class BaseAttack extends CraterCollectionElem {
     public void update(long dt, World world){
         this.setFrame();
         this.curLength += dt * this.speed/1000;
+        this.ellapsedMillis += dt;
         if (! this.isFinished)
             this.isFinished = this.curLength >= this.maxLength;
 
@@ -93,7 +94,7 @@ public abstract class BaseAttack extends CraterCollectionElem {
     //row = rotation, col = frame num
     private void setFrame(){
         float framesPerMilli =  getFramesPerSecond()/1000f;
-        int frameNum = (int) (((System.currentTimeMillis() - this.startMillis) % (this.getNumFrames()/framesPerMilli)) * framesPerMilli);
+        int frameNum = (int) ((this.ellapsedMillis % (this.getNumFrames()/framesPerMilli)) * framesPerMilli);
         this.deltaTextureX = MathOps.getTextureBufferTranslationX(frameNum,this.getNumFrames());
         this.deltaTextureY = 0;
     }

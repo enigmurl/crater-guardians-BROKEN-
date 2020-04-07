@@ -1,11 +1,15 @@
 package com.enigmadux.craterguardians.GUIs.pauseGameScreen;
 
 import android.content.Context;
+import android.util.Log;
 import android.view.MotionEvent;
 
 import com.enigmadux.craterguardians.CraterRenderer;
 import com.enigmadux.craterguardians.GUILib.GUIClickable;
 import com.enigmadux.craterguardians.GUILib.GUILayout;
+import com.enigmadux.craterguardians.GUILib.ImageText;
+import com.enigmadux.craterguardians.GUILib.Text;
+import com.enigmadux.craterguardians.GUILib.TextRenderable;
 import com.enigmadux.craterguardians.GUILib.dynamicText.DynamicText;
 import com.enigmadux.craterguardians.R;
 import com.enigmadux.craterguardians.values.STRINGS;
@@ -14,6 +18,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 
 import enigmadux2d.core.quadRendering.GuiRenderer;
+import enigmadux2d.core.quadRendering.QuadTexture;
 
 /** Layout shown when the game is paused
  *
@@ -32,6 +37,8 @@ public class PauseGameLayout implements GUILayout {
      *
      */
     private ArrayList<GUIClickable> clickables;
+    private ArrayList<QuadTexture> quadTextures;
+    private ArrayList<TextRenderable> textRenderables;
 
     /** Whether or not to draw the screen
      *
@@ -42,12 +49,15 @@ public class PauseGameLayout implements GUILayout {
      *
      */
     private CraterRenderer craterRenderer;
+    private Text countDown;
 
     /** Default Constructor
      *
      */
     public PauseGameLayout(CraterRenderer craterRenderer){
         this.clickables = new ArrayList<>();
+        this.textRenderables = new ArrayList<>();
+        this.quadTextures = new ArrayList<>();
         this.craterRenderer = craterRenderer;
     }
 
@@ -58,15 +68,25 @@ public class PauseGameLayout implements GUILayout {
      */
     @Override
     public void loadComponents(Context context, HashMap<String, GUILayout> allLayouts) {
+
+        ImageText bg = new ImageText(context,R.drawable.layout_background,0,0,1.75f,1.75f,true);
+        bg.updateText("Game Paused",0.1f);
+        bg.setTextDelta(0,0.6f);
+        this.quadTextures.add(bg);
+        this.textRenderables.add(bg);
+
+        //purposefully not putting countdown inside components that are switched on by visibility
+        this.countDown = new Text(0,0," ",0.1f);
+
         //the home button);
         this.clickables.add(new PauseScreenVisibilityButton(context, R.drawable.home_button,
-                0,-0.4f,0.4f,0.4f,
+                0.15f,0.1f,0.4f,0.4f,
                 this,allLayouts.get(STRINGS.HOME_SCREEN_LAYOUT_ID),
                 this.craterRenderer,false));
 
         //go to levels
         PauseScreenVisibilityButton levelButton = new PauseScreenVisibilityButton(context, R.drawable.button_background,
-                0,0.1f,1.9f,0.4f,
+                0,-0.4f,1.25f,0.4f,
                 this,allLayouts.get(STRINGS.LEVEL_SELECT_LAYOUT_ID),
                 this.craterRenderer, true);
         levelButton.updateText(STRINGS.BACK_TO_LEVELS_BUTTON,0.1f);
@@ -74,9 +94,14 @@ public class PauseGameLayout implements GUILayout {
 
         //just hide this (resume button)
         this.clickables.add(new PauseScreenVisibilityButton(context,R.drawable.resume_button,
-                0,0.75f,0.4f,0.4f,
-                this,null,
+                -0.15f,0.1f,0.4f,0.4f,
+                this,countDown,
                 this.craterRenderer,false));
+
+
+        this.quadTextures.addAll(clickables);
+        this.textRenderables.addAll(clickables);
+        this.textRenderables.add(countDown);
 
 
     }
@@ -111,8 +136,8 @@ public class PauseGameLayout implements GUILayout {
         this.isVisible = visibility;
 
 
-        for (int i = this.clickables.size()-1;i>= 0;i--){
-            this.clickables.get(i).setVisibility(visibility);
+        for (int i = this.quadTextures.size()-1;i>= 0;i--){
+            this.quadTextures.get(i).setVisibility(visibility);
         }
     }
 
@@ -124,15 +149,18 @@ public class PauseGameLayout implements GUILayout {
     @Override
     public void render(float[] uMVPMatrix, GuiRenderer renderer, DynamicText textRenderer) {
         if (this.isVisible) {
-            renderer.renderQuads(this.clickables, uMVPMatrix);
-            for (int i = 0,size = this.clickables.size();i<size;i++){
-                this.clickables.get(i).renderText(textRenderer,uMVPMatrix);
+            renderer.renderQuads(this.quadTextures, uMVPMatrix);
+            for (int i = 0,size = this.textRenderables.size();i<size;i++){
+                this.textRenderables.get(i).renderText(textRenderer,uMVPMatrix);
             }
+        }
+        if (this.countDown.isVisible()){
+            this.countDown.renderText(textRenderer,uMVPMatrix);
         }
     }
 
     @Override
     public boolean isVisible() {
-        return isVisible;
+        return isVisible || countDown.isVisible();
     }
 }

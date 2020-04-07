@@ -5,6 +5,7 @@ import android.content.Context;
 import com.enigmadux.craterguardians.FileStreams.PlayerData;
 import com.enigmadux.craterguardians.GUILib.dynamicText.DynamicText;
 import com.enigmadux.craterguardians.R;
+import com.enigmadux.craterguardians.values.LayoutConsts;
 import com.enigmadux.craterguardians.values.STRINGS;
 
 import java.util.ArrayList;
@@ -13,8 +14,8 @@ import java.util.ArrayList;
 public class MatieralBar implements RenderableCollection{
     private static final float FONT_SIZE = 0.1f;
 
-    private static final float X = 0.6f;
-    private static final float Y = 0.6f;
+    private static final float X = -0.6f;
+    private static final float Y = 0.9f;
     private static final float W = 0.8f;
     private static final float H = 0.2f;
 
@@ -29,7 +30,8 @@ public class MatieralBar implements RenderableCollection{
      */
     public MatieralBar(Context context){
         //init it all the time anyways just in case
-        xpIndicator = new ImageText(context, R.drawable.materials_bar_background,X,Y,W,H,false);
+        xpIndicator = new ImageText(context, R.drawable.materials_bar_background,X,Y,W/ LayoutConsts.SCALE_X,H,false);
+        xpIndicator.setTextDelta(-0.25f,0);
         update();
 
         renderables.clear();

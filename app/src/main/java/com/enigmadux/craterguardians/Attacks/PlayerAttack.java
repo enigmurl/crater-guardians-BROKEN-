@@ -78,7 +78,7 @@ public abstract class PlayerAttack extends BaseAttack {
     void onHitEnemy(Enemy e,World w){
         SoundLib.playPlayerAttackLandSoundEffect();
         e.damage(this.damage);
-        new Knockback(e,Knockback.DEFAULT_MILLIS,Knockback.DEFAULT_KNOCKBACK_LEN * (float) Math.cos(angle),Knockback.DEFAULT_KNOCKBACK_LEN * (float) Math.sin(angle));
+        e.addKnockback(new Knockback(e,Knockback.DEFAULT_MILLIS,Knockback.DEFAULT_KNOCKBACK_LEN * (float) Math.cos(angle),Knockback.DEFAULT_KNOCKBACK_LEN * (float) Math.sin(angle)));
         w.getPlayer().reportDamageDealt(this.damage, e);
         this.dealtDamage = true;
     }

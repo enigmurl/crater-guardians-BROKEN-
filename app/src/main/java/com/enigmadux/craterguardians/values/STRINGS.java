@@ -72,9 +72,9 @@ public class STRINGS {
     /** The text that is displayed in the pause, and post game layouts, that indicates to go back to the level select layout
      *
      */
-    public static final String BACK_TO_LEVELS_BUTTON = "Choose Another Level";
+    public static final String BACK_TO_LEVELS_BUTTON = "Choose Level";
 
-    public static final String XP_PREFIX = " Experience: ";
+    public static final String XP_PREFIX = "XP: ";
 
 
 

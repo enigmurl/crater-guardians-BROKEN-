@@ -3,14 +3,12 @@ package com.enigmadux.craterguardians.Animations;
 public abstract class FrameTransitionAnim extends TransitionAnim {
     private static final long DELAY_MILLIS = 16;
 
-    private long startMillis;
     protected long millisLeft;
     protected long totalMillis;
     protected long finishedMillis;
 
     private boolean cancel;
     FrameTransitionAnim(long millis){
-        startMillis = System.currentTimeMillis();
         finishedMillis = 0;
         totalMillis = millisLeft= millis;
 
@@ -33,8 +31,11 @@ public abstract class FrameTransitionAnim extends TransitionAnim {
             return;
         }
         step();
-        millisLeft = startMillis + totalMillis - System.currentTimeMillis();
-        finishedMillis = System.currentTimeMillis() - startMillis;
+        //not using current time because that doesnt work well with pausing
+        finishedMillis += DELAY_MILLIS;
+        millisLeft -= DELAY_MILLIS;
+//        millisLeft = startMillis + totalMillis - System.currentTimeMillis();
+//        finishedMillis = System.currentTimeMillis() - startMillis;
 
         HANDLER.postDelayed(this,DELAY_MILLIS);
 

@@ -4,45 +4,40 @@ package com.enigmadux.craterguardians.Animations;
 import enigmadux2d.core.quadRendering.QuadTexture;
 
 //fades in and out, zooms in (like a cubic
-public class ZoomFadeIn extends TransitionAnim {
+public class ZoomFadeIn extends FrameTransitionAnim {
     public static final long DEFAULT_MILLIS = 2000;
-    private static final long DELAY_MILLIS = 16;
 
 
     private QuadTexture original;
     private float orgW;
     private float orgH;
 
-    private long totalMillis;
-    private long millisLeft;
     public ZoomFadeIn(QuadTexture original,long millis){
+        super(millis);
         this.original = original;
         this.orgH = original.getH();
         this.orgW = original.getW();
-        this.millisLeft = millis;
-        this.totalMillis = millis;
         original.setScale(0,0);
         original.setVisibility(true);
-        HANDLER.postDelayed(this,DELAY_MILLIS);
+        start();
     }
 
+
+
     @Override
-    public void run() {
-        this.millisLeft -= DELAY_MILLIS;
-        if (this.millisLeft < 0){
-            original.setVisibility(false);
-            original.setScale(orgW,orgH);
-            return;
-        }
+    void step() {
         float t = 1 - (float)(millisLeft)/totalMillis;
         float scale = getScale(t);
         original.setScale(orgW * scale,orgH * scale);
         original.setAlpha(getAlpha(t));
-
-        HANDLER.postDelayed(this,DELAY_MILLIS);
-
     }
 
+    @Override
+    void finish() {
+        super.finish();
+        original.setVisibility(false);
+        original.setScale(orgW,orgH);
+    }
 
     private float getScale(float t){
         if (t < 0.2843f){

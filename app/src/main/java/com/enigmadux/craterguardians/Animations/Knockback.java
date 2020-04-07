@@ -5,10 +5,7 @@ import com.enigmadux.craterguardians.enemies.Enemy;
 /** An helper class that moves a character over some time
  *
  */
-public class Knockback extends TransitionAnim {
-    //the amount of milliseconds in between small pushes
-    private static final long DELAY_MILLIS = 16;
-
+public class Knockback extends FrameTransitionAnim {
     //the default amount of time a knockback takes
     //note it is not actually "default" per se but more a reccomended value, it will not be automaticlaly implemented
     public static final long DEFAULT_MILLIS = 250;
@@ -20,15 +17,14 @@ public class Knockback extends TransitionAnim {
 
     //the component that needs to be hidden
     private Enemy enemy;
-    //the amount of milliseconds left
-    private long millisLeft;
-    //the total amount of milliseconds in this animatino
-    private long totalMillis;
 
     //the amount to move in the deltX direction
     private float deltaX;
     //the amount to move in the y direction
     private float deltaY;
+
+    private float startX;
+    private float startY;
 
     /** Default constructor
      *
@@ -39,32 +35,21 @@ public class Knockback extends TransitionAnim {
      *
      */
     public Knockback(Enemy enemy, long millis, float deltaX, float deltaY){
-        super();
+        super(millis);
         enemy.stun(millis);
 
 
         this.enemy = enemy;
-        this.millisLeft = millis;
-        this.totalMillis = millis;
 
         this.deltaX = deltaX;
         this.deltaY = deltaY;
-        HANDLER.postDelayed(this,DELAY_MILLIS);
+        this.startX = enemy.getDeltaX();
+        this.startY = enemy.getDeltaY();
+        start();
     }
 
-
-    /** Hides the enigmadux component
-     *
-     */
     @Override
-    public void run() {
-        this.enemy.translateFromPos(this.deltaX * DELAY_MILLIS/this.totalMillis,this.deltaY * DELAY_MILLIS/this.totalMillis);
-        this.millisLeft -= DELAY_MILLIS;
-        if (this.millisLeft > 0){
-            HANDLER.postDelayed(this,DELAY_MILLIS);
-        }
+    void step() {
+        this.enemy.setTranslate(startX + (float) finishedMillis/totalMillis * (deltaX),startY + (float) finishedMillis/totalMillis * (deltaY));
     }
-
-
-
 }

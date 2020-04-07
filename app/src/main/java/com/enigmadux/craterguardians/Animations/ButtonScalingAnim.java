@@ -4,15 +4,12 @@ import android.util.Log;
 
 import com.enigmadux.craterguardians.GUILib.GUIClickable;
 
-import enigmadux2d.core.quadRendering.QuadTexture;
 
 public class ButtonScalingAnim extends FrameTransitionAnim {
 
     //the default amount of time a knockback takes
     //note it is not actually "default" per se but more a reccomended value, it will not be automaticlaly implemented
     public static final long DEFAULT_MILLIS = 100;
-    //the default knockback length
-
 
     //the component that needs to be hidden
     private GUIClickable quadTexture;

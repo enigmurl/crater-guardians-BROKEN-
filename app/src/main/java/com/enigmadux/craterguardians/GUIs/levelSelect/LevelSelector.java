@@ -4,6 +4,7 @@ package com.enigmadux.craterguardians.GUIs.levelSelect;
 import android.content.Context;
 import android.view.MotionEvent;
 
+import com.enigmadux.craterguardians.Animations.PopUp;
 import com.enigmadux.craterguardians.CraterRenderer;
 import com.enigmadux.craterguardians.FileStreams.LevelData;
 import com.enigmadux.craterguardians.GUILib.GUIClickable;
@@ -19,7 +20,7 @@ import com.enigmadux.craterguardians.values.STRINGS;
  * @version BETA
  */
 public class LevelSelector extends GUIClickable {
-
+    private static final long DELAY_LEVEL = 48;
 
     /** Color of when the level is unlocked but not completed (RGBA)
      *
@@ -60,6 +61,10 @@ public class LevelSelector extends GUIClickable {
      */
     private int levelNum;
 
+    private PopUp popUpAnimation;
+    private float orgW;
+    private float orgH;
+
     /**
      * Default Constructor
      *
@@ -83,6 +88,8 @@ public class LevelSelector extends GUIClickable {
         this.craterRenderer = craterRenderer;
 
         this.levelNum = levelNum;
+        this.orgW = this.w;
+        this.orgH = this.h;
 
 
         this.textColor = LayoutConsts.LEVEL_FLOAT_TEXT_COLOR;
@@ -166,6 +173,17 @@ public class LevelSelector extends GUIClickable {
             } else {
                 this.shader = LevelSelector.LOCKED_SHADER;
             }
+            if (popUpAnimation != null){
+                popUpAnimation.cancel();
+            }
+            this.popUpAnimation = new PopUp(PopUp.DEFAULT_MILLIS,orgW,orgH,this,this.levelNum * DELAY_LEVEL);
+
         }
+    }
+
+    @Override
+    public void setScale(float w, float h) {
+        super.setScale(w, h);
+        this.scale = w/orgW;
     }
 }
