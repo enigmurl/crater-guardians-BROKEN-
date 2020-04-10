@@ -7,11 +7,13 @@ import com.enigmadux.craterguardians.FileStreams.SettingsData;
 import com.enigmadux.craterguardians.GUILib.GUIClickable;
 import com.enigmadux.craterguardians.GUILib.GUILayout;
 import com.enigmadux.craterguardians.GUILib.ImageText;
+import com.enigmadux.craterguardians.GUILib.MatieralBar;
 import com.enigmadux.craterguardians.GUILib.Text;
 import com.enigmadux.craterguardians.GUILib.TextRenderable;
 import com.enigmadux.craterguardians.GUILib.VisibilityInducedButton;
 import com.enigmadux.craterguardians.GUILib.VisibilitySwitch;
 import com.enigmadux.craterguardians.GUILib.dynamicText.DynamicText;
+import com.enigmadux.craterguardians.GUIs.homeScreen.HomeScreen;
 import com.enigmadux.craterguardians.R;
 import com.enigmadux.craterguardians.values.LayoutConsts;
 import com.enigmadux.craterguardians.values.STRINGS;
@@ -57,6 +59,8 @@ public class SettingsScreen implements GUILayout {
      */
     private SettingsData settingsData;
 
+    private MatieralBar matieralBar;
+
 
     /** Default Constructor
      *
@@ -78,15 +82,18 @@ public class SettingsScreen implements GUILayout {
     @Override
     public void loadComponents(Context context, HashMap<String,GUILayout> allLayouts){
 
-        ImageText title = new ImageText(context,R.drawable.button_background,-0.5f,0.85f,1,0.25f,true);
-        ImageText musicText =new ImageText(context,R.drawable.button_background,-0.4f,0.15f,1,1f,true);
-        ImageText soundText =new ImageText(context,R.drawable.button_background,0.4f,0.15f,1,1f,true);
+        ImageText title = new ImageText(context,R.drawable.layout_background,0f,0.85f,1,0.25f,true);
+        ImageText musicText =new ImageText(context,R.drawable.button_background,-0.4f,-0.05f,1.5f,1.5f,true);
+        ImageText soundText =new ImageText(context,R.drawable.button_background,0.4f,-0.05f,1.5f,1.5f,true);
+        musicText.setShader(GUIClickable.SHADER[0],GUIClickable.SHADER[1],GUIClickable.SHADER[2],GUIClickable.SHADER[3]);
+        soundText.setShader(GUIClickable.SHADER[0],GUIClickable.SHADER[1],GUIClickable.SHADER[2],GUIClickable.SHADER[3]);
 
-        musicText.setTextDelta(0,0.25f);
-        soundText.setTextDelta(0,0.25f);
 
-        musicText.updateText("Music",0.1f);
-        soundText.updateText("Sound FX",0.1f);
+        musicText.setTextDelta(0,0.35f);
+        soundText.setTextDelta(0,0.35f);
+
+        musicText.updateText("Music",0.15f);
+        soundText.updateText("Sound FX",0.15f);
         title.updateText("Settings",0.1f);
 
         this.renderables.add(new QuadTexture(context,R.drawable.gui_background,0,0,2,2));
@@ -99,17 +106,23 @@ public class SettingsScreen implements GUILayout {
         this.renderables.add(musicText);
         this.renderables.add(soundText);
 
+        this.matieralBar = ((HomeScreen) allLayouts.get(HomeScreen.ID)).getMatieralBar();
+        this.renderables.addAll(matieralBar.getRenderables());
+        //causes flickering
+        this.allComponents.addAll(matieralBar.getRenderables());
+        this.textRenderables.addAll(matieralBar.getRenderables());
+
         //the home button);
         this.clickables.add(new VisibilityInducedButton(context, R.drawable.home_button,
                 1 - 0.15f * LayoutConsts.SCALE_X,0.85f,0.2f,0.2f,
                 this,allLayouts.get(STRINGS.HOME_SCREEN_LAYOUT_ID), false));
         //the music button
         this.clickables.add(new MusicSwitch(context,R.drawable.music_on_off_button,
-                -0.4f,0f,0.5f,0.5f,
+                -0.4f,-0.25f,0.75f,0.75f,
                 this.settingsData));
         //the sound effects button
         this.clickables.add(new SoundEffectsSwitch(context,R.drawable.sound_effect_on_off_button,
-                0.4f,0f,0.5f,0.5f,
+                0.4f,-0.25f,0.75f,0.75f,
                 this.settingsData));
 
         this.renderables.addAll(clickables);
@@ -156,11 +169,16 @@ public class SettingsScreen implements GUILayout {
      */
     @Override
     public void setVisibility(boolean visibility) {
-        this.isVisible = visibility;
 
         for (int i = this.allComponents.size()-1;i>= 0;i--){
             this.allComponents.get(i).setVisibility(visibility);
         }
+        if (! visibility){
+            for (int i = 0; i < matieralBar.getRenderables().size();i++){
+                matieralBar.getRenderables().get(i).setVisibility(true);
+            }
+        }
+        this.isVisible = visibility;
     }
 
     @Override

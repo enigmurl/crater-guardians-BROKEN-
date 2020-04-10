@@ -25,6 +25,8 @@ import enigmadux2d.core.quadRendering.QuadTexture;
  */
 public abstract class GUIClickable extends QuadTexture implements VisibilitySwitch, TextRenderable {
 
+    public static final float[] SHADER = new float[] {0.941f,0.533f,0.22f,1};
+
     /** Rounded Button corner radius / width of entire image
      *
      */
@@ -104,9 +106,9 @@ public abstract class GUIClickable extends QuadTexture implements VisibilitySwit
      */
     protected GUIClickable(Context context, int texturePointer, float x, float y, float w, float h, boolean isRounded) {
         super(context, texturePointer, x, y, w * LayoutConsts.SCREEN_HEIGHT/LayoutConsts.SCREEN_WIDTH, h);
-
         if (isRounded){
             this.enableRounding();
+            this.setShader(SHADER[0],SHADER[1],SHADER[2],SHADER[3]);
         }
     }
 

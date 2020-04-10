@@ -10,6 +10,7 @@ import com.enigmadux.craterguardians.GUILib.GUIClickable;
 import com.enigmadux.craterguardians.GUILib.GUILayout;
 import com.enigmadux.craterguardians.GUILib.ImageText;
 import com.enigmadux.craterguardians.GUILib.MatieralBar;
+import com.enigmadux.craterguardians.GUILib.Text;
 import com.enigmadux.craterguardians.GUILib.TextRenderable;
 import com.enigmadux.craterguardians.GUILib.VisibilityInducedButton;
 import com.enigmadux.craterguardians.GUILib.VisibilitySwitch;
@@ -72,6 +73,8 @@ public class CharacterSelectLayout implements GUILayout {
 
     private ArrayList<VisibilitySwitch> allComponents;
 
+    private Text instructions;
+
     /** Whether or not to draw the screen
      *
      */
@@ -122,7 +125,9 @@ public class CharacterSelectLayout implements GUILayout {
     public void loadComponents(Context context, HashMap<String,GUILayout> allLayouts){
         this.renderables.add(new QuadTexture(context,R.drawable.gui_background,0,0,2,2));
         this.renderables.add(new ImageText(context,R.drawable.layout_background,0,0.2f,(2 - 1.6f * SIDE_MARGINS )/LayoutConsts.SCALE_X + ICON_WIDTH,0.8f,true));
-
+        QuadTexture bottomBar =  new QuadTexture(context,R.drawable.character_select_bottom,0,-0.7f,2,0.6f);
+        bottomBar.setAlpha(0.5f);
+        this.renderables.add(bottomBar);
         this.allComponents.addAll(this.renderables);
         float scaleX = (float) LayoutConsts.SCREEN_HEIGHT/LayoutConsts.SCREEN_WIDTH;
         for (int i = 0;i<CharacterSelectLayout.CHARACTERS.length;i++){
@@ -149,13 +154,13 @@ public class CharacterSelectLayout implements GUILayout {
 
 
         this.characterSelecter = new CharacterSelecter(context,R.drawable.button_background,this,allLayouts.get(HomeScreen.ID),
-                -0.5f,-0.5f,0.8f,0.4f,
+                0f,-0.65f,0.8f,0.4f,
                 this.craterRenderer, true);
 
         this.characterUpgrader = new CharacterUpgrader(context,R.drawable.button_background,playerData,this,
-                0.5f,-0.5f,1f,0.4f,true);
+                -0.65f,-0.65f,0.8f,0.4f,true);
 
-        this.infoButton = new InfoButton(context,R.drawable.info_button,0.8f,-0.8f,0.4f,0.4f,null,null,false);
+        this.infoButton = new InfoButton(context,R.drawable.info_button,0.65f,-0.65f,0.4f,0.4f,null,null,false);
 
         this.clickables.add(infoButton);
         this.clickables.add(this.characterSelecter);
@@ -172,9 +177,11 @@ public class CharacterSelectLayout implements GUILayout {
         this.renderables.addAll(matieralBar.getRenderables());
 
         this.textRenderables.addAll(this.clickables);
-        ImageText title = new ImageText(context,R.drawable.button_background,-0.5f,0.8f,1.5f,0.25f,true);
-        title.updateText("Select Character",0.1f);
+        ImageText title = new ImageText(context,R.drawable.layout_background,0f,0.8f,1.5f,0.25f,true);
+        title.updateText("Characters",0.1f);
         this.textRenderables.add(title);
+        this.instructions = new Text(0,-0.8f,"Tap on a player icon",0.1f);
+        this.textRenderables.add(this.instructions);
         this.renderables.add(title);
         this.allComponents.addAll(this.textRenderables);
         this.allComponents.addAll(matieralBar.getRenderables());
@@ -188,7 +195,6 @@ public class CharacterSelectLayout implements GUILayout {
     public void setVisibility(boolean visibility) {
         //if it's true, we need to reset the character selecter
 
-        this.isVisible = visibility;
 
         for (int i = this.allComponents.size()-1;i>= 0;i--){
             if (! (allComponents.get(i) instanceof InfoDisplay) || ! visibility) {
@@ -200,7 +206,12 @@ public class CharacterSelectLayout implements GUILayout {
             this.characterSelecter.updateCurrentPlayer(null);
             this.characterUpgrader.updateCurrentPlayer(null);
             this.infoButton.setVisibility(false);
+        } else {
+            for (int i = 0; i < matieralBar.getRenderables().size();i++){
+                matieralBar.getRenderables().get(i).setVisibility(true);
+            }
         }
+        this.isVisible = visibility;
 
     }
     /** Renders all components if they are visible
@@ -242,7 +253,7 @@ public class CharacterSelectLayout implements GUILayout {
      */
     void updateCurrentPlayer(Player newPlayer){
         this.currentPlayer = newPlayer;
-
+        this.instructions.setVisibility(false);
         this.characterSelecter.updateCurrentPlayer(newPlayer);
         this.characterUpgrader.updateCurrentPlayer(newPlayer);
         this.infoButton.setVisibility(true);

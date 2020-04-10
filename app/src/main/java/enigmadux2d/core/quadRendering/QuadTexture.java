@@ -160,13 +160,13 @@ public class QuadTexture implements VisibilitySwitch {
         int indexOfPointer = QuadTexture.androidToGLTextureMap.indexOfKey(texturePointer);
         if (indexOfPointer < 0) {
 
-            //first convert the image file into a bitmap
             BitmapFactory.Options options = new BitmapFactory.Options();
             options.inScaled = false;
-            options.inPremultiplied = false;
             options.inPreferredConfig = Bitmap.Config.ARGB_8888;
-            Bitmap texture = BitmapFactory.decodeResource(context.getResources(), texturePointer,options);
+            options.inPremultiplied = false;
+            Bitmap texture = BitmapFactory.decodeResource(context.getResources(),texturePointer,options);
             texture.setHasAlpha(true);
+
 
             texture = Bitmap.createBitmap(texture);
 

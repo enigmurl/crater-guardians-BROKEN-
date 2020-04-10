@@ -7,10 +7,10 @@ import com.enigmadux.craterguardians.enemies.Enemy;
 
 
 public class AttackKaiser extends PlayerAttack {
-    private static final float RADIUS = 0.2f;
+    private static final float RADIUS = 0.15f;
 
     private static final int DAMAGE = 20;
-    private static final float SPEED = 1f;
+    private static final float SPEED = 4f;
     private static final float LENGTH = 1f;
 
     /**

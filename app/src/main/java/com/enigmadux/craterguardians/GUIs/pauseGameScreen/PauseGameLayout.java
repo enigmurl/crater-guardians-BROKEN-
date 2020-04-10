@@ -133,12 +133,12 @@ public class PauseGameLayout implements GUILayout {
         }
 
 
-        this.isVisible = visibility;
 
 
         for (int i = this.quadTextures.size()-1;i>= 0;i--){
             this.quadTextures.get(i).setVisibility(visibility);
         }
+        this.isVisible = visibility;
     }
 
     /** Renders sub components

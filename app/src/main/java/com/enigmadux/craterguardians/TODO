@@ -27,11 +27,14 @@
             Finish Settings (Just need to work on title, and maybe background)
             Finish Material Bar
             Finish Home Screen (might not be able to though)
+
             Finish Character Select
             Finish Level Select
             Finish In Game Screen (first telemetry)
         4/7/20:
             Update Player Icons, player info, and finally level buttons
+        4/10/20:
+            Make Colored buttons, (make the button_background grayscalled, then add a default shader.
 
         Finish 9 slide scaling, instead of what it is right now
 
@@ -56,6 +59,7 @@
         4) It seems like you cannot have 0 enemies in a "wave" need to fix
         5) Make tutorial only three slides, prob remove the stuff about plateaus toxic lakes, replace with supplies, make the level oritented with it
         6) Null objects for both playerAttacks as well as the animations, not sure why
+        7) In tutorial, explain that xp is alien matter
 
     Graphics Notes:
         1) For Level background ask ryan to rescale it to 2048

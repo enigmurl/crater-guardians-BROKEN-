@@ -9,6 +9,7 @@ import com.enigmadux.craterguardians.GUILib.GUIClickable;
 import com.enigmadux.craterguardians.GUILib.GUILayout;
 import com.enigmadux.craterguardians.GUILib.MatieralBar;
 import com.enigmadux.craterguardians.GUILib.VisibilityInducedButton;
+import com.enigmadux.craterguardians.GUILib.VisibilitySwitch;
 import com.enigmadux.craterguardians.GUILib.dynamicText.DynamicText;
 import com.enigmadux.craterguardians.GUIs.inGameScreen.InGameScreen;
 import com.enigmadux.craterguardians.R;
@@ -36,6 +37,7 @@ public class HomeScreen implements GUILayout {
      *
      */
     public static final String ID = STRINGS.HOME_SCREEN_LAYOUT_ID;
+
 
 
     /** Stores all the components
@@ -92,29 +94,30 @@ public class HomeScreen implements GUILayout {
     @Override
     public void loadComponents(Context context, HashMap<String,GUILayout> allLayouts){
         this.renderables.add(new QuadTexture(context,R.drawable.gui_background,0,0,2,2));
+        this.renderables.add(new QuadTexture(context,R.drawable.crater_guardians_label,0,0.75f,1.8f*LayoutConsts.SCALE_X,0.45f));
         //the firstButton (settings button);
         this.clickables.add(new VisibilityInducedButton(context, R.drawable.settings_button,
                 1 - 0.15f * LayoutConsts.SCALE_X,0.85f,0.2f,0.2f,
                 this,allLayouts.get(STRINGS.SETTINGS_LAYOUT_ID), false));
         //second button is the character select layout
         VisibilityInducedButton characterSelectButton = new VisibilityInducedButton(context,R.drawable.button_background,
-                0,-0.3f,1.5f,0.4f,
+                0.35f,-0.60f,1.15f,0.5f,
                 this,allLayouts.get(STRINGS.CHARACTER_SELECT_LAYOUT_ID), true);
-        characterSelectButton.updateText(STRINGS.CHARACTER_SELECT_BUTTON_TEXT,0.1f);
+        characterSelectButton.updateText(STRINGS.CHARACTER_SELECT_BUTTON_TEXT,0.08f);
         this.clickables.add(characterSelectButton);
 
 
         //third one is a display, but not a clickable
         this.characterDisplay = new CharacterDisplay(context,this.craterRenderer.getWorld().getPlayer().getPlayerIcon(),
-                0,0.45f,1f,1f);
+                -0.4f,-0.25f,1.35f,1.35f);
 
 
 
         //fourth one is the level select button
         VisibilityInducedButton levelSelectButton = new VisibilityInducedButton(context,R.drawable.button_background,
-                0,-0.75f,1.5f,0.4f,
+                0.35f,0.05f,1.15f,0.5f,
                 this,allLayouts.get(STRINGS.LEVEL_SELECT_LAYOUT_ID), true);
-        levelSelectButton.updateText(STRINGS.LEVEL_SELECT_BUTTON_TEXT,0.1f);
+        levelSelectButton.updateText(STRINGS.LEVEL_SELECT_BUTTON_TEXT,0.08f);
         this.clickables.add(levelSelectButton);
 
         matieralBar = new MatieralBar(context);
@@ -166,9 +169,8 @@ public class HomeScreen implements GUILayout {
      */
     @Override
     public void setVisibility(boolean visibility) {
-        this.isVisible = visibility;
 
-        if (this.isVisible){
+        if (visibility){
             SoundLib.setStateGameMusic(false);
             SoundLib.setStateVictoryMusic(false);
             SoundLib.setStateLossMusic(false);
@@ -190,6 +192,12 @@ public class HomeScreen implements GUILayout {
         for (int i = this.renderables.size()-1;i>= 0;i--){
             this.renderables.get(i).setVisibility(visibility);
         }
+        if (! visibility){
+            for (int i = 0; i < matieralBar.getRenderables().size();i++){
+                matieralBar.getRenderables().get(i).setVisibility(true);
+            }
+        }
+        this.isVisible = visibility;
     }
 
     public MatieralBar getMatieralBar(){

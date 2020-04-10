@@ -46,7 +46,7 @@ public class STRINGS {
     /** The text of the character select button in the home screen
      *
      */
-    public static final String CHARACTER_SELECT_BUTTON_TEXT = "Choose Character";
+    public static final String CHARACTER_SELECT_BUTTON_TEXT = "Choose Player";
     /** The text of the level select button in the home screen
      *
      */
@@ -74,7 +74,7 @@ public class STRINGS {
      */
     public static final String BACK_TO_LEVELS_BUTTON = "Choose Level";
 
-    public static final String XP_PREFIX = "XP: ";
+    public static final String XP_PREFIX = " ";
 
 
 

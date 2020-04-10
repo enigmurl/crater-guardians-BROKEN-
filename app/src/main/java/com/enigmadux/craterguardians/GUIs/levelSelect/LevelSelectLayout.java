@@ -7,11 +7,13 @@ import com.enigmadux.craterguardians.CraterRenderer;
 import com.enigmadux.craterguardians.GUILib.GUIClickable;
 import com.enigmadux.craterguardians.GUILib.GUILayout;
 import com.enigmadux.craterguardians.GUILib.ImageText;
+import com.enigmadux.craterguardians.GUILib.MatieralBar;
 import com.enigmadux.craterguardians.GUILib.Text;
 import com.enigmadux.craterguardians.GUILib.TextRenderable;
 import com.enigmadux.craterguardians.GUILib.VisibilityInducedButton;
 import com.enigmadux.craterguardians.GUILib.VisibilitySwitch;
 import com.enigmadux.craterguardians.GUILib.dynamicText.DynamicText;
+import com.enigmadux.craterguardians.GUIs.homeScreen.HomeScreen;
 import com.enigmadux.craterguardians.GUIs.inGameScreen.InGameScreen;
 import com.enigmadux.craterguardians.GameMap;
 import com.enigmadux.craterguardians.players.Kaiser;
@@ -65,6 +67,8 @@ public class LevelSelectLayout implements GUILayout {
 
     private ArrayList<QuadTexture> renderables;
 
+    private ArrayList<LevelSelector> levelSelectors;
+
     private ArrayList<TextRenderable> textRenderables;
 
     private ArrayList<VisibilitySwitch> allComponents;
@@ -85,12 +89,15 @@ public class LevelSelectLayout implements GUILayout {
      */
     private GUILayout inGameLayout;
 
+    private MatieralBar matieralBar;
+
     /** Default Constructor
      *
      */
     public LevelSelectLayout(CraterRenderer craterRenderer){
         this.clickables = new ArrayList<>();
         this.renderables = new ArrayList<>();
+        this.levelSelectors = new ArrayList<>();
         textRenderables = new ArrayList<>();
         allComponents = new ArrayList<>();
         this.craterRenderer = craterRenderer;
@@ -119,24 +126,31 @@ public class LevelSelectLayout implements GUILayout {
         float scaleX = (float) LayoutConsts.SCREEN_HEIGHT/LayoutConsts.SCREEN_WIDTH;
 
         for (int i = 0;i < GameMap.NUM_LEVELS;i++){
-            float x =-1 +SIDE_MARGINS +  (i*scaleX * (ICON_WIDTH + ICON_MARGINS)) % (2 - SIDE_MARGINS);
-            float y = 1- TOP_MARGIN -  ICON_WIDTH * (int) (((i*scaleX * (ICON_WIDTH + ICON_MARGINS))/(2 - SIDE_MARGINS)));
+            float x = -1 +SIDE_MARGINS +  (i*scaleX * (ICON_WIDTH + ICON_MARGINS)) % (2 - SIDE_MARGINS);
+            float y =  1- TOP_MARGIN -  ICON_WIDTH * (int) (((i*scaleX * (ICON_WIDTH + ICON_MARGINS))/(2 - SIDE_MARGINS)));
             LevelSelector levelSelector = new LevelSelector(context,R.drawable.level_button_background,
                     x,y,ICON_WIDTH,ICON_WIDTH,
                     this,allLayouts.get(InGameScreen.ID),
                     this.craterRenderer,i+1);
+            this.levelSelectors.add(levelSelector);
             this.clickables.add(levelSelector);
             this.textRenderables.add(levelSelector);
 
         }
         this.renderables.addAll(this.clickables);
 
-        ImageText title = new ImageText(context,R.drawable.button_background,-0.5f,0.8f,1.5f,0.2f,true);
-        title.updateText("Select Level:",0.1f);
+        ImageText title = new ImageText(context,R.drawable.layout_background,0,0.8f,1.25f,0.2f,true);
+        title.updateText("Levels",0.1f);
         this.textRenderables.add(title);
         this.renderables.add(title);
         this.allComponents.addAll(this.textRenderables);
+        this.allComponents.addAll(this.renderables);
         this.allComponents.add(background);
+        this.matieralBar = ((HomeScreen) allLayouts.get(HomeScreen.ID)).getMatieralBar();
+        this.renderables.addAll(matieralBar.getRenderables());
+        this.allComponents.addAll(matieralBar.getRenderables());
+        this.textRenderables.addAll(matieralBar.getRenderables());
+
         this.inGameLayout = allLayouts.get(InGameScreen.ID);
 
     }
@@ -178,7 +192,7 @@ public class LevelSelectLayout implements GUILayout {
      */
     @Override
     public void setVisibility(boolean visibility) {
-        this.isVisible = visibility;
+
         if (visibility){
             SoundLib.setStateGameMusic(false);
             SoundLib.setStateVictoryMusic(false);
@@ -193,9 +207,15 @@ public class LevelSelectLayout implements GUILayout {
             }
         }
 
-        for (int i = this.allComponents.size()-1;i>= 0;i--){
+        for (int i = 0;i< this.allComponents.size();i++){
             this.allComponents.get(i).setVisibility(visibility);
         }
+        if (! visibility){
+            for (int i = 0; i < matieralBar.getRenderables().size();i++){
+                matieralBar.getRenderables().get(i).setVisibility(true);
+            }
+        }
+        this.isVisible = visibility;
     }
 
     @Override

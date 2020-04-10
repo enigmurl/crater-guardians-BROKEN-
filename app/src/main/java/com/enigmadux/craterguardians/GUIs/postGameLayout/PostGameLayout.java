@@ -149,7 +149,6 @@ public class PostGameLayout implements GUILayout {
     @Override
     public void setVisibility(boolean visibility) {
 
-        this.isVisible = visibility;
         if (visibility){
             //pause backend
             this.craterRenderer.getCraterBackendThread().setPause(true);
@@ -182,6 +181,7 @@ public class PostGameLayout implements GUILayout {
         for (int i = this.clickables.size()-1;i>= 0;i--){
             this.clickables.get(i).setVisibility(visibility);
         }
+        this.isVisible = visibility;
     }
 
     /** Renders sub components

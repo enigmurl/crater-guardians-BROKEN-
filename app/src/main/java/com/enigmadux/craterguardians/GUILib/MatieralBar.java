@@ -12,7 +12,7 @@ import java.util.ArrayList;
 
 
 public class MatieralBar implements RenderableCollection{
-    private static final float FONT_SIZE = 0.1f;
+    private static final float FONT_SIZE = 0.085f;
 
     private static final float X = -0.6f;
     private static final float Y = 0.9f;
@@ -30,8 +30,8 @@ public class MatieralBar implements RenderableCollection{
      */
     public MatieralBar(Context context){
         //init it all the time anyways just in case
-        xpIndicator = new ImageText(context, R.drawable.materials_bar_background,X,Y,W/ LayoutConsts.SCALE_X,H,false);
-        xpIndicator.setTextDelta(-0.25f,0);
+        xpIndicator = new ImageText(context, R.drawable.materials_bar_background,X - W/2 * LayoutConsts.SCALE_X,Y,W,H,false);
+        xpIndicator.setTextDelta(0.05f,0);
         update();
 
         renderables.clear();

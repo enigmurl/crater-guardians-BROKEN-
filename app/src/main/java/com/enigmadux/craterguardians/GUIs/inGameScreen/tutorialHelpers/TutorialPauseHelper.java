@@ -18,6 +18,8 @@ import enigmadux2d.core.quadRendering.QuadTexture;
 
 public abstract class TutorialPauseHelper extends TransitionAnim implements VisibilitySwitch {
     private static final long FADE_MILLIS = 400;
+    private static final long ANIM_VARIATION = 500;
+
 
     private long DELAY_MILLIS = 16;
 
@@ -103,7 +105,7 @@ public abstract class TutorialPauseHelper extends TransitionAnim implements Visi
         }
         if (firstTime) {
             for (int i = 0, size = this.scalables.size(); i < size; i++) {
-                new PopUp(this.animMillis, orgWs[i],orgHs[i],this.scalables.get(i), 0);
+                new PopUp(this.animMillis +(long) ((ANIM_VARIATION) * (-0.5f + (float) Math.random())), orgWs[i],orgHs[i],this.scalables.get(i), 0);
             }
         }
 

@@ -2,6 +2,7 @@ package com.enigmadux.craterguardians.gameLib;
 
 import android.content.Context;
 
+
 import com.enigmadux.craterguardians.worlds.World;
 
 import java.util.ArrayList;
@@ -10,7 +11,7 @@ import java.util.Iterator;
 /** Holds items and their vertex data
  *
  */
-public class CraterCollection<T extends CraterCollectionElem> {
+public class CraterCollection<T extends CraterCollectionElem> implements Iterable<T>{
 
     /** Vertex data of the item per instance
      *
@@ -94,6 +95,7 @@ public class CraterCollection<T extends CraterCollectionElem> {
         return this.instanceData;
     }
 
+    @Override
     public Iterator<T> iterator(){
         return this.instanceData.iterator();
     }

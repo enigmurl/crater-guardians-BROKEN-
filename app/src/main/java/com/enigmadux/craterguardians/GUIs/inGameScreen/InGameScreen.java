@@ -136,7 +136,6 @@ public class InGameScreen implements GUILayout {
      */
     @Override
     public void setVisibility(boolean visibility) {
-        this.isVisible = visibility;
         boolean tutorialVisibility = visibility && TutorialData.TUTORIAL_ENABLED;
         this.tutorialWrapper.setVisiblility(tutorialVisibility);
 
@@ -146,6 +145,7 @@ public class InGameScreen implements GUILayout {
         if (tutorialVisibility){
             this.pause.setVisibility(false);
         }
+        this.isVisible = visibility;
     }
 
 

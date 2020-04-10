@@ -6,6 +6,7 @@ import android.opengl.Matrix;
 import android.util.Log;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 
 import enigmadux2d.core.shaders.GUIShader;
 import enigmadux2d.core.shaders.ShaderProgram;
@@ -22,7 +23,7 @@ public class GuiRenderer {
 
 
     //all quads share the same mesh, it's initialized in the constructor
-    private final QuadMesh mesh;
+    private final GuiMesh mesh;
 
     //this is where each specfic quad apply's its own transformations
     private final float[] instanceTransformation = new float[16];
@@ -42,12 +43,28 @@ public class GuiRenderer {
      */
     public GuiRenderer(Context context, int vertexShader, int fragmentShader){
         //create the shared mesh
-        this.mesh = new QuadMesh(new float[] {
+        float[] posses = new float[] {
                 -0.5f,0.5f,0,
-                -0.5f,-0.5f,0,
+                -1/6f,0.5f,0,
+                +1/6f,0.5f,0,
                 0.5f,0.5f,0,
-                0.5f,-0.5f,0
-        });
+
+                -0.5f,1/6f,0,
+                -1/6f,1/6f,0,
+                +1/6f,1/6f,0,
+                0.5f,1/6f,0,
+
+                -0.5f,-1/6f,0,
+                -1/6f,-1/6f,0,
+                +1/6f,-1/6f,0,
+                0.5f,-1/6f,0,
+
+                -0.5f,-0.5f,0,
+                -1/6f,-0.5f,0,
+                +1/6f,-0.5f,0,
+                0.5f,-0.5f,0,
+        };
+        this.mesh = new GuiMesh(posses);
 
         Log.d("TEXTURE","id: " + this.mesh.getVaoID());
 
@@ -94,7 +111,7 @@ public class GuiRenderer {
         this.guiShader.writeCornerInfo(quad.getCornerSize(),quad.getAspectRatio());
 
         //finally draw the quad
-        GLES30.glDrawArrays(GLES30.GL_TRIANGLE_STRIP,0,this.mesh.getVertexCount());
+        GLES30.glDrawElements(GLES30.GL_TRIANGLES,this.mesh.indices.capacity(),GLES30.GL_UNSIGNED_INT,this.mesh.indices);
 
         //vertices no longer needed
         GLES30.glDisableVertexAttribArray(QuadMesh.VERTEX_SLOT);
@@ -133,7 +150,7 @@ public class GuiRenderer {
 
             //finally draw the quad
 
-            GLES30.glDrawArrays(GLES30.GL_TRIANGLE_STRIP,0,this.mesh.getVertexCount());
+            GLES30.glDrawElements(GLES30.GL_TRIANGLES,this.mesh.indices.capacity(),GLES30.GL_UNSIGNED_INT,this.mesh.indices);
         }
         //vertices no longer needed
         GLES30.glDisableVertexAttribArray(QuadMesh.VERTEX_SLOT);

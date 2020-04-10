@@ -227,7 +227,7 @@ public class CraterRenderer extends EnigmaduxGLRenderer {
         //reset the color array
         GLES30.glClear(GLES30.GL_COLOR_BUFFER_BIT);
         //fill it with a brownish color
-        GLES30.glClearColor(1,0.125f,0.125f,1.0f);
+        GLES30.glClearColor(0.768f,0.6078f,0.4f,1.0f);
     }
 
     /** Resets the camera Translation M to the origin and pointing towards there

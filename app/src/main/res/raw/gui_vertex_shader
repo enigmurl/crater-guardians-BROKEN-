@@ -1,5 +1,7 @@
 precision highp float;
 uniform mat4 mvpMatrix;
+uniform float cornerSize;
+uniform float aspectRatio;
 
 
 attribute vec3 position;
@@ -8,9 +10,21 @@ varying vec2 pass_textureCord;
 
 
 void main() {
-    gl_Position = mvpMatrix * vec4(position,1);
-    float u = (position.x + 0.5);
+
+    float x = position.x;
+    float y = position.y;
+    float u = (x + 0.5);
     float v = (0.5 - position.y);
+    if (x > -0.4 && x < 0.){
+        x = cornerSize/aspectRatio -0.5;
+        u = cornerSize;
+    } else if (x > 0. && x < 0.4){
+        x = 0.5 - cornerSize/aspectRatio;
+        u = 1. - cornerSize;
+    }
+
+
+    gl_Position = mvpMatrix * vec4(x,y,position.z,1);
     pass_textureCord = vec2(u,v);
 
 }

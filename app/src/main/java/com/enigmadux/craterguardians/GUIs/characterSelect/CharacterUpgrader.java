@@ -92,14 +92,16 @@ public class CharacterUpgrader extends GUIClickable {
     public boolean onHardRelease(MotionEvent e) {
         this.isDown = false;
 
+        this.playerData.updateXP(PlayerData.getExperience() - Player.UPGRADE_COSTS[currentPlayer.getPlayerLevel()]);
         //will not be called if the current player is null
         this.currentPlayer.setPlayerLevel(this.currentPlayer.getPlayerLevel() + 1);
+        this.playerData.writePlayerData();
         if (currentPlayer.getPlayerLevel() < Player.UPGRADE_COSTS.length) {
             this.updateText(STRINGS.CHARACTER_UPGRADER_SUFFIX_TEXT + Player.UPGRADE_COSTS[currentPlayer.getPlayerLevel()], 0.05f);
-            this.playerData.updateXP(PlayerData.getExperience() - Player.UPGRADE_COSTS[currentPlayer.getPlayerLevel()]);
         } else {
             this.updateText("MAX LEVEL",0.05f);
         }
+
         this.characterSelectLayout.updatePlayerIcons();
         this.updateShader();
         return true;

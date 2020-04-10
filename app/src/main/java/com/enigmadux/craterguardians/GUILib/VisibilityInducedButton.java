@@ -72,10 +72,12 @@ public class VisibilityInducedButton extends GUIClickable {
     @Override
     public boolean onHardRelease(MotionEvent e) {
         this.isDown = false;
-        if (this.objectToHide != null)
-            this.objectToHide.setVisibility(false);
         if (this.objectToShow != null)
             this.objectToShow.setVisibility(true);
+        if (this.objectToHide != null)
+            this.objectToHide.setVisibility(false);
+
+
 
         return true;
     }
