@@ -142,6 +142,9 @@ public class JoyStick extends QuadTexture {
         this.isSelected = false;
         this.deltaX = 0;
         this.deltaY = 0;
+        this.centerX = x;
+        this.centerY = y;
+
     }
 
     public QuadTexture getBackground(){

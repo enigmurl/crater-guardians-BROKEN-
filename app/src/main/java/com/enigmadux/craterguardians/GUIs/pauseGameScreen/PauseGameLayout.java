@@ -128,16 +128,14 @@ public class PauseGameLayout implements GUILayout {
     @Override
     public void setVisibility(boolean visibility) {
         //if this is being seen, the game should be paused
-        if (visibility) {
-            this.craterRenderer.getCraterBackendThread().setPause(true);
-        }
-
-
-
 
         for (int i = this.quadTextures.size()-1;i>= 0;i--){
             this.quadTextures.get(i).setVisibility(visibility);
         }
+        if (visibility) {
+            this.craterRenderer.getCraterBackendThread().setPause(true);
+        }
+
         this.isVisible = visibility;
     }
 

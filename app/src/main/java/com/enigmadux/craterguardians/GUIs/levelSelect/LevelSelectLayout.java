@@ -1,8 +1,12 @@
 package com.enigmadux.craterguardians.GUIs.levelSelect;
 
 import android.content.Context;
+import android.opengl.Matrix;
+import android.util.Log;
 import android.view.MotionEvent;
+import android.view.VelocityTracker;
 
+import com.enigmadux.craterguardians.Animations.FlingingAnim;
 import com.enigmadux.craterguardians.CraterRenderer;
 import com.enigmadux.craterguardians.GUILib.GUIClickable;
 import com.enigmadux.craterguardians.GUILib.GUILayout;
@@ -18,6 +22,7 @@ import com.enigmadux.craterguardians.GUIs.inGameScreen.InGameScreen;
 import com.enigmadux.craterguardians.GameMap;
 import com.enigmadux.craterguardians.players.Kaiser;
 import com.enigmadux.craterguardians.players.TutorialPlayer;
+import com.enigmadux.craterguardians.util.MathOps;
 import com.enigmadux.craterguardians.values.LayoutConsts;
 import com.enigmadux.craterguardians.R;
 import com.enigmadux.craterguardians.util.SoundLib;
@@ -36,7 +41,6 @@ import enigmadux2d.core.quadRendering.QuadTexture;
  * @version BETA
  */
 public class LevelSelectLayout implements GUILayout {
-
 
     /** The width and height of each icon, but will be scale down for x axis to make a square
      *
@@ -67,6 +71,8 @@ public class LevelSelectLayout implements GUILayout {
 
     private ArrayList<QuadTexture> renderables;
 
+    private float prevX;
+    private int currentID = -1;
     private ArrayList<LevelSelector> levelSelectors;
 
     private ArrayList<TextRenderable> textRenderables;
@@ -91,6 +97,14 @@ public class LevelSelectLayout implements GUILayout {
 
     private MatieralBar matieralBar;
 
+    private float startX;
+    private float cameraX = 1 - SIDE_MARGINS;
+
+    private FlingingAnim flingingAnim;
+    private VelocityTracker velocityTracker;
+
+    private long prevMillis = System.currentTimeMillis();
+
     /** Default Constructor
      *
      */
@@ -101,6 +115,7 @@ public class LevelSelectLayout implements GUILayout {
         textRenderables = new ArrayList<>();
         allComponents = new ArrayList<>();
         this.craterRenderer = craterRenderer;
+        this.velocityTracker = VelocityTracker.obtain();
     }
 
     /** Due to complexities with references, this can't be in the constructor
@@ -126,18 +141,19 @@ public class LevelSelectLayout implements GUILayout {
         float scaleX = (float) LayoutConsts.SCREEN_HEIGHT/LayoutConsts.SCREEN_WIDTH;
 
         for (int i = 0;i < GameMap.NUM_LEVELS;i++){
-            float x = -1 +SIDE_MARGINS +  (i*scaleX * (ICON_WIDTH + ICON_MARGINS)) % (2 - SIDE_MARGINS);
-            float y =  1- TOP_MARGIN -  ICON_WIDTH * (int) (((i*scaleX * (ICON_WIDTH + ICON_MARGINS))/(2 - SIDE_MARGINS)));
+            float x = -1 +SIDE_MARGINS +  (i*scaleX * (ICON_WIDTH + ICON_MARGINS)) /*% (2 - SIDE_MARGINS)*/;
+            float y =  1- TOP_MARGIN -  ICON_WIDTH /* * (int) (((i*scaleX * (ICON_WIDTH + ICON_MARGINS))/(2 - SIDE_MARGINS)))*/;
             LevelSelector levelSelector = new LevelSelector(context,R.drawable.level_button_background,
                     x,y,ICON_WIDTH,ICON_WIDTH,
                     this,allLayouts.get(InGameScreen.ID),
                     this.craterRenderer,i+1);
+            levelSelector.setCameraX(cameraX);
             this.levelSelectors.add(levelSelector);
             this.clickables.add(levelSelector);
             this.textRenderables.add(levelSelector);
-
         }
         this.renderables.addAll(this.clickables);
+
 
         ImageText title = new ImageText(context,R.drawable.layout_background,0,0.8f,1.25f,0.2f,true);
         title.updateText("Levels",0.1f);
@@ -163,10 +179,15 @@ public class LevelSelectLayout implements GUILayout {
     @Override
     public void render(float[] uMVPMatrix, GuiRenderer renderer, DynamicText textRenderer) {
         if (this.isVisible) {
+            for (int i = 0,size = this.levelSelectors.size();i<size;i++){
+                this.levelSelectors.get(i).setCameraX(this.cameraX);
+            }
             renderer.renderQuads(this.renderables, uMVPMatrix);
             for (int i = 0,size = this.textRenderables.size();i<size;i++){
                 this.textRenderables.get(i).renderText(textRenderer,uMVPMatrix);
             }
+
+
         }
     }
 
@@ -180,9 +201,42 @@ public class LevelSelectLayout implements GUILayout {
     public boolean onTouch(MotionEvent e) {
         if (! this.isVisible) return false;
 
-        for (int i = this.clickables.size()-1;i>= 0;i--){
-            if (this.clickables.get(i).onTouch(e)) return true;
+        if (e.getActionMasked() == MotionEvent.ACTION_DOWN) {
+            if (this.flingingAnim != null) flingingAnim.cancel();
         }
+
+        for (int i = this.clickables.size()-1;i>= 0;i--){
+            if (this.clickables.get(i).onTouch(e)){
+                return true;
+            }
+        }
+
+        if (e.getActionMasked() == MotionEvent.ACTION_DOWN){
+            prevX = MathOps.getOpenGLX(e.getRawX());
+            startX = prevX;
+            currentID = e.getPointerId(e.getActionIndex());
+            Log.d("Level Select","Started scroll: " + currentID);
+            this.prevMillis = System.currentTimeMillis();
+        }
+        else if (e.getActionMasked() == MotionEvent.ACTION_MOVE && e.getPointerId(e.getActionIndex()) == currentID){
+            float x = MathOps.getOpenGLX(e.getRawX());
+            this.cameraX += x - prevX;
+            if (-this.cameraX < -1 +SIDE_MARGINS){
+                this.cameraX = 1 - SIDE_MARGINS;
+            } else if (-this.cameraX >-1 +SIDE_MARGINS +  (GameMap.NUM_LEVELS*LayoutConsts.SCALE_X * (ICON_WIDTH + ICON_MARGINS))){
+                this.cameraX = -(-1 +SIDE_MARGINS +  (GameMap.NUM_LEVELS*LayoutConsts.SCALE_X * (ICON_WIDTH + ICON_MARGINS)));
+            }
+            prevX = x;
+            velocityTracker.addMovement(e);
+        } else if (e.getActionMasked() == MotionEvent.ACTION_UP && e.getPointerId(e.getActionIndex()) == currentID){
+            this.currentID = -1;
+            //seconds
+            velocityTracker.computeCurrentVelocity(1000);
+            float velocity = 2 * velocityTracker.getXVelocity()/LayoutConsts.SCREEN_WIDTH;
+            velocityTracker.clear();
+            this.flingingAnim = new FlingingAnim(this,velocity);
+        }
+
         return false;
     }
 
@@ -210,6 +264,9 @@ public class LevelSelectLayout implements GUILayout {
         for (int i = 0;i< this.allComponents.size();i++){
             this.allComponents.get(i).setVisibility(visibility);
         }
+        for (int i = 0,size = this.levelSelectors.size();i<size;i++){
+            this.levelSelectors.get(i).setCameraX(cameraX);
+        }
         if (! visibility){
             for (int i = 0; i < matieralBar.getRenderables().size();i++){
                 matieralBar.getRenderables().get(i).setVisibility(true);
@@ -222,4 +279,22 @@ public class LevelSelectLayout implements GUILayout {
     public boolean isVisible() {
         return isVisible;
     }
+
+    public float getCameraX(){
+        return cameraX;
+    }
+
+    public void setCameraX(float cameraX){
+        this.cameraX = cameraX;
+        if (-this.cameraX < -1 +SIDE_MARGINS){
+            this.cameraX = 1 - SIDE_MARGINS;
+        } else if (-this.cameraX >-1 +SIDE_MARGINS +  (GameMap.NUM_LEVELS*LayoutConsts.SCALE_X * (ICON_WIDTH + ICON_MARGINS))){
+            this.cameraX = -(-1 +SIDE_MARGINS +  (GameMap.NUM_LEVELS*LayoutConsts.SCALE_X * (ICON_WIDTH + ICON_MARGINS)));
+        }
+
+        ///level selectors updated inside draw
+
+    }
+
+
 }

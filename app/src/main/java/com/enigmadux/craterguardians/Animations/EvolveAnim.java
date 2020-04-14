@@ -52,16 +52,6 @@ public class EvolveAnim extends Animation {
     }
 
 
-    /** Binds the sprite sheet to the quad
-     *
-     * @param context any nonnull context
-     */
-    public static void loadGLTexture(Context context){
-        QuadTexture.loadAndroidTexturePointer(context,R.drawable.death_animation);
-    }
-
-
-
     /** Updates to the currentFrame
      *
      * @param dt milliseconds since last call of update

@@ -21,8 +21,8 @@ public class AttackKaiser extends PlayerAttack {
      * @param y start y
      * @param angle      RADIANS
      */
-    public AttackKaiser(int instanceID, float x, float y, float angle,float attackChargeUp) {
-        super(instanceID, x, y,RADIUS * 2,RADIUS * 2, angle, SPEED, LENGTH,AttackKaiser.DAMAGE,attackChargeUp);
+    public AttackKaiser(int instanceID, float x, float y, float angle,int evolveGen) {
+        super(instanceID, x, y,RADIUS * 2,RADIUS * 2, angle, SPEED, LENGTH,AttackKaiser.DAMAGE);
     }
 
 

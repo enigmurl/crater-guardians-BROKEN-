@@ -194,6 +194,8 @@ public class QuadTexture implements VisibilitySwitch {
             //add it to our banking
             QuadTexture.androidToGLTextureMap.put(texturePointer,returnArr[0]);
 
+            Log.d("Drawable","Generating Resource");
+
         } else {
             returnArr[0] = QuadTexture.androidToGLTextureMap.get(texturePointer);
         }

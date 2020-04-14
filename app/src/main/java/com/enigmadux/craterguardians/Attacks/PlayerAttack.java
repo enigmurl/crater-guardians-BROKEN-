@@ -41,10 +41,10 @@ public abstract class PlayerAttack extends BaseAttack {
      * @param speed          openGL coords/ per second
      * @param length         max length before dying
      */
-    public PlayerAttack(int instanceID, float x, float y, float w, float h, float angle, float speed, float length,float normalDamage,float attackChargeUp) {
+    public PlayerAttack(int instanceID, float x, float y, float w, float h, float angle, float speed, float length,float damage) {
         super(instanceID, x, y, w, h, angle, speed, length, BaseAttack.PLAYER_ATTACK);
 
-        this.damage = (int) (normalDamage * (1 + attackChargeUp));
+        this.damage = (int) damage;
         SoundLib.playPlayerShootSoundEffect();
     }
 

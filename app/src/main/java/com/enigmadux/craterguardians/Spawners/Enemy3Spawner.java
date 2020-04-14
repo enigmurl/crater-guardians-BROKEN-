@@ -55,7 +55,7 @@ public class Enemy3Spawner extends Spawner {
         for (int i = 0;i<numEnemies;i++){
             float x = this.deltaX + (this.width/2  * (1 + (float) Math.cos(Math.PI * 2* i / numEnemies)));
             float y = this.deltaY + (this.height/2 * (1 + (float) Math.sin(Math.PI * 2* i / numEnemies)));
-            int id = blueEnemies.getVertexData().addInstance();
+            //int id = blueEnemies.getVertexData().addInstance();
             //instanceData.add(new Enemy1(id,false));
             //enemies.get(i).setTranslate(x,y);
         }
@@ -66,7 +66,7 @@ public class Enemy3Spawner extends Spawner {
         for (int i = 0;i<numEnemies;i++){
             float x = this.deltaX + (this.width/2  * (1 + (float) Math.cos(Math.PI * 2* i / numEnemies)));
             float y = this.deltaY + (this.height/2 * (1 + (float) Math.sin(Math.PI * 2* i / numEnemies)));
-            int id = orangeEnemies.getVertexData().addInstance();
+            //int id = orangeEnemies.getVertexData().addInstance();
             //enemies.add(new Enemy1(id,true));
             //enemies.get(i).setTranslate(x,y);
         }

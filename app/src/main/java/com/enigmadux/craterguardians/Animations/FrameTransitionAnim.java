@@ -1,7 +1,7 @@
 package com.enigmadux.craterguardians.Animations;
 
 public abstract class FrameTransitionAnim extends TransitionAnim {
-    private static final long DELAY_MILLIS = 16;
+    static final long DELAY_MILLIS = 16;
 
     protected long millisLeft;
     protected long totalMillis;

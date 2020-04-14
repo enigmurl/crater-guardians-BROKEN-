@@ -168,8 +168,8 @@ public abstract class Spawner extends CraterCollectionElem {
         //f(blue1 + orange + blue2) = 0;
 
         //dy over dx
-        float m1 = (orangeEndHealth - maxHealth)/(blue1 + orange);
-        float m2 = (- blue1EndHealth)/(orange + blue2);
+        float m1 = (float) (orangeEndHealth - maxHealth)/(blue1 + orange);
+        float m2 = (float) (- blue1EndHealth)/(orange + blue2);
 
         this.healthFunction = new MultiSegCubicSolver(
                 0,maxHealth,0,

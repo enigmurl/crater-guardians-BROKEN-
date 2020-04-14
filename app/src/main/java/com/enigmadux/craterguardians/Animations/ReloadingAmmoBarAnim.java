@@ -2,22 +2,25 @@ package com.enigmadux.craterguardians.Animations;
 
 import android.util.Log;
 
+import com.enigmadux.craterguardians.GUILib.ProgressBar;
 import com.enigmadux.craterguardians.GUILib.Tileable;
 
 public class ReloadingAmmoBarAnim extends FrameTransitionAnim {
 
-    private Tileable ammoBar;
+    private ProgressBar ammoBar;
 
     private float rChannel;
     private float gChannel;
     private float bChannel;
-    public ReloadingAmmoBarAnim(long millis, Tileable ammoBar){
+    public ReloadingAmmoBarAnim(long millis, ProgressBar ammoBar){
         super(millis);
         this.ammoBar = ammoBar;
-        ammoBar.setAlpha(0);
+        for (int i = 0;i < ammoBar.getRenderables().size();i++) {
+            ammoBar.getRenderables().get(i).setAlpha(0);
+        }
         Log.d("Animations:","Reloading (new instance)");
 
-        float[] currentShader = ammoBar.getShader();
+        float[] currentShader = ammoBar.getRenderables().get(0).getShader();
         rChannel = currentShader[0];
         gChannel = currentShader[1];
         bChannel = currentShader[2];
@@ -26,13 +29,17 @@ public class ReloadingAmmoBarAnim extends FrameTransitionAnim {
 
     @Override
     void step() {
-        this.ammoBar.setAlpha(this.getAmmoBarAlpha((float) (finishedMillis)/totalMillis));
+        for (int i = 0;i < ammoBar.getRenderables().size();i++) {
+            ammoBar.getRenderables().get(i).setAlpha(getAmmoBarAlpha((float) (finishedMillis)/totalMillis));
+        }
     }
 
     @Override
     void finish() {
         super.finish();
-        this.ammoBar.setShader(rChannel,gChannel,bChannel,1);
+        for (int i = 0;i < ammoBar.getRenderables().size();i++) {
+            ammoBar.getRenderables().get(i).setShader(rChannel,gChannel,bChannel,(float) (finishedMillis)/totalMillis);
+        }
     }
 
     /** Helper method that helps computes the alpha during the flashing animation: todo make it so values where the reload time is high it does more flashes as to keep each wavelength the same

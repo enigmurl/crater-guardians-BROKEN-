@@ -29,6 +29,7 @@ import com.enigmadux.craterguardians.players.Player;
 import com.enigmadux.craterguardians.players.TutorialPlayer;
 import com.enigmadux.craterguardians.util.SoundLib;
 import com.enigmadux.craterguardians.values.LayoutConsts;
+import com.enigmadux.craterguardians.worlds.DrawablesLoader;
 import com.enigmadux.craterguardians.worlds.World;
 
 import java.util.ArrayList;
@@ -336,22 +337,22 @@ public class CraterRenderer extends EnigmaduxGLRenderer {
 
     /** Loads textures that aren't loading screen oriented
      *
+     * returns whether it can move onto next step or not
      */
-    private void loadNonBeginningTextures(int step){
+    private boolean loadNonBeginningTextures(int step){
         //this is in the case of a resumed screen, we don't need to re init all the stuff then
         if (this.loadingCompleted){
-            return;
+            return false;
         }
 
         //padding frame so that the loading scren will display
         if (step < 0){
-            return;
+            return true;
         }
         switch (step) {
             case 0:
                 Log.d("RENDERER","Loading step: 0");
                 QuadTexture.resetTextures();
-
                 break;
             case 1:
                 Log.d("RENDERER","Loading step: 1");
@@ -367,8 +368,11 @@ public class CraterRenderer extends EnigmaduxGLRenderer {
                 Log.d("RENDERER","Loading step: 3");
                 break;
             case 4:
+                if (DrawablesLoader.loadResource(context)){
+                    return true;
+                }
                 Log.d("RENDERER","Loading step: 4");
-                break;
+                return false;
             case 5:
                 World.loadTextures(context);
                 Log.d("RENDERER","Loading step: 5");
@@ -441,6 +445,7 @@ public class CraterRenderer extends EnigmaduxGLRenderer {
                 this.loadingCompleted = true;
                 break;
         }
+        return true;
     }
 
     /** Gets the action bar height, used for finding screen width
@@ -530,8 +535,9 @@ public class CraterRenderer extends EnigmaduxGLRenderer {
          *
          */
         void step() {
-            loadNonBeginningTextures(this.step);
-            this.step++;
+            if (loadNonBeginningTextures(this.step)) {
+                this.step++;
+            }
         }
     }
 

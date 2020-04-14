@@ -20,7 +20,7 @@ public class LayoutConsts {
     /** Serves as the color of the level buttons, the color is black
      *
      */
-    public static final float[] LEVEL_FLOAT_TEXT_COLOR = new float[] {0,0,0,1};// 0xFF99462D;
+    public static final float[] LEVEL_FLOAT_TEXT_COLOR = new float[] {1,1,0.664f,1};// 0xFF99462D;
 
     /** The width of the screen in pixels, it is set by the Renderer
      *

@@ -13,37 +13,29 @@ import enigmadux2d.core.quadRendering.QuadTexture;
  * @author Manu Bhat
  * @version BETA
  */
-public class DeathAnim extends Animation {
-
-    /** The amount of frames in the animation
-     *
-     */
-    private static final int NUM_FRAMES = 5;
+public class RippleAnim extends Animation {
 
 
     /** The amount of millis in the animation
      *
      */
-    private static final long ANIMATION_LENGTH = 1000;
+    private static final long ANIMATION_LENGTH = 400;
 
 
     //current place in animation in milliseconds
     private long currentPosition;
+    private float orgR;
 
     /** Default constructor
      *
      * @param x center opengl deltX
      * @param y center opengl y
-     * @param w opengl width
-     * @param h opengl height
      */
-    public DeathAnim(float x,float y,float w,float h){
+    public RippleAnim(float x,float y,float r){
         //null context bc it isnt needed
-        super(null,R.drawable.death_animation,x,y,w,h);
-
-        this.textureW = 1f/NUM_FRAMES;
+        super(null,R.drawable.joystick_background,x,y,0,0);
+        this.orgR = r;
     }
-
 
 
     /** Updates to the currentFrame
@@ -53,7 +45,9 @@ public class DeathAnim extends Animation {
     public void update(World world,long dt) {
         super.update(world,dt);
         this.currentPosition += dt;
-        this.textureDeltaX = MathOps.getTextureBufferTranslationX((int) (this.currentPosition* DeathAnim.NUM_FRAMES/DeathAnim.ANIMATION_LENGTH), DeathAnim.NUM_FRAMES);
+        this.setScale(2 * this.orgR * currentPosition/RippleAnim.ANIMATION_LENGTH,2 * this.orgR * currentPosition/RippleAnim.ANIMATION_LENGTH);
+        this.setAlpha(1 - (float) currentPosition/RippleAnim.ANIMATION_LENGTH);
+
     }
 
     /** Sees whether it's finished or not
@@ -61,6 +55,6 @@ public class DeathAnim extends Animation {
      * @return whether or not the animation is finished
      */
     public boolean isFinished() {
-        return this.currentPosition>DeathAnim.ANIMATION_LENGTH;
+        return this.currentPosition>RippleAnim.ANIMATION_LENGTH;
     }
 }

@@ -3,7 +3,7 @@ package com.enigmadux.craterguardians.Animations;
 import com.enigmadux.craterguardians.GameObjects.Shield;
 
 public class ShieldSpawner extends FrameTransitionAnim {
-    public static final long DEFAULT_MILLIS = 250;
+    public static final long DEFAULT_MILLIS = 100;
     private Shield s;
     private float orgR;
 

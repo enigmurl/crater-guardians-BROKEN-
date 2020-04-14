@@ -16,6 +16,7 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Scanner;
 
+import enigmadux2d.core.quadRendering.QuadTexture;
 import enigmadux2d.core.shaders.ShaderProgram;
 import enigmadux2d.core.shaders.TextShader;
 

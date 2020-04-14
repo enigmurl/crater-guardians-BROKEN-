@@ -17,35 +17,29 @@ import enigmadux2d.core.quadRendering.QuadTexture;
  */
 public class ProgressBar implements RenderableCollection {
     //percent of height, which is then inferred to widht
-    private static final float MARGIN_PERCENT = 0.1f;
+    static final float MARGIN_PERCENT = 0.1f;
 
 
     private int maxValue;
     private int currentValue;
 
     protected ArrayList<QuadTexture> renderables = new ArrayList<>(2);
-    //background
-    private QuadTexture background;
     //the bar on top of the background
     private QuadTexture overlay;
 
 
-
-    private float overlayW;
-    private float overlayH;
-
-
     //center x and y,
-    public ProgressBar(Context context,float x, float y, float w, float h, int maxValue){
+    public ProgressBar(Context context, float x, float y, float w, float h, int maxValue, int barPointer){
         this.maxValue = maxValue;
         this.currentValue = maxValue;
 
-        this.background = new QuadTexture(context, R.drawable.hitpoints_bar_holder,x,y,w,h);
+        //background
+        QuadTexture background = new QuadTexture(context, R.drawable.hitpoints_bar_holder, x, y, w, h);
         float hMargin = h * MARGIN_PERCENT;
 
-        this.overlayH = h - 2 * hMargin;
-        this.overlayW = w - 2 * hMargin * LayoutConsts.SCALE_X;
-        this.overlay = new QuadTexture(context,R.drawable.hitpoints_bar,x,y,overlayW,overlayH);
+        float overlayH = h - 2 * hMargin;
+        float overlayW = w - 2 * hMargin * LayoutConsts.SCALE_X;
+        this.overlay = new QuadTexture(context,barPointer,x,y, overlayW, overlayH);
         this.overlay.setTextureCord(0,0,0.5f,1);
 
 

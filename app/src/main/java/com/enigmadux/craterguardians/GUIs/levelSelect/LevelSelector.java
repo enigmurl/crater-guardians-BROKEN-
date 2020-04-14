@@ -15,13 +15,18 @@ import com.enigmadux.craterguardians.worlds.World;
 import com.enigmadux.craterguardians.values.LayoutConsts;
 import com.enigmadux.craterguardians.values.STRINGS;
 
+import java.util.Arrays;
+
 /** When pressed, it goes into the game with the corresponding level number
  *
  * @author Manu Bhat
  * @version BETA
  */
 public class LevelSelector extends GUIClickable {
-    private static final long DELAY_LEVEL = 48;
+    private static final float MAX_MULT = 3.5f;
+    private static final float MIN_MULT = 1f;
+
+    //private static final long DELAY_LEVEL = 48;
 
     /** Color of when the level is unlocked but not completed (RGBA)
      *
@@ -63,8 +68,12 @@ public class LevelSelector extends GUIClickable {
     private int levelNum;
 
     private PopUp popUpAnimation;
+    private float orgOrgW;
+    private float orgOrgH;
     private float orgW;
     private float orgH;
+
+    private float startX;
 
     /**
      * Default Constructor
@@ -82,19 +91,21 @@ public class LevelSelector extends GUIClickable {
                          LevelSelectLayout levelSelectLayout, GUILayout inGameScreen,
                          CraterRenderer craterRenderer, int levelNum) {
         super(context, texturePointer, x, y, w, h, false);
-
+        this.startX = x;
         this.levelSelectLayout = levelSelectLayout;
         this.inGameScreen = inGameScreen;
         this.backend = craterRenderer.getCraterBackendThread().getBackend();
         this.craterRenderer = craterRenderer;
 
         this.levelNum = levelNum;
-        this.orgW = this.w;
-        this.orgH = this.h;
+        this.orgW = this.orgOrgW = this.w;
+        this.orgH = this.orgOrgH = this.h;
 
 
-        this.textColor = LayoutConsts.LEVEL_FLOAT_TEXT_COLOR;
-        this.updateText(STRINGS.LEVEL_BUTTON_BASE_TEXT + levelNum,h/10);
+
+
+        this.updateText(""+levelNum,h/5);
+        this.textDeltaY = -h/10;
 
     }
 
@@ -168,16 +179,17 @@ public class LevelSelector extends GUIClickable {
             boolean completed = LevelData.getCompletedLevels()[this.levelNum-1];
 
             if (unlocked && completed){
-                this.shader = LevelSelector.COMPLETED_SHADER;
+                this.shader = Arrays.copyOf(LevelSelector.COMPLETED_SHADER,4);
             } else if (unlocked) {
-                this.shader = LevelSelector.UNLOCKED_SHADER;
+                this.shader = Arrays.copyOf(LevelSelector.UNLOCKED_SHADER,4);
             } else {
-                this.shader = LevelSelector.LOCKED_SHADER;
+                this.shader = Arrays.copyOf(LevelSelector.LOCKED_SHADER,4);
             }
             if (popUpAnimation != null){
                 popUpAnimation.cancel();
             }
-            this.popUpAnimation = new PopUp(PopUp.DEFAULT_MILLIS,orgW,orgH,this,this.levelNum * DELAY_LEVEL);
+            //float s = getScale(this.x );
+            //this.popUpAnimation = new PopUp(PopUp.DEFAULT_MILLIS,orgW * s,orgH * s,this,this.levelNum * DELAY_LEVEL);
 
         }
     }
@@ -187,4 +199,42 @@ public class LevelSelector extends GUIClickable {
         super.setScale(w, h);
         this.scale = w/orgW;
     }
+
+    void setCameraX(float cameraX){
+
+        float orgX = cameraX + startX;
+        float x = orgX + (float) (orgX < 0 ? -Math.pow(-orgX,0.75):Math.pow(orgX,0.75));
+        float s = getScale(x);
+
+        if (Math.abs(x) - s * w/2 > 1){
+            s = 0;
+        }
+        this.fontScale = s;
+        if (x < 0 != this.x < 0 && isVisible){
+            SoundLib.playLevelSelectTickSoundEffect();
+        }
+        this.setTransform(x,y,this.orgOrgW * s ,orgOrgH*s );
+        this.orgW = w;
+        this.orgH = h;
+
+        if (Math.abs(x) > 0.8f + w/2 && Math.abs(x) <= 1 + w/2) {
+            this.shader[3] = (1 - Math.abs(x)) * 5;
+            if (this.visibleText != null) {
+                this.visibleText.setAlpha((1 - Math.abs(x)) * 5);
+                Log.d("Text Shader: ","ID: " + this.visibleText.getShader() + " " + this.visibleText);
+            }
+        } else {
+            this.shader[3] = 1;
+            if (this.visibleText != null) {
+                this.visibleText.setAlpha(1);
+            }
+        }
+    }
+
+    //given location on screen, gets the scale
+    private float getScale(float orgX){
+        float t = (1 - Math.abs(orgX));
+        return  t * (MAX_MULT - MIN_MULT) + MIN_MULT;
+    }
+
 }

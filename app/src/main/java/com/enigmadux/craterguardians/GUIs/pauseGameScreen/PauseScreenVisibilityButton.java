@@ -27,6 +27,8 @@ public class PauseScreenVisibilityButton extends VisibilityInducedButton {
      */
     private CraterRenderer craterRenderer;
 
+    private Countdown countdown;
+
     /** Default constructor
      * @param context any context that can get resources
      * @param texturePointer a texture pointer in the form of R.drawable.*;
@@ -60,7 +62,7 @@ public class PauseScreenVisibilityButton extends VisibilityInducedButton {
         //this means we are going into the game
         if (this.objectToShow instanceof Text){
             backend.resetJoySticks();
-            new Countdown((Text)this.objectToShow,3,this.craterRenderer.getCraterBackendThread());
+            this.countdown = new Countdown((Text)this.objectToShow,3,this.craterRenderer.getCraterBackendThread());
             // this needs to be done later
 
         } else {
@@ -74,5 +76,13 @@ public class PauseScreenVisibilityButton extends VisibilityInducedButton {
 
 
         return true;
+    }
+
+    @Override
+    public void setVisibility(boolean visible) {
+        super.setVisibility(visible);
+        if (visible && this.countdown != null){
+            this.countdown.cancel();
+        }
     }
 }

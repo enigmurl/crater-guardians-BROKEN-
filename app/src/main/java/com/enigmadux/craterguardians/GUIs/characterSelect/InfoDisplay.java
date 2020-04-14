@@ -1,6 +1,7 @@
 package com.enigmadux.craterguardians.GUIs.characterSelect;
 
 import android.content.Context;
+import android.util.Log;
 import android.view.MotionEvent;
 
 import com.enigmadux.craterguardians.Animations.PopUp;
@@ -41,18 +42,21 @@ public class InfoDisplay extends GUIClickable {
     @Override
     public boolean onPress(MotionEvent e) {
         this.setVisibility(false);
+        this.scale = 1;
         return true;
     }
 
     @Override
     public boolean onHardRelease(MotionEvent e) {
         //will never come to this state
+        this.scale = 1;
         return false;
     }
 
     @Override
     public boolean onSoftRelease(MotionEvent e) {
         //will never come to this state
+        this.scale = 1;
         return false;
     }
 
@@ -64,5 +68,20 @@ public class InfoDisplay extends GUIClickable {
     @Override
     public boolean isPressed(MotionEvent e) {
         return this.isVisible && ! super.isPressed(e);
+    }
+
+    @Override
+    protected void defaultPressAction() {
+        //do nothing
+    }
+
+    @Override
+    protected void defaultReleaseAction() {
+        //nothing
+    }
+
+    @Override
+    protected void defaultSoftRelease() {
+        //nothing
     }
 }

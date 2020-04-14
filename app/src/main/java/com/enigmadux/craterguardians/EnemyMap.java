@@ -8,6 +8,7 @@ import com.enigmadux.craterguardians.players.Player;
 import com.enigmadux.craterguardians.util.MathOps;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Locale;
@@ -80,7 +81,11 @@ public class EnemyMap {
          * C2|_|_|C3
          */
         //left perpendicular
-        float scalarL = (width/2)/(float) Math.hypot(node1.x-node2.x,node1.y-node2.y);
+        float denom = (float) Math.hypot(node1.x-node2.x,node1.y-node2.y);
+
+        //theyre the same point
+        if (denom == 0) return 0;
+        float scalarL = (width/2)/denom;
 
         //todo MIGTH BE CAUSING GARBAGE COLLECTO
         Node lP = new Node(-scalarL * (node1.y-node2.y),scalarL * (node1.x-node2.x));
@@ -116,7 +121,10 @@ public class EnemyMap {
                     MathOps.lineIntersectsLine(c1.x,c1.y,c3.x,c3.y,points[0][0],points[0][1],points[1][0],points[1][1]) ||
                     MathOps.lineIntersectsLine(c1.x,c1.y,c3.x,c3.y,points[3][0],points[3][1],points[1][0],points[1][1]) ||
                     MathOps.lineIntersectsLine(c1.x,c1.y,c3.x,c3.y,points[0][0],points[0][1],points[2][0],points[2][1]) ||
-                    MathOps.lineIntersectsLine(c1.x,c1.y,c3.x,c3.y,points[2][0],points[2][1],points[3][0],points[3][1])) return -1;
+                    MathOps.lineIntersectsLine(c1.x,c1.y,c3.x,c3.y,points[2][0],points[2][1],points[3][0],points[3][1])){
+                Log.d("ENEMY","Plateau: " + Arrays.deepToString(points) + " n1: " + c0 + " n2: " + c1 + " n3: " + c2 + " c3:" + c3 );
+                return -1;
+            }
 
         }
         for (int i = 0,size = this.toxicLakes.size();i<size;i++){
@@ -153,17 +161,22 @@ public class EnemyMap {
         Node playerNode = new Node(player.getDeltaX(),player.getDeltaY());
 
         for (int i = 1;i<this.nodeMap.length;i++){
-            float weightage = (float) this.isValid(playerNode,nodeMap[i],0);
+
+            float weightage = (float) this.isValid(playerNode, nodeMap[i], 0);
             if (weightage >= 0){
                 nodeMap[i].addNeighbour(playerNode,weightage);
                 playerNode.addNeighbour(nodeMap[i],weightage);
             }
+            Log.d("ENEYM","Match with: "+ nodeMap[i] + " weightage: " + weightage);
+
+
         }
 
 
 
         this.nodeMap[0] = playerNode;
 
+        Log.d("ENEMY MAP","Player connections: " + playerNode.connections + " dx: " + player.getDeltaX() + " dY: " + player.getDeltaY());
 
 
     }

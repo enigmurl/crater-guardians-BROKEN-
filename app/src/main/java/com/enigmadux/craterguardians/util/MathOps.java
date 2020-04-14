@@ -243,6 +243,45 @@ public class MathOps {
         return (o4 == 0 && onSegment(x01,y01,x11,y11,x10,y10));
     }
 
+    /**https://ideone.com/PnPJgb
+     *
+     * @param x00
+     * @param y00
+     * @param x10
+     * @param y10
+     * @param x01
+     * @param y01
+     * @param x11
+     * @param y11
+     * @return
+     */
+    public static boolean lineIntersection(float x00,float y00,float x10,float y10,float x01,float y01,float x11,float y11){
+        float cmpX = x01 - x00;
+        float cmpy = y01 - y00;
+        float rx = x10 - x00;
+        float ry = y10 - y00;
+        float sx = x11 - x01;
+        float sy = y11 - y01;
+
+        float cmPxR = cmpX * ry - cmpy * rx;
+        float cmPxS = cmpX * sy - cmpy * sx;
+        float RxS = rx * sy - ry * sx;
+
+        //colinear
+        if (cmPxR == 0){
+            return ((x01 - x00 < 0f) != (x01 - x10 < 0f))
+                    || ((y01 - y00 < 0f) != (y01 - y00 < 0f));
+        }
+        //paralel
+        if (RxS == 0) return false;
+
+        float rxsr = 1f / RxS;
+        float t = cmPxS * rxsr;
+        float u = cmPxR * rxsr;
+
+        return (t >= 0f) && (t <= 1f) && (u >= 0f) && (u <= 1f);
+    }
+
     /** Gets the t value where deltX = t(x10 - x00) + x00 y = t(y10 - y00) + y00 where (deltX,y) is the intersection point of the two lines
      * even if 0<t<1, there may not be an intersection because it may be only on line 1 but not line segment 2, so use the lineIntersectsLineFunction
      * https://stackoverflow.com/a/1968345/10030086, todo look at "Qwertie"'s optimizations and implement them

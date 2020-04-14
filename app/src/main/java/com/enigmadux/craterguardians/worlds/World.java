@@ -6,13 +6,11 @@ import android.util.Log;
 
 import com.enigmadux.craterguardians.Animations.Animation;
 import com.enigmadux.craterguardians.Animations.DeathAnim;
-import com.enigmadux.craterguardians.Animations.DelayedHide;
 import com.enigmadux.craterguardians.Animations.EnemySpawn;
 import com.enigmadux.craterguardians.Animations.EvolveAnim;
 import com.enigmadux.craterguardians.Attacks.BaseAttack;
 import com.enigmadux.craterguardians.Attacks.EnemyAttack;
 import com.enigmadux.craterguardians.Attacks.PlayerAttack;
-import com.enigmadux.craterguardians.CraterBackend;
 import com.enigmadux.craterguardians.EnemyMap;
 import com.enigmadux.craterguardians.FileStreams.LevelData;
 import com.enigmadux.craterguardians.FileStreams.PlayerData;
@@ -268,16 +266,13 @@ public class World {
      *
      */
     public static void loadTextures(Context context){
+
+
         //inputs
         //characters
         Player.loadTexture(context);
-        Kaiser.loadGLTexture(context);
         TutorialPlayer.loadGLTexture(context);
         //animations
-        DeathAnim.loadGLTexture(context);
-        EvolveAnim.loadGLTexture(context);
-        EnemySpawn.loadGLTexture(context);
-
         //others (lakes + plateaus)
         Spawner.loadGLTexture(context);
 
@@ -636,7 +631,7 @@ public class World {
 
         if (levelNum > 0) {
             LevelData.getCompletedLevels()[levelNum - 1] = true;
-            if (levelNum < CraterBackend.NUM_LEVELS) {
+            if (levelNum < GameMap.NUM_LEVELS) {
                 LevelData.getUnlockedLevels()[levelNum] = true;
             }
         }

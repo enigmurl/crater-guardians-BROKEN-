@@ -71,7 +71,7 @@ public abstract class GUIClickable extends QuadTexture implements VisibilitySwit
     /** ImageText that will be shown to the screen,it's really just vertices and texture cords if it's null, no text is rendered
      *
      */
-    private TextMesh visibleText;
+    protected TextMesh visibleText;
 
     /** This is the actual text that needs to be rendered
      *
@@ -86,13 +86,14 @@ public abstract class GUIClickable extends QuadTexture implements VisibilitySwit
     /** ImageText color that subclasses can change
      *
      */
-    protected float[] textColor = LayoutConsts.CRATER_FLOAT_TEXT_COLOR;
+    protected float[] textColor = new float[4];
 
     protected float textDeltaX;
     protected float textDeltaY;
 
     protected ButtonScalingAnim buttonScalingAnim;
     protected float scale = 1;
+    protected float fontScale = 1;
 
     /**
      * Default Constructor
@@ -106,6 +107,12 @@ public abstract class GUIClickable extends QuadTexture implements VisibilitySwit
      */
     protected GUIClickable(Context context, int texturePointer, float x, float y, float w, float h, boolean isRounded) {
         super(context, texturePointer, x, y, w * LayoutConsts.SCREEN_HEIGHT/LayoutConsts.SCREEN_WIDTH, h);
+        this.textColor[0] = LayoutConsts.CRATER_FLOAT_TEXT_COLOR[0];
+        this.textColor[1] = LayoutConsts.CRATER_FLOAT_TEXT_COLOR[1];
+        this.textColor[2] = LayoutConsts.CRATER_FLOAT_TEXT_COLOR[2];
+        this.textColor[3] = LayoutConsts.CRATER_FLOAT_TEXT_COLOR[3];
+
+
         if (isRounded){
             this.enableRounding();
             this.setShader(SHADER[0],SHADER[1],SHADER[2],SHADER[3]);
@@ -238,12 +245,12 @@ public abstract class GUIClickable extends QuadTexture implements VisibilitySwit
 
         }
         if (this.visibleText != null) {
-            float additionalScale = this.scale;
+            float additionalScale = this.fontScale * this.scale;
             Matrix.setIdentityM(textTranslationMatrix,0);
             //3/2 for the y component bc idk
-            Matrix.translateM(textTranslationMatrix,0, additionalScale * this.textDeltaX-additionalScale *this.fontSize * LayoutConsts.SCREEN_HEIGHT / LayoutConsts.SCREEN_WIDTH * this.visibleText.getW()/2 + this.x,-additionalScale * this.fontSize * 3 * this.visibleText.getH()/2+ this.y + additionalScale * this.textDeltaY ,0);
+            Matrix.translateM(textTranslationMatrix,0, additionalScale * (this.textDeltaX- this.fontSize * LayoutConsts.SCALE_X * this.visibleText.getW()/2) + this.x,-additionalScale * this.fontSize * 3 * this.visibleText.getH()/2+ this.y + additionalScale * this.textDeltaY ,0);
             Matrix.setIdentityM(textScalarMatrix,0);
-            Matrix.scaleM(textScalarMatrix,0,additionalScale *this.fontSize * LayoutConsts.SCREEN_HEIGHT / LayoutConsts.SCREEN_WIDTH, additionalScale * this.fontSize, 1);
+            Matrix.scaleM(textScalarMatrix,0,additionalScale * this.fontSize * LayoutConsts.SCALE_X, additionalScale * this.fontSize, 1);
             Matrix.multiplyMM(textTransformationMatrix,0,textTranslationMatrix,0,textScalarMatrix,0);
             Matrix.multiplyMM(finalMatrix,0,parentMatrix,0,textTransformationMatrix,0);
 
@@ -262,11 +269,13 @@ public abstract class GUIClickable extends QuadTexture implements VisibilitySwit
             if (this.isDown() && e.getActionMasked() == MotionEvent.ACTION_UP) {
                 this.defaultReleaseAction();
                 this.onHardRelease(e);
+                return true;
             } else if (e.getActionMasked() == MotionEvent.ACTION_DOWN) {
                 this.defaultPressAction();
                 this.onPress(e);
+                return true;
             }
-            return true;
+            return this.isDown;
         } else if (this.isDown()) {
             this.defaultSoftRelease();
             this.onSoftRelease(e);
@@ -288,6 +297,7 @@ public abstract class GUIClickable extends QuadTexture implements VisibilitySwit
         } else {
             this.text = newText;
             this.fontSize = fontSize;
+
         }
 
     }
@@ -299,9 +309,9 @@ public abstract class GUIClickable extends QuadTexture implements VisibilitySwit
         SoundLib.playButtonSelectedSoundEffect();
         if (buttonScalingAnim != null){
             buttonScalingAnim.cancel();
-            buttonScalingAnim = new ButtonScalingAnim(this,ButtonScalingAnim.DEFAULT_MILLIS,this.buttonScalingAnim.getMillisLeft(),1,BUTTON_DOWN_SCALEFACTOR);
+            buttonScalingAnim = new ButtonScalingAnim(this,ButtonScalingAnim.DEFAULT_MILLIS,this.buttonScalingAnim.getMillisLeft(),1, BUTTON_DOWN_SCALEFACTOR);
         } else {
-            buttonScalingAnim = new ButtonScalingAnim(this,ButtonScalingAnim.DEFAULT_MILLIS,0,1,BUTTON_DOWN_SCALEFACTOR);
+            buttonScalingAnim = new ButtonScalingAnim(this,ButtonScalingAnim.DEFAULT_MILLIS,0,1, BUTTON_DOWN_SCALEFACTOR);
         }
 
     }

@@ -62,7 +62,7 @@ public class TutorialPlayer extends Player {
     @Override
     public void attack(World world,float angle) {
         int id = world.getPlayerAttacks().createVertexInstance();
-        AttackTutorialPlayer a = new AttackTutorialPlayer(id,this.getDeltaX(),this.getDeltaY(),angle,this.attackChargeUp);
+        AttackTutorialPlayer a = new AttackTutorialPlayer(id,this.getDeltaX(),this.getDeltaY(),angle);
         world.getPlayerAttacks().addInstance(a);
     }
 
@@ -126,11 +126,6 @@ public class TutorialPlayer extends Player {
     @Override
     public float getDamageForEvolve() {
         return EVOLVE_DAMAGE[this.evolveGen];
-    }
-
-    @Override
-    public float getDamageForFullChargeUp() {
-        return DAMAGE_FOR_CHARGE_UP;
     }
 
     @Override

@@ -29,62 +29,16 @@ import enigmadux2d.core.quadRendering.QuadTexture;
  */
 public abstract class Player implements Character {
 
-    public static final int[] UPGRADE_COSTS = new int[] {10,10,10,10,10,10,10,10,10,10,10,10,10,10,
-            10,10,10,10,10,10,10,10,10,10,10,10,10,10,
-            10,10,10,10,10,10,10,10,10,10,10,10,10,10,
-            10,10,10,10,10,10,10,10,10,10,10,10,10,10,
-            10,10,10,10,10,10,10,10,10,10,10,10,10,10,
-            10,10,10,10,10,10,10,10,10,10,10,10,10,10,
-            10,10,10,10,10,10,10,10,10,10,10,10,10,10,
-            10,10,10,10,10,10,10,10,10,10,10,10,10,10,
-            10,10,10,10,10,10,10,10,10,10,10,10,10,10,
-            10,10,10,10,10,10,10,10,10,10,10,10,10,10,
-            10,10,10,10,10,10,10,10,10,10,10,10,10,10,
-            10,10,10,10,10,10,10,10,10,10,10,10,10,10,
-            10,10,10,10,10,10,10,10,10,10,10,10,10,10,
-            10,10,10,10,10,10,10,10,10,10,10,10,10,10,
-            10,10,10,10,10,10,10,10,10,10,10,10,10,10,
-            10,10,10,10,10,10,10,10,10,10,10,10,10,10,
-            10,10,10,10,10,10,10,10,10,10,10,10,10,10,
-            10,10,10,10,10,10,10,10,10,10,10,10,10,10,
-            10,10,10,10,10,10,10,10,10,10,10,10,10,10,
-            10,10,10,10,10,10,10,10,10,10,10,10,10,10,
-            10,10,10,10,10,10,10,10,10,10,10,10,10,10,
-            10,10,10,10,10,10,10,10,10,10,10,10,10,10,
-            10,10,10,10,10,10,10,10,10,10,10,10,10,10,
-            10,10,10,10,10,10,10,10,10,10,10,10,10,10,
-            10,10,10,10,10,10,10,10,10,10,10,10,10,10,
-            10,10,10,10,10,10,10,10,10,10,10,10,10,10,
-            10,10,10,10,10,10,10,10,10,10,10,10,10,10,
-            10,10,10,10,10,10,10,10,10,10,10,10,10,10,
-            10,10,10,10,10,10,10,10,10,10,10,10,10,10,
-            10,10,10,10,10,10,10,10,10,10,10,10,10,10,
-            10,10,10,10,10,10,10,10,10,10,10,10,10,10,
-            10,10,10,10,10,10,10,10,10,10,10,10,10,10,
-            10,10,10,10,10,10,10,10,10,10,10,10,10,10,
-            10,10,10,10,10,10,10,10,10,10,10,10,10,10,
-            10,10,10,10,10,10,10,10,10,10,10,10,10,10,
-            10,10,10,10,10,10,10,10,10,10,10,10,10,10,
-            10,10,10,10,10,10,10,10,10,10,10,10,10,10,
-            10,10,10,10,10,10,10,10,10,10,10,10,10,10,
-            10,10,10,10,10,10,10,10,10,10,10,10,10,10,
-            10,10,10,10,10,10,10,10,10,10,10,10,10,10,
-            10,10,10,10,10,10,10,10,10,10,10,10,10,10,
-            10,10,10,10,10,10,10,10,10,10,10,10,10,10,
-            10,10,10,10,10,10,10,10,10,10,10,10,10,10,
-            10,10,10,10,10,10,10,10,10,10,10,10,10,10,
-            10,10,10,10,10,10,10,10,10,10,10,10,10,10};
+    public static final int[] UPGRADE_COSTS = new int[] {10,15,25,45,75,130,210,320,450,575,
+            800,1200,1700,2650,3500,5000,8100,12000,17000,25000,
+            35000,52000,64300,83200,126000,154000,188000,240000,350000,1500000
+        };
+    protected static final float TOXIC_LAKE_SLOWNESS = 0.1f;
 
     //to avoid floating point errors
     private static final int NUM_EVOLVE_TICKS = 100000;
 
     //default slowness when in toxic lakes, but subclasses can do technicayl what ever they want
-    protected static final float TOXIC_LAKE_SLOWNESS = 0.1f;
-
-    //if an attack is missed, how much should the attack charge up be reduced by (multipllied by)
-    private static final float ATTACK_MISSED_MULT = 0.75f;
-    //the amount reduced per second (subtraction
-    private static final float ATTACK_DROP_PER_SECOND = 0.3f;
 
     private static Shield shield;
 
@@ -146,9 +100,6 @@ public abstract class Player implements Character {
 
 
 
-    //value from 0 to 1, so attack damage would be 1 *
-    protected float attackChargeUp;
-
     protected int numLoadedAttacks;
     protected long millisTillFinishedReloading = 0;
 
@@ -195,7 +146,6 @@ public abstract class Player implements Character {
         this.health = getMaxHealth();
         this.evolveGen = 0;
         this.evolveCharge = 0;
-        this.attackChargeUp = 0;
         this.numLoadedAttacks = getMaxAttacks();
 
         this.activeLakes.clear();
@@ -252,9 +202,6 @@ public abstract class Player implements Character {
             world.completeLevelLost();
             return;
         }
-
-        this.attackChargeUp -= Player.ATTACK_DROP_PER_SECOND * dt/1000;
-        this.attackChargeUp = MathOps.clip(this.attackChargeUp,0,1);
 
         if (this.millisTillFinishedReloading > 0) {
             this.millisTillFinishedReloading -= dt;
@@ -352,14 +299,12 @@ public abstract class Player implements Character {
             this.evolveCharge += NUM_EVOLVE_TICKS * damageDealt / this.getDamageForEvolve();
             this.evolveCharge = Math.min(this.evolveCharge, NUM_EVOLVE_TICKS);
 
-            this.attackChargeUp += damageDealt/this.getDamageForFullChargeUp();
-            this.attackChargeUp = MathOps.clip(this.attackChargeUp,0,1);
         }
     }
 
     //if an attack ends without hitting something
     public void reportFailedAttack(){
-        this.attackChargeUp *= ATTACK_MISSED_MULT;
+
     }
 
 
@@ -415,9 +360,6 @@ public abstract class Player implements Character {
     public abstract float getCharacterSpeed();
 
     public abstract float getDamageForEvolve();
-
-    //the amount of damage needed to be dealth to set the charge up from 0 to 1
-    public abstract float getDamageForFullChargeUp();
 
     public abstract int getNumGens();
 

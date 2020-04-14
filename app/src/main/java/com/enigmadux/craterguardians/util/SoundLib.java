@@ -56,6 +56,8 @@ public class SoundLib {
     private static MediaPlayer evolvingSoundEffect;
     /** sound effect played when xp is gained and that counter thing is shown */
     private static MediaPlayer xpCounterSoundEffect;
+    /** sound effect played when a level select icon is switched */
+    private static MediaPlayer levelSelectTickSoundEffect;
 
     /** whether or not the player has the music on*/
     private static boolean playMusic = true;
@@ -98,6 +100,7 @@ public class SoundLib {
         SoundLib.spawnerDeathSoundEffect = MediaPlayer.create(context,R.raw.spawner_death);
         SoundLib.evolvingSoundEffect = MediaPlayer.create(context,R.raw.evolving_soundeffect);
         SoundLib.xpCounterSoundEffect = MediaPlayer.create(context,R.raw.xpcounter_sound_effect);
+        SoundLib.levelSelectTickSoundEffect = MediaPlayer.create(context,R.raw.level_select_tick);
     }
 
     /** Pauses all music,
@@ -398,6 +401,17 @@ public class SoundLib {
             SoundLib.xpCounterSoundEffect.start();
         }
     }
+    /** Plays the sound effect when the level selector is being switched
+     */
+    public static void playLevelSelectTickSoundEffect(){
+        if (! SoundLib.playSoundEffects) return;
+
+        if (! SoundLib.levelSelectTickSoundEffect.isPlaying()) {
+            SoundLib.levelSelectTickSoundEffect.start();
+        }
+    }
+
+
 
 
     /** Sets whether or not playing music, true means music will be played, false means music wont be played

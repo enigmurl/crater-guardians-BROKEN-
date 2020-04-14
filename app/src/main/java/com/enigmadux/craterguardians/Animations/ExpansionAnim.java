@@ -34,6 +34,7 @@ public class ExpansionAnim extends FrameTransitionAnim {
         this.maxHeight = quadTexture.getH();
         this.minWidth  = startW;
         this.minHeight = startH;
+        quadTexture.setScale(0,0);
         start(16);
     }
 
@@ -49,5 +50,11 @@ public class ExpansionAnim extends FrameTransitionAnim {
     void finish() {
         super.finish();
         this.quadTexture.setScale(maxWidth,maxHeight);
+    }
+
+    @Override
+    public void cancel() {
+        super.cancel();
+        this.finish();
     }
 }

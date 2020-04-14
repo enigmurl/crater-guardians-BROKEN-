@@ -5,6 +5,7 @@ import android.view.MotionEvent;
 
 import com.enigmadux.craterguardians.Animations.ReloadingAmmoBarAnim;
 import com.enigmadux.craterguardians.CraterRenderer;
+import com.enigmadux.craterguardians.GUILib.AmmoBar;
 import com.enigmadux.craterguardians.GUILib.HealthBar;
 import com.enigmadux.craterguardians.GUILib.ProgressBar;
 import com.enigmadux.craterguardians.GUILib.Tileable;
@@ -43,12 +44,12 @@ public class DefaultJoyStickLayout extends JoystickLayout {
 
 
     //center x,y, then w, h
-    private static final float[] PROGRESS_BAR_QUAD = new float[] {0,0.8f,1,0.2f};
-    private static final float[] AMMO_BAR_QUAD = new float[] {0,0.5f,0.4f,0.1f};
+    private static final float[] PROGRESS_BAR_QUAD = new float[] {0.5f,0.8f,0.5f,0.1f};
+    private static final float[] AMMO_BAR_QUAD =  new float[] {0.5f,0.6f,0.5f,0.1f};
 
 
     private ProgressBar playerHealthBar;
-    private Tileable numPlayerAttacks;
+    private ProgressBar numPlayerAttacks;
 
     private ReloadingAmmoBarAnim currentAmmoBarAnim;
     private boolean handledCurrentReloading = false;
@@ -101,9 +102,9 @@ public class DefaultJoyStickLayout extends JoystickLayout {
 
         //max health initialized in update loop
         playerHealthBar = new HealthBar(context,PROGRESS_BAR_QUAD[0],PROGRESS_BAR_QUAD[1],PROGRESS_BAR_QUAD[2],PROGRESS_BAR_QUAD[3],-1);
-        this.numPlayerAttacks = new Tileable(context,R.drawable.ammo_visual,AMMO_BAR_QUAD[0],AMMO_BAR_QUAD[1],AMMO_BAR_QUAD[2],AMMO_BAR_QUAD[3],1);
+        this.numPlayerAttacks = new AmmoBar(context,AMMO_BAR_QUAD[0],AMMO_BAR_QUAD[1],AMMO_BAR_QUAD[2],AMMO_BAR_QUAD[3],-1);
         this.renderables.addAll(playerHealthBar.getRenderables());
-        this.renderables.add(this.numPlayerAttacks);
+        this.renderables.addAll(this.numPlayerAttacks.getRenderables());
     }
 
     @Override
@@ -112,14 +113,14 @@ public class DefaultJoyStickLayout extends JoystickLayout {
         Player p = world.getPlayer();
         playerHealthBar.setMaxValue(p.getMaxHealth());
         playerHealthBar.setValue(p.getHealth());
-        numPlayerAttacks.setMaxAmount(p.getMaxAttacks());
+        numPlayerAttacks.setMaxValue(p.getMaxAttacks());
         if (world.getPlayer().getNumLoadedAttacks() == 0 && ! handledCurrentReloading){
             this.currentAmmoBarAnim = new ReloadingAmmoBarAnim(p.getReloadingTime(),numPlayerAttacks);
-            this.numPlayerAttacks.setCurrentAmount(p.getMaxAttacks());
+            this.numPlayerAttacks.setValue(p.getMaxAttacks());
             handledCurrentReloading = true;
         } else if (world.getPlayer().getNumLoadedAttacks() > 0){
             handledCurrentReloading = false;
-            numPlayerAttacks.setCurrentAmount(p.getNumLoadedAttacks());
+            numPlayerAttacks.setValue(p.getNumLoadedAttacks());
         }
 
         evolveButton.update(world,dt);

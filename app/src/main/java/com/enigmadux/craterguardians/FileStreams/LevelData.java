@@ -3,7 +3,6 @@ package com.enigmadux.craterguardians.FileStreams;
 import android.content.Context;
 import android.util.Log;
 
-import com.enigmadux.craterguardians.CraterBackend;
 import com.enigmadux.craterguardians.GameMap;
 
 import java.io.FileNotFoundException;
@@ -62,12 +61,12 @@ public class LevelData {
         try {
             PrintWriter stdout = new PrintWriter(new OutputStreamWriter(this.context.openFileOutput (LevelData.LEVEL_FILE_PATH, Context.MODE_PRIVATE)));
 
-            for (int i = 0;i<CraterBackend.NUM_LEVELS;i++){
+            for (int i = 0;i<GameMap.NUM_LEVELS;i++){
                 stdout.print(LevelData.unlockedLevels[i] + " ");
                 stdout.println(LevelData.completedLevels[i] + " ");
 
                 //making sure there is always one available level
-                if (LevelData.completedLevels[i] && i < CraterBackend.NUM_LEVELS-1){
+                if (LevelData.completedLevels[i] && i < GameMap.NUM_LEVELS-1){
                     Log.d("LEVEL DATA","Unlocked level:" + (i+2));
                     LevelData.unlockedLevels[i+1] = true;
                 }

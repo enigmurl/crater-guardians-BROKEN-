@@ -4,9 +4,12 @@ import android.content.Context;
 import android.util.Log;
 
 import com.enigmadux.craterguardians.GUILib.MatieralBar;
+import com.enigmadux.craterguardians.players.Fission;
+import com.enigmadux.craterguardians.players.Flamethrower;
 import com.enigmadux.craterguardians.players.Kaiser;
 import com.enigmadux.craterguardians.players.Player;
-import com.enigmadux.craterguardians.players.Ryze;
+import com.enigmadux.craterguardians.players.Shotgunner;
+import com.enigmadux.craterguardians.players.Skippy;
 
 import java.io.IOException;
 import java.io.OutputStreamWriter;
@@ -15,7 +18,7 @@ import java.util.Scanner;
 
 public class PlayerData {
     //all character classes
-    public static final Player[] CHARACTERS = new Player[] {new Kaiser(0,0),new Ryze(0,0)};
+    public static final Player[] CHARACTERS = new Player[] {new Kaiser(0,0),new Skippy(0,0),new Fission(0,0),new Flamethrower(0,0),new Shotgunner(0,0)};
 
     //the path to the player levels + xp file
     private static final String PLAYER_DATA = "player_data";

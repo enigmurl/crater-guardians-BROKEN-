@@ -59,7 +59,7 @@ public class EvolveButton extends QuadTexture {
 
     public boolean onTouch(MotionEvent e) {
         if (this.isPressed(e)) {
-            if (this.isDown && e.getActionMasked() == MotionEvent.ACTION_UP || e.getActionMasked() == MotionEvent.ACTION_POINTER_UP) {
+            if (this.isDown && (e.getActionMasked() == MotionEvent.ACTION_UP || e.getActionMasked() == MotionEvent.ACTION_POINTER_UP)) {
                 this.defaultReleaseAction();
                 this.onHardRelease(e);
             } else if (e.getActionMasked() == MotionEvent.ACTION_DOWN || e.getActionMasked() == MotionEvent.ACTION_POINTER_DOWN) {
@@ -176,10 +176,12 @@ public class EvolveButton extends QuadTexture {
     //2pi/n = flashingPeriod
     //n = 2pi/flashingPeriod
     private float getRed(){
-        return 0.375f * ((float) Math.sin((float) (2 * Math.PI * millisSinceInited)/FLASHING_PERIOD) + 1);
+        return 0;
+        //return 0.375f * ((float) Math.sin((float) (2 * Math.PI * millisSinceInited)/FLASHING_PERIOD) + 1);
 
     }
     private float getBlue(){
-        return 0.375f * ((float) Math.sin((float) (2 * Math.PI * millisSinceInited)/FLASHING_PERIOD) + 1);
+        return 0;
+        //return 0.375f * ((float) Math.sin((float) (2 * Math.PI * millisSinceInited)/FLASHING_PERIOD) + 1);
     }
 }

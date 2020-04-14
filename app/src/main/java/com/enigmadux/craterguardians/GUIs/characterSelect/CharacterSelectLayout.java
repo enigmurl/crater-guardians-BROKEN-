@@ -73,17 +73,14 @@ public class CharacterSelectLayout implements GUILayout {
 
     private ArrayList<VisibilitySwitch> allComponents;
 
+    private ArrayList<QuadTexture> infoDisplays;
+
     private Text instructions;
 
     /** Whether or not to draw the screen
      *
      */
     private boolean isVisible;
-
-    /** The current player being selected, if it's null that means no player is being selected
-     *
-     */
-    private Player currentPlayer;
 
     /** Held outside as well because we need to do some operations to it
      *
@@ -112,6 +109,7 @@ public class CharacterSelectLayout implements GUILayout {
         this.renderables = new ArrayList<>();
         this.textRenderables = new ArrayList<>();
         allComponents = new ArrayList<>();
+        infoDisplays = new ArrayList<>();
         this.craterRenderer = craterRenderer;
         this.playerData = playerData;
     }
@@ -166,13 +164,17 @@ public class CharacterSelectLayout implements GUILayout {
         this.clickables.add(this.characterSelecter);
         this.clickables.add(this.characterUpgrader);
 
-        for (int i = 0;i<CharacterSelectLayout.CHARACTERS.length;i++){
-            Player player = CharacterSelectLayout.CHARACTERS[i];
-            this.clickables.add(new InfoDisplay(context,player,0,0,1,1,false));
-        }
+
 
 
         this.renderables.addAll(this.clickables);
+        for (int i = 0;i<CharacterSelectLayout.CHARACTERS.length;i++){
+            Player player = CharacterSelectLayout.CHARACTERS[i];
+            InfoDisplay infoDisplay = new InfoDisplay(context,player,0,0,1,1,false);
+            this.infoDisplays.add(infoDisplay);
+            this.clickables.add(infoDisplay);
+        }
+
         matieralBar = ((HomeScreen) allLayouts.get(HomeScreen.ID)).getMatieralBar();
         this.renderables.addAll(matieralBar.getRenderables());
 
@@ -227,6 +229,7 @@ public class CharacterSelectLayout implements GUILayout {
                 this.textRenderables.get(i).renderText(textRenderer,uMVPMatrix);
             }
             this.matieralBar.renderText(textRenderer,uMVPMatrix);
+            renderer.renderQuads(infoDisplays,uMVPMatrix);
 
         }
     }
@@ -252,7 +255,9 @@ public class CharacterSelectLayout implements GUILayout {
      *
      */
     void updateCurrentPlayer(Player newPlayer){
-        this.currentPlayer = newPlayer;
+        /** The current player being selected, if it's null that means no player is being selected
+         *
+         */
         this.instructions.setVisibility(false);
         this.characterSelecter.updateCurrentPlayer(newPlayer);
         this.characterUpgrader.updateCurrentPlayer(newPlayer);
@@ -263,7 +268,7 @@ public class CharacterSelectLayout implements GUILayout {
                 break;
             }
         }
-        Log.d("CHARACTER SELECT","Current Player: "+ this.currentPlayer);
+        Log.d("CHARACTER SELECT","Current Player: "+ newPlayer);
     }
 
     void updatePlayerIcons(){

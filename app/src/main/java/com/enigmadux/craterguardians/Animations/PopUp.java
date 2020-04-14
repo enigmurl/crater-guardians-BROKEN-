@@ -1,5 +1,7 @@
 package com.enigmadux.craterguardians.Animations;
 
+import android.util.Log;
+
 import enigmadux2d.core.quadRendering.QuadTexture;
 
 public class PopUp extends FrameTransitionAnim {
@@ -15,12 +17,22 @@ public class PopUp extends FrameTransitionAnim {
         this.orgH = orgH;
         quadTexture.setScale(0,0);
         start(delay);
+        Log.d("PopUP","Org w: "+ orgW + " org H: " + orgH + " millis: " + millis + " delay: " + delay);
     }
 
     @Override
     void step() {
         float scale =this.getScale(Math.min(finishedMillis,totalMillis)/(float) totalMillis);
         this.quadTexture.setScale(scale * orgW,scale * orgH);
+
+    }
+
+    @Override
+    void finish() {
+        super.finish();
+        this.quadTexture.setScale(orgW,orgH);
+        Log.d("PopUP","Finished w: " + quadTexture.getW() + " H: " + quadTexture.getH());
+
     }
 
     //runs the animation (0 < t  <1)

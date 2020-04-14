@@ -1,6 +1,7 @@
 package com.enigmadux.craterguardians.Animations;
 
 import com.enigmadux.craterguardians.GUILib.Text;
+import com.enigmadux.craterguardians.util.SoundLib;
 
 public class XpGainedAnimation extends FrameTransitionAnim {
     public static final long DEFAULT_MILLIS = 2000;
@@ -16,6 +17,7 @@ public class XpGainedAnimation extends FrameTransitionAnim {
         this.xp = xp;
         this.maxSize = xpDisplay.getFontSize();
         xpDisplay.setVisibility(true);
+        SoundLib.playXpCounterSoundEffect();
         start();
     }
 

@@ -25,8 +25,8 @@ public class AttackTutorialPlayer extends PlayerAttack {
      * @param y start y
      * @param angle      RADIANS
      */
-    public AttackTutorialPlayer(int instanceID, float x, float y, float angle,float attackChargeUp) {
-        super(instanceID, x, y,RADIUS * 2,RADIUS * 2, angle, SPEED, LENGTH,AttackTutorialPlayer.DAMAGE,attackChargeUp);
+    public AttackTutorialPlayer(int instanceID, float x, float y, float angle) {
+        super(instanceID, x, y,RADIUS * 2,RADIUS * 2, angle, SPEED, LENGTH,AttackTutorialPlayer.DAMAGE);
     }
 
 

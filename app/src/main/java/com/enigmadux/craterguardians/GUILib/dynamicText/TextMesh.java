@@ -158,6 +158,16 @@ public class TextMesh {
         return shader;
     }
 
+    public void setShader(float r,float g,float b,float a){
+        this.shader[0] = r;
+        this.shader[1] = g;
+        this.shader[2] = b;
+        this.shader[3] = a;
+    }
+    public void setAlpha(float a){
+        this.shader[3] = a;
+    }
+
     /** Gets the element array
      *
      * @return the element array that tells how to order the vertices

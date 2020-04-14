@@ -14,7 +14,9 @@
     4) Add weights to the level data (so enemies know smart paths, fix enemies not having paths sometimes) (4/12/20)
         Basically complete, need to add it to level maker though
     5) Creates levels, character data, attacks etc (5/3/20)
+        Additionally, needs to make for all types of screen, does not look like it's doing that rn
     6) Graphics (hopefully ryan can be doing these along side before that, so same date) (5/3/20)
+        Additionaly, when upgrading, after a new evolve is unlock, it should do some sort of animation
     //note finals and ap stuff around here, so possible delay slightly
     7) Sound Effects (and music) (5/17/20)
     8) Release (nut) (6/8/20)
@@ -22,33 +24,19 @@
 
 
     todo Current Queue:
-        4/6/20:
-            Finish Post Game, maybe create a different background layout (Pretty much finished)
-            Finish Settings (Just need to work on title, and maybe background)
-            Finish Material Bar
-            Finish Home Screen (might not be able to though)
+        4/12/20:
+            Content: Create Characters, start of by making kaiser unlock evolves at different levels (id say 4 max)
+                Keep attack similar to right now
+                Name and think of attacks of 5 characters
+                Kaiser - bullet attack
+                Skippy - skips like a rock
 
-            Finish Character Select
-            Finish Level Select
-            Finish In Game Screen (first telemetry)
-        4/7/20:
-            Update Player Icons, player info, and finally level buttons
-        4/10/20:
-            Make Colored buttons, (make the button_background grayscalled, then add a default shader.
 
-        Finish 9 slide scaling, instead of what it is right now
-
-        in game screen
-                --Make telemetry look decent
-                Go through each layout: (Settings, character select, level select, home)
-        In Game Screen:
-            ---Joysticks need a background---, Also I think having a square rounded button (no gui renderer neccessary) for evolve icon would be nice
-         get info bar looking good PRIORITY
 
         Content (level stuff, should probably do that soon)
 
         Improving GUIs:
-            Do the yellow and red color scheme like the tutorial layout
+            The info bars are taking up too much space on the screen, need to move to top right corner
 
 
 

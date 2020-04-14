@@ -21,9 +21,9 @@ public abstract class BaseAttack extends CraterCollectionElem {
     protected boolean isFinished = false;
 
     private boolean isPlayerAttack;
-    private final float[] scalarTranslationM = new float[16];
+    final float[] scalarTranslationM = new float[16];
 
-    private long ellapsedMillis;
+    long ellapsedMillis;
     /**
      * Default Constructor
      *
@@ -70,6 +70,10 @@ public abstract class BaseAttack extends CraterCollectionElem {
             return;
         }
 
+        this.updateMatrix();
+    }
+
+    void updateMatrix(){
         Matrix.setIdentityM(scalarTranslationM,0);
         Matrix.translateM(scalarTranslationM,0,this.deltaX,this.deltaY,0);
         Matrix.scaleM(scalarTranslationM,0,this.width,this.height,1);
@@ -92,7 +96,7 @@ public abstract class BaseAttack extends CraterCollectionElem {
 
 
     //row = rotation, col = frame num
-    private void setFrame(){
+    void setFrame(){
         float framesPerMilli =  getFramesPerSecond()/1000f;
         int frameNum = (int) ((this.ellapsedMillis % (this.getNumFrames()/framesPerMilli)) * framesPerMilli);
         this.deltaTextureX = MathOps.getTextureBufferTranslationX(frameNum,this.getNumFrames());
@@ -100,7 +104,6 @@ public abstract class BaseAttack extends CraterCollectionElem {
     }
 
     public abstract void collisionCheck(World world);
-
 
 
     protected abstract int getNumFrames();

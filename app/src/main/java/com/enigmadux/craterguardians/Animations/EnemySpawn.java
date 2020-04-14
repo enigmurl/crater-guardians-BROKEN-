@@ -44,14 +44,6 @@ public class EnemySpawn extends Animation {
     }
 
 
-    /** Binds the sprite sheet to the quad
-     *
-     * @param context any nonnull context
-     */
-    public static void loadGLTexture(Context context){
-        //loads the texture for future use
-        QuadTexture.loadAndroidTexturePointer(context,R.drawable.death_animation);
-    }
 
     /** Updates to the currentFrame
      *
