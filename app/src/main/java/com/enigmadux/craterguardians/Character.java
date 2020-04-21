@@ -13,7 +13,7 @@ public interface Character {
      * @param damage the amount of damage the character must take, a >0 value will decrease the health, <0 will increase, =0 will do nothing
      *               though depending on the sub classes implementation, this may vary
      */
-    void damage(int damage);
+    void damage(float damage);
 
 
     /**
@@ -40,7 +40,7 @@ public interface Character {
 
     void setTranslate(float dX,float dY);
 
-
+    void resetShader();
 
 }
 

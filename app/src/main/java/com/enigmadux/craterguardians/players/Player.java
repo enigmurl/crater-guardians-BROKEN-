@@ -4,15 +4,16 @@ import android.content.Context;
 import android.opengl.Matrix;
 import android.util.Log;
 
-import com.enigmadux.craterguardians.Animations.DeathAnim;
-import com.enigmadux.craterguardians.Animations.EvolveAnim;
-import com.enigmadux.craterguardians.Animations.RedShader;
+import com.enigmadux.craterguardians.animations.DeathAnim;
+import com.enigmadux.craterguardians.animations.EvolveAnim;
+import com.enigmadux.craterguardians.animations.ColoredShader;
+import com.enigmadux.craterguardians.animations.ShootAnimation;
 import com.enigmadux.craterguardians.Character;
-import com.enigmadux.craterguardians.GameObjects.Plateau;
-import com.enigmadux.craterguardians.GameObjects.Shield;
-import com.enigmadux.craterguardians.GameObjects.ToxicLake;
+import com.enigmadux.craterguardians.gameobjects.Plateau;
+import com.enigmadux.craterguardians.gameobjects.Shield;
+import com.enigmadux.craterguardians.gameobjects.ToxicLake;
 import com.enigmadux.craterguardians.util.MathOps;
-import com.enigmadux.craterguardians.worlds.World;
+import com.enigmadux.craterguardians.gamelib.World;
 import com.enigmadux.craterguardians.enemies.Enemy;
 import com.enigmadux.craterguardians.util.SoundLib;
 
@@ -105,7 +106,7 @@ public abstract class Player implements Character {
 
 
     //what makes it red when players are hit
-    private RedShader currentShader;
+    private ColoredShader currentShader;
 
     protected Shield currentShield;
 
@@ -239,11 +240,11 @@ public abstract class Player implements Character {
      * @param damage the amount of damage the character must take, a >0 value will decrease the health, <0 will increase, =0 will do nothing
      */
     @Override
-    public void damage(int damage) {
+    public void damage(float damage) {
         if (this.currentShader != null){
             this.currentShader.cancel();
         }
-        this.currentShader = new RedShader(this,RedShader.DEFAULT_LEN);
+        this.currentShader = new ColoredShader(this, ColoredShader.DEFAULT_LEN, true);
         this.health -= damage;
 
     }
@@ -302,13 +303,6 @@ public abstract class Player implements Character {
         }
     }
 
-    //if an attack ends without hitting something
-    public void reportFailedAttack(){
-
-    }
-
-
-
     public void evolve(World world){
         //num gens -1, bc num Evolves = numGens - 1
         if (this.evolveCharge >= NUM_EVOLVE_TICKS && this.evolveGen < this.getNumGens() - 1){
@@ -343,7 +337,12 @@ public abstract class Player implements Character {
     }
 
     //angle is in radians
-    abstract void attack(World world,float angle);
+    void attack(World world,float angle){
+        synchronized (World.animationLock) {
+            ShootAnimation shootAnim = new ShootAnimation(deltaX, deltaY, ShootAnimation.STANDARD_DIMENSIONS, ShootAnimation.STANDARD_DIMENSIONS);
+            world.getAnims().add(shootAnim);
+        }
+    }
 
 
     /** This method should add the needed rotatableEntities to the "rotatableEntities" array list, so that it can be drawn.
@@ -382,4 +381,7 @@ public abstract class Player implements Character {
     //number of attacks
     public abstract int getMaxAttacks();
 
+    public void resetShader(){
+        this.setShader(1,1,1,1);
+    }
 }

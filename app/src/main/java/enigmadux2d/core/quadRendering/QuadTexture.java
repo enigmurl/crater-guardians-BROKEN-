@@ -9,9 +9,7 @@ import android.opengl.Matrix;
 import android.util.Log;
 import android.util.SparseIntArray;
 
-import com.enigmadux.craterguardians.GUILib.MatieralBar;
-import com.enigmadux.craterguardians.GUILib.VisibilitySwitch;
-import com.enigmadux.craterguardians.R;
+import com.enigmadux.craterguardians.guilib.VisibilitySwitch;
 import com.enigmadux.craterguardians.values.LayoutConsts;
 
 /** This is where the actual texture of the quad is stored. As well as instance specfic info

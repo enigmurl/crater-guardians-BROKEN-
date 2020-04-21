@@ -4,9 +4,9 @@ import android.content.Context;
 import android.support.annotation.NonNull;
 import android.util.Log;
 
-import com.enigmadux.craterguardians.Attacks.AttackKaiser;
+import com.enigmadux.craterguardians.attacks.AttackKaiser;
 import com.enigmadux.craterguardians.R;
-import com.enigmadux.craterguardians.worlds.World;
+import com.enigmadux.craterguardians.gamelib.World;
 
 import enigmadux2d.core.quadRendering.QuadTexture;
 
@@ -63,13 +63,13 @@ public class Kaiser extends Player {
         this.e3 = new QuadTexture(context,R.drawable.kaiser_sprite_sheet_e3,0,0,1,1);
         this.e4 = new QuadTexture(context,R.drawable.kaiser_sprite_sheet_e4,0,0,1,1);
         this.e5 = new QuadTexture(context,R.drawable.kaiser_sprite_sheet_e5,0,0,1,1);
-        this.rotatableEntities.add(e1);
         //e2 is added in evolve
     }
 
     //angle is in radians
     @Override
     public void attack(World world,float angle) {
+        super.attack(world,angle);
         Log.d("KAISER","Attacking; "  + angle);
         int id = world.getPlayerAttacks().createVertexInstance();
         AttackKaiser a = new AttackKaiser(id,this.getDeltaX(),this.getDeltaY(),angle,this.evolveGen);

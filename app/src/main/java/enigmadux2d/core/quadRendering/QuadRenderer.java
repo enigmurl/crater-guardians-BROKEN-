@@ -5,6 +5,7 @@ import android.opengl.GLES30;
 import android.util.Log;
 
 import java.util.ArrayList;
+import java.util.Collections;
 
 import enigmadux2d.core.shaders.QuadShader;
 import enigmadux2d.core.shaders.ShaderProgram;
@@ -36,6 +37,7 @@ public class QuadRenderer {
     //see below, but basically a buffered list for efficient rendering and limited state changing
     private ArrayList<QuadTexture> bufferedQuads = new ArrayList<>();
 
+
     /** Default constructor
      *
      * @param context any context that can load resources; used for shader program
@@ -55,7 +57,6 @@ public class QuadRenderer {
 
         //initialize the shader
         this.quadShader = new QuadShader(context,vertexShader,fragmentShader);
-
     }
 
     /** Starts the rendering process, by attaching our shader
@@ -110,12 +111,16 @@ public class QuadRenderer {
      * @param uMVPmatrix a 4x4 matrix that represents the    model view projection matrix
      */
     public void renderQuads(ArrayList<? extends QuadTexture> quads,float[] uMVPmatrix){
+        //Collections.sort(quads,this.sorter);
+
         //in case it's not currently
         this.startRendering();
         //bind the vao
         GLES30.glBindVertexArray(this.mesh.getVaoID());
         //enable the vertices
         GLES30.glEnableVertexAttribArray(QuadMesh.VERTEX_SLOT);
+
+        int prevTexture = -68767;
         //now draw all the quads
         for (int i = 0,size = quads.size();i<size;i++){
             ShaderProgram.NUM_DRAW_CALLS++;
@@ -125,8 +130,13 @@ public class QuadRenderer {
 
             //first write the instance transform matrix
             this.quadShader.writeMatrix(this.instanceTransformation);
+            int texture = quads.get(i).getTexture();
+            if (texture != prevTexture){
+                this.quadShader.writeTexture(texture);
+            }
+            prevTexture = texture;
             //then write the texture
-            this.quadShader.writeTexture(quads.get(i).getTexture());
+            //this.quadShader.writeTexture(quads.get(i).getTexture());
             //then write the shader variable
             this.quadShader.writeShader(quads.get(i).getShader());
             //write texture cord date

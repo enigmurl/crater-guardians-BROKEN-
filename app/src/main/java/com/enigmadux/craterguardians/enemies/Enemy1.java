@@ -1,27 +1,26 @@
 package com.enigmadux.craterguardians.enemies;
 
 
-import com.enigmadux.craterguardians.Attacks.AttackEnemy1;
-import com.enigmadux.craterguardians.worlds.World;
+import com.enigmadux.craterguardians.attacks.AttackEnemy1;
+import com.enigmadux.craterguardians.util.MathOps;
+import com.enigmadux.craterguardians.gamelib.World;
 
+/** Melee range
+ *
+ */
 public class Enemy1 extends Enemy {
-    //a constant that represents how many rows the sprite sheet has (how many orientations of rotations
-    private static final int NUM_ROTATION_ORIENTATIONS = 8;
-    //a constant that represents how many columns the sprite sheet has (how many frames in a single rotation animation)
-    private static final int FRAMES_PER_ROTATION = 8;
-    //a constant that represents how fast to play the animation in frames per second
-    private static final float FPS = 16;
 
-    private static final float RADIUS = 0.15f;
+
+    private static final float RADIUS = 0.2f;
     //milliseconds between attacks
-    private static final long ATTACK_RATE = 1000;
+    private static final long ATTACK_RATE = 2000;
 
-    public static final float[] TEXTURE_MAP = new float[] {
-            0,(Enemy1.NUM_ROTATION_ORIENTATIONS-1f)/Enemy1.NUM_ROTATION_ORIENTATIONS,
-            0,1,
-            1/(float) Enemy1.FRAMES_PER_ROTATION,(Enemy1.NUM_ROTATION_ORIENTATIONS-1f)/Enemy1.NUM_ROTATION_ORIENTATIONS,
-            1/(float) Enemy1.FRAMES_PER_ROTATION,1,
-    };
+    private static final float PLAYER_BIAS = 50;
+
+    private static final float MIN_DIST = 0.4f;
+    private static final float SCRAMBLE_DIST = 1f;
+
+    private static final int[] HEALTHS = new int[] {50,100,175,250};
 
 
     /**
@@ -32,44 +31,40 @@ public class Enemy1 extends Enemy {
      * @param y          the center y in openGL terms
      * @param isBlue    if its blue
      */
-    public Enemy1(int instanceID, float x, float y, boolean isBlue) {
-        super(instanceID, x, y, RADIUS,AttackEnemy1.LENGTH, isBlue,ATTACK_RATE);
+    public Enemy1(int instanceID, float x, float y, boolean isBlue,int strength) {
+        super(instanceID, x, y, RADIUS, AttackEnemy1.LENGTH, isBlue,ATTACK_RATE,strength);
+        this.minDist = MIN_DIST;
     }
 
 
     public float getCharacterSpeed(){
-        return 0.5f;
+        return 0.65f;
     }
 
     @Override
     public int getMaxHealth() {
-        return 40;
+        return HEALTHS[strength];
     }
+
 
     @Override
-    public void update(long dt, World world) {
-        super.update(dt, world);
-    }
-
-    @Override
-    protected int getNumRotationOrientations() {
-        return NUM_ROTATION_ORIENTATIONS;
-    }
-
-    @Override
-    protected int getFramesPerRotation() {
-        return FRAMES_PER_ROTATION;
-    }
-
-    @Override
-    protected float getFramesPerSecond() {
-        return FPS;
-    }
-
     public void attack(World world,float angle){
-        int id = world.getEnemyAttacks().createVertexInstance();
-        AttackEnemy1 a = new AttackEnemy1(id,this.getDeltaX(),this.getDeltaY(),angle);
-        world.getEnemyAttacks().addInstance(a);
+        super.attack(world,angle);
+        AttackEnemy1.spawnBatch(world,deltaX,deltaY,angle);
     }
 
+    @Override
+    boolean canMove(World world) {
+        return super.canMove(world);
+    }
+
+    @Override
+    float getPlayerVsSupplyBias() {
+        return PLAYER_BIAS;
+    }
+
+    @Override
+    boolean isScrambling(World world) {
+        return this.getHealth() * 2 < this.getMaxHealth() || MathOps.sqrDist(deltaX - world.getPlayer().getDeltaX(),deltaY - world.getPlayer().getDeltaY()) < SCRAMBLE_DIST * SCRAMBLE_DIST;
+    }
 }

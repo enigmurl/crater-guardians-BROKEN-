@@ -3,10 +3,9 @@ package com.enigmadux.craterguardians.players;
 import android.content.Context;
 import android.support.annotation.NonNull;
 
-import com.enigmadux.craterguardians.Attacks.AttackFlamethrower;
-import com.enigmadux.craterguardians.Attacks.AttackShotgunner;
+import com.enigmadux.craterguardians.attacks.AttackShotgunner;
 import com.enigmadux.craterguardians.R;
-import com.enigmadux.craterguardians.worlds.World;
+import com.enigmadux.craterguardians.gamelib.World;
 
 import enigmadux2d.core.quadRendering.QuadTexture;
 
@@ -50,6 +49,7 @@ public class Shotgunner extends Player {
 
     @Override
     public void attack(World world, float angle) {
+        super.attack(world,angle);
         AttackShotgunner.spawnBatch(world,deltaX,deltaY,angle,evolveGen);
     }
 
@@ -58,7 +58,6 @@ public class Shotgunner extends Player {
         //this.rotatableEntities.add(visualRep);
         this.e1 = new QuadTexture(context,R.drawable.kaiser_sprite_sheet_e1,0,0,1,1);
         this.e2 = new QuadTexture(context,R.drawable.kaiser_sprite_sheet_e2,0,0,1,1);
-        this.rotatableEntities.add(e1);
     }
 
 
@@ -89,7 +88,14 @@ public class Shotgunner extends Player {
     }
     @Override
     public void setShader(float r, float b, float g, float a) {
-
+        switch (this.evolveGen) {
+            case 0:
+                e1.setShader(r, b, g, a);
+                break;
+            case 1:
+                e2.setShader(r, b, g, a);
+                break;
+        }
     }
 
     @Override

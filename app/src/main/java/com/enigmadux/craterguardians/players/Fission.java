@@ -2,13 +2,10 @@ package com.enigmadux.craterguardians.players;
 
 import android.content.Context;
 import android.support.annotation.NonNull;
-import android.util.Log;
 
-import com.enigmadux.craterguardians.Attacks.AttackFission;
-import com.enigmadux.craterguardians.Attacks.AttackKaiser;
-import com.enigmadux.craterguardians.Attacks.AttackSkippy;
+import com.enigmadux.craterguardians.attacks.AttackFission;
 import com.enigmadux.craterguardians.R;
-import com.enigmadux.craterguardians.worlds.World;
+import com.enigmadux.craterguardians.gamelib.World;
 
 import enigmadux2d.core.quadRendering.QuadTexture;
 
@@ -52,6 +49,7 @@ public class Fission extends Player {
 
     @Override
     public void attack(World world, float angle) {
+        super.attack(world,angle);
         int id = world.getPlayerAttacks().createVertexInstance();
         AttackFission a = new AttackFission(id,this.getDeltaX(),this.getDeltaY(),angle,this.evolveGen);
         world.getPlayerAttacks().addInstance(a);
@@ -62,7 +60,6 @@ public class Fission extends Player {
         //this.rotatableEntities.add(visualRep);
         this.e1 = new QuadTexture(context,R.drawable.kaiser_sprite_sheet_e1,0,0,1,1);
         this.e2 = new QuadTexture(context,R.drawable.kaiser_sprite_sheet_e2,0,0,1,1);
-        this.rotatableEntities.add(e1);
     }
 
 
@@ -91,9 +88,17 @@ public class Fission extends Player {
     public void setPlayerLevel(int playerLevel){
         PLAYER_LEVEL = playerLevel;
     }
+
     @Override
     public void setShader(float r, float b, float g, float a) {
-
+        switch (this.evolveGen) {
+            case 0:
+                e1.setShader(r, b, g, a);
+                break;
+            case 1:
+                e2.setShader(r, b, g, a);
+                break;
+        }
     }
 
     @Override
@@ -155,4 +160,6 @@ public class Fission extends Player {
     public String toString() {
         return "Fission";
     }
+
+
 }

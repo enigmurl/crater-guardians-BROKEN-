@@ -9,6 +9,21 @@ import com.enigmadux.craterguardians.values.LayoutConsts;
  */
 public class MathOps {
 
+    public static float sqrDist(float dx,float dy){
+        return dx * dx + dy * dy;
+    }
+    //rad1 - rad2
+    public static float radDist(float rad1,float rad2){
+        float r1 = (float) ((rad1 % (2 * Math.PI) + 2 * Math.PI) % (2 * Math.PI));
+        float r2 = (float) ((rad2 % (2 * Math.PI) + 2 * Math.PI) % (2 * Math.PI));
+        float dist = (float) (((r1 - r2) + 2 * Math.PI) % (2 * Math.PI));
+        float counter = (float) (dist - 2 * Math.PI);
+        if (Math.abs(dist) < Math.abs(counter)){
+            return dist;
+        } else {
+            return counter;
+        }
+    }
 
     /** Makes sure a character doesn't pass an edge, if its in it, it moves it outside.
      * Portions of code borrowed from: http://csharphelper.com/blog/2017/08/calculate-where-a-line-segment-and-an-ellipse-intersect-in-c/
@@ -172,40 +187,7 @@ public class MathOps {
         return rotation % (360f/numRotationOrientations);
     }
 
-    /** Given three colinear points p, q, r, the function checks if point q lies on line segment 'pr'
-     * Following three functions borrowed from https://www.geeksforgeeks.org/check-if-two-given-line-segments-intersect/
-     *
-     * @param x0 p1 deltX
-     * @param y0 p1 y
-     * @param x1 p2 deltX
-     * @param y1 p2 y
-     * @param x2 p3 deltX
-     * @param y2 p3 y
-     * @return if point q lies on line segment 'pr'
-     */
-    private static boolean onSegment(float x0,float y0,float x1,float y1,float x2,float y2) {
-        return (x2 <= Math.max(x0, x1) && x2 >= Math.min(x0,x1) &&
-                y1 <= Math.max(y0, y1) && y2 >= Math.min(y0, y1));
-    }
 
-    /** Gets the orientation of colinear = 0, clock = 1, counterclockwise = 2
-     *
-     * @param x0 p1 deltX
-     * @param y0 p1 y
-     * @param x1 p2 deltX
-     * @param y1 p2 y
-     * @param x2 p3 deltX
-     * @param y2 p3 y
-     * @return colinear clockwise or counterclockwise
-     */
-    private static int orientation(float x0,float y0,float x1,float y1,float x2,float y2) {
-        double val = (y1 - y0) * (x2 - x1)
-                - (x1 - x0) * (y2 - y1);
-
-        if (val == 0)
-            return 0; // colinear
-        return (val > 0) ? 1 : 2; // clock or counterclock wise
-    }
 
     /** sees whether two line segments intersect
      *
@@ -220,42 +202,6 @@ public class MathOps {
      * @return whether or not the two intersect
      */
     public static boolean lineIntersectsLine(float x00,float y00,float x10,float y10,float x01,float y01,float x11,float y11) {
-
-        int o1 = orientation(x00,y00,x10,y10,x01,y01);
-        int o2 = orientation(x00,y00,x10,y10,x11,y11);
-        int o3 = orientation(x01,y01,x11,y11,x00,y00);
-        int o4 = orientation(x01,y01,x11,y11,x10,y10);
-
-        if (o1 != o2 && o3 != o4)
-            return true;
-
-        // Special Cases
-        // p1, q1 and p2 are colinear and p2 lies on segment p1q1
-        if (o1 == 0 && onSegment(x00,y00, x10,y10,x01,y01)) return true;
-
-        // p1, q1 and q2 are colinear and q2 lies on segment p1q1
-        if (o2 == 0 && onSegment(x00,y00, x10,y10, x11,y11)) return true;
-
-        // p2, q2 and p1 are colinear and p1 lies on segment p2q2
-        if (o3 == 0 && onSegment(x01,y01, x11,y11,x00,y00)) return true;
-
-        // p2, q2 and q1 are colinear and q1 lies on segment p2q2
-        return (o4 == 0 && onSegment(x01,y01,x11,y11,x10,y10));
-    }
-
-    /**https://ideone.com/PnPJgb
-     *
-     * @param x00
-     * @param y00
-     * @param x10
-     * @param y10
-     * @param x01
-     * @param y01
-     * @param x11
-     * @param y11
-     * @return
-     */
-    public static boolean lineIntersection(float x00,float y00,float x10,float y10,float x01,float y01,float x11,float y11){
         float cmpX = x01 - x00;
         float cmpy = y01 - y00;
         float rx = x10 - x00;
@@ -281,6 +227,8 @@ public class MathOps {
 
         return (t >= 0f) && (t <= 1f) && (u >= 0f) && (u <= 1f);
     }
+
+
 
     /** Gets the t value where deltX = t(x10 - x00) + x00 y = t(y10 - y00) + y00 where (deltX,y) is the intersection point of the two lines
      * even if 0<t<1, there may not be an intersection because it may be only on line 1 but not line segment 2, so use the lineIntersectsLineFunction

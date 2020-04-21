@@ -30,8 +30,21 @@
                 Name and think of attacks of 5 characters
                 Kaiser - bullet attack
                 Skippy - skips like a rock
+            Improved enemy ai, making formations, Improve Shotgun attack, improve enemy attacks
+            enemy3 should know where to go. Attack animation (just somethign firing,
+        Start work on levels, make level 19 proper, possibly with some enemy3s
+        Make enemy encounters more individual (increase their stats)
 
+        4/21/20:
+            Spread out enemy 3s, like a fan, also make enemies slowly  push closer and closer towards the enemise
 
+            Start work on other levels
+            need to finish all other characters before mayy
+            Make paths an asynchronous thing run on a thread
+        4/22/20:
+            Fully finish strengths for enemies,
+            Continue work on players
+            See why some enemies are piling at the top
 
         Content (level stuff, should probably do that soon)
 
@@ -41,14 +54,12 @@
 
 
     TODO TODO TODO LONG TERM FIXES:
-        1) Sometimes stuff flicker, specifically enemies when spawning, some enemies don't get the correct path info as well
+        1) Sometimes stuff flicker, specifically enemies when spawning,
         2) Look into downsides of having static textures, also recycle stuff after the app closes
         3) Matieral Bar is a very bad solution, look into something more concrete perhaps wiht listeners
         4) It seems like you cannot have 0 enemies in a "wave" need to fix
-        5) Make tutorial only three slides, prob remove the stuff about plateaus toxic lakes, replace with supplies, make the level oritented with it
-        6) Null objects for both playerAttacks as well as the animations, not sure why
-        7) In tutorial, explain that xp is alien matter
-
+        5) Null objects for both playerAttacks as well as the animations, not sure why
+        6) Possible out of memory, maybe too many threads
     Graphics Notes:
         1) For Level background ask ryan to rescale it to 2048
 

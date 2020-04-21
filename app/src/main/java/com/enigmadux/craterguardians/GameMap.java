@@ -3,17 +3,18 @@ package com.enigmadux.craterguardians;
 import android.content.Context;
 import android.util.Log;
 
-import com.enigmadux.craterguardians.FileStreams.LevelData;
-import com.enigmadux.craterguardians.GameObjects.Plateau;
-import com.enigmadux.craterguardians.GameObjects.Supply;
-import com.enigmadux.craterguardians.GameObjects.ToxicLake;
-import com.enigmadux.craterguardians.Spawners.Enemy1Spawner;
-import com.enigmadux.craterguardians.Spawners.Enemy2Spawner;
-import com.enigmadux.craterguardians.Spawners.Enemy3Spawner;
-import com.enigmadux.craterguardians.Spawners.Spawner;
-import com.enigmadux.craterguardians.gameLib.CraterCollection;
+import com.enigmadux.craterguardians.enemies.Enemy;
+import com.enigmadux.craterguardians.filestreams.LevelData;
+import com.enigmadux.craterguardians.gameobjects.Plateau;
+import com.enigmadux.craterguardians.gameobjects.Supply;
+import com.enigmadux.craterguardians.gameobjects.ToxicLake;
+import com.enigmadux.craterguardians.spawners.Enemy1Spawner;
+import com.enigmadux.craterguardians.spawners.Enemy2Spawner;
+import com.enigmadux.craterguardians.spawners.Enemy3Spawner;
+import com.enigmadux.craterguardians.spawners.Spawner;
+import com.enigmadux.craterguardians.gamelib.CraterCollection;
 import com.enigmadux.craterguardians.players.Player;
-import com.enigmadux.craterguardians.worlds.World;
+import com.enigmadux.craterguardians.gamelib.World;
 
 import java.util.Scanner;
 
@@ -167,7 +168,6 @@ public class GameMap {
         craterRadius = level_data.nextFloat();
 
 
-
         synchronized (World.supplyLock) {
             int numSupplies = level_data.nextInt();
             for (int i = 0; i < numSupplies; i++) {
@@ -233,19 +233,20 @@ public class GameMap {
 
 
                 int instanceID = this.spawnerCollection.createVertexInstance();
+                int strength = Enemy.STRENGTHS[levelNum];
 
                 switch (type) {
                     case "ENEMY_TYPE_1":
                         spawnerCollection.addInstance(new Enemy1Spawner(context,instanceID, x, y, w, h,endOrangeHealth,endBlue1Health,maxHealth,blue1,orange,blue2,
-                                numBlueSpawns,blueSpawnTimes,numOrangeSpawns,orangeSpawnTimes));
+                                numBlueSpawns,blueSpawnTimes,numOrangeSpawns,orangeSpawnTimes,strength));
                         break;
                     case "ENEMY_TYPE_2":
                         spawnerCollection.addInstance(new Enemy2Spawner(context,instanceID, x, y, w, h,endOrangeHealth,endBlue1Health,maxHealth,blue1,orange,blue2,
-                                numBlueSpawns,blueSpawnTimes,numOrangeSpawns,orangeSpawnTimes));
+                                numBlueSpawns,blueSpawnTimes,numOrangeSpawns,orangeSpawnTimes,strength));
                         break;
                     case "ENEMY_TYPE_3":
                         spawnerCollection.addInstance(new Enemy3Spawner(context,instanceID, x, y, w, h,endOrangeHealth,endBlue1Health,maxHealth,blue1,orange,blue2,
-                                numBlueSpawns,blueSpawnTimes,numOrangeSpawns,orangeSpawnTimes));
+                                numBlueSpawns,blueSpawnTimes,numOrangeSpawns,orangeSpawnTimes,strength));
                         break;
                     default:
                         Log.d("GAME MAP","Level: " + levelNum + " incorrect spawner Type of " + type);
@@ -281,7 +282,8 @@ public class GameMap {
         for (int i = 0; i < numNodes; i++) {
             float x = level_data.nextFloat();
             float y = level_data.nextFloat();
-            nodes[i] = new EnemyMap.Node(x, y);
+            float r = level_data.nextFloat();
+            nodes[i] = new EnemyMap.Node(x, y,r);
         }
 
         int numConnections = level_data.nextInt();
@@ -333,7 +335,8 @@ public class GameMap {
      *
      * @return the player in the game
      */
-    public com.enigmadux.craterguardians.players.Player getPlayer() {
+    public Player getPlayer() {
         return player;
     }
+
 }

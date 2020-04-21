@@ -7,6 +7,7 @@ import android.util.Log;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 
 import enigmadux2d.core.shaders.GUIShader;
 import enigmadux2d.core.shaders.ShaderProgram;
@@ -34,6 +35,7 @@ public class GuiRenderer {
 
     //see below, but basically a buffered list for efficient rendering and limited state changing
     private ArrayList<QuadTexture> bufferedQuads = new ArrayList<>();
+
 
     /** Default constructor
      *
@@ -127,11 +129,15 @@ public class GuiRenderer {
      */
     public void renderQuads(ArrayList<? extends QuadTexture> quads,float[] uMVPmatrix){
         //in case it's not currently
+        //Collections.sort(quads,this.sorter);
+
         this.startRendering();
         //bind the vao
         GLES30.glBindVertexArray(this.mesh.getVaoID());
         //enable the vertices
         GLES30.glEnableVertexAttribArray(QuadMesh.VERTEX_SLOT);
+
+        int prevTexture = -1235234;
         //now draw all the quads
         for (int i = 0,size = quads.size();i<size;i++){
             ShaderProgram.NUM_DRAW_CALLS++;
@@ -141,8 +147,12 @@ public class GuiRenderer {
 
             //first write the instance transform matrix
             this.guiShader.writeMatrix(this.instanceTransformation);
-            //then write the texture
-            this.guiShader.writeTexture(quads.get(i).getTexture());
+            int texture = quads.get(i).getTexture();
+            if (texture != prevTexture) {
+                //then write the texture
+                this.guiShader.writeTexture(quads.get(i).getTexture());
+            }
+            prevTexture = texture;
             //then write the shader variable
             this.guiShader.writeShader(quads.get(i).getShader());
             //write aspect ratio

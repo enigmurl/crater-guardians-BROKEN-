@@ -1,12 +1,10 @@
 package com.enigmadux.craterguardians.players;
 
 import android.content.Context;
-import android.util.Log;
 
-import com.enigmadux.craterguardians.Attacks.AttackKaiser;
-import com.enigmadux.craterguardians.Attacks.AttackTutorialPlayer;
+import com.enigmadux.craterguardians.attacks.AttackTutorialPlayer;
 import com.enigmadux.craterguardians.R;
-import com.enigmadux.craterguardians.worlds.World;
+import com.enigmadux.craterguardians.gamelib.World;
 
 import enigmadux2d.core.quadRendering.QuadTexture;
 
@@ -32,7 +30,8 @@ public class TutorialPlayer extends Player {
 
 
 
-    public static QuadTexture visualRep;
+    private QuadTexture e1;
+    private QuadTexture e2;
 
     /**
      * Default Constructor
@@ -49,18 +48,24 @@ public class TutorialPlayer extends Player {
         this(0,0);
     }
 
-    public static void loadGLTexture(Context context){
-        visualRep = new QuadTexture(context, R.drawable.kaiser_sprite_sheet_e1,0,0,1,1);
+    @Override
+    public void spawn() {
+        super.spawn();
+        if (e1 != null && e2 != null) {
+            this.updateSprite();
+        }
     }
 
     @Override
     protected void addRotatableEntities(Context context) {
-        this.rotatableEntities.add(visualRep);
+        e1 = new QuadTexture(context,R.drawable.kaiser_sprite_sheet_e1,0,0,1,1);
+        e2 = new QuadTexture(context,R.drawable.kaiser_sprite_sheet_e2,0,0,1,1);
     }
 
     //angle is in radians
     @Override
     public void attack(World world,float angle) {
+        super.attack(world,angle);
         int id = world.getPlayerAttacks().createVertexInstance();
         AttackTutorialPlayer a = new AttackTutorialPlayer(id,this.getDeltaX(),this.getDeltaY(),angle);
         world.getPlayerAttacks().addInstance(a);
@@ -113,7 +118,14 @@ public class TutorialPlayer extends Player {
     public void setShader(float r, float b, float g, float a) {
         //technically it only affects the static, but theres only one so the shader will be affect that only
         //TODO make more general solution
-        visualRep.setShader(r, b, g, a);
+        switch (this.evolveGen) {
+            case 0:
+                e1.setShader(r, b, g, a);
+                break;
+            case 1:
+                e2.setShader(r, b, g, a);
+                break;
+        }
     }
 
 
@@ -132,5 +144,24 @@ public class TutorialPlayer extends Player {
     public int getNumGens() {
         return NUM_GENS;
     }
+
+    @Override
+    public void evolve(World world) {
+        super.evolve(world);
+        this.updateSprite();
+    }
+
+    private void updateSprite(){
+        switch (this.evolveGen){
+            case 0:
+                this.rotatableEntities.add(e1);
+                break;
+            case 1:
+                this.rotatableEntities.remove(e1);
+                this.rotatableEntities.add(e2);
+                break;
+        }
+    }
+
 
 }

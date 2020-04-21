@@ -4,28 +4,31 @@ import android.content.Context;
 import android.support.annotation.NonNull;
 import android.util.Log;
 
-import com.enigmadux.craterguardians.Attacks.AttackKaiser;
-import com.enigmadux.craterguardians.Attacks.AttackSkippy;
+import com.enigmadux.craterguardians.attacks.AttackSkippy;
 import com.enigmadux.craterguardians.R;
-import com.enigmadux.craterguardians.worlds.World;
+import com.enigmadux.craterguardians.gamelib.World;
 
 import enigmadux2d.core.quadRendering.QuadTexture;
 
 public class Skippy extends Player {
-    private static final int NUM_GENS = 2;
-    private static final int[] EVOLVE_DAMAGE = new int[] {40,100};
+    private static final int NUM_GENS = 3;
+    private static final int[] EVOLVE_DAMAGE = new int[] {1400,2000,3000,3500,4000};
 
-    private static final float SPEED = 1f;
+    private static final float[] SPEED = new float[] {1f,1.1f,1.2f,1.3f,1.4f,1.5f};
     private static final float RADIUS = 0.1f;
-    private static final long MILLIS_BETWEEN_ATTACKS = 300;
+    private static final long MILLIS_BETWEEN_ATTACKS = 200;
 
-    private static final long RELOADING_MILLIS = 1000;
-    private static final int MAX_ATTACKS = 10;
+    private static final long RELOADING_MILLIS = 500;
+    private static final int[] MAX_ATTACKS = new int[] {10,12,15,20,25};
+    private static final int[] HEALTHS = new int[] {200,225,250,275,300};
 
     private static int PLAYER_LEVEL = 0;
 
     private QuadTexture e1;
     private QuadTexture e2;
+    private QuadTexture e3;
+    private QuadTexture e4;
+    private QuadTexture e5;
     /**
      * Default Constructor
      *
@@ -51,6 +54,7 @@ public class Skippy extends Player {
 
     @Override
     public void attack(World world, float angle) {
+        super.attack(world,angle);
         Log.d("SKIPPY","ATTACKING @ "  + angle);
         int id = world.getPlayerAttacks().createVertexInstance();
         AttackSkippy a = new AttackSkippy(id,this.getDeltaX(),this.getDeltaY(),angle,this.evolveGen);
@@ -62,13 +66,15 @@ public class Skippy extends Player {
         //this.rotatableEntities.add(visualRep);
         this.e1 = new QuadTexture(context,R.drawable.kaiser_sprite_sheet_e1,0,0,1,1);
         this.e2 = new QuadTexture(context,R.drawable.kaiser_sprite_sheet_e2,0,0,1,1);
-        this.rotatableEntities.add(e1);
+        this.e3 = new QuadTexture(context,R.drawable.kaiser_sprite_sheet_e3,0,0,1,1);
+        this.e4 = new QuadTexture(context,R.drawable.kaiser_sprite_sheet_e4,0,0,1,1);
+        this.e5 = new QuadTexture(context,R.drawable.kaiser_sprite_sheet_e5,0,0,1,1);
     }
 
 
     @Override
     public int getMaxHealth() {
-        return 200;
+        return HEALTHS[this.evolveGen];
     }
     @Override
     public int getPlayerIcon() {
@@ -93,7 +99,14 @@ public class Skippy extends Player {
     }
     @Override
     public void setShader(float r, float b, float g, float a) {
-
+        switch (this.evolveGen) {
+            case 0:
+                e1.setShader(r, b, g, a);
+                break;
+            case 1:
+                e2.setShader(r, b, g, a);
+                break;
+        }
     }
 
     @Override
@@ -108,19 +121,18 @@ public class Skippy extends Player {
     }
     @Override
     public float getCharacterSpeed() {
-        return (this.activeLakes.size() > 0) ? Player.TOXIC_LAKE_SLOWNESS * SPEED : SPEED;
+        return (this.activeLakes.size() > 0) ? Player.TOXIC_LAKE_SLOWNESS * SPEED[evolveGen] : SPEED[evolveGen];
     }
     @Override
     public float getDamageForEvolve() {
         return EVOLVE_DAMAGE[this.evolveGen];
     }
 
-
-
     @Override
     public int getNumGens() {
-        return NUM_GENS;
+        return Math.min(NUM_GENS,2 + PLAYER_LEVEL/10);
     }
+
 
     @Override
     public long getReloadingTime() {
@@ -129,7 +141,7 @@ public class Skippy extends Player {
 
     @Override
     public int getMaxAttacks() {
-        return MAX_ATTACKS;
+        return MAX_ATTACKS[this.evolveGen];
     }
     @Override
     public void evolve(World world) {
@@ -145,6 +157,18 @@ public class Skippy extends Player {
             case 1:
                 this.rotatableEntities.remove(e1);
                 this.rotatableEntities.add(e2);
+                break;
+            case 2:
+                this.rotatableEntities.remove(e2);
+                this.rotatableEntities.add(e3);
+                break;
+            case 3:
+                this.rotatableEntities.remove(e3);
+                this.rotatableEntities.add(e4);
+                break;
+            case 4:
+                this.rotatableEntities.remove(e4);
+                this.rotatableEntities.add(e5);
                 break;
         }
     }

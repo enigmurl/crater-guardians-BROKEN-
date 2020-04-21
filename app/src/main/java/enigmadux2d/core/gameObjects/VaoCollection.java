@@ -330,7 +330,9 @@ public abstract class VaoCollection {
      * @param instanceId the id of the element that needs to be hidden,
      */
     public void deleteInstance(int instanceId){
-        Log.d("VAO","DELETING " + instanceId);
+        if (! takenIds[instanceId]){
+            throw new IllegalStateException("Deleting object that does not exist");
+        }
         //one instance less
         this.numInstances--;
 

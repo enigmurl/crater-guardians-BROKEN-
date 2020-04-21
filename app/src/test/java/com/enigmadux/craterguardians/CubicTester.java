@@ -1,6 +1,6 @@
 package com.enigmadux.craterguardians;
 
-import com.enigmadux.craterguardians.Spawners.CubicSolver;
+import com.enigmadux.craterguardians.spawners.CubicSolver;
 
 import org.junit.Test;
 

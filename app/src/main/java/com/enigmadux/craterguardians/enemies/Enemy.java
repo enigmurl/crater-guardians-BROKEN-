@@ -3,23 +3,24 @@ package com.enigmadux.craterguardians.enemies;
 import android.opengl.Matrix;
 import android.util.Log;
 
-import com.enigmadux.craterguardians.Animations.EnemySpawn;
-import com.enigmadux.craterguardians.Animations.Knockback;
-import com.enigmadux.craterguardians.Animations.RedShader;
+import com.enigmadux.craterguardians.R;
+import com.enigmadux.craterguardians.animations.EnemySpawn;
+import com.enigmadux.craterguardians.animations.Knockback;
+import com.enigmadux.craterguardians.animations.ColoredShader;
+import com.enigmadux.craterguardians.animations.ShootAnimation;
 import com.enigmadux.craterguardians.Character;
 import com.enigmadux.craterguardians.EnemyMap;
-import com.enigmadux.craterguardians.GameObjects.Plateau;
-import com.enigmadux.craterguardians.GameObjects.Supply;
-import com.enigmadux.craterguardians.GameObjects.ToxicLake;
+import com.enigmadux.craterguardians.gameobjects.Plateau;
+import com.enigmadux.craterguardians.gameobjects.Supply;
+import com.enigmadux.craterguardians.gameobjects.ToxicLake;
 import com.enigmadux.craterguardians.util.MathOps;
-import com.enigmadux.craterguardians.worlds.World;
-import com.enigmadux.craterguardians.gameLib.CraterCollectionElem;
+import com.enigmadux.craterguardians.gamelib.World;
+import com.enigmadux.craterguardians.gamelib.CraterCollectionElem;
 import com.enigmadux.craterguardians.players.Player;
 import com.enigmadux.craterguardians.util.PairIntFloat;
 
 import java.util.ArrayList;
-import java.util.List;
-import java.util.Queue;
+import java.util.LinkedList;
 import java.util.concurrent.TimeUnit;
 
 /** New Enemy
@@ -28,14 +29,60 @@ import java.util.concurrent.TimeUnit;
  * @version BETA
  */
 public abstract class Enemy extends CraterCollectionElem implements Character {
+    //strengths depending on level
+    public static int[] STRENGTHS = new int[] {
+            0,0,0,0,0,0,0,
+            1,1,1,1,1,1,1,
+            2,2,2,2,2,2,2,
+            3,3,3,3,3,3,3,
+    };
+
+    //gives the texture based on strength
+    public static int[] STRENGTH_TEXTURES = new int[]{
+            R.drawable.kaiser_sprite_sheet_e1,
+            R.drawable.kaiser_sprite_sheet_e2,
+            R.drawable.kaiser_sprite_sheet_e3,
+            R.drawable.kaiser_sprite_sheet_e4,
+            R.drawable.kaiser_sprite_sheet_e5
+    };
+
+
+    //a constant that represents how many rows the sprite sheet has (how many orientations of rotations
+    private static final int NUM_ROTATION_ORIENTATIONS = 1;
+    //a constant that represents how many columns the sprite sheet has (how many frames in a single rotation animation)
+    private static final int FRAMES_PER_ROTATION = 1;
+    //a constant that represents how fast to play the animation in frames per second
+    private static final float FPS = 16;
+
+    private static final float STUNNED_SHRINK = 0.8f;
+
+    //radians per second
+    private static final float TURNSPEED = 200f;
+
+    //speed it pushes forward
+    private static final float PUSH_SPEED = 0.2f;
+
+    //every radian per second turned = 0.9f * speed
+    private static final float TURN_SLOWER = 0.25f;
+    //a little noise to each turn (per second)
+    private static final float MAX_NOISE = 1f;
 
     //amount of distance required to query onto the next pos
-    private static final float DIST_TILL_NEXT_POS = 0.3f;
+    private static final float DIST_TILL_NEXT_POS = 0.1f;
     //distance player had to move required to redirect
     private static final float DIST_TILL_RESEARCH = 1f;
 
+    //chance to redirect when scrambling
+    private static final float REDIRECTION_CHANCE = 0.1f;
+    //the last part of the attack is lunging
+    private static final float LUNGE_PERCENTAGE = 0.075f;
 
-
+    public static final float[] TEXTURE_MAP = new float[] {
+            0,(Enemy.NUM_ROTATION_ORIENTATIONS-1f)/Enemy.NUM_ROTATION_ORIENTATIONS,
+            0,1,
+            1/(float) Enemy.FRAMES_PER_ROTATION,(Enemy.NUM_ROTATION_ORIENTATIONS-1f)/Enemy.NUM_ROTATION_ORIENTATIONS,
+            1/(float) Enemy.FRAMES_PER_ROTATION,1,
+    };
 
 
     /** The radius in openGL terms (half the width, half the height)
@@ -58,7 +105,7 @@ public abstract class Enemy extends CraterCollectionElem implements Character {
     private long attackRate;
     private long millisSinceLastAttack;
 
-    private Queue<EnemyMap.Node> currentPath;
+    LinkedList<EnemyMap.Node> currentPath;
     private boolean searchedForPath = false;
 
     //when it starts, so that we can calculate correct frame num
@@ -67,15 +114,16 @@ public abstract class Enemy extends CraterCollectionElem implements Character {
     private long stunnedMillis = 0;
 
     //direction we're heading rads
-    private float rotation;
+    float rotation = 0;
+    private boolean startedPathTraverse;
 
     private boolean spawned = false;
 
     //set to true in the spawning animation
     protected boolean isVisible = false;
 
-    private float velocityX;
-    private float velocityY;
+    float velocityX;
+    float velocityY;
 
     //previous position
     private float prevDeltaX;
@@ -84,8 +132,23 @@ public abstract class Enemy extends CraterCollectionElem implements Character {
     private Knockback knockback;
 
     //if it's targetting player, where was it when it first tried it
-    private float playerStartX;
-    private float playerStartY;
+    private float finalTargetX;
+    private float finalTargetY;
+
+
+    //don't continue closer to player if this close
+    float minDist = 0;
+
+    private boolean scrambling;
+    //where it starts running around
+    private float startX;
+    private float startY;
+
+    private LinkedList<Enemy3> healers;
+
+    int strength;
+
+
     /** Default Constructor
      *
      * @param instanceID the id of the instance in reference to the vao it's in (received using VaoCollection.addInstance());
@@ -94,7 +157,7 @@ public abstract class Enemy extends CraterCollectionElem implements Character {
      * @param r the radius in openGL terms (half the width, half the height)
      * @param milliSeconds ms between attacks
      */
-    public Enemy(int instanceID,float x,float y,float r,float attackLen,boolean isBlue,long milliSeconds){
+    public Enemy(int instanceID,float x,float y,float r,float attackLen,boolean isBlue,long milliSeconds,int strength){
         super(instanceID);
 
         //assign variables to attributes
@@ -107,8 +170,10 @@ public abstract class Enemy extends CraterCollectionElem implements Character {
 
         this.isBlue = isBlue;
         this.attackLen = attackLen;
+        this.strength = strength;
 
         this.health = this.getMaxHealth();
+
 
         if (isBlue){
             this.setShader(0,0,1,1);
@@ -119,6 +184,7 @@ public abstract class Enemy extends CraterCollectionElem implements Character {
         this.attackRate = milliSeconds;
         this.millisSinceLastAttack = attackRate;
 
+        this.healers = new LinkedList<>();
     }
 
 
@@ -133,12 +199,13 @@ public abstract class Enemy extends CraterCollectionElem implements Character {
      * @param damage the amount of damage the character must take, a >0 value will decrease the health, <0 will increase, =0 will do nothing
      */
     @Override
-    public void damage(int damage) {
+    public void damage(float damage) {
         //if its not visible shouldn't be able to be damaged
         if (! this.isVisible) return;
         //need to cast to avoid ambiguity
-        new RedShader((Character) this,RedShader.DEFAULT_LEN);
+        new ColoredShader((Character) this, ColoredShader.DEFAULT_LEN, damage > 0);
         this.health -= damage;
+        this.health = Math.min(this.health,this.getMaxHealth());
     }
 
 
@@ -146,23 +213,11 @@ public abstract class Enemy extends CraterCollectionElem implements Character {
      *
      * @return if the enemy health is above 0
      */
-    public boolean isAlive(){
-        return this.health > 0;
+    public boolean isDead(){
+        return this.health <= 0;
     }
 
 
-    /** Sets the filtration of specific channels to the desired values. The most common uses may be shade the character when
-     * losing or gaining health
-     *
-     * @param r the filter of the red channel
-     * @param b the filter of the blue channel
-     * @param g the filter of the green channel
-     * @param a the filter of the alpha channel
-     */
-    @Override
-    public void setShader(float r, float b, float g, float a) {
-        super.setShader(r, b, g, a);
-    }
 
     /** Updates the transform
      *
@@ -180,8 +235,12 @@ public abstract class Enemy extends CraterCollectionElem implements Character {
             Matrix.scaleM(blankInstanceInfo,0,uMVPMatrix,0,0,0,0);
             return;
         }
+        float r = (float) Math.toDegrees(this.rotation % (2 * Math.PI/NUM_ROTATION_ORIENTATIONS));
+
+        float hScale = stunnedMillis <= 0 ? 1: STUNNED_SHRINK;
         Matrix.translateM(blankInstanceInfo,0,uMVPMatrix,0,this.getDeltaX(),this.getDeltaY(),0);
-        Matrix.scaleM(blankInstanceInfo,0,2 * this.r,2 * this.r,0);
+        Matrix.rotateM(blankInstanceInfo,0,r,0,0,1);
+        Matrix.scaleM(blankInstanceInfo,0,2 * this.r * hScale,2 * this.r * hScale,0);
     }
 
     /** Moves the enemy to a specific position
@@ -200,16 +259,17 @@ public abstract class Enemy extends CraterCollectionElem implements Character {
     }
 
 
-
     public void update(long dt, World world){
         if (! spawned){
             world.getAnims().add(new EnemySpawn(this,this.getDeltaX(),this.getDeltaY(),this.r * 2,this.r * 2));
             this.spawned = true;
             return;
-        } if (! isVisible){
+        }
+        if (! isVisible){
             return;
         }
-        if (! this.isAlive()){
+
+        if (this.isDead()){
             if (this.isBlue){
                 world.getBlueEnemies().delete(this);
             } else {
@@ -221,36 +281,109 @@ public abstract class Enemy extends CraterCollectionElem implements Character {
 
         if (! this.searchedForPath){
             this.searchedForPath = true;
-            PairIntFloat target = this.getNearestTarget(world);
-            PathFinder pf = new PathFinder(world.getEnemyMap(),target.first,this.getDeltaX(),this.getDeltaY(),world.getPlayer());
-            pf.start();
+            this.searchPath(world);
+
         }
 
 
         if (readyToAttack()){
-            PairIntFloat target = this.getNearestTarget(world);
-            int maxIndex = target.first;
-            float minDist = target.second;
-            if (minDist <= this.attackLen){
-                if (maxIndex == -1){
-                    float angle = MathOps.getAngle((world.getPlayer().getDeltaX() - this.getDeltaX())/minDist,(world.getPlayer().getDeltaY() - this.getDeltaY())/minDist);
-                    this.attack(world,angle);
-
-                } else {
-                    Supply s =  world.getSupplies().getInstanceData().get(maxIndex);
-                    float angle = MathOps.getAngle((s.getDeltaX() - this.getDeltaX())/minDist,(s.getDeltaY() - this.getDeltaY())/minDist);
-                    this.attack(world,angle);
-
-                }
+            if (attemptAttack(world)){
                 this.millisSinceLastAttack = 0;
             }
         }
-        stunnedMillis -= dt;
-        if (this.stunnedMillis <= 0) {
-            this.move(world, dt);
-        }
-        this.setFrame(this.rotation);
 
+        stunnedMillis -= dt;
+        prevDeltaX = deltaX;
+        prevDeltaY = deltaY;
+        boolean scrambling = isScrambling(world);
+        if (this.canMove(world)) {
+            if (scrambling){
+                scramble(world,dt);
+            }else {
+                this.move(world, dt);
+            }
+            this.scrambling = scrambling;
+        } else {
+            this.velocityX = velocityY = 0;
+        }
+        this.clipPos(world);
+        this.setFrame(this.rotation);
+    }
+
+    //todo OPTIMIZE
+    private void scramble(World world, long dt){
+        //first call
+        if (! scrambling){
+            this.startX = deltaX;
+            this.startY = deltaY;
+        } else {
+            //push a bit towards the player
+            float dx = world.getPlayer().getDeltaX() - deltaX;
+            float dy = world.getPlayer().getDeltaY() - deltaY;
+            float dist = (float) Math.hypot(dx,dy);
+            float mult = dist < dt * PUSH_SPEED/1000 ? 1 : dt * PUSH_SPEED/1000/dist;
+            startX += dx * mult;
+            startY += dy * mult;
+        }
+
+        if ((float) this.millisSinceLastAttack/this.attackRate >1 - LUNGE_PERCENTAGE/2){
+            float dx = world.getPlayer().getDeltaX() - deltaX;
+            float dy = world.getPlayer().getDeltaY() - deltaY;
+            float dist = (float) Math.hypot(dx,dy);
+            float angle = dist == 0 ? 0:MathOps.getAngle(dx/dist,dy/dist);
+            float speed = this.getCharacterSpeed() * (this.isSlowed(world) ? this.getSpeedInToxicLake():1);
+            this.velocityX = (float) Math.cos(angle) *speed;
+            this.velocityY = (float) Math.sin(angle) *speed;
+            this.rotation = angle;
+        }
+        else if ((float) this.millisSinceLastAttack/this.attackRate < LUNGE_PERCENTAGE/2){
+            float dx = deltaX - world.getPlayer().getDeltaX();
+            float dy = deltaY - world.getPlayer().getDeltaY();
+            float dist = (float) Math.hypot(dx,dy);
+            float angle = dist == 0 ? 0:MathOps.getAngle(dx/dist,dy/dist);
+            float speed = this.getCharacterSpeed() * (this.isSlowed(world) ? this.getSpeedInToxicLake():1);
+            this.velocityX = (float) Math.cos(angle) *speed;
+            this.velocityY = (float) Math.sin(angle) *speed;
+        }
+
+        else {
+            float dist = (float)Math.hypot(deltaX-startX,deltaY-startY);
+            boolean redirect = Math.random()  < REDIRECTION_CHANCE * dist;
+            if (redirect || velocityX == 0 && velocityY == 0) {
+                float returnAngle = (dist == 0) ? 0 : MathOps.getAngle((startX - deltaX) / dist, (startY - deltaY) / dist);
+                float randVal = (float) Math.random() - 0.5f;
+                float angle = (float) (randVal * randVal * 2 * Math.PI) + returnAngle;
+                float speed = this.getCharacterSpeed() * (this.isSlowed(world) ? this.getSpeedInToxicLake() : 1);
+                this.velocityX = (float) Math.cos(angle) * speed;
+                this.velocityY = (float) Math.sin(angle) * speed;
+            }
+        }
+        this.translateFromPos(this.velocityX * dt/1000,this.velocityY * dt/1000);
+    }
+
+    protected void searchPath(World world){
+        PairIntFloat target = this.getNearestTarget(world,true);
+        Supply s = target.first == -1? null : world.getSupplies().getInstanceData().get(target.first);
+        PathFinder pf = new PathFinder(world.getEnemyMap(),target.first,s,this.getDeltaX(),this.getDeltaY(),world.getPlayer());
+        pf.start();
+    }
+
+    protected boolean attemptAttack(World world){
+        PairIntFloat target = this.getNearestTarget(world,false);
+        int maxIndex = target.first;
+        float minDist = target.second;
+        if (minDist <= this.attackLen){
+            if (maxIndex == -1){
+                float angle = minDist == 0 ? 0: MathOps.getAngle((world.getPlayer().getDeltaX() - this.getDeltaX())/minDist,(world.getPlayer().getDeltaY() - this.getDeltaY())/minDist);
+                this.attack(world,angle);
+            } else {
+                Supply s =  world.getSupplies().getInstanceData().get(maxIndex);
+                float angle = minDist == 0 ? 0: MathOps.getAngle((s.getDeltaX() - this.getDeltaX())/minDist,(s.getDeltaY() - this.getDeltaY())/minDist);
+                this.attack(world,angle);
+            }
+            return true;
+        }
+        return false;
     }
 
     protected void move(World world,long dt){
@@ -263,70 +396,82 @@ public abstract class Enemy extends CraterCollectionElem implements Character {
             targetX = world.getPlayer().getDeltaX();
             targetY = world.getPlayer().getDeltaY();
 
-            if (Math.hypot(deltaX-targetX,deltaY - targetY) > this.attackLen && Math.hypot(playerStartX-targetX,playerStartY - targetY) > DIST_TILL_RESEARCH){
-                PairIntFloat target = this.getNearestTarget(world);
-                PathFinder pf = new PathFinder(world.getEnemyMap(),target.first,this.getDeltaX(),this.getDeltaY(),world.getPlayer());
-                pf.start();
+            if (Math.hypot(deltaX-targetX,deltaY - targetY) > this.attackLen && Math.hypot(finalTargetX -targetX, finalTargetY - targetY) > DIST_TILL_RESEARCH){
+               this.searchPath(world);
             }
         } else {
             targetX = this.currentPath.peek().x;
             targetY = this.currentPath.peek().y;
         }
 
-        double travelLen = (float) Math.hypot(this.getDeltaX() - targetX,this.getDeltaY()-targetY);
+        float travelLen = (float) Math.hypot(this.getDeltaX() - targetX,this.getDeltaY()-targetY);
 
         if (currentPath != null && currentPath.size() > 1 && travelLen <  Enemy.DIST_TILL_NEXT_POS) this.currentPath.poll();
 
-
-        //this may be wrong
-        float clippedLength = (travelLen >  this.getCharacterSpeed() * dt / 1000f) ? (this.getCharacterSpeed() *  dt / 1000f)/ (float) travelLen: 1;
-
-
+        float clippedLength = Math.min(travelLen, this.getCharacterSpeed() * dt / 1000f);
 
         //see if intersecting any toxic lakes
-        boolean slowed = false;
-        synchronized (World.toxicLakeLock){
-            ArrayList<ToxicLake> toxicLakes = world.getToxicLakes().getInstanceData();
-            for (int i = 0;i < toxicLakes.size();i++){
-                if (toxicLakes.get(i).intersectsCharacter(this)){
-                    slowed = true;
-                    break;
-                }
-            }
-        }
-        if (slowed){
+        if (this.isSlowed(world)){
             clippedLength *= this.getSpeedInToxicLake();
         }
 
         float startX = this.getDeltaX();
         float startY = this.getDeltaY();
 
-        this.translateFromPos(clippedLength * (targetX - this.getDeltaX()),clippedLength * (targetY - this.getDeltaY()) );
 
+        float actualLen = (float) Math.hypot( (targetX - this.getDeltaX()),(targetY - this.getDeltaY()));
+        float targetRot = actualLen == 0 ? rotation: MathOps.getAngle( (targetX - this.getDeltaX())/actualLen,(targetY - this.getDeltaY())/actualLen);
+
+        if (! startedPathTraverse && this.currentPath!= null ){
+            this.rotation = targetRot;
+            this.startedPathTraverse = true;
+        } else {
+            float rawAngle = MathOps.radDist(targetRot, rotation);
+            float delta = MathOps.clip(rawAngle, -TURNSPEED * dt / 1000, TURNSPEED * dt / 1000);
+            clippedLength -= clippedLength * Math.min(1,TURN_SLOWER * Math.abs(delta) * 1000/dt);
+            float noise =(float) (Math.random() * MAX_NOISE - MAX_NOISE/2) * dt/1000;
+            this.rotation += delta + noise;
+        }
+
+        if (currentPath == null || currentPath.size() > 1 || travelLen > minDist){
+            this.translateFromPos((float) Math.cos(rotation) * clippedLength,(float) Math.sin(rotation) * clippedLength);
+        }
+        this.velocityX = (this.getDeltaX() - startX) * 1000/dt;
+        this.velocityY = (this.getDeltaY() - startY) * 1000/dt;
+
+    }
+
+    boolean isSlowed(World world){
+        synchronized (World.toxicLakeLock){
+            ArrayList<ToxicLake> toxicLakes = world.getToxicLakes().getInstanceData();
+            for (int i = 0;i < toxicLakes.size();i++){
+                if (toxicLakes.get(i).intersectsCharacter(this)){
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+    private  void clipPos(World world){
         //dont need lock bc not doing anything with it
         ArrayList<Plateau> plateaus = world.getPlateaus().getInstanceData();
         for (int i =0,size = plateaus.size();i < size;i++){
             plateaus.get(i).clipCharacterPos(this);
         }
-
-
-        float actualLen = (float) Math.hypot(this.getDeltaX() - startX,this.getDeltaY() - startY);
-
-        this.velocityX = (this.getDeltaX() - startX) * 1000/dt;
-        this.velocityY = (this.getDeltaY() - startY) * 1000/dt;
-
-        this.rotation = MathOps.getAngle( (this.getDeltaX() - startX)/actualLen, (this.getDeltaY() - startY)/actualLen);
-
-
+        float hypotenuse = (float) Math.hypot(getDeltaX(), getDeltaY());
+        if (hypotenuse > world.getCraterRadius()) {
+            setTranslate(getDeltaX() * world.getCraterRadius() / hypotenuse, getDeltaY() * world.getCraterRadius() / hypotenuse);
+        }
     }
 
     //gets index of nearest supply, -1 if it's player, along with distance to that
-    private PairIntFloat getNearestTarget(World world){
+    private PairIntFloat getNearestTarget(World world,boolean weighted){
         int maxIndex = -1;
+        float divisor = weighted ? this.getPlayerVsSupplyBias():1;
         float minDist = (float) Math.hypot(this.deltaX - world.getPlayer().getDeltaX(),this.deltaY - world.getPlayer().getDeltaY());
         for (int i = 0,size = world.getSupplies().size();i<size;i++){
             Supply s =  world.getSupplies().getInstanceData().get(i);
-            double dist = Math.hypot(s.getDeltaX() - deltaX,s.getDeltaY() - deltaY);
+            double dist = Math.hypot(s.getDeltaX() - deltaX,s.getDeltaY() - deltaY) * divisor;
             if (dist < minDist){
                 maxIndex = i;
                 minDist = (float) dist;
@@ -354,11 +499,12 @@ public abstract class Enemy extends CraterCollectionElem implements Character {
     /** Used to find a path without holding up other threads.
      *
      */
-    private class PathFinder extends Thread {
+    class PathFinder extends Thread {
         //the map used to actually determine the path
         private EnemyMap enemyMap;
         //the target supply, -1 represents targetting the player
         private int supplyIndex;
+        private Supply supply;
         //the deltX position of the enemy
         private float x;
         //the y position of the enemy
@@ -375,9 +521,10 @@ public abstract class Enemy extends CraterCollectionElem implements Character {
          * @param y the current y position of this enemy
          * @param player current Player
          */
-        PathFinder(EnemyMap enemyMap, int supplyIndex, float x, float y, Player player){
+        PathFinder(EnemyMap enemyMap, int supplyIndex, Supply s, float x, float y, Player player){
             this.enemyMap = enemyMap;
             this.supplyIndex = supplyIndex;
+            this.supply = s;
             this.x = x;
             this.y = y;
             this.player = player;
@@ -386,7 +533,6 @@ public abstract class Enemy extends CraterCollectionElem implements Character {
         @Override
         public void run() {
             super.run();
-
             try {
                 if (EnemyMap.LOCK.tryLock(5, TimeUnit.SECONDS)) {
                     try {
@@ -398,10 +544,13 @@ public abstract class Enemy extends CraterCollectionElem implements Character {
                     finally {
                         EnemyMap.LOCK.unlock();
                     }
-                    if (currentPath== null  || currentPath.peek() == null){
-                        playerStartX = player.getDeltaX();
-                        playerStartY = player.getDeltaY();
+                    if (currentPath== null  || currentPath.peek() == null || supplyIndex == -1){
+                        finalTargetX = player.getDeltaX();
+                        finalTargetY = player.getDeltaY();
                         Log.d("Enemy Path","Locked onto player x: " + x + " y: " + y + " deltaX: " + deltaX + " deltaY: " + deltaY);
+                    } else {
+                        finalTargetX = supply.getDeltaX();
+                        finalTargetY = supply.getDeltaY();
                     }
                 }
             } catch (InterruptedException e) {
@@ -409,43 +558,36 @@ public abstract class Enemy extends CraterCollectionElem implements Character {
 
             }
 
-
-
             //Log.d("ENEMY PATH", "path: "  + currentPath + " supply: " + supplyIndex);
 
             try {
                 this.join();
             } catch (InterruptedException e){
-                Log.d("PathFinder","interrupted self");
+                Log.d("PathFinder","interrupted self: ");
             }
         }
     }
     //row = rotation, col = frame num
     private void setFrame(float rotation){
-        float framesPerMilli =  getFramesPerSecond()/1000f;
-        int frameNum = (int) (((System.currentTimeMillis() - this.startMillis) % (this.getFramesPerRotation()/framesPerMilli)) * framesPerMilli);
-        this.deltaTextureX = MathOps.getTextureBufferTranslationX(frameNum,this.getFramesPerRotation());
-        this.deltaTextureY = MathOps.getTextureBufferTranslationY(rotation,this.getNumRotationOrientations());
+        float framesPerMilli =  FPS/1000f;
+        int frameNum = (int) (((System.currentTimeMillis() - this.startMillis) % (FRAMES_PER_ROTATION/framesPerMilli)) * framesPerMilli);
+        this.deltaTextureX = MathOps.getTextureBufferTranslationX(frameNum,FRAMES_PER_ROTATION);
+        this.deltaTextureY = MathOps.getTextureBufferTranslationY(rotation,NUM_ROTATION_ORIENTATIONS);
     }
 
 
-    protected abstract int getNumRotationOrientations();
-
-    protected abstract int getFramesPerRotation();
-
-    protected abstract float getFramesPerSecond();
-
     public abstract int getMaxHealth();
 
-    public abstract void attack(World world,float angle);
+    public void attack(World world,float angle){
+        synchronized (World.animationLock) {
+            ShootAnimation shootAnim = new ShootAnimation(deltaX, deltaY, ShootAnimation.STANDARD_DIMENSIONS, ShootAnimation.STANDARD_DIMENSIONS);
+            world.getAnims().add(shootAnim);
+        }
+    }
 
     //can be overrided if sub classes want to change (this is multiplier)
     protected float getSpeedInToxicLake(){
         return 0.1f;
-    }
-    //can be override
-    protected float getMass(){
-        return 10;
     }
 
     public boolean isVisible() {
@@ -479,5 +621,37 @@ public abstract class Enemy extends CraterCollectionElem implements Character {
         return millisSinceLastAttack > attackRate;
     }
 
+
+    boolean canMove(World world){
+        return stunnedMillis <= 0;
+    }
+
+    public float getHealth(){
+        return health;
+    }
+
+    //how much more t would like to target players vs supplies
+    float getPlayerVsSupplyBias(){
+        return 1;
+    }
+
+    public void resetShader(){
+        if (isBlue){
+            this.setShader(0,0,1,1);
+        } else{
+            this.setShader(1,0,0,1);
+        }
+
+    }
+
+    abstract boolean isScrambling(World world);
+
+    LinkedList<Enemy3> getHealers(){
+        return healers;
+    }
+
+    LinkedList<EnemyMap.Node> getPath(){
+        return currentPath;
+    }
 
 }

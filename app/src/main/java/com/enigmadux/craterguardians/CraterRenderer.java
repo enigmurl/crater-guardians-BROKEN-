@@ -12,25 +12,25 @@ import android.view.Display;
 import android.view.MotionEvent;
 import android.view.WindowManager;
 
-import com.enigmadux.craterguardians.FileStreams.PlayerData;
-import com.enigmadux.craterguardians.FileStreams.SettingsData;
-import com.enigmadux.craterguardians.FileStreams.TutorialData;
-import com.enigmadux.craterguardians.GUILib.GUILayout;
-import com.enigmadux.craterguardians.GUIs.characterSelect.CharacterSelectLayout;
-import com.enigmadux.craterguardians.GUIs.homeScreen.HomeScreen;
-import com.enigmadux.craterguardians.GUIs.inGameScreen.InGameScreen;
-import com.enigmadux.craterguardians.GUIs.levelSelect.LevelSelectLayout;
-import com.enigmadux.craterguardians.GUIs.pauseGameScreen.PauseGameLayout;
-import com.enigmadux.craterguardians.GUIs.postGameLayout.PostGameLayout;
-import com.enigmadux.craterguardians.GUIs.settingsScreen.SettingsScreen;
-import com.enigmadux.craterguardians.gameLib.GUIDataWrapper;
+import com.enigmadux.craterguardians.filestreams.PlayerData;
+import com.enigmadux.craterguardians.filestreams.SettingsData;
+import com.enigmadux.craterguardians.filestreams.TutorialData;
+import com.enigmadux.craterguardians.guilib.GUILayout;
+import com.enigmadux.craterguardians.guis.characterSelect.CharacterSelectLayout;
+import com.enigmadux.craterguardians.guis.homeScreen.HomeScreen;
+import com.enigmadux.craterguardians.guis.inGameScreen.InGameScreen;
+import com.enigmadux.craterguardians.guis.levelSelect.LevelSelectLayout;
+import com.enigmadux.craterguardians.guis.pauseGameScreen.PauseGameLayout;
+import com.enigmadux.craterguardians.guis.postGameLayout.PostGameLayout;
+import com.enigmadux.craterguardians.guis.settingsScreen.SettingsScreen;
+import com.enigmadux.craterguardians.gamelib.GUIDataWrapper;
 import com.enigmadux.craterguardians.players.Kaiser;
 import com.enigmadux.craterguardians.players.Player;
 import com.enigmadux.craterguardians.players.TutorialPlayer;
 import com.enigmadux.craterguardians.util.SoundLib;
 import com.enigmadux.craterguardians.values.LayoutConsts;
-import com.enigmadux.craterguardians.worlds.DrawablesLoader;
-import com.enigmadux.craterguardians.worlds.World;
+import com.enigmadux.craterguardians.gamelib.DrawablesLoader;
+import com.enigmadux.craterguardians.gamelib.World;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -49,7 +49,7 @@ import enigmadux2d.core.shaders.ShaderProgram;
 public class CraterRenderer extends EnigmaduxGLRenderer {
 
     //says how far back the camera is from the view
-    private static final float CAMERA_Z = 3f;
+    public static final float CAMERA_Z = 4f;
 
 
     private DisplayMetrics displayMetrics;//used to get information about screen;
@@ -95,9 +95,7 @@ public class CraterRenderer extends EnigmaduxGLRenderer {
     //todo these are all debug varaibles delete them before releaes
 
     long debugStartMillis = System.currentTimeMillis();
-
     int updateCount = 0;
-    int under60 = 0;
     long lastMillis = System.currentTimeMillis();
 
 
@@ -302,9 +300,6 @@ public class CraterRenderer extends EnigmaduxGLRenderer {
 
         this.world.draw(vPMatrix,this.guiMatrix);
 
-        if (System.currentTimeMillis() - lastMillis  >  1000/60f){
-            under60++;
-        }
         this.lastMillis = System.currentTimeMillis();
         updateCount++;
 
@@ -312,13 +307,10 @@ public class CraterRenderer extends EnigmaduxGLRenderer {
 
         if (System.currentTimeMillis() - debugStartMillis > 10000){
             Log.d("FRONTENDTHREAD:","Frames per second:"  + (1000 * updateCount/(double) (System.currentTimeMillis() - debugStartMillis)));
-            Log.d("FRONTENDTHREAD:","percentage under 60:"  + ((float) under60/updateCount));
-
             Log.d("FRONTENDTHREAD:","Total Time:"  + ((System.currentTimeMillis() - debugStartMillis)/this.updateCount));
 
             debugStartMillis = System.currentTimeMillis();
             updateCount = 0;
-            under60 = 0;
         }
 
 

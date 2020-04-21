@@ -2,7 +2,7 @@ package com.enigmadux.craterguardians;
 
 import android.util.Log;
 
-import com.enigmadux.craterguardians.worlds.World;
+import com.enigmadux.craterguardians.gamelib.World;
 
 import java.util.ArrayList;
 import java.util.List;
