@@ -2,6 +2,7 @@ package com.enigmadux.craterguardians;
 
 import android.util.Log;
 
+import com.enigmadux.craterguardians.animations.TransitionAnim;
 import com.enigmadux.craterguardians.gamelib.World;
 
 import java.util.ArrayList;
@@ -15,8 +16,9 @@ public class CraterBackendThread extends Thread {
     //whether the thread is running, if its ever set to false after started it will be finished
     private boolean running = false;
 
+    private boolean appPaused = false;
     //whether the thread is temporarily paused. It's still in the loop just not making calls to backend
-    private boolean paused = false;
+    private boolean gamePaused = false;
 
 
 
@@ -35,7 +37,9 @@ public class CraterBackendThread extends Thread {
         this.backend = backend;
 
         this.lastMillis = System.currentTimeMillis();
-
+        if (backend!= null && backend.getEnemyMap() != null) {
+            backend.setEnemyMap(new EnemyMap(backend.getEnemyMap()));
+        }
     }
 
     /** Sets the backend incase the argument was null in the construcotr
@@ -44,6 +48,9 @@ public class CraterBackendThread extends Thread {
      */
     public void setBackend(World backend) {
         this.backend = backend;
+        if (backend!= null && backend.getEnemyMap() != null) {
+            backend.setEnemyMap(new EnemyMap(backend.getEnemyMap()));
+        }
     }
 
     /** Called whenever screen is changed, constantly calls update
@@ -53,8 +60,6 @@ public class CraterBackendThread extends Thread {
     public void run() {
         super.run();
         this.running = true;
-
-        //Debug.startMethodTracing("backend");
 
         long debugStartMillis = System.currentTimeMillis();
 
@@ -79,16 +84,17 @@ public class CraterBackendThread extends Thread {
                 }
             }
 
-
-            if (! paused) {
-                this.backend.update(System.currentTimeMillis() - lastMillis);//todo update this value
+            if (! appPaused) {
+                TransitionAnim.updateAnims(System.currentTimeMillis() - lastMillis);
+                if (!gamePaused) {
+                    TransitionAnim.updateGameAnims(System.currentTimeMillis() - lastMillis);
+                    this.backend.update(System.currentTimeMillis() - lastMillis);//todo update this value
+                }
             }
             if (System.currentTimeMillis() - lastMillis  >  1000/60f){
                 under60++;
                 under60s.add((long) (1000f/(System.currentTimeMillis() - lastMillis)));
             }
-            //Log.d("BACKEND_THREAD","framerate: " + (1000/( System.currentTimeMillis() - lastMillis)));
-
 
             this.lastMillis = System.currentTimeMillis();
 
@@ -101,14 +107,9 @@ public class CraterBackendThread extends Thread {
                 updateCount = 0;
                 under60 = 0;
                 under60s.clear();
-                //Debug.stopMethodTracing();
-                //Debug.startMethodTracing("backend");
-
             }
 
         }
-        //Debug.stopMethodTracing();
-
 
     }
 
@@ -125,8 +126,21 @@ public class CraterBackendThread extends Thread {
      *
      * @param pausedState whether to pause the thread or not
      */
-    public void setPause(boolean pausedState){
-        this.paused = pausedState;
+    public void setGamePaused(boolean pausedState){
+        Log.d("Backend Thread","Setting Paused State: "+ pausedState);
+        this.gamePaused = pausedState;
+        if (! pausedState){
+            this.setAppPaused(false);
+        }
+        if (backend!= null && backend.getEnemyMap() != null) this.backend.getEnemyMap().setPaused(gamePaused);
+    }
+
+    public void setAppPaused(boolean pauseState){
+        Log.d("Backend Thread","Setting APP Paused State: "+ pauseState);
+        this.appPaused = pauseState;
+        if (pauseState){
+            this.setGamePaused(true);
+        }
     }
 
     /** Gets the backend object that this thread updates

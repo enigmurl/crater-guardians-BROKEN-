@@ -207,7 +207,7 @@ public class CraterRenderer extends EnigmaduxGLRenderer {
         if (this.craterBackendThread == null) {
             this.craterBackendThread = new CraterBackendThread(this.world);
             this.craterBackendThread.setRunning(true);
-            this.craterBackendThread.setPause(true);
+            this.craterBackendThread.setGamePaused(true);
             this.craterBackendThread.start();
         }
 
@@ -423,11 +423,12 @@ public class CraterRenderer extends EnigmaduxGLRenderer {
                     this.world.setPlayer(new TutorialPlayer());
                     //important this is first, because internally, it may be set
                     //to false later on
-                    this.craterBackendThread.setPause(false);
-                    inGameScreen.setVisibility(true);
+                    Log.d("RENDERER","Tutorial Enabled");
+                    this.craterBackendThread.setGamePaused(false);
                     //non positives = tutorial
                     this.world.setLevelNum(0);
                     this.world.loadLevel();
+                    inGameScreen.setVisibility(true);
                     this.world.setState(World.STATE_PREGAME);
                     SoundLib.setStateGameMusic(true);
                 } else {
@@ -458,11 +459,10 @@ public class CraterRenderer extends EnigmaduxGLRenderer {
      * @return whether or not you are interested in the rest of that event (everything from ACTION_DOWN to ACTION_UP or ACTION_CANCEL) (true means interested, false means not, other views get to read the event)
      */
     public boolean onTouch(MotionEvent e){
-        try {
+        if (this.guiData != null) {
             this.guiData.onTouch(e);
-        } catch (NullPointerException ev) {
-            Log.i("null Pointer", "touch event before loaded",ev);
         }
+
         return true;
 
     }
@@ -478,7 +478,7 @@ public class CraterRenderer extends EnigmaduxGLRenderer {
 
                 this.layoutHashMap.get(PauseGameLayout.ID).setVisibility(true);
             }
-            this.craterBackendThread.setPause(true);
+            this.craterBackendThread.setAppPaused(true);
         }
 
 
@@ -494,6 +494,7 @@ public class CraterRenderer extends EnigmaduxGLRenderer {
         try {
             this.craterBackendThread.setRunning(false);
             this.craterBackendThread.join();
+            if (world != null && world.getEnemyMap() != null) this.world.getEnemyMap().endProcess();
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
@@ -502,8 +503,9 @@ public class CraterRenderer extends EnigmaduxGLRenderer {
         if (this.craterBackendThread == null || ! this.craterBackendThread.isAlive()) {
             this.craterBackendThread = new CraterBackendThread(this.world);
             this.craterBackendThread.setRunning(true);
-            this.craterBackendThread.setPause(true);
+            this.craterBackendThread.setGamePaused(true);
             this.craterBackendThread.start();
+            //if (world!= null && world.getEnemyMap() != null) this.world.getEnemyMap().start();
         }
     }
 

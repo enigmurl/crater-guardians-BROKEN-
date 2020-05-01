@@ -11,8 +11,8 @@ import com.enigmadux.craterguardians.gamelib.World;
 import enigmadux2d.core.quadRendering.QuadTexture;
 
 public class Skippy extends Player {
-    private static final int NUM_GENS = 3;
-    private static final int[] EVOLVE_DAMAGE = new int[] {1400,2000,3000,3500,4000};
+    private static final int NUM_GENS = 5;
+    private static final int[] EVOLVE_DAMAGE = new int[] {3000,5000,7500,15000,25000};
 
     private static final float[] SPEED = new float[] {1f,1.1f,1.2f,1.3f,1.4f,1.5f};
     private static final float RADIUS = 0.1f;
@@ -55,15 +55,18 @@ public class Skippy extends Player {
     @Override
     public void attack(World world, float angle) {
         super.attack(world,angle);
-        Log.d("SKIPPY","ATTACKING @ "  + angle);
-        int id = world.getPlayerAttacks().createVertexInstance();
-        AttackSkippy a = new AttackSkippy(id,this.getDeltaX(),this.getDeltaY(),angle,this.evolveGen);
-        world.getPlayerAttacks().addInstance(a);
+        try {
+            int id = world.getPlayerAttacks().createVertexInstance();
+            Log.d("SKIPPY","ATTACKING @ "  + angle + " id: " + id);
+            AttackSkippy a = new AttackSkippy(id, this.getDeltaX(), this.getDeltaY(), angle, this.evolveGen);
+            world.getPlayerAttacks().addInstance(a);
+        } catch (Exception e){
+            Log.d("SKIPPY","Exception",e);
+        }
     }
 
     @Override
     protected void addRotatableEntities(Context context) {
-        //this.rotatableEntities.add(visualRep);
         this.e1 = new QuadTexture(context,R.drawable.kaiser_sprite_sheet_e1,0,0,1,1);
         this.e2 = new QuadTexture(context,R.drawable.kaiser_sprite_sheet_e2,0,0,1,1);
         this.e3 = new QuadTexture(context,R.drawable.kaiser_sprite_sheet_e3,0,0,1,1);

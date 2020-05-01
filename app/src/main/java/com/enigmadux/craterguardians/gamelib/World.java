@@ -5,6 +5,7 @@ import android.opengl.Matrix;
 import android.util.Log;
 
 import com.enigmadux.craterguardians.animations.Animation;
+import com.enigmadux.craterguardians.animations.TransitionAnim;
 import com.enigmadux.craterguardians.attacks.BaseAttack;
 import com.enigmadux.craterguardians.attacks.EnemyAttack;
 import com.enigmadux.craterguardians.attacks.PlayerAttack;
@@ -178,21 +179,21 @@ public class World {
     private EnemyMap enemyMap;
 
     private boolean wonLastLevel = false;
+    private int amntXpLastLevel;
 
 
-    private float cameraX;
-    private float cameraY;
+    private float cameraX, cameraY;
+    //where the camera is moved by screen shakes
+    private float cameraDeltaX,cameraDeltaY;
 
+    //avg loc of the supplies
+    private float supplyX, supplyY;
 
-    private float movementX;
-    private float movementY;
+    private float movementX, movementY;
 
-    private float attackX;
-    private float attackY;
+    private float attackX, attackY;
 
-    private float defenseX;
-    private float defenseY;
-
+    private float defenseX, defenseY;
 
 
     //mvp matrix for in game stuff
@@ -216,10 +217,10 @@ public class World {
 
         this.orangeEnemies = new CraterCollection<>(256,World.QUAD_VERTICES,Enemy1.TEXTURE_MAP,World.QUAD_INDICES);
 
-        this.toxicLakes = new CraterCollection<>(16,World.QUAD_VERTICES,World.QUAD_TEXTURE_CORDS,World.QUAD_INDICES);
+        this.toxicLakes = new CraterCollection<>(32,World.QUAD_VERTICES,World.QUAD_TEXTURE_CORDS,World.QUAD_INDICES);
         this.toxicLakes.loadTexture(context,R.drawable.toxic_lake_texture);
 
-        this.plateaus = new CraterCollection<>(16,Plateau.VERTICES,Plateau.TEX_CORDS,World.QUAD_INDICES);
+        this.plateaus = new CraterCollection<>(32,Plateau.VERTICES,Plateau.TEX_CORDS,World.QUAD_INDICES);
         this.plateaus.loadTexture(context,R.drawable.plateau);
 
         this.spawners = new CraterCollection<>(16,World.QUAD_VERTICES,World.QUAD_TEXTURE_CORDS,World.QUAD_INDICES);
@@ -267,7 +268,6 @@ public class World {
     public void loadLayouts(){
 
         this.inGameScreen = (InGameScreen) this.guiLayouts.get(InGameScreen.ID);
-        Log.d("BACKEND","Null check: " + this.inGameScreen);
         this.inGameScreen.setBattleStartIndicatorVisibility(false);
         this.inGameScreen.setWinLossVisibility(false);
 
@@ -373,10 +373,10 @@ public class World {
         }
 
         this.player.translateFromPos(dt * this.movementX / (1000 * scaleX) * this.player.getCharacterSpeed(), dt * this.movementY / (scaleY * 1000) * this.player.getCharacterSpeed());
-
+        this.player.setVelocity(this.movementX / (scaleX) * this.player.getCharacterSpeed(), this.movementY / (scaleY) * this.player.getCharacterSpeed());
         hypotenuse = (float) Math.hypot(this.attackX / scaleX, this.attackY / scaleY);
         if (hypotenuse > 0){
-            this.player.attemptAttack(this,this.attackX/ (scaleX * hypotenuse),(this.attackY) / (scaleX *hypotenuse));
+            this.player.attemptAttack(this,this.attackX/ (scaleX * hypotenuse),(this.attackY) / (scaleY *hypotenuse));
         }
 
         //making it sure it doesn't go out of bounds
@@ -409,7 +409,10 @@ public class World {
 
             cameraLockedOnPlayer = this.updateCamera();
 
-            Matrix.setLookAtM(this.camMatrix,0,cameraX,cameraY, 1,cameraX,cameraY,0,0,1,0);
+            float deltaX = cameraLockedOnPlayer ? this.cameraDeltaX : 0;
+            float deltaY = cameraLockedOnPlayer ? this.cameraDeltaY : 0;
+
+            Matrix.setLookAtM(this.camMatrix,0,cameraX + deltaX,cameraY + deltaY, 1,cameraX + deltaX,cameraY + deltaY,0,0,1,0);
             Matrix.multiplyMM(this.mvpMatrix,0,scaleMatrix,0,this.camMatrix,0);
 
 
@@ -417,6 +420,7 @@ public class World {
             for (int i = 0;i<spawners.size();i++){
                 this.renderables.addAll(this.spawners.getInstanceData().get(i).getRenderables());
             }
+
             this.quadRenderer.renderQuads(this.renderables,mvpMatrix);
 
 
@@ -451,13 +455,19 @@ public class World {
                 this.player.draw(mvpMatrix, this.quadRenderer);
                 this.player.setTranslate(playerX, playerY);
             }
-            synchronized (animationLock) {
-                this.quadRenderer.renderQuads(animations,mvpMatrix);
+            renderables.clear();
+            for (int i = 0;i<supplies.size();i++){
+                this.renderables.addAll(this.supplies.getInstanceData().get(i).getRenderables());
             }
+            synchronized (animationLock) {
+                renderables.addAll(animations);
+            }
+
+            this.quadRenderer.renderQuads(renderables,mvpMatrix);
+            this.inGameScreen.render(orthoMatrix,quadRenderer,dynamicText);
         }
 
 
-        this.inGameScreen.render(orthoMatrix,quadRenderer,dynamicText);
         //the only gui layouts that can be shown in game, are pause game layouts, and post game layouts, otherwise
         //we don't need to render them
         if (this.mState == World.STATE_GUI || this.guiLayouts.get(PauseGameLayout.ID).isVisible()) {
@@ -472,13 +482,16 @@ public class World {
     private boolean updateCamera(){
 
         if (this.mState == World.STATE_POSTGAMEPAUSE && supplies.size() == 0){
-            float dist = (float) Math.hypot(cameraX,cameraY);
+            float targetX = supplyX;
+            float targetY = supplyY;
+            float dist = (float) Math.hypot(cameraX - targetX,cameraY - targetY);
             if (dist < MIN_CAMERA_TRAVEL_FRAME){
-                cameraX = cameraY = 0;
+                cameraX = targetX;
+                cameraY = targetY;
             } else {
                 dist = MAX_CAMERA_TRAVEL_FRAME;
-                cameraX -= cameraX * dist;
-                cameraY -= cameraY * dist;
+                cameraX += (targetX - cameraX) * dist;
+                cameraY += (targetY - cameraY) * dist;
             }
             return false;
         } else {
@@ -486,10 +499,7 @@ public class World {
             cameraY = player.getDeltaY();
             return true;
         }
-
-
     }
-
 
     public void loadLevel(){
         Log.d("WORLD","Loading Level : " + levelNum);
@@ -502,7 +512,14 @@ public class World {
         if (this.levelNum > GameMap.NUM_LEVELS){
             this.levelNum = 0;
         }
+        supplyX = 0;
+        supplyY = 0;
+        for (Supply s: supplies){
+            supplyX += s.getDeltaX()/supplies.size();
+            supplyY += s.getDeltaY()/supplies.size();
+        }
 
+        TransitionAnim.clear();
         this.enemyMap = this.gameMap.getEnemyMap();
     }
 
@@ -615,13 +632,15 @@ public class World {
         this.mState = World.STATE_POSTGAMEPAUSE;
         this.endGamePauseMillis = World.PAUSE_MILLIS;
 
-
+        boolean alreadyCompleted = false;
         if (levelNum > 0) {
+            alreadyCompleted = LevelData.getCompletedLevels()[levelNum-1];
             LevelData.getCompletedLevels()[levelNum - 1] = true;
             LevelData.updateUnlocked();
         }
 
-        this.playerData.updateXP(PlayerData.getExperience() + getXpGainPerLevel(levelNum));
+        this.amntXpLastLevel = getXpGainPerLevel(levelNum,alreadyCompleted);
+        this.playerData.updateXP(PlayerData.getExperience() + amntXpLastLevel);
         this.levelData.writeLevelFiles();
 
         this.levelNum++;
@@ -643,6 +662,7 @@ public class World {
         this.mState = World.STATE_POSTGAMEPAUSE;
         this.wonLastLevel = false;
         this.endGamePauseMillis = World.PAUSE_MILLIS;
+        amntXpLastLevel = 0;
 
         SoundLib.setStateGameMusic(false);
         SoundLib.setStateLossMusic(true);
@@ -668,6 +688,11 @@ public class World {
     }
 
     public void setState(int state){
+        //exiting the game
+        if (mState != World.STATE_GUI && state == World.STATE_GUI){
+            this.getEnemyMap().endProcess();
+        }
+
         this.mState = state;
         if (mState == World.STATE_PREGAME){
             this.preGameZoomMillis = World.PRE_GAME_MILLIES;
@@ -751,6 +776,9 @@ public class World {
     public boolean hasWonLastLevel(){
         return this.wonLastLevel;
     }
+    public int getAmntXpLastLevel(){
+        return this.amntXpLastLevel;
+    }
 
     public void setPlayer(Player player) {
         Log.d("WORLD","Player: "+ player);
@@ -759,7 +787,6 @@ public class World {
         this.player.loadComponents(context);
         this.gameMap.setPlayer(player);
         this.playerAttacks.loadTexture(context,player.getAttackSpritesheetPointer());
-
     }
 
     public ArrayList<Animation> getAnims(){
@@ -768,16 +795,26 @@ public class World {
 
     public EnemyMap getEnemyMap(){return  this.enemyMap; }
 
+    public void setEnemyMap(EnemyMap enemyMap){
+        this.gameMap.setEnemyMap(enemyMap);
+    }
+
     public int getLevelNum(){
         return this.levelNum;
     }
 
-    public static int getXpGainPerLevel(int level){
-        return World.XP_GAIN_PER_LEVEL * level;
-    }
 
     public float getCraterRadius(){
         return gameMap.getCraterRadius();
+    }
+
+    public void setCameraDelta(float dX,float dY){
+        this.cameraDeltaX = dX;
+        this.cameraDeltaY = dY;
+    }
+    public static int getXpGainPerLevel(int level,boolean alreadyCompleted){
+        double exp = alreadyCompleted ? 0.4 : 1.3;
+        return (int) (World.XP_GAIN_PER_LEVEL * Math.pow(level,exp));
     }
 
 

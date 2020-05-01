@@ -84,7 +84,7 @@ public class ImageText extends QuadTexture implements VisibilitySwitch, TextRend
      * @param isRounded      if the button is rounded, it will use the default button values,
      */
     public ImageText(Context context, int texturePointer, float x, float y, float w, float h, boolean isRounded) {
-        super(context, texturePointer, x, y, w * LayoutConsts.SCREEN_HEIGHT/LayoutConsts.SCREEN_WIDTH, h);
+        super(context, texturePointer, x, y, w * LayoutConsts.SCALE_X, h);
 
         if (isRounded){
             this.enableRounding();

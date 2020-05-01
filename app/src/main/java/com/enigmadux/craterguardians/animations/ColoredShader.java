@@ -32,7 +32,7 @@ public class ColoredShader extends TransitionAnim {
             s.setShader(1.0f,GB_VALUE,GB_VALUE,1);
         else
             s.setShader(GB_VALUE,1.0f,GB_VALUE,1);
-        HANDLER.postDelayed(this,millis);
+        GAME_HANDLER.postDelayed(this,millis);
     }
     public ColoredShader(CraterCollectionElem craterCollectionElem, long millis, boolean isRed){
         super();
@@ -41,7 +41,7 @@ public class ColoredShader extends TransitionAnim {
             craterCollectionElem.setShader(1.0f,GB_VALUE,GB_VALUE,1);
         else
             craterCollectionElem.setShader(GB_VALUE,1,GB_VALUE,1);
-        HANDLER.postDelayed(this,millis);
+        GAME_HANDLER.postDelayed(this,millis);
 
     }
 

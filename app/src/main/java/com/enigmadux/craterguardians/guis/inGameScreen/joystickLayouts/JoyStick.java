@@ -105,7 +105,7 @@ public class JoyStick extends QuadTexture {
 
     }
 
-    private boolean onPress(MotionEvent e) {
+    private void onPress(MotionEvent e) {
         this.isSelected = true;
         this.pointerID = e.getPointerId(e.getActionIndex());
         int ind = e.findPointerIndex(this.pointerID);
@@ -115,10 +115,9 @@ public class JoyStick extends QuadTexture {
 
 
         this.joystickLayout.getPointerLocs().put(e.getPointerId(e.getActionIndex()),this);
-        return true;
     }
 
-    private boolean onHardRelease(MotionEvent e) {
+    private void onHardRelease(MotionEvent e) {
         this.joystickLayout.getPointerLocs().remove(e.getPointerId(e.getActionIndex()));
         this.deltaX = 0;
         this.deltaY = 0;
@@ -127,7 +126,6 @@ public class JoyStick extends QuadTexture {
         this.background.setCord(centerX,centerY);
 
         this.isSelected = false;
-        return true;
     }
 
     public float getX(){
@@ -151,4 +149,22 @@ public class JoyStick extends QuadTexture {
         return background;
     }
 
+    public boolean isSelected() {
+        return isSelected;
+    }
+
+    public void deSelect(){
+        if (! this.isSelected){
+            return;
+        }
+        this.joystickLayout.getPointerLocs().remove(this.pointerID);
+        this.deltaX = 0;
+        this.deltaY = 0;
+        centerX = x;
+        centerY = y;
+        this.background.setCord(centerX,centerY);
+
+        this.isSelected = false;
+    }
 }
+

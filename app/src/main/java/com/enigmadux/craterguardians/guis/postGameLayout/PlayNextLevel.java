@@ -83,7 +83,7 @@ public class PlayNextLevel extends GUIClickable {
         this.isDown = false;
 
         this.inGameScreen.setVisibility(true);
-        this.craterRenderer.getCraterBackendThread().setPause(false);
+        this.craterRenderer.getCraterBackendThread().setGamePaused(false);
         this.craterRenderer.getCraterBackendThread().getBackend().loadLevel();
         this.craterRenderer.getCraterBackendThread().getBackend().setState(World.STATE_PREGAME);
 

@@ -202,8 +202,8 @@ public class Shield extends QuadTexture {
                 //not only intersecting
                 if (b4 && ! (b1 || b2 || b3)){
                     MathOps.clipCharacterEdge(e,x4,y4,x5,y5);
-                    forceX += e.getVelocityX() * e.getRadius() * FORCE_PER_RADIUS;
-                    forceY += e.getVelocityY() * e.getRadius() * FORCE_PER_RADIUS;
+                    forceX += (e.getVelocityX()- world.getPlayer().getVelocityX())* e.getRadius() * FORCE_PER_RADIUS;
+                    forceY += (e.getVelocityY()- world.getPlayer().getVelocityY()) * e.getRadius() * FORCE_PER_RADIUS;
                 }
 
             }
@@ -220,8 +220,8 @@ public class Shield extends QuadTexture {
                 //not only intersecting
                 if (b4 && ! (b1 || b2 || b3)){
                     MathOps.clipCharacterEdge(e,x4,y4,x5,y5);
-                    forceX += e.getVelocityX() * e.getRadius() * FORCE_PER_RADIUS;
-                    forceY += e.getVelocityY() * e.getRadius() * FORCE_PER_RADIUS;
+                    forceX += (e.getVelocityX() - world.getPlayer().getVelocityX()) * e.getRadius() * FORCE_PER_RADIUS;
+                    forceY += (e.getVelocityY() - world.getPlayer().getVelocityY()) * e.getRadius() * FORCE_PER_RADIUS;
                 }
             }
         }

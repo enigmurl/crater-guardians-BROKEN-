@@ -1,23 +1,35 @@
 package com.enigmadux.craterguardians.animations;
 
 public abstract class FrameTransitionAnim extends TransitionAnim {
-    static final long DELAY_MILLIS = 16;
+    static final long DELAY_MILLIS = 1000L/120L;
 
     protected long millisLeft;
     protected long totalMillis;
     protected long finishedMillis;
 
     private boolean cancel;
+    private boolean finished;
+
+    private long deltaTime;
+    boolean inGameAnim = false;
     FrameTransitionAnim(long millis){
         finishedMillis = 0;
         totalMillis = millisLeft= millis;
 
     }
     void start(){
-        HANDLER.postDelayed(this,0);
+        if (inGameAnim) {
+            GAME_HANDLER.postDelayed(this, 0);
+        } else {
+            HANDLER.postDelayed(this,0);
+        }
     }
     void start(long delay){
-        HANDLER.postDelayed(this,delay);
+        if (inGameAnim) {
+            GAME_HANDLER.postDelayed(this, delay);
+        } else {
+            HANDLER.postDelayed(this,delay);
+        }
     }
 
     @Override
@@ -32,19 +44,27 @@ public abstract class FrameTransitionAnim extends TransitionAnim {
         }
         step();
         //not using current time because that doesnt work well with pausing
-        finishedMillis += DELAY_MILLIS;
-        millisLeft -= DELAY_MILLIS;
+        finishedMillis += deltaTime;
+        millisLeft -= deltaTime;
 //        millisLeft = startMillis + totalMillis - System.currentTimeMillis();
 //        finishedMillis = System.currentTimeMillis() - startMillis;
 
-        HANDLER.postDelayed(this,DELAY_MILLIS);
+        if (inGameAnim){
+            GAME_HANDLER.postDelayed(this,DELAY_MILLIS);
+        } else {
+            HANDLER.postDelayed(this, DELAY_MILLIS);
+        }
 
+    }
+
+    public void setDeltaTime(long deltaTime){
+        this.deltaTime = deltaTime;
     }
 
     abstract void step();
 
     void finish(){
-
+        this.finished = true;
     }
     public void cancel(){
         this.cancel = true;
@@ -52,5 +72,9 @@ public abstract class FrameTransitionAnim extends TransitionAnim {
 
     public long getMillisLeft(){
         return millisLeft;
+    }
+
+    public boolean isFinished() {
+        return finished;
     }
 }

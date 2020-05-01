@@ -83,7 +83,6 @@ public class TextMesh {
             elementArray[6 * i + 5] = i * 4 + 3;
 
         }
-        Log.d("DYNAMIC TEXT","Element Array: " + Arrays.toString(elementArray));
 
         this.elementArray = this.pushDataInIntBuffer(elementArray);
     }

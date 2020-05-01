@@ -9,8 +9,8 @@ import com.enigmadux.craterguardians.gamelib.World;
 
 public class AttackSkippy extends PlayerAttack {
     /*Note because the speed reduces over time, we treat the curLength as a sort of "t"*/
-    private static final long MILLIS = 1100;
-    private static final float[] LENGTH = new float[] {1.5f,1.6f,1.7f,1.8f,1.9f};
+    private static final long MILLIS = 750;
+    private static final float[] LENGTH = new float[] {1.7f,1.8f,1.9f,2f,2.1f};
     private static final float[] RADIUS = new float[] {0.1f,0.12f,0.14f,0.16f,0.18f};
     private static final float[] DAMAGE = new float[] {6,6.33f,6.666f,7,7.333f};
     //amount in turns after each hop;
@@ -18,7 +18,7 @@ public class AttackSkippy extends PlayerAttack {
 
 
     private static final float MIN_SCALE = 0.5f;
-    private static final long[] HITS = new long[] {200,435,600,841,928,957,986,1040,1075};
+    private static final long[] HITS = new long[] {136,296,409,573,632,652,672,708,732};
 
     private boolean[] completed = new boolean[HITS.length];
 

@@ -154,7 +154,6 @@ public class DynamicText {
         }
 
         int fontHeight = internalScanner.nextInt();
-        Log.d("DYNAMIC TEXT","Font size " + fontSize + " w " + w + " h " + h + " font height " + fontHeight);
 
         internalScanner.close();
 
@@ -226,12 +225,12 @@ public class DynamicText {
                     this.h
             ));
 
-            if (charCode == 't' || charCode == 'e' || charCode == 's'){
-                Log.d("DYNAMIC TEXT",charCode + " is chard code: " +
-                        "the rectX " + rectX +
-                        " rectY " + rectY +
-                        " the offsetY is " + offsetY  + " the rectH " + rectH);
-            }
+//            if (charCode == 't' || charCode == 'e' || charCode == 's'){
+//                Log.d("DYNAMIC TEXT",charCode + " is chard code: " +
+//                        "the rectX " + rectX +
+//                        " rectY " + rectY +
+//                        " the offsetY is " + offsetY  + " the rectH " + rectH);
+//            }
 
 
 

@@ -1,6 +1,7 @@
 package com.enigmadux.craterguardians.guis.inGameScreen.tutorialHelpers;
 
 import android.content.Context;
+import android.util.Log;
 import android.view.MotionEvent;
 
 import com.enigmadux.craterguardians.animations.TransitionAnim;
@@ -54,8 +55,10 @@ public class TutorialWrapper extends TransitionAnim {
 
     public void setVisiblility(boolean visiblility) {
         this.isVisible = visiblility;
+
         if (this.isVisible){
             HANDLER.postDelayed(this,DELAYS[count]);
+            Log.d("Wrapper","calling visibility");
             called[0] = true;
         }
     }
@@ -63,8 +66,10 @@ public class TutorialWrapper extends TransitionAnim {
     @Override
     public void run() {
         if (world != null && world.getCurrentGameState() != World.STATE_INGAME){
+            Log.d("Wrapper","state " + world.getCurrentGameState());
             return;
         }
+        Log.d("Wrapper","calling");
 
         this.tutorialPauseHelpers.get(count).setVisibility(true);
         count++;
@@ -85,7 +90,7 @@ public class TutorialWrapper extends TransitionAnim {
                     }
                     break;
                 case 2://explain health bar, and other stuff, as well as evolve button
-                    if (! called[2] && world.getPlayer().getEvolveCharge() >= 1){
+                    if (! called[2] && world.getPlayer().getEvolveCharge() >= 0){
                         HANDLER.postDelayed(this,DELAYS[count]);
                         called[2] = true;
                     }
@@ -94,5 +99,13 @@ public class TutorialWrapper extends TransitionAnim {
 
             }
         }
+    }
+
+    @Override
+    public void cancel() {
+        //DO NOT ACTUALLY CANCEL
+        //wont be cancelled, because cancels happena t begining of game
+        //abnd then nothing will show
+        Log.d("Wrapper","Cancelled");
     }
 }

@@ -17,7 +17,6 @@ public class PopUp extends FrameTransitionAnim {
         this.orgH = orgH;
         quadTexture.setScale(0,0);
         start(delay);
-        Log.d("PopUP","Org w: "+ orgW + " org H: " + orgH + " millis: " + millis + " delay: " + delay);
     }
 
     @Override

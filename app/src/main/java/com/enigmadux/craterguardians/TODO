@@ -24,42 +24,39 @@
 
 
     todo Current Queue:
-        4/12/20:
-            Content: Create Characters, start of by making kaiser unlock evolves at different levels (id say 4 max)
-                Keep attack similar to right now
-                Name and think of attacks of 5 characters
-                Kaiser - bullet attack
-                Skippy - skips like a rock
-            Improved enemy ai, making formations, Improve Shotgun attack, improve enemy attacks
-            enemy3 should know where to go. Attack animation (just somethign firing,
-        Start work on levels, make level 19 proper, possibly with some enemy3s
-        Make enemy encounters more individual (increase their stats)
 
-        4/21/20:
-            Spread out enemy 3s, like a fan, also make enemies slowly  push closer and closer towards the enemise
+            glitching a bit, seem to go over the place
+            spawner orange reseting
+            collisions seem to be a bit off
+            Attack bar might need a little work
+            black texture for the emulator some times?
 
-            Start work on other levels
-            need to finish all other characters before mayy
-            Make paths an asynchronous thing run on a thread
-        4/22/20:
-            Fully finish strengths for enemies,
-            Continue work on players
-            See why some enemies are piling at the top
+            Start work on multiple screen sizes seems like its fine for now focus on assets
 
-        Content (level stuff, should probably do that soon)
+            Assets (I need to focus on sound effects)
 
-        Improving GUIs:
-            The info bars are taking up too much space on the screen, need to move to top right corner
+
+           LAYOUT     18/9 16/9  37/18
+           TUTORIAL   √    √     √
+           HOME SCR   √    √     √
+           CHARACTER  √    √     √
+           LEVEL SLCT √    √     √
+           SETTINGS   √    √     √
+           IN GAME    √    √     √
+           PAUSE GAME √    √     √
+           POST GAME  √    √     √
+
+
 
 
 
     TODO TODO TODO LONG TERM FIXES:
         1) Sometimes stuff flicker, specifically enemies when spawning,
         2) Look into downsides of having static textures, also recycle stuff after the app closes
-        3) Matieral Bar is a very bad solution, look into something more concrete perhaps wiht listeners
-        4) It seems like you cannot have 0 enemies in a "wave" need to fix
-        5) Null objects for both playerAttacks as well as the animations, not sure why
-        6) Possible out of memory, maybe too many threads
+        3) Null objects for both playerAttacks as well as the animations, not sure why, it may be because null is sometimes given when there is no other objects
+        4) CameraX for the Level select should be based on level won
+        5) Possible procedural level, where it starts with strength 0, then 1, 2, 3 and a boss
+        6) May want to disable screen shaking
     Graphics Notes:
         1) For Level background ask ryan to rescale it to 2048
 

@@ -119,6 +119,8 @@ public abstract class VaoCollection {
     private boolean[] takenIds;
 
 
+    private float[] nullInstance;
+
     /** Default Constructor. Note that it assumed that indices, vertices, and texture cords, are all being used.
      * And you must provide them.
      *
@@ -142,6 +144,8 @@ public abstract class VaoCollection {
     public VaoCollection(int numEntities,float[] vertices,float[] textureCords,int[] indices,int vbosNeeded, int floatsPerInstance){
         //make a vbo list of the amount needed
         this.vboList = new int[vbosNeeded];
+
+        this.nullInstance = new float[floatsPerInstance];
 
 
         //the amount of floats per instance
@@ -335,6 +339,8 @@ public abstract class VaoCollection {
         }
         //one instance less
         this.numInstances--;
+
+        this.updateInstance(instanceId,nullInstance);
 
         //id is no longer taken
         this.takenIds[instanceId] = false;

@@ -31,6 +31,8 @@ public abstract class PlayerAttack extends BaseAttack {
     boolean enableKnockback = true;
     float knockbackLength = Knockback.DEFAULT_KNOCKBACK_LEN;
     long knockbackMillis = Knockback.DEFAULT_MILLIS;
+
+    float spawnerDamageMult = 1;
     /**
      * Default Constructor
      *
@@ -48,6 +50,7 @@ public abstract class PlayerAttack extends BaseAttack {
 
         this.damage = damage;
         SoundLib.playPlayerShootSoundEffect();
+
     }
 
     @Override
@@ -89,8 +92,8 @@ public abstract class PlayerAttack extends BaseAttack {
     }
     void onHitSpawner(Spawner s,World w){
         SoundLib.playSpawnerDamageSoundEffect();
-        s.damage(this.damage);
-        w.getPlayer().reportDamageDealt(this.damage,s);
+        s.damage(this.damage * this.spawnerDamageMult);
+        w.getPlayer().reportDamageDealt(this.damage * this.spawnerDamageMult,s);
     }
 
     abstract boolean collidesWithEnemy(Enemy e);

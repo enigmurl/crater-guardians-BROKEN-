@@ -15,8 +15,6 @@ import com.enigmadux.craterguardians.values.LayoutConsts;
 import enigmadux2d.core.quadRendering.QuadTexture;
 
 public class EvolveButton extends QuadTexture {
-    //millis
-    private static final long FLASHING_PERIOD = 1000;
 
     /**
      * The scale factor when it's pushed down
@@ -31,9 +29,6 @@ public class EvolveButton extends QuadTexture {
     private CraterRenderer craterRenderer;
 
     private boolean isDown;
-
-    //amount of millise conds since the evolve charge becomes 1
-    private long millisSinceInited = 0;
 
 
     /**
@@ -59,7 +54,7 @@ public class EvolveButton extends QuadTexture {
 
     public boolean onTouch(MotionEvent e) {
         if (this.isPressed(e)) {
-            if (this.isDown && (e.getActionMasked() == MotionEvent.ACTION_UP || e.getActionMasked() == MotionEvent.ACTION_POINTER_UP)) {
+            if (this.isDown && (e.getActionMasked() == MotionEvent.ACTION_UP || e.getActionMasked() == MotionEvent.ACTION_POINTER_UP) || e.getActionMasked() == MotionEvent.ACTION_CANCEL) {
                 this.defaultReleaseAction();
                 this.onHardRelease(e);
             } else if (e.getActionMasked() == MotionEvent.ACTION_DOWN || e.getActionMasked() == MotionEvent.ACTION_POINTER_DOWN) {
@@ -156,18 +151,14 @@ public class EvolveButton extends QuadTexture {
     public void update(World world,long dt){
         if (world.getPlayer().getEvolveCharge() == 1) {
             this.setVisibility(true);
-            millisSinceInited+= dt;
-
             this.setShader(this.getRed(),1,this.getBlue(),1);
 
         } else if (world.getPlayer().getEvolveCharge() < 0){
             this.setVisibility(false);
-            millisSinceInited = 0;
         } else {
             this.setVisibility(true);
             float charge = world.getPlayer().getEvolveCharge();
             this.setShader(1,charge,charge,1);
-            millisSinceInited = 0;
         }
 
     }

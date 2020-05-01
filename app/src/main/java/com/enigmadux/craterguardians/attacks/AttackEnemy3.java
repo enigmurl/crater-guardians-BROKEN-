@@ -12,21 +12,24 @@ import com.enigmadux.craterguardians.gamelib.World;
  *
  */
 public class AttackEnemy3 extends EnemyAttack {
-    private static final float RADIUS = 0.2f;
-    public static final float LENGTH = 2f;
+    private static final float[] RADIUS =  new float[] {0.2f,0.205f,0.21f,0.215f};
+    public static final float[] LENGTH = new float[] {1,1.5f,2f,2.5f};
     //per second
     //th
-    private static final float SPEED = 3f;
+    private static final float[] SPEED = new float[] {2,2.5f,3f,3.5f};
 
 
-    private static final int DAMAGE = -10;
+    private static final int[] DAMAGE = new int[] {-4,-6,-10,-14};
 
 
     private boolean isBlue;
-    public AttackEnemy3(int instanceID, float x, float y, float angle,boolean isBlue) {
-        super(instanceID, x, y, RADIUS *2,RADIUS*2, angle, SPEED, LENGTH, DAMAGE);
+    private int strength;
+
+    public AttackEnemy3(int instanceID, float x, float y, float angle,boolean isBlue,int strength) {
+        super(instanceID, x, y, RADIUS[strength] *2,RADIUS[strength]*2, angle, SPEED[strength], LENGTH[strength], DAMAGE[strength]);
         this.setShader(0.5f,1,0.5f,1);
         this.isBlue = isBlue;
+        this.strength = strength;
     }
 
 
@@ -88,8 +91,8 @@ public class AttackEnemy3 extends EnemyAttack {
             for (int i = 0, size = world.getBlueEnemies().size(); i < size; i++) {
                 Enemy blueE = world.getBlueEnemies().getInstanceData().get(i);
                 if (blueE instanceof Enemy3) continue;
-                if (blueE.isVisible() && Math.hypot(blueE.getDeltaX() - deltaX, blueE.getDeltaY() - deltaY) < RADIUS + blueE.getRadius()) {
-                    blueE.damage(DAMAGE);
+                if (blueE.isVisible() && Math.hypot(blueE.getDeltaX() - deltaX, blueE.getDeltaY() - deltaY) < RADIUS[strength] + blueE.getRadius()) {
+                    blueE.damage(DAMAGE[strength]);
                     this.isFinished = true;
                     return;
                 }
@@ -98,8 +101,8 @@ public class AttackEnemy3 extends EnemyAttack {
             for (int i = 0, size = world.getOrangeEnemies().size(); i < size; i++) {
                 Enemy orangeE = world.getOrangeEnemies().getInstanceData().get(i);
                 if (orangeE instanceof Enemy3) continue;
-                if (orangeE.isVisible() && Math.hypot(orangeE.getDeltaX() - deltaX, orangeE.getDeltaY() - deltaY) < RADIUS + orangeE.getRadius()) {
-                    orangeE.damage(DAMAGE);
+                if (orangeE.isVisible() && Math.hypot(orangeE.getDeltaX() - deltaX, orangeE.getDeltaY() - deltaY) < RADIUS[strength] + orangeE.getRadius()) {
+                    orangeE.damage(DAMAGE[strength]);
                     this.isFinished = true;
                     return;
                 }

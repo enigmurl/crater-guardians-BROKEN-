@@ -23,6 +23,7 @@ public class ReloadingAmmoBarAnim extends FrameTransitionAnim {
         rChannel = currentShader[0];
         gChannel = currentShader[1];
         bChannel = currentShader[2];
+        this.inGameAnim = true;
         start();
     }
 

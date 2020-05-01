@@ -55,11 +55,11 @@ public class PostGameVisibilityButton extends VisibilityInducedButton {
         World backend = this.craterRenderer.getCraterBackendThread().getBackend();
         //this means we are going into the game
         if (this.objectToShow == null){
-            this.craterRenderer.getCraterBackendThread().setPause(false);
+            this.craterRenderer.getCraterBackendThread().setGamePaused(false);
             backend.resetJoySticks();
 
         } else {
-            this.craterRenderer.getCraterBackendThread().setPause(true);
+            this.craterRenderer.getCraterBackendThread().setGamePaused(true);
             //going to level screen or home screen
             backend.killEndGamePausePeriod();
             //backend.getGameScreenLayout().hide();

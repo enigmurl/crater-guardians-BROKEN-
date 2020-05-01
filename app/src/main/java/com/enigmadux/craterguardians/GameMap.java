@@ -177,7 +177,7 @@ public class GameMap {
                 int health = level_data.nextInt();
 
                 int id = this.suppliesVao.createVertexInstance();
-                suppliesVao.addInstance(new Supply(x, y, r, health,id));
+                suppliesVao.addInstance(new Supply(context,x, y, r, health,id));
             }
         }
 
@@ -297,6 +297,7 @@ public class GameMap {
 
 
         this.enemyMap = new EnemyMap(this.plateausCollection.getInstanceData(), this.toxicLakeCollection.getInstanceData(), nodes);
+        //this.enemyMap.start();
         level_data.close();
 
         this.craterVisual.setTransform(0,0,this.craterRadius * 2 * CRATER_VISUAL_SCALE,this.craterRadius * 2 * CRATER_VISUAL_SCALE);
@@ -313,6 +314,9 @@ public class GameMap {
 
     public EnemyMap getEnemyMap(){
         return this.enemyMap;
+    }
+    public void setEnemyMap(EnemyMap enemyMap){
+        this.enemyMap = enemyMap;
     }
 
     public float getSpawnLocX(){

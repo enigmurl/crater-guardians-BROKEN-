@@ -1,5 +1,9 @@
 package com.enigmadux.craterguardians.spawners;
 
+import android.support.annotation.NonNull;
+
+import java.util.Arrays;
+
 /**https://en.wikipedia.org/wiki/Cubic_Hermite_spline
  *
  */
@@ -30,5 +34,11 @@ public class MultiSegCubicSolver {
         }
         //not in interval
         return -1;
+    }
+
+    @NonNull
+    @Override
+    public String toString() {
+        return Arrays.toString(data);
     }
 }

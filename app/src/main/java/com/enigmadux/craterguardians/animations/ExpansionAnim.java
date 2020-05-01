@@ -35,6 +35,8 @@ public class ExpansionAnim extends FrameTransitionAnim {
         this.minWidth  = startW;
         this.minHeight = startH;
         quadTexture.setScale(0,0);
+
+        this.inGameAnim = true;
         start(16);
     }
 

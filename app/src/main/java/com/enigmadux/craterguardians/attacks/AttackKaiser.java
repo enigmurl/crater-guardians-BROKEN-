@@ -7,12 +7,14 @@ import com.enigmadux.craterguardians.enemies.Enemy;
 
 
 public class AttackKaiser extends PlayerAttack {
-    private static final float RADIUS = 0.15f;
+    private static final float[] RADIUS = new float[] {0.15f,0.16f,0.17f,0.18f,0.19f};
 
-    private static final int DAMAGE = 20;
+    private static final int[] DAMAGE = new int[] {17,22,24,26,28};
     private static final float SPEED = 4f;
-    private static final float LENGTH = 1f;
+    private static final float[] LENGTH = new float[] {1.75f,1.85f,1.95f,2.05f,2.15f};
 
+
+    private int evolveGen;
     /**
      * Default Constructor
      *
@@ -22,18 +24,19 @@ public class AttackKaiser extends PlayerAttack {
      * @param angle      RADIANS
      */
     public AttackKaiser(int instanceID, float x, float y, float angle,int evolveGen) {
-        super(instanceID, x, y,RADIUS * 2,RADIUS * 2, angle, SPEED, LENGTH,AttackKaiser.DAMAGE);
+        super(instanceID, x, y,RADIUS[evolveGen] * 2,RADIUS[evolveGen] * 2, angle, SPEED, LENGTH[evolveGen],AttackKaiser.DAMAGE[evolveGen]);
+        this.evolveGen = evolveGen;
     }
 
 
     @Override
     boolean collidesWithEnemy(Enemy e) {
-        return Math.hypot(this.deltaX - e.getDeltaX(),this.deltaY - e.getDeltaY()) < e.getRadius() + AttackKaiser.RADIUS;
+        return Math.hypot(this.deltaX - e.getDeltaX(),this.deltaY - e.getDeltaY()) < e.getRadius() + AttackKaiser.RADIUS[evolveGen];
     }
 
     @Override
     boolean collidesWithSpawner(Spawner s) {
-        return s.collidesWithCircle(this.deltaX,this.deltaY,RADIUS);
+        return s.collidesWithCircle(this.deltaX,this.deltaY,RADIUS[evolveGen]);
     }
 
     @Override

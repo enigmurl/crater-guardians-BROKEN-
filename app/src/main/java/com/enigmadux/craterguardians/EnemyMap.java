@@ -3,17 +3,18 @@ package com.enigmadux.craterguardians;
 import android.util.Log;
 
 
+import com.enigmadux.craterguardians.enemies.Enemy;
 import com.enigmadux.craterguardians.gameobjects.Plateau;
 import com.enigmadux.craterguardians.gameobjects.ToxicLake;
 import com.enigmadux.craterguardians.players.Player;
+import com.enigmadux.craterguardians.util.FloatPoint;
 import com.enigmadux.craterguardians.util.MathOps;
 
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Locale;
-import java.util.concurrent.locks.Lock;
-import java.util.concurrent.locks.ReentrantLock;
+import java.util.Queue;
 
 /** This class provides information to an enemy about the current level so they can find out where to target
  *
@@ -21,7 +22,7 @@ import java.util.concurrent.locks.ReentrantLock;
  *  Because of the complexity, it seems the easiest thing to do as of now is just hardcode enemy paths in level files saving time, and hard to come up with algorithm
  *  do a* from there
  */
-public class EnemyMap {
+public class EnemyMap extends Thread {
     //to add a bit of leeway
     private static final float EPSILON = 0.1f;
     //the granularity of the first map
@@ -32,7 +33,7 @@ public class EnemyMap {
     private static final float GRANULARITY_3 = 1f;
 
     //used to prevent multiple threads accessing enemy map
-    public static final Lock LOCK = new ReentrantLock();
+    public static final Object LOCK = new Object();
 
     //each element of this array is itself a node, it tells the deltX and y and neighbours, first node is player, next N are supply, rest are intermediate
     private Node[] nodeMap;
@@ -42,7 +43,11 @@ public class EnemyMap {
     private List<Plateau> plateaus;
     //toxic lakes used for ray casting
     private List<ToxicLake> toxicLakes;
+    //enemies we need to handle
+    private Queue<Entry> enemies = new LinkedList<>();
 
+    private boolean running = true;
+    private volatile boolean paused = false;
 
 
     /** Default Constructor
@@ -51,13 +56,23 @@ public class EnemyMap {
      * @param nodes the current node maps. NOTE, the format is node 0 must be the player spawn, then the supply nodes, WHICH MUST BE CONNECTED TO SOMETHING OTHER THAN THE NODE0
      */
     public EnemyMap (List<Plateau> plateaus, List<ToxicLake> toxicLakes, Node[] nodes){
+        Log.d("Enemy","MAPPING CREATED");
         this.plateaus = plateaus;
         this.toxicLakes = toxicLakes;
         this.nodeMap = nodes;
-
+        this.start();
     }
 
-
+    public EnemyMap(EnemyMap org){
+        Log.d("Enemy","MAPPING CREATED");
+        this.plateaus = org.plateaus;
+        this.toxicLakes = org.toxicLakes;
+        this.nodeMap = org.nodeMap;
+        this.enemies = org.enemies;
+        this.running = org.running;
+        this.paused = org.paused;
+        this.start();
+    }
 
 
     /** Given a line represented by two nodes, it sees if it's possible to traverse this line without intersecting the plateau
@@ -68,10 +83,9 @@ public class EnemyMap {
      *
      * @param node1 the starting point
      * @param node2 the ending point
-     * @param width the width of the path
      * @return -1 if the line isn't possible otherwise, an integer representing the time it takes to traverse this specific node
      */
-    private double isValid(Node node1,Node node2,float width){
+    private double isValid(Node node1, Node node2){
         if (node1 == null || node2 == null) return -1;
 
         double weight = Math.hypot(node1.x-node2.x,node1.y-node2.y);
@@ -80,25 +94,10 @@ public class EnemyMap {
          * C2|_|_|C3
          */
         //left perpendicular
-        float denom = (float) Math.hypot(node1.x-node2.x,node1.y-node2.y);
 
         //theyre the same point
-        if (denom == 0) return 0;
-        float scalarL = (width/2)/denom;
+        if (weight == 0) return 0;
 
-        //todo MIGTH BE CAUSING GARBAGE COLLECTO
-        Node lP = new Node(-scalarL * (node1.y-node2.y),scalarL * (node1.x-node2.x));
-
-        //rightperpendicular
-        Node rP = new Node(-lP.x,-lP.y);
-
-        Node c0 = new Node(node1.x + lP.x,node1.y + lP.y);
-        Node c1 = new Node(node1.x + rP.x,node1.y + rP.y);
-        Node c2 = new Node(node2.x + lP.x,node2.y + lP.y);
-        Node c3 = new Node(node2.x + rP.x,node2.y + rP.y);
-
-
-        //Log.d("ENEMYMAP:","node1: " + node1 + " node2: " + node2 + "c0: " + c0 + " c1: " + c1  + " c2 " + c2 + " c3: " + c3);
 
         for (int i = 0,size = this.plateaus.size();i<size;i++){
             Plateau plateau = this.plateaus.get(i);
@@ -108,19 +107,11 @@ public class EnemyMap {
             //NOTE to prevent overfitting, what we do is instead of all the times the "rect" formed c0,1,2,3 intersects the plat
             //this is more efficient, and makes it more suited for what we need
 
-            if (MathOps.pointInRect(points[0][0],points[0][1],c0.deltX,c0.y,c1.deltX,c1.y,c2.deltX,c2.y,c3.deltX,c3.y) ||
-                    MathOps.pointInRect(points[1][0],points[1][1],c0.deltX,c0.y,c1.deltX,c1.y,c2.deltX,c2.y,c3.deltX,c3.y) ||
-                    MathOps.pointInRect(points[2][0],points[2][1],c0.deltX,c0.y,c1.deltX,c1.y,c2.deltX,c2.y,c3.deltX,c3.y) ||
-                    MathOps.pointInRect(points[3][0],points[3][1],c0.deltX,c0.y,c1.deltX,c1.y,c2.deltX,c2.y,c3.deltX,c3.y)) return -1;
             */
-            if (MathOps.lineIntersectsLine(c0.x,c0.y,c2.x,c2.y,points[0][0],points[0][1],points[1][0],points[1][1]) ||
-                    MathOps.lineIntersectsLine(c0.x,c0.y,c2.x,c2.y,points[3][0],points[3][1],points[1][0],points[1][1]) ||
-                    MathOps.lineIntersectsLine(c0.x,c0.y,c2.x,c2.y,points[0][0],points[0][1],points[2][0],points[2][1]) ||
-                    MathOps.lineIntersectsLine(c0.x,c0.y,c2.x,c2.y,points[2][0],points[2][1],points[3][0],points[3][1]) ||
-                    MathOps.lineIntersectsLine(c1.x,c1.y,c3.x,c3.y,points[0][0],points[0][1],points[1][0],points[1][1]) ||
-                    MathOps.lineIntersectsLine(c1.x,c1.y,c3.x,c3.y,points[3][0],points[3][1],points[1][0],points[1][1]) ||
-                    MathOps.lineIntersectsLine(c1.x,c1.y,c3.x,c3.y,points[0][0],points[0][1],points[2][0],points[2][1]) ||
-                    MathOps.lineIntersectsLine(c1.x,c1.y,c3.x,c3.y,points[2][0],points[2][1],points[3][0],points[3][1])){
+            if (MathOps.lineIntersectsLine(node1.x,node1.y,node2.x,node2.y,points[0][0],points[0][1],points[1][0],points[1][1]) ||
+                    MathOps.lineIntersectsLine(node1.x,node1.y,node2.x,node2.y,points[3][0],points[3][1],points[1][0],points[1][1]) ||
+                    MathOps.lineIntersectsLine(node1.x,node1.y,node2.x,node2.y,points[0][0],points[0][1],points[2][0],points[2][1]) ||
+                    MathOps.lineIntersectsLine(node1.x,node1.y,node2.x,node2.y,points[2][0],points[2][1],points[3][0],points[3][1])){
                 return -1;
             }
 
@@ -136,11 +127,10 @@ public class EnemyMap {
                 //see what to do, but basically increase the weightage
 
                 //this.map1Nodes[i] = null;
-                weight += r; 
+                return -1;
             }
 
         }
-
 
 
         return weight;
@@ -154,35 +144,39 @@ public class EnemyMap {
     public void updatePlayerPosition(Player player){
         //see every connection it can make with every other node, if it's possible
         //add it to neighbours
-        if (this.nodeMap[0] != null) this.nodeMap[0].reset();
+        synchronized (LOCK) {
+            if (this.nodeMap[0] != null) this.nodeMap[0].reset();
 
-        Node playerNode = new Node(player.getDeltaX(),player.getDeltaY());
+            Node playerNode = new Node(player.getDeltaX(), player.getDeltaY());
 
-        for (int i = 1;i<this.nodeMap.length;i++){
+            for (int i = 1; i < this.nodeMap.length; i++) {
 
-            float weightage = (float) this.isValid(playerNode, nodeMap[i], 0);
-            if (weightage >= 0){
-                nodeMap[i].addNeighbour(playerNode,weightage);
-                playerNode.addNeighbour(nodeMap[i],weightage);
+                float weightage = (float) this.isValid(playerNode, nodeMap[i]);
+                if (weightage >= 0) {
+                    nodeMap[i].addNeighbour(playerNode, weightage);
+                    playerNode.addNeighbour(nodeMap[i], weightage);
+                }
+
             }
 
+
+            this.nodeMap[0] = playerNode;
         }
 
+    }
 
-
-        this.nodeMap[0] = playerNode;
-
+    public synchronized void requestPath(Enemy enemy,int supplyIndex){
+        this.enemies.add(new Entry(enemy, supplyIndex));
     }
 
     /** Returns a List<Node> that represents the path it must take ALGO from: https://www.youtube.com/watch?v=mZfyt03LDH4
      *
-     * @param radius the radius of the character
      * @param currentX the starting deltX
      * @param currentY the starting y
      * @param nodeIndex -1 if you're targeting the player, otherwise the index of the supply you want/node
      * @return a path of nodes that represent the path it must take. NOTE if the last Node is null, that means that the last node is  the Player, and appropriate action can be taken from there
      */
-    public LinkedList<Node> nextStepMap(float radius, float currentX, float currentY, int nodeIndex){
+    private LinkedList<Node> nextStepMap(float currentX, float currentY, int nodeIndex){
         //first get possibly nodes it can connect with through ray casting
         //get the weightages of each of those nodes
         Node start = new Node(currentX,currentY);
@@ -190,9 +184,8 @@ public class EnemyMap {
         float targetY = this.nodeMap[nodeIndex + 1].y;
 
         for (int i = 1;i<this.nodeMap.length;i++){
-            //Log.d("ENEMY WEIGHT","NULL POINTER: " + (this.nodeMap[i] == null));
 
-            float weightage = (float) this.isValid(start,nodeMap[i],0);
+            float weightage = (float) this.isValid(start,nodeMap[i]);
             //Log.d("ENEMY WEIGHT","weight: " + weightage + " length: "  +this.nodeMap.length);
             if (weightage >= 0){
                 //this seems to be causing problems as it lasts for the a* search even after this one,
@@ -261,7 +254,6 @@ public class EnemyMap {
         path.add(null);
         path.add(null);
 
-        Log.d("ENEMY MAP:" ,"Target Position:" + this.nodeMap[nodeIndex+1] + " Enemy Pos: "  + start  + " Target connections: " + this.nodeMap[nodeIndex+1].connections +  " enemy connections " +  start.connections + " supply index: " + nodeIndex + " Open: " + open);
 
         return path;
     }
@@ -291,6 +283,54 @@ public class EnemyMap {
         }
         return -1;
     }
+
+    @Override
+    public void run() {
+        super.run();
+
+        while (running){
+
+            if (paused){
+                continue;
+            }
+
+            Entry entry = enemies.poll();
+            if (entry != null) {
+                Enemy e = entry.e;
+                LinkedList<Node> path;
+                synchronized (LOCK) {
+                    path = this.nextStepMap(e.getDeltaX(), e.getDeltaY(), entry.supplyIndex);
+                }
+                e.setPath(path);
+            } else {
+                try {
+                    Thread.sleep(1000);
+                    Log.d("Enemy", "MAPPING: Is paused: " + paused);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+            }
+        }
+
+        try {
+            this.join();
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+    }
+
+
+    public void endProcess(){
+        this.running = false;
+    }
+
+
+
+    public void setPaused(boolean paused){
+        this.paused = paused;
+        Log.d("Enemy","MAPPING PAUSED: " + paused);
+    }
+
 
     public static class Node {
         /** The distance from the start to this node*/
@@ -379,6 +419,15 @@ public class EnemyMap {
         }
 
     }
+    private static class Entry {
+        Enemy e;
+        int supplyIndex;
+        Entry(Enemy e,int supplyIndex){
+            this.e = e;
+            this.supplyIndex = supplyIndex;
+        }
+    }
+
     /** To string method used to display info to a gui
      *
      * @return a string representation
@@ -398,5 +447,6 @@ public class EnemyMap {
         }
         return returnString + "]";
     }
+
 
 }

@@ -88,6 +88,7 @@ public class PlayerSelecterIcon extends GUIClickable {
     }
 
     public void update(){
-        this.updateText(STRINGS.CHARACTER_UPGRADER_TEXT + mPlayer.getPlayerLevel(),FONT_SIZE);
+        String level = mPlayer.getPlayerLevel() / 10 + "." + mPlayer.getPlayerLevel() % 10;
+        this.updateText(STRINGS.CHARACTER_UPGRADER_TEXT + level,FONT_SIZE);
     }
 }

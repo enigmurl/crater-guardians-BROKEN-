@@ -17,6 +17,7 @@ public class ZoomFadeIn extends FrameTransitionAnim {
         this.original = original;
         this.orgH = original.getH();
         this.orgW = original.getW();
+        this.inGameAnim = true;
         original.setScale(0,0);
         original.setVisibility(true);
         start();
@@ -56,5 +57,12 @@ public class ZoomFadeIn extends FrameTransitionAnim {
         } else {
             return -3.517f * t + 3.517f;
         }
+    }
+
+
+    @Override
+    public void cancel() {
+        super.cancel();
+        finish();
     }
 }

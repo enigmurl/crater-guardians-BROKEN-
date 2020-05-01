@@ -125,6 +125,9 @@ public class QuadRenderer {
         for (int i = 0,size = quads.size();i<size;i++){
             ShaderProgram.NUM_DRAW_CALLS++;
 
+            if (quads.get(i) == null){
+                Log.d("NULL POINTER","QUADS: "+ quads);
+            }
             if (! quads.get(i).isVisible()) continue;
             quads.get(i).dumpOutputMatrix(this.instanceTransformation,uMVPmatrix);
 

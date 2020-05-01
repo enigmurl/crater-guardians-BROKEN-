@@ -60,4 +60,13 @@ public class MathOpsTester {
         assertEquals(-2.135314707f,a1,0.1);
     }
 
+    @Test
+    public void lineIntersectsCircle(){
+        float x = 3;
+        float y = 2;
+        float r = 2;
+        assertTrue(MathOps.segmentIntersectsCircle(x,y,r,1,3,6,2));
+        assertFalse(MathOps.segmentIntersectsCircle(x,y,r,1,3,4,6));
+    }
+
 }

@@ -29,7 +29,7 @@ public class Countdown extends TransitionAnim {
         secondsLeft--;
         if (secondsLeft <= 0){
             this.text.setVisibility(false);
-            this.craterBackendThread.setPause(false);
+            this.craterBackendThread.setGamePaused(false);
             return;
         }
         this.text.updateText("" + secondsLeft,this.text.getFontSize());

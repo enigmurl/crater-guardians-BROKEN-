@@ -1,13 +1,21 @@
 package com.enigmadux.craterguardians.gameobjects;
 
+import android.content.Context;
 import android.opengl.Matrix;
 
+import com.enigmadux.craterguardians.R;
 import com.enigmadux.craterguardians.animations.DeathAnim;
 import com.enigmadux.craterguardians.animations.ColoredShader;
+import com.enigmadux.craterguardians.animations.ScreenShake;
+import com.enigmadux.craterguardians.guilib.ProgressBar;
 import com.enigmadux.craterguardians.util.MathOps;
 import com.enigmadux.craterguardians.util.SoundLib;
 import com.enigmadux.craterguardians.gamelib.World;
 import com.enigmadux.craterguardians.gamelib.CraterCollectionElem;
+
+import java.util.ArrayList;
+
+import enigmadux2d.core.quadRendering.QuadTexture;
 
 /** This is what the robots are trying to steal
  *
@@ -15,7 +23,7 @@ import com.enigmadux.craterguardians.gamelib.CraterCollectionElem;
  * @version BETA
  */
 public class Supply extends CraterCollectionElem {
-
+    private static final float HEALTH_BAR_PERCENT = 0.75f;
 
 
 
@@ -30,6 +38,10 @@ public class Supply extends CraterCollectionElem {
 
     //turns it red when damaged;
     private ColoredShader currentShader;
+    private ArrayList<QuadTexture> renderables;
+    private ProgressBar healthBar;
+
+    private static ScreenShake screenShakeAnim;
 
     /**  Default constructor
      *
@@ -39,7 +51,7 @@ public class Supply extends CraterCollectionElem {
      * @param health the amount of damage it can take dieing
      * @param myVaoKey the id of this supply with respects to the VaoCollection it's in
      */
-    public Supply(float x,float y,float r,int health,int myVaoKey){
+    public Supply(Context context, float x, float y, float r, int health, int myVaoKey){
         super(myVaoKey);
 
 
@@ -50,6 +62,9 @@ public class Supply extends CraterCollectionElem {
         this.height = r/2;
         this.health = health;
 
+        this.renderables = new ArrayList<>();
+        this.healthBar = new ProgressBar(context,x,y + r + 0.0375f * HEALTH_BAR_PERCENT,2 * r * HEALTH_BAR_PERCENT,0.075f * HEALTH_BAR_PERCENT,health, R.drawable.hitpoints_bar);
+        this.renderables.addAll(healthBar.getRenderables());
 
         Matrix.setIdentityM(translationScalarMatrix,0);
         Matrix.translateM(translationScalarMatrix,0,this.deltaX,this.deltaY,0);
@@ -116,10 +131,19 @@ public class Supply extends CraterCollectionElem {
     public void update(long dt, World world) {
         //nothing needs to be updated
         if (! isAlive()){
+            if (screenShakeAnim== null || screenShakeAnim.isFinished()) {
+                screenShakeAnim = new ScreenShake(1f / world.getSupplies().size(), world);
+            }
             world.getSupplies().delete(this);
             synchronized (World.animationLock) {
                 world.getAnims().add(new DeathAnim(this.getDeltaX(),this.getDeltaY(),2 * this.r,2 * this.r));
             }
         }
+        this.healthBar.setValue(this.health);
+    }
+
+
+    public ArrayList<QuadTexture> getRenderables(){
+        return renderables;
     }
 }

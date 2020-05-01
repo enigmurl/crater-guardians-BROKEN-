@@ -1,6 +1,7 @@
 package com.enigmadux.craterguardians.guis.inGameScreen.tutorialHelpers;
 
 import android.content.Context;
+import android.util.Log;
 import android.view.MotionEvent;
 
 import com.enigmadux.craterguardians.animations.PopUp;
@@ -18,7 +19,7 @@ import enigmadux2d.core.quadRendering.QuadTexture;
 
 public abstract class TutorialPauseHelper extends TransitionAnim implements VisibilitySwitch {
     private static final long FADE_MILLIS = 400;
-    private static final long ANIM_VARIATION = 500;
+    private static final long ANIM_VARIATION = 200;
 
 
     private long DELAY_MILLIS = 16;
@@ -39,6 +40,7 @@ public abstract class TutorialPauseHelper extends TransitionAnim implements Visi
     private long fadeInMillis = 0;
     private long animMillis;
     //animMillis < minMillis
+    private boolean canceled = false;
     public TutorialPauseHelper(Context context,CraterBackendThread craterBackendThread,long minMillis,long animMillis) {
         this.texts =getTexts(context);
         scalables = getScalables(context);
@@ -69,6 +71,7 @@ public abstract class TutorialPauseHelper extends TransitionAnim implements Visi
     @Override
     public void setVisibility(boolean visibility) {
         this.isVisible = visibility;
+        Log.d("Wrapper","Showing");
         if (visibility){
             HANDLER.postDelayed(this,DELAY_MILLIS);
         }
@@ -77,7 +80,7 @@ public abstract class TutorialPauseHelper extends TransitionAnim implements Visi
                 texts.get(i).setVisibility(visibility);
             }
         }
-        craterBackendThread.setPause(visibility);
+        craterBackendThread.setGamePaused(visibility);
     }
     public void render(float[] uMVPMatrix, QuadRenderer renderer, DynamicText textRenderer) {
         if (! this.isVisible) return;
@@ -90,6 +93,7 @@ public abstract class TutorialPauseHelper extends TransitionAnim implements Visi
 
     @Override
     public void run(){
+        if (canceled) return;
         boolean firstTime = fadeInMillis < FADE_MILLIS;
         fadeInMillis += DELAY_MILLIS;
         if (fadeInMillis < FADE_MILLIS){
@@ -122,10 +126,9 @@ public abstract class TutorialPauseHelper extends TransitionAnim implements Visi
 
     }
 
-    //runs the animation (0 < t  <1)
-    private float getScale(float t){
-        //quadratic
-        return -1.93452380952f * t * t + 2.93452380952f * t;
+    @Override
+    public void cancel() {
+        canceled = true;
     }
 
     public boolean onTouch(MotionEvent e){

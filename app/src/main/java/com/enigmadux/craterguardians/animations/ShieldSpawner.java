@@ -13,6 +13,7 @@ public class ShieldSpawner extends FrameTransitionAnim {
         this.s = s;
         this.orgR = s.getRadius();
         s.setRadius(0);
+        this.inGameAnim = true;
         start();
     }
 

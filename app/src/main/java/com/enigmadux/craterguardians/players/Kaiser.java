@@ -12,16 +12,16 @@ import enigmadux2d.core.quadRendering.QuadTexture;
 
 public class Kaiser extends Player {
     private static final int NUM_GENS = 5;
-    private static final int[] EVOLVE_DAMAGE = new int[] {400,100,100,100,100};
+    private static final int[] EVOLVE_DAMAGE = new int[] {2800,6000,10000,15000,25000};
 
-    private static final float SPEED = 1;
+    private static final float[] SPEED = new float[] {1,1.05f,1.1f,1.15f,1.2f};
     private static final float RADIUS = 0.1f;
-    private static final int MAX_HEALTH = 200;
+    private static final int[] MAX_HEALTH = new int[] {150,175,200,225,250};
 
     //attack details
-    private static final long MILLIS_BETWEEN_ATTACKS = 300;
-    private static final long RELOADING_MILLIS = 2000;
-    private static final int MAX_ATTACKS = 30;
+    private static final long MILLIS_BETWEEN_ATTACKS = 100;
+    private static final long RELOADING_MILLIS = 750;
+    private static final int MAX_ATTACKS = 20;
 
     private static int PLAYER_LEVEL = 0;
 
@@ -63,23 +63,20 @@ public class Kaiser extends Player {
         this.e3 = new QuadTexture(context,R.drawable.kaiser_sprite_sheet_e3,0,0,1,1);
         this.e4 = new QuadTexture(context,R.drawable.kaiser_sprite_sheet_e4,0,0,1,1);
         this.e5 = new QuadTexture(context,R.drawable.kaiser_sprite_sheet_e5,0,0,1,1);
-        //e2 is added in evolve
     }
 
     //angle is in radians
     @Override
     public void attack(World world,float angle) {
         super.attack(world,angle);
-        Log.d("KAISER","Attacking; "  + angle);
         int id = world.getPlayerAttacks().createVertexInstance();
         AttackKaiser a = new AttackKaiser(id,this.getDeltaX(),this.getDeltaY(),angle,this.evolveGen);
         world.getPlayerAttacks().addInstance(a);
-        Log.d("KAISER","Num attacks: " + world.getPlayerAttacks().size());
     }
 
     @Override
     public int getMaxHealth() {
-        return MAX_HEALTH;
+        return MAX_HEALTH[evolveGen];
     }
 
     @Override
@@ -143,7 +140,7 @@ public class Kaiser extends Player {
 
     @Override
     public float getCharacterSpeed() {
-        return ((this.activeLakes.size() > 0) ? Player.TOXIC_LAKE_SLOWNESS * SPEED : SPEED);
+        return ((this.activeLakes.size() > 0) ? Player.TOXIC_LAKE_SLOWNESS * SPEED[evolveGen] : SPEED[evolveGen]);
     }
 
     @Override

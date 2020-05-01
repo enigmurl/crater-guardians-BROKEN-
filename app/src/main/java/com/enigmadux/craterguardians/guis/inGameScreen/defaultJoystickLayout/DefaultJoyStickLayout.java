@@ -22,9 +22,9 @@ public class DefaultJoyStickLayout extends JoystickLayout {
     //the center coordinate of the movement joy stick (openGL coordinates)
     public static final float[] MOVEMENT_JOY_STICK_CENTER = {-0.4f,-0.6f};
     //the center coordinate of attack joy stick (openGL coordinates)
-    public static final float[] ATTACK_JOY_STICK_CENTER = {0.7f,-0.4f};
+    public static final float[] ATTACK_JOY_STICK_CENTER = {0.75f,-0.4f};
     //the center coordinate of attack joy stick (openGL coordinates)
-    public static final float[] SHIELD_JOY_STICK_CENTER = {0.4f,-0.65f};
+    public static final float[] SHIELD_JOY_STICK_CENTER = {0.35f,-0.65f};
     //the diameter of the movement and attack joysticks
     public static final float JOY_STICK_IMAGE_WIDTH = 0.2f;
     //the maximum length they can extend too
@@ -50,7 +50,6 @@ public class DefaultJoyStickLayout extends JoystickLayout {
     private ProgressBar playerHealthBar;
     private ProgressBar numPlayerAttacks;
 
-    private ReloadingAmmoBarAnim currentAmmoBarAnim;
     private boolean handledCurrentReloading = false;
 
 
@@ -73,8 +72,14 @@ public class DefaultJoyStickLayout extends JoystickLayout {
 
                 if (distA < distD) {
                     this.attackJoyStick.onTouch(e);
+                    if (this.attackJoyStick.isSelected() && defenseJoyStick.isSelected()){
+                        this.defenseJoyStick.deSelect();
+                    }
                 } else {
                     this.defenseJoyStick.onTouch(e);
+                    if (this.attackJoyStick.isSelected() && defenseJoyStick.isSelected()){
+                        this.attackJoyStick.deSelect();
+                    }
                 }
             }
         }
@@ -114,7 +119,7 @@ public class DefaultJoyStickLayout extends JoystickLayout {
         playerHealthBar.setValue(p.getHealth());
         numPlayerAttacks.setMaxValue(p.getMaxAttacks());
         if (world.getPlayer().getNumLoadedAttacks() == 0 && ! handledCurrentReloading){
-            this.currentAmmoBarAnim = new ReloadingAmmoBarAnim(p.getReloadingTime(),numPlayerAttacks);
+            new ReloadingAmmoBarAnim(p.getReloadingTime(),numPlayerAttacks);
             this.numPlayerAttacks.setValue(p.getMaxAttacks());
             handledCurrentReloading = true;
         } else if (world.getPlayer().getNumLoadedAttacks() > 0){

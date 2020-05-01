@@ -1,5 +1,6 @@
 package com.enigmadux.craterguardians.enemies;
 
+
 import android.util.Log;
 
 import com.enigmadux.craterguardians.attacks.AttackEnemy3;
@@ -9,22 +10,22 @@ import com.enigmadux.craterguardians.gamelib.World;
 
 import java.util.ArrayList;
 import java.util.LinkedList;
-import java.util.concurrent.TimeUnit;
 
 public class Enemy3 extends Enemy {
 
     private static final float RADIUS = 0.1f;
     //milliseconds between attacks
-    private static final long ATTACK_RATE = 1000;
+    private static final long[] ATTACK_RATE = new long[] {1000,975,950,925};
+    private static final float[] SPEEDS = new float[] {0.80f,0.825f,0.85f,0.87f};
 
-    private static final float RAND_MULT = 0.2f;
+    //radians
+    private static final float SEPARATION = 0.1f;
 
     //distance needed to move
-    private static final float MOVE_DIST = AttackEnemy3.LENGTH - 0.1f;
 
-    private static final float ATTACK_LEN = AttackEnemy3.LENGTH;
-    private static final float HOVER_DIST = ATTACK_LEN * 0.5f;
+    private static final float[] ATTACK_LEN = AttackEnemy3.LENGTH;
 
+    private static final int MIN_HEALER_RETARGET = 3;
 
     private boolean moving = true;
 
@@ -32,9 +33,20 @@ public class Enemy3 extends Enemy {
 
     private static final int[] HEALTHS = new int[] {20,33,50,70};
 
+    private float offset;
+
+    private int strength;
+
+    private float moveDist;
+    private float hoverDist;
 
     public Enemy3(int instanceID, float x, float y, boolean isBlue,int strength) {
-        super(instanceID, x, y, RADIUS, ATTACK_LEN, isBlue, ATTACK_RATE,strength);
+        super(instanceID, x, y, RADIUS, ATTACK_LEN[strength], isBlue, ATTACK_RATE[strength],strength);
+        this.strength = strength;
+        this.moveDist = ATTACK_LEN[strength] - 0.1f;
+        this.hoverDist = ATTACK_LEN[strength] * 0.5f;
+
+
     }
 
     @Override
@@ -46,14 +58,14 @@ public class Enemy3 extends Enemy {
     public void attack(World world, float angle) {
         super.attack(world,angle);
         int id = world.getEnemyAttacks().createVertexInstance();
-        AttackEnemy3 attackEnemy3 = new AttackEnemy3(id,deltaX,deltaY,angle,this.isBlue);
+        AttackEnemy3 attackEnemy3 = new AttackEnemy3(id,deltaX,deltaY,angle,this.isBlue,strength);
         world.getEnemyAttacks().addInstance(attackEnemy3);
     }
 
     @Override
     public void update(long dt, World world) {
         super.update(dt, world);
-        if (target != null && target.isDead()){
+        if (target != null && (target.isDead() ||  (target.getHealth() == target.getMaxHealth() && target.getHealers().size() >MIN_HEALER_RETARGET))){
             target = null;
             this.currentPath = null;
         }
@@ -61,8 +73,10 @@ public class Enemy3 extends Enemy {
             this.research(world);
         }
         if (this.currentPath == null && this.target != null && this.target.getPath() != null){
-            Pathfinder pathfinder = new Pathfinder(world.getEnemyMap(),this.target);
-            pathfinder.run();
+            EnemyMap.Node start  = this.target.getPath().getFirst();
+
+            int index = Math.max(-1,start == null ? -1 : world.getEnemyMap().getNodeIndex(start.orgNode) - 1);
+            world.getEnemyMap().requestPath(this,index);
 
         }
     }
@@ -86,12 +100,17 @@ public class Enemy3 extends Enemy {
             this.target = maxEnemy;
             maxEnemy.getHealers().add(this);
             this.currentPath = null;
+
+            int size = maxEnemy.getHealers().size();
+            int multiplier = size % 2 ==0 ? -1 * (size+1)/2 : (size+1)/2;
+            this.offset = SEPARATION * multiplier;
+
         }
     }
 
     @Override
     public float getCharacterSpeed() {
-        return 0.85f;
+        return SPEEDS[strength];
     }
 
     @Override
@@ -100,8 +119,8 @@ public class Enemy3 extends Enemy {
             return moving = false;
         }
         float minDist = (float) Math.hypot(target.getDeltaX()-deltaX,target.getDeltaY()-deltaY);
-        moving = minDist >= MOVE_DIST && target.getPath() != null && (getPath() == null || target.getPath().size() < getPath().size());
-        if (minDist <= ATTACK_LEN){
+        moving = minDist >= moveDist && target.getPath() != null && (getPath() == null || target.getPath().size() < getPath().size());
+        if (minDist <= ATTACK_LEN[strength]){
             float angle = minDist == 0 ? 0: MathOps.getAngle((target.getDeltaX() - this.getDeltaX())/minDist,(target.getDeltaY() - this.getDeltaY())/minDist);
             this.attack(world,angle);
             return true;
@@ -120,15 +139,14 @@ public class Enemy3 extends Enemy {
         if (moving) {
             super.move(world, dt);
         } else if (target != null) {
-            //sandwich the target and palyer
+            //sandwich the target and player
             float dX = target.getDeltaX() - world.getPlayer().getDeltaX();
             float dY = target.getDeltaY() - world.getPlayer().getDeltaY();
-            float hypot = (float) Math.hypot(dX,dY);
-            float mult = (hypot + HOVER_DIST)/hypot;
-            dX *= mult * (1 + RAND_MULT * (Math.random() - 0.5));
-            dY *= mult * (1 + RAND_MULT * (Math.random() - 0.5));
-            float targetX = world.getPlayer().getDeltaX() + dX;
-            float targetY = world.getPlayer().getDeltaY() + dY;
+            float hypotenuse = (float) Math.hypot(dX,dY);
+            float angle = MathOps.getAngle(dX/hypotenuse,dY/hypotenuse) + offset;
+
+            float targetX = target.getDeltaX() + (float) (Math.cos(angle) * hoverDist);
+            float targetY = target.getDeltaY() + (float) (Math.sin(angle) * hoverDist);
             float travelLen = (float) Math.hypot(this.getDeltaX() - targetX,this.getDeltaY()-targetY);
 
             float clippedLength = Math.min(travelLen, this.getCharacterSpeed() * dt / 1000f);
@@ -172,49 +190,14 @@ public class Enemy3 extends Enemy {
     }
 
 
-
-    class Pathfinder implements Runnable{
-
-        private EnemyMap enemyMap;
-        private Enemy target;
-        /**
-         * Default constructor
-         *
-         * @param enemyMap    the map used to actually determine the path which has information about the level
-
-         */
-        Pathfinder(EnemyMap enemyMap,Enemy target) {
-            super();
-            this.enemyMap = enemyMap;
-            this.target = target;
-        }
-
-        @Override
-        public void run() {
-            try {
-                if (EnemyMap.LOCK.tryLock(5, TimeUnit.SECONDS)) {
-                    //the minus 1 is too offset the player node
-                    EnemyMap.Node start  = this.target.getPath().getFirst();
-
-                    int index = start == null ? -1 : this.enemyMap.getNodeIndex(start.orgNode) - 1;
-                    Log.d("Enemy Path"," Index: " + (index +1));
-                    try {
-                        LinkedList<EnemyMap.Node> prePath = this.enemyMap.nextStepMap(getRadius(), deltaX,deltaY,index);
-                        prePath.addAll(target.getPath());
-                        currentPath = prePath;
-                    } catch (Exception e){
-                        Log.d("ENEMY PATH","Exception trying to gain path: ",e);
-                    }
-                    finally {
-                        EnemyMap.LOCK.unlock();
-                    }
-                    Log.d("Enemy","PAth: " + currentPath);
-                }
-            } catch (InterruptedException e) {
-                Log.d("ENEMY PATH","PATH FAILED");
-
+    @Override
+    public void setPath(LinkedList<EnemyMap.Node> path) {
+        if (this.target != null && this.target.getPath() != null) {
+            super.setPath(path);
+            if (this.currentPath != null && this.target != null && this.target.getPath() != null) {
+                this.currentPath.addAll(this.target.getPath());
             }
-
         }
     }
+
 }

@@ -11,12 +11,12 @@ import java.util.HashSet;
 
 public class AttackFlamethrower extends PlayerAttack {
     private static final float[] DAMAGE = new float[] {3,4,5,5.5f,6};
-    private static final float[] LENGTH = new float[] {1f,1.125f,1.25f,1.375f,1.5f};
+    private static final float[] LENGTH = new float[] {1.4f,1.475f,1.55f,1.625f,1.7f};
     private static final float SPEED = 4f;
     private static final float SWEEP = 0.4f;//radians
 
-    private static final float[] START_R = new float[] {0.1f,0.1125f,0.125f,0.1375f,0.15f};
-    private static final float[] END_R  =  new float[] {0.26f,0.3f,0.325f,0.3575f,0.39f};
+    private static final float[] START_R = new float[] {0.14f,0.1475f,0.155f,0.1625f,0.17f};
+    private static final float[] END_R  =  new float[] {0.364f,0.3835f,0.403f,0.4225f,0.442f};
 
     private HashSet<CraterCollectionElem> hits;
 

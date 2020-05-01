@@ -51,7 +51,7 @@ public class TutorialData {
         try (Scanner stdin = new Scanner(this.context.openFileInput(TutorialData.TUTORIAL))) {
             TUTORIAL_ENABLED = stdin.nextBoolean();
         } catch (Exception e) {
-            Log.d("FRONTEND", "Error loading settings file ", e);
+            Log.d("FRONTEND", "Error loading tutorial file ", e);
             this.writeTutorialFile();
             TUTORIAL_ENABLED = true;
         }

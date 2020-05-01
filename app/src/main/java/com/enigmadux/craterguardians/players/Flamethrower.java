@@ -12,7 +12,7 @@ import enigmadux2d.core.quadRendering.QuadTexture;
 
 public class Flamethrower extends Player {
     private static final int NUM_GENS = 5;
-    private static final int[] EVOLVE_DAMAGE = new int[] {500,1000,1500,2250,3000};
+    private static final int[] EVOLVE_DAMAGE = new int[] {2000,4000,7000,10000,15000};
 
     private static final float SPEED = 0.8f;
     private static final float RADIUS = 0.1f;
@@ -181,7 +181,6 @@ public class Flamethrower extends Player {
                 this.rotatableEntities.add(e5);
                 break;
         }
-        Log.d("Flamethrower","Rotatables: " + this.rotatableEntities);
     }
 
 

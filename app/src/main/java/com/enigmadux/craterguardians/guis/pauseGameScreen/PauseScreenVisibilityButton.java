@@ -63,7 +63,7 @@ public class PauseScreenVisibilityButton extends VisibilityInducedButton {
             // this needs to be done later
 
         } else {
-            this.craterRenderer.getCraterBackendThread().setPause(true);
+            this.craterRenderer.getCraterBackendThread().setGamePaused(true);
             //going to level screen or home screen
             backend.killEndGamePausePeriod();
             backend.setState(World.STATE_GUI);

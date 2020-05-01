@@ -50,6 +50,8 @@ public class ToxicLake extends CraterCollectionElem {
         this.deltaX = x;
         this.deltaY = y;
         //super(deltX-r,y-r,2*r,2*r);
+        this.width = 2 * radius;
+        this.height = 2 * radius;
         this.radius = radius;
 
         //translates to appropriate coordinates
@@ -128,5 +130,9 @@ public class ToxicLake extends CraterCollectionElem {
 
     public boolean intersectsCharacter(Character c) {
         return Math.hypot(c.getDeltaX() - this.deltaX,c.getDeltaY() - this.deltaY) < this.radius + c.getRadius();
+    }
+    public boolean intersectsCircle(float x,float y,float r){
+        return Math.hypot(x - this.deltaX,y - this.deltaY) < this.radius + r;
+
     }
 }

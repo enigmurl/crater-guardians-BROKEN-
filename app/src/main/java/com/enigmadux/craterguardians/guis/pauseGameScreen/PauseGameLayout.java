@@ -132,7 +132,7 @@ public class PauseGameLayout implements GUILayout {
             this.quadTextures.get(i).setVisibility(visibility);
         }
         if (visibility) {
-            this.craterRenderer.getCraterBackendThread().setPause(true);
+            this.craterRenderer.getCraterBackendThread().setGamePaused(true);
         }
 
         this.isVisible = visibility;

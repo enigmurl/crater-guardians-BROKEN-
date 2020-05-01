@@ -187,7 +187,10 @@ public abstract class Spawner extends CraterCollectionElem {
         this.renderables.add(this.spawnGlowIndicator);
         this.renderables.add(this.blueFuelCell);
         this.renderables.add(this.orangeFuelCell);
-        this.updateGraphics();
+        //set shader to null so that they only appear at the start
+
+        this.spawnGlowIndicator.setShader(0,0,0,0);
+        this.updateFuelCells();
     }
 
     /**
@@ -251,22 +254,30 @@ public abstract class Spawner extends CraterCollectionElem {
             if (! Arrays.equals(spawnGlowIndicator.getShader(),BLUE_SHADER)){
                 if (this.expansionAnim != null) this.expansionAnim.cancel();
                 this.expansionAnim = new ExpansionAnim(this.spawnGlowIndicator,ExpansionAnim.DEFAULT_MILLIS,0,0);
+                Log.d("SPAWNER","ID: " + getInstanceID() + " changing to BLUE 1");
             }
             this.spawnGlowIndicator.setShader(BLUE_SHADER[0],BLUE_SHADER[1],BLUE_SHADER[2],BLUE_SHADER[3]);
         } else if (this.elapsedTime < this.orangeEnd){
             if (! Arrays.equals(spawnGlowIndicator.getShader(),ORANGE_SHADER)){
                 if (this.expansionAnim != null) this.expansionAnim.cancel();
                 this.expansionAnim = new ExpansionAnim(this.spawnGlowIndicator,ExpansionAnim.DEFAULT_MILLIS,0,0);
+                Log.d("SPAWNER","ID: " + getInstanceID() + " changing to ORANGE");
             }
             this.spawnGlowIndicator.setShader(ORANGE_SHADER[0],ORANGE_SHADER[1],ORANGE_SHADER[2],ORANGE_SHADER[3]);
         } else {
             if (! Arrays.equals(spawnGlowIndicator.getShader(),BLUE_SHADER)){
                 if (this.expansionAnim != null) this.expansionAnim.cancel();
                 this.expansionAnim = new ExpansionAnim(this.spawnGlowIndicator,ExpansionAnim.DEFAULT_MILLIS,0,0);
+                Log.d("SPAWNER","ID: " + getInstanceID() + " changing to BLUE 2");
             }
             this.spawnGlowIndicator.setShader(BLUE_SHADER[0],BLUE_SHADER[1],BLUE_SHADER[2],BLUE_SHADER[3]);
         }
 
+        this.updateFuelCells();
+
+    }
+
+    private void updateFuelCells(){
 
         float h1 = Math.min(1,(float) (this.blue2End-this.elapsedTime)/(this.blue2End-this.orangeEnd)) * this.height/6;
         float h0 = h1;
@@ -291,7 +302,6 @@ public abstract class Spawner extends CraterCollectionElem {
             this.renderables.remove(this.orangeFuelCell);
         }
     }
-
 
     public abstract void spawnOrangeEnemies(int numEnemies, CraterCollection<Enemy> orangeEnemies);
 
@@ -324,6 +334,9 @@ public abstract class Spawner extends CraterCollectionElem {
             Log.d("SPAWNER","INTERPELOATING MID (x): " + mid + " F(mid) " +  this.healthFunction.interpolate(mid) + " target " + this.health);
         }
 
+        if (lhs < elapsedTime){
+            Log.d("SPAWNERBUG","Function: " + this.healthFunction);
+        }
         this.elapsedTime = (long) lhs;
 
 

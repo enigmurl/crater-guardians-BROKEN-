@@ -152,7 +152,7 @@ public class LevelSelector extends GUIClickable {
         this.backend.setLevelNum(this.levelNum);
         this.backend.loadLevel();
         this.backend.setState(World.STATE_PREGAME);
-        this.craterRenderer.getCraterBackendThread().setPause(false);
+        this.craterRenderer.getCraterBackendThread().setGamePaused(false);
 
         this.levelSelectLayout.setVisibility(false);
         this.inGameScreen.setVisibility(true);
@@ -219,7 +219,6 @@ public class LevelSelector extends GUIClickable {
             this.shader[3] = (1 - Math.abs(x)) * 5;
             if (this.visibleText != null) {
                 this.visibleText.setAlpha((1 - Math.abs(x)) * 5);
-                Log.d("Text Shader: ","ID: " + this.visibleText.getShader() + " " + this.visibleText);
             }
         } else {
             this.shader[3] = 1;

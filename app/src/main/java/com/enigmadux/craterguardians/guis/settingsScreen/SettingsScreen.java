@@ -82,8 +82,8 @@ public class SettingsScreen implements GUILayout {
     public void loadComponents(Context context, HashMap<String,GUILayout> allLayouts){
 
         ImageText title = new ImageText(context,R.drawable.layout_background,0f,0.85f,1,0.25f,true);
-        ImageText musicText =new ImageText(context,R.drawable.button_background,-0.4f,-0.05f,1.5f,1.5f,true);
-        ImageText soundText =new ImageText(context,R.drawable.button_background,0.4f,-0.05f,1.5f,1.5f,true);
+        ImageText musicText =new ImageText(context,R.drawable.button_background,-0.5f,-0.05f,1.5f,1.5f,true);
+        ImageText soundText =new ImageText(context,R.drawable.button_background,0.5f,-0.05f,1.5f,1.5f,true);
         musicText.setShader(GUIClickable.SHADER[0],GUIClickable.SHADER[1],GUIClickable.SHADER[2],GUIClickable.SHADER[3]);
         soundText.setShader(GUIClickable.SHADER[0],GUIClickable.SHADER[1],GUIClickable.SHADER[2],GUIClickable.SHADER[3]);
 
@@ -117,11 +117,11 @@ public class SettingsScreen implements GUILayout {
                 this,allLayouts.get(STRINGS.HOME_SCREEN_LAYOUT_ID), false));
         //the music button
         this.clickables.add(new MusicSwitch(context,R.drawable.music_on_off_button,
-                -0.4f,-0.25f,0.75f,0.75f,
+                -0.5f,-0.25f,0.75f,0.75f,
                 this.settingsData));
         //the sound effects button
         this.clickables.add(new SoundEffectsSwitch(context,R.drawable.sound_effect_on_off_button,
-                0.4f,-0.25f,0.75f,0.75f,
+                0.5f,-0.25f,0.75f,0.75f,
                 this.settingsData));
 
         this.renderables.addAll(clickables);

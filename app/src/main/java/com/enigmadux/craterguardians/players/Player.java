@@ -1,12 +1,14 @@
 package com.enigmadux.craterguardians.players;
 
 import android.content.Context;
+import android.graphics.Point;
 import android.opengl.Matrix;
 import android.util.Log;
 
 import com.enigmadux.craterguardians.animations.DeathAnim;
 import com.enigmadux.craterguardians.animations.EvolveAnim;
 import com.enigmadux.craterguardians.animations.ColoredShader;
+import com.enigmadux.craterguardians.animations.ScreenShake;
 import com.enigmadux.craterguardians.animations.ShootAnimation;
 import com.enigmadux.craterguardians.Character;
 import com.enigmadux.craterguardians.gameobjects.Plateau;
@@ -34,7 +36,10 @@ public abstract class Player implements Character {
             800,1200,1700,2650,3500,5000,8100,12000,17000,25000,
             35000,52000,64300,83200,126000,154000,188000,240000,350000,1500000
         };
-    protected static final float TOXIC_LAKE_SLOWNESS = 0.1f;
+    static final float TOXIC_LAKE_SLOWNESS = 0.1f;
+
+
+    private static final float[] STRENGTH_MULTS = new float[] {15.8f,8f,1,1};
 
     //to avoid floating point errors
     private static final int NUM_EVOLVE_TICKS = 100000;
@@ -79,6 +84,7 @@ public abstract class Player implements Character {
 
     public float deltaY;
 
+    public float vX,vY;
     //the lakes the player is in as of now
     protected LinkedList<ToxicLake> activeLakes = new LinkedList<>();
 
@@ -127,7 +133,6 @@ public abstract class Player implements Character {
         this.spawn();
 
         this.numLoadedAttacks = this.getMaxAttacks();
-
     }
 
     public void loadComponents(Context context){
@@ -148,6 +153,7 @@ public abstract class Player implements Character {
         this.evolveGen = 0;
         this.evolveCharge = 0;
         this.numLoadedAttacks = getMaxAttacks();
+
 
         this.activeLakes.clear();
         //facing up because
@@ -250,6 +256,7 @@ public abstract class Player implements Character {
     }
 
     public void attemptAttack(World world,float cos,float sin){
+        Log.d("PLAYER","Attacking: " + cos + " sin: " + sin);
         float angle = MathOps.getAngle(cos, sin);
         if (this.millisSinceLastAttack > this.millisBetweenAttacks && this.numLoadedAttacks > 0){
             this.numLoadedAttacks--;
@@ -296,8 +303,10 @@ public abstract class Player implements Character {
     }
 
     public void reportDamageDealt(float damageDealt,Object damaged){
-        if (Enemy.class.isAssignableFrom(damaged.getClass())) {
-            this.evolveCharge += NUM_EVOLVE_TICKS * damageDealt / this.getDamageForEvolve();
+        if (damaged instanceof Enemy) {
+            int strength = ((Enemy) damaged).getStrength();
+            float charge = STRENGTH_MULTS[strength] * damageDealt;
+            this.evolveCharge += NUM_EVOLVE_TICKS * charge / this.getDamageForEvolve();
             this.evolveCharge = Math.min(this.evolveCharge, NUM_EVOLVE_TICKS);
 
         }
@@ -343,6 +352,19 @@ public abstract class Player implements Character {
             world.getAnims().add(shootAnim);
         }
     }
+
+
+    public float getVelocityX(){
+        return vX;
+    }
+    public float getVelocityY(){
+        return vY;
+    }
+    public void setVelocity(float x,float y){
+        this.vX = x;
+        this.vY = y;
+    }
+
 
 
     /** This method should add the needed rotatableEntities to the "rotatableEntities" array list, so that it can be drawn.

@@ -45,6 +45,7 @@ public class Knockback extends FrameTransitionAnim {
         this.deltaY = deltaY;
         this.startX = enemy.getDeltaX();
         this.startY = enemy.getDeltaY();
+        this.inGameAnim = true;
         start();
     }
 

@@ -151,14 +151,14 @@ public class PostGameLayout implements GUILayout {
 
         if (visibility){
             //pause backend
-            this.craterRenderer.getCraterBackendThread().setPause(true);
+            this.craterRenderer.getCraterBackendThread().setGamePaused(true);
             //if it's tutorial, want to change it to kaiser instead
             if (this.craterRenderer.getWorld().getPlayer() instanceof TutorialPlayer){
                 this.craterRenderer.getWorld().setPlayer(new Kaiser());
             }
             if (craterRenderer.getWorld().hasWonLastLevel()){
                 //-1 because the player just won, so level num was increased, not the best solution
-                int xp = World.getXpGainPerLevel(craterRenderer.getWorld().getLevelNum() -1);
+                int xp = craterRenderer.getWorld().getAmntXpLastLevel();
                 new XpGainedAnimation(XpGainedAnimation.DEFAULT_MILLIS,this.xpAmount,xp);
                 this.victoryIndicator.updateText("Victory",victoryIndicator.getFontSize());
             } else {
