@@ -3,6 +3,7 @@ package com.enigmadux.craterguardians.guis.inGameScreen.tutorialHelpers;
 import android.content.Context;
 
 import com.enigmadux.craterguardians.CraterBackendThread;
+import com.enigmadux.craterguardians.enemies.Enemy;
 import com.enigmadux.craterguardians.guilib.Text;
 import com.enigmadux.craterguardians.R;
 import com.enigmadux.craterguardians.values.LayoutConsts;
@@ -23,7 +24,7 @@ public class GameObjectHelper extends TutorialPauseHelper {
     ArrayList<QuadTexture> getScalables(Context context) {
         ArrayList<QuadTexture> scalables = new ArrayList<>();
         scalables.add(new QuadTexture(context, R.drawable.tutorial_spawner_icon,-0.5f,0,0.5f * LayoutConsts.SCALE_X,0.5f));
-        scalables.add(new QuadTexture(context, R.drawable.tutorial_enemy_icon,0,0,0.5f * LayoutConsts.SCALE_X,0.5f));
+        scalables.add(new QuadTexture(context, R.drawable.tutorial_enemy_icon,0,0,0.5f * LayoutConsts.SCALE_X * Enemy.ASPECT_RATIO,0.5f));
         scalables.add(new QuadTexture(context, R.drawable.supply_top_view,0.5f,0,0.5f * LayoutConsts.SCALE_X,0.5f));
 
 

@@ -3,6 +3,7 @@ package com.enigmadux.craterguardians.enemies;
 
 import android.util.Log;
 
+import com.enigmadux.craterguardians.animations.ShootAnimation;
 import com.enigmadux.craterguardians.attacks.AttackEnemy3;
 import com.enigmadux.craterguardians.EnemyMap;
 import com.enigmadux.craterguardians.util.MathOps;
@@ -57,9 +58,16 @@ public class Enemy3 extends Enemy {
     @Override
     public void attack(World world, float angle) {
         super.attack(world,angle);
-        int id = world.getEnemyAttacks().createVertexInstance();
-        AttackEnemy3 attackEnemy3 = new AttackEnemy3(id,deltaX,deltaY,angle,this.isBlue,strength);
-        world.getEnemyAttacks().addInstance(attackEnemy3);
+        float gunTipX = GUN_LENGTH * this.height + AttackEnemy3.RADIUS[strength]+this.getRadius();
+        //don't need h/2 because its in the middle
+        float gunTipY = GUN_OFFSET_Y * this.height;
+        float x = (float) (gunTipX * Math.cos(angle) - Math.sin(angle) * gunTipY);
+        float y = (float) (gunTipX * Math.sin(angle) + Math.cos(angle) * gunTipY);
+        synchronized (World.enemyAttackLock) {
+            int id = world.getEnemyAttacks().createVertexInstance();
+            AttackEnemy3 attackEnemy3 = new AttackEnemy3(id,deltaX + x,deltaY + y,angle,this.isBlue,strength);
+            world.getEnemyAttacks().addInstance(attackEnemy3);
+        }
     }
 
     @Override
@@ -122,10 +130,13 @@ public class Enemy3 extends Enemy {
         moving = minDist >= moveDist && target.getPath() != null && (getPath() == null || target.getPath().size() < getPath().size());
         if (minDist <= ATTACK_LEN[strength]){
             float angle = minDist == 0 ? 0: MathOps.getAngle((target.getDeltaX() - this.getDeltaX())/minDist,(target.getDeltaY() - this.getDeltaY())/minDist);
+            this.attackRotation = angle;
             this.attack(world,angle);
+            isAttacking = true;
             return true;
         }
 
+        isAttacking = false;
         return false;
     }
 

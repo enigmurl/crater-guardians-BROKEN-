@@ -27,7 +27,7 @@ public class MultiSegCubicSolver {
                 float m1 = data[j * 3 + 2];
                 float h00 = 2 * t * t *t - 3 * t *t  + 1;
                 float h10 = t * t * t - 2  * t *t  + t;
-                float h01 = -2 *t * t *t *t  + 3 * t * t;
+                float h01 = -2 *t * t *t  + 3 * t * t;
                 float h11 = t * t * t - t * t;
                 return h00 * p0 + h10 * m0 + h01 * p1 + h11 * m1;
             }

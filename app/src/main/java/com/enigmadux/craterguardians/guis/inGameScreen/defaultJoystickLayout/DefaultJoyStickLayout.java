@@ -33,11 +33,6 @@ public class DefaultJoyStickLayout extends JoystickLayout {
     //the center coordinate of the evolve button
     public static final float[] EVOLVE_BUTTON_CENTER = {0.6f,ATTACK_JOY_STICK_CENTER[1] + JOY_STICK_IMAGE_WIDTH + JOY_STICK_MAX_RADIUS + 0.1f};
 
-    @Override
-    public boolean onTouch(MotionEvent e) {
-        return super.onTouch(e);
-    }
-
     //the diameter of the evolve button
     public static final float EVOLVE_BUTTON_WIDTH = 0.4f;
 
@@ -66,7 +61,7 @@ public class DefaultJoyStickLayout extends JoystickLayout {
 
             if (x < 0){
                 this.movementJoyStick.onTouch(e);
-            } else if (! evolveButton.onTouch(e)){
+            } else if (craterRenderer.getCraterBackendThread().isGamePaused() || ! evolveButton.onTouch(e)){
                 float distA = (float) Math.hypot(x - attackJoyStick.getX(),y - attackJoyStick.getY());
                 float distD = (float) Math.hypot(x - defenseJoyStick.getX(),y - defenseJoyStick.getY());
 
@@ -93,11 +88,11 @@ public class DefaultJoyStickLayout extends JoystickLayout {
 
     @Override
     protected void initComponents(Context context) {
-        this.attackJoyStick = new JoyStick(context, R.drawable.joystick_icon,ATTACK_JOY_STICK_CENTER[0],ATTACK_JOY_STICK_CENTER[1],
+        this.attackJoyStick = new JoyStick(context, R.drawable.attack_joystick_icon,ATTACK_JOY_STICK_CENTER[0],ATTACK_JOY_STICK_CENTER[1],
                 JOY_STICK_IMAGE_WIDTH/2,JOY_STICK_MAX_RADIUS,JOY_STICK_MAX_RADIUS * MIN_POWER,this);
-        this.defenseJoyStick = new JoyStick(context, R.drawable.joystick_icon,SHIELD_JOY_STICK_CENTER[0],SHIELD_JOY_STICK_CENTER[1],
+        this.defenseJoyStick = new JoyStick(context, R.drawable.defense_joystick_icon,SHIELD_JOY_STICK_CENTER[0],SHIELD_JOY_STICK_CENTER[1],
                 JOY_STICK_IMAGE_WIDTH/2,JOY_STICK_MAX_RADIUS,0,this);
-        this.movementJoyStick = new JoyStick(context, R.drawable.joystick_icon,MOVEMENT_JOY_STICK_CENTER[0],MOVEMENT_JOY_STICK_CENTER[1],
+        this.movementJoyStick = new JoyStick(context, R.drawable.movement_joystick_icon,MOVEMENT_JOY_STICK_CENTER[0],MOVEMENT_JOY_STICK_CENTER[1],
                 JOY_STICK_IMAGE_WIDTH/2,JOY_STICK_MAX_RADIUS,0,this);
 
         this.evolveButton = new EvolveButton(context,R.drawable.evolve_button,
@@ -113,7 +108,6 @@ public class DefaultJoyStickLayout extends JoystickLayout {
 
     @Override
     public void update(World world, long dt) {
-        //not the best solution but whatever (TODO)
         Player p = world.getPlayer();
         playerHealthBar.setMaxValue(p.getMaxHealth());
         playerHealthBar.setValue(p.getHealth());

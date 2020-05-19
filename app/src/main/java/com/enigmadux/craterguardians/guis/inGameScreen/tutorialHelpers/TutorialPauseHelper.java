@@ -113,15 +113,9 @@ public abstract class TutorialPauseHelper extends TransitionAnim implements Visi
             }
         }
 
-//        if (this.elapsedMillis > minMillis){
-//            return;
-//        }
+
         this.elapsedMillis += DELAY_MILLIS;
-//        float scale =this.getScale(Math.min(elapsedMillis,animMillis)/(float) animMillis);
-//
-//        for (int i = 0,size = this.scalables.size();i<size;i++){
-//            this.scalables.get(i).setScale(orgWs[i] * scale,orgHs[i] * scale);
-//        }
+
         HANDLER.postDelayed(this,DELAY_MILLIS);
 
     }

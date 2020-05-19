@@ -3,6 +3,7 @@ package com.enigmadux.craterguardians.gamelib;
 import android.content.Context;
 
 
+
 import java.util.ArrayList;
 import java.util.Iterator;
 
@@ -19,10 +20,11 @@ public class CraterCollection<T extends CraterCollectionElem> implements Iterabl
     /** Actual Data about the game object
      *
      */
-    private ArrayList<T> instanceData = new ArrayList<T>();
+    private ArrayList<T> instanceData = new ArrayList<>();
 
     //so that theres no garbage collection
     private final float[] bufferData = new float[22];
+
 
 
     /** Default constructor
@@ -37,9 +39,15 @@ public class CraterCollection<T extends CraterCollectionElem> implements Iterabl
 
     }
 
+
     public void update(long dt, World world){
+
         for (int i = 0;i<instanceData.size();i++){
-            instanceData.get(i).update(dt,world);
+            T craterCollectionElem = instanceData.get(i);
+            craterCollectionElem.update(dt,world);
+            if (!instanceData.contains(craterCollectionElem)) {
+                i--;
+            }
         }
     }
 
@@ -76,7 +84,6 @@ public class CraterCollection<T extends CraterCollectionElem> implements Iterabl
 
     //adds an actual instance
     public void addInstance(T instance){
-        if (instance == null) throw new NullPointerException("Tried to add null instance to crater collection (MAJOR BUG)");
         this.instanceData.add(instance);
     }
 

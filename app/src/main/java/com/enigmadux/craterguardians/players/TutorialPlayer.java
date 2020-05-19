@@ -66,9 +66,17 @@ public class TutorialPlayer extends Player {
     @Override
     public void attack(World world,float angle) {
         super.attack(world,angle);
-        int id = world.getPlayerAttacks().createVertexInstance();
-        AttackTutorialPlayer a = new AttackTutorialPlayer(id,this.getDeltaX(),this.getDeltaY(),angle);
-        world.getPlayerAttacks().addInstance(a);
+        float gunTipX = this.getGundx() + this.getGunw()/2;
+        //don't need h/2 because its in the middle
+        float gunTipY = this.getGundy();
+        float x = (float) (gunTipX * Math.cos(angle) - Math.sin(angle) * gunTipY);
+        float y = (float) (gunTipX * Math.sin(angle) + Math.cos(angle) * gunTipY);
+        synchronized (World.playerAttackLock) {
+            int id = world.getPlayerAttacks().createVertexInstance();
+            AttackTutorialPlayer a = new AttackTutorialPlayer(id, this.getDeltaX() + x, this.getDeltaY() + y, angle);
+
+            world.getPlayerAttacks().addInstance(a);
+        }
     }
 
     @Override
@@ -117,14 +125,15 @@ public class TutorialPlayer extends Player {
     @Override
     public void setShader(float r, float b, float g, float a) {
         //technically it only affects the static, but theres only one so the shader will be affect that only
-        //TODO make more general solution
-        switch (this.evolveGen) {
-            case 0:
-                e1.setShader(r, b, g, a);
-                break;
-            case 1:
-                e2.setShader(r, b, g, a);
-                break;
+        if (e1 != null && e2 != null) {
+            switch (this.evolveGen) {
+                case 0:
+                    e1.setShader(r, b, g, a);
+                    break;
+                case 1:
+                    e2.setShader(r, b, g, a);
+                    break;
+            }
         }
     }
 
@@ -163,5 +172,21 @@ public class TutorialPlayer extends Player {
         }
     }
 
+    @Override
+    public QuadTexture getGun(Context context) {
+        return new QuadTexture(context,R.drawable.player_gun,this.getGundx(),this.getGundy(),this.getGunw(),this.getGunh());
+    }
 
+    float getGundx(){
+        return 7 * this.getGunw()/16 + this.getRadius()/(float) Math.sqrt(2);
+    }
+    float getGundy(){
+        return -this.getRadius()/(float) Math.sqrt(2);
+    }
+    float getGunw(){
+        return this.getRadius() * 4;
+    }
+    float getGunh(){
+        return  getRadius();
+    }
 }

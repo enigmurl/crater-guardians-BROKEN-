@@ -1,5 +1,7 @@
 package com.enigmadux.craterguardians.animations;
 
+import android.opengl.Matrix;
+
 import com.enigmadux.craterguardians.gamelib.World;
 import com.enigmadux.craterguardians.util.MathOps;
 import com.enigmadux.craterguardians.R;
@@ -13,11 +15,11 @@ public class ShootAnimation extends Animation {
 
 
     //the standard dimensions of evolve animations
-    public static final float STANDARD_DIMENSIONS = 0.2f;
+    public static final float STANDARD_DIMENSIONS = 0.3f;
     /** The amount of frames in the animation
      *
      */
-    private static final int NUM_FRAMES = 5;
+    private static final int NUM_FRAMES = 4;
 
 
     /** The amount of millis in the animation
@@ -30,18 +32,21 @@ public class ShootAnimation extends Animation {
     //current place in animation in milliseconds
     private long currentPosition;
 
+    private float rotation = 0;
     /** Default constructor
      *
      * @param x center opengl deltX
      * @param y center opengl y
      * @param w opengl width
      * @param h opengl height
+     * @param rotation degrees
      */
-    public ShootAnimation(float x, float y, float w, float h){
+    public ShootAnimation(float x, float y, float w, float h,float rotation){
         //super(x-w/2,y-h/2,w,h);
-        super(null,R.drawable.death_animation,x,y,w,h);
+        super(null,R.drawable.shoot_animation,x,y,w,h);
 
         this.textureW = 1f/NUM_FRAMES;
+        this.rotation = rotation;
     }
 
 
@@ -56,6 +61,12 @@ public class ShootAnimation extends Animation {
         this.currentPosition += dt;
 
         this.textureDeltaX = MathOps.getTextureBufferTranslationX((int) (this.currentPosition* ShootAnimation.NUM_FRAMES/ ShootAnimation.ANIMATION_LENGTH), ShootAnimation.NUM_FRAMES);
+    }
+
+    @Override
+    public void dumpOutputMatrix(float[] dumpMatrix, float[] mvpMatrix) {
+        super.dumpOutputMatrix(dumpMatrix, mvpMatrix);
+        Matrix.rotateM(dumpMatrix,0,this.rotation,0,0,1);
     }
 
     /** Sees whether it's finished or not

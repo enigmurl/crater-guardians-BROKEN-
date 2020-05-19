@@ -34,12 +34,12 @@ public class LevelSelector extends GUIClickable {
     /** Color of when the level is unlocked and completed (RGBA)
      *
      */
-    private static float[] COMPLETED_SHADER = new float[] {0.5f,1,0.5f,1};
+    private static float[] COMPLETED_SHADER = new float[] {0.3f,1,0.3f,1};
 
     /** Color of when level is not unlocked
      *
      */
-    private static float[] LOCKED_SHADER = new float[] {1,0.5f,0.5f,1};
+    private static float[] LOCKED_SHADER = new float[] {1,0.3f,0.3f,1};
 
     /** The level select layout that will be hidden after
      *
@@ -208,9 +208,11 @@ public class LevelSelector extends GUIClickable {
             s = 0;
         }
         this.fontScale = s;
-        if (x < 0 != this.x < 0 && isVisible){
-            SoundLib.playLevelSelectTickSoundEffect();
+        if (x < 0 != this.x < 0 && this.isVisible){
+            SoundLib.playLevelSelectTick();
         }
+
+
         this.setTransform(x,y,this.orgOrgW * s ,orgOrgH*s );
         this.orgW = w;
         this.orgH = h;

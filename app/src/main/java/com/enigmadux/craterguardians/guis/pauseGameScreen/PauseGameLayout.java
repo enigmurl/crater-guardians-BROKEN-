@@ -11,6 +11,7 @@ import com.enigmadux.craterguardians.guilib.Text;
 import com.enigmadux.craterguardians.guilib.TextRenderable;
 import com.enigmadux.craterguardians.guilib.dynamicText.DynamicText;
 import com.enigmadux.craterguardians.R;
+import com.enigmadux.craterguardians.guis.inGameScreen.InGameScreen;
 import com.enigmadux.craterguardians.values.STRINGS;
 
 import java.util.ArrayList;
@@ -49,6 +50,8 @@ public class PauseGameLayout implements GUILayout {
      */
     private CraterRenderer craterRenderer;
     private Text countDown;
+
+    private InGameScreen inGameScreen;
 
     /** Default Constructor
      *
@@ -97,6 +100,8 @@ public class PauseGameLayout implements GUILayout {
                 this,countDown,
                 this.craterRenderer,false));
 
+        this.inGameScreen = (InGameScreen) allLayouts.get(InGameScreen.ID);
+
 
         this.quadTextures.addAll(clickables);
         this.textRenderables.addAll(clickables);
@@ -133,6 +138,7 @@ public class PauseGameLayout implements GUILayout {
         }
         if (visibility) {
             this.craterRenderer.getCraterBackendThread().setGamePaused(true);
+            this.inGameScreen.resetJoySticks();
         }
 
         this.isVisible = visibility;

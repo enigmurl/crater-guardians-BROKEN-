@@ -47,7 +47,7 @@ import enigmadux2d.core.renderEngine.MeshRenderer;
  */
 public class World {
     //how long the pause after a win or loss is for smooth transitions
-    private static final long PAUSE_MILLIS  = 5000;
+    private static final long PAUSE_MILLIS  = 3000;
     //how long the pre game period lasts
     public static final long PRE_GAME_MILLIES = 2000;
 
@@ -80,7 +80,7 @@ public class World {
 
 
 
-    //the amount of xp gained for clearing a level todo in future make this part of the level data
+    //the amount of xp gained for clearing a level
     private static final int XP_GAIN_PER_LEVEL = 10;
 
 
@@ -99,7 +99,7 @@ public class World {
     public static final Object spawnerLock = new Object();
     public static final Object plateauLock = new Object();
     public static final Object toxicLakeLock = new Object();
-    public static final Object animationLock = new Object();
+    private static final Object animationLock = new Object();
     public static final Object playerLock = new Object();
 
 
@@ -224,7 +224,7 @@ public class World {
         this.plateaus.loadTexture(context,R.drawable.plateau);
 
         this.spawners = new CraterCollection<>(16,World.QUAD_VERTICES,World.QUAD_TEXTURE_CORDS,World.QUAD_INDICES);
-        this.spawners.loadTexture(context,R.drawable.enemy1_spawner);
+        this.spawners.loadTexture(context,R.drawable.enemy_spawner);
 
         this.supplies = new CraterCollection<>(16,World.QUAD_VERTICES,World.QUAD_TEXTURE_CORDS,World.QUAD_INDICES);
         this.supplies.loadTexture(context,R.drawable.supply_top_view);
@@ -232,7 +232,7 @@ public class World {
         this.craterVisual = new QuadTexture(context,R.drawable.level_background_crater,0,0,1,1);
 
         this.enemyAttacks = new CraterCollection<>(128,World.QUAD_VERTICES, EnemyAttack.TEXTURE_MAP,World.QUAD_INDICES);
-        this.enemyAttacks.loadTexture(context,R.drawable.enemy1_attack_spritesheet);
+        this.enemyAttacks.loadTexture(context,R.drawable.enemy_attack_spritesheet);
         this.playerAttacks = new CraterCollection<>(128,World.QUAD_VERTICES, PlayerAttack.TEXTURE_MAP,World.QUAD_INDICES);
         this.playerAttacks.loadTexture(context,R.drawable.kaiser_attack_spritesheet);
 
@@ -378,6 +378,7 @@ public class World {
         if (hypotenuse > 0){
             this.player.attemptAttack(this,this.attackX/ (scaleX * hypotenuse),(this.attackY) / (scaleY *hypotenuse));
         }
+        this.player.setIsAttacking(hypotenuse > 0);
 
         //making it sure it doesn't go out of bounds
         hypotenuse = (float) Math.hypot(player.getDeltaX(), player.getDeltaY());
@@ -432,11 +433,12 @@ public class World {
             this.meshRenderer.renderCollection(this.toxicLakes.getVertexData());
             this.meshRenderer.renderCollection(this.plateaus.getVertexData());
 
-            this.meshRenderer.renderCollection(this.enemyAttacks.getVertexData());
             this.meshRenderer.renderCollection(this.playerAttacks.getVertexData());
 
             this.meshRenderer.renderCollection(this.blueEnemies.getVertexData());
             this.meshRenderer.renderCollection(this.orangeEnemies.getVertexData());
+
+            this.meshRenderer.renderCollection(this.enemyAttacks.getVertexData());
 
         }
 
@@ -776,12 +778,12 @@ public class World {
     public boolean hasWonLastLevel(){
         return this.wonLastLevel;
     }
+
     public int getAmntXpLastLevel(){
         return this.amntXpLastLevel;
     }
 
     public void setPlayer(Player player) {
-        Log.d("WORLD","Player: "+ player);
         this.player = player;
         //todo loading components mid game, need to find better way
         this.player.loadComponents(context);
@@ -789,20 +791,28 @@ public class World {
         this.playerAttacks.loadTexture(context,player.getAttackSpritesheetPointer());
     }
 
-    public ArrayList<Animation> getAnims(){
-        return this.animations;
+    public int getLevelNum(){
+        return levelNum;
+    }
+
+
+    public void addAnim(Animation animation){
+        synchronized (animationLock){
+            this.animations.add(animation);
+        }
+    }
+    public void removeAnim(Animation animation){
+        synchronized (animationLock){
+            this.animations.remove(animation);
+        }
     }
 
     public EnemyMap getEnemyMap(){return  this.enemyMap; }
 
     public void setEnemyMap(EnemyMap enemyMap){
+        this.enemyMap = enemyMap;
         this.gameMap.setEnemyMap(enemyMap);
     }
-
-    public int getLevelNum(){
-        return this.levelNum;
-    }
-
 
     public float getCraterRadius(){
         return gameMap.getCraterRadius();
@@ -812,11 +822,49 @@ public class World {
         this.cameraDeltaX = dX;
         this.cameraDeltaY = dY;
     }
-    public static int getXpGainPerLevel(int level,boolean alreadyCompleted){
-        double exp = alreadyCompleted ? 0.4 : 1.3;
+    private static int getXpGainPerLevel(int level, boolean alreadyCompleted){
+        double exp = alreadyCompleted ? 0.4 : 1.45;
         return (int) (World.XP_GAIN_PER_LEVEL * Math.pow(level,exp));
     }
 
+
+    public void onDestroy(){
+        synchronized (blueEnemyLock){
+            this.blueEnemies.clear();
+            this.blueEnemies.getVertexData().recycle();
+        }
+        synchronized (orangeEnemyLock){
+            this.orangeEnemies.clear();
+            this.orangeEnemies.getVertexData().recycle();
+        }
+        synchronized (enemyAttackLock){
+            this.enemyAttacks.clear();
+            this.enemyAttacks.getVertexData().recycle();
+        }
+        synchronized (playerAttackLock){
+            this.playerAttacks.clear();
+            this.playerAttacks.getVertexData().recycle();
+        }
+        synchronized (supplyLock){
+            this.supplies.clear();
+            this.supplies.getVertexData().recycle();
+        }
+        synchronized (spawnerLock){
+            this.spawners.clear();
+            this.spawners.getVertexData().recycle();
+        }
+        synchronized (plateauLock){
+            this.plateaus.clear();
+            this.plateaus.getVertexData().recycle();
+        }
+        synchronized (toxicLakeLock){
+            this.toxicLakes.clear();
+            this.toxicLakes.getVertexData().recycle();
+        }
+        synchronized (animationLock){
+            this.animations.clear();
+        }
+    }
 
 
 }

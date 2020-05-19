@@ -93,7 +93,7 @@ public class HomeScreen implements GUILayout {
     @Override
     public void loadComponents(Context context, HashMap<String,GUILayout> allLayouts){
         this.renderables.add(new QuadTexture(context,R.drawable.gui_background,0,0,2,2));
-        this.renderables.add(new QuadTexture(context,R.drawable.crater_guardians_label,0,0.75f,1.8f*LayoutConsts.SCALE_X,0.45f));
+        this.renderables.add(new QuadTexture(context,R.drawable.crater_guardians_label,0,0.75f,1.40625f*LayoutConsts.SCALE_X,0.6f));
         //the firstButton (settings button);
         this.clickables.add(new VisibilityInducedButton(context, R.drawable.settings_button,
                 1 - 0.15f * LayoutConsts.SCALE_X,0.85f,0.2f,0.2f,

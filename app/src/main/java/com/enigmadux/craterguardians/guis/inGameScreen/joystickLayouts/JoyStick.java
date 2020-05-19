@@ -38,7 +38,6 @@ public class JoyStick extends QuadTexture {
     public JoyStick(Context context, int texturePointer, float x, float y, float radius,float maxRadius,float minRadius, JoystickLayout joystickLayout) {
         super(context, texturePointer, x, y,radius * 2 * LayoutConsts.SCALE_X,radius * 2);
         this.background = new QuadTexture(context, R.drawable.joystick_background,x,y,maxRadius * 2 * LayoutConsts.SCALE_X,maxRadius * 2);
-        this.background.setAlpha(0.3f);
 
         this.x = x;
         this.y = y;

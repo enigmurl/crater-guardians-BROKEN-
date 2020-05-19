@@ -31,6 +31,7 @@ import enigmadux2d.core.quadRendering.QuadTexture;
  */
 public class PostGameLayout implements GUILayout {
 
+    private static final float FONT_SIZE = 0.12f;
 
     /** The id of this layout so other classes can access it
      *
@@ -51,6 +52,7 @@ public class PostGameLayout implements GUILayout {
     private QuadTexture background;
 
     private ArrayList<QuadTexture> craterArt;
+    private ArrayList<QuadTexture> renderables = new ArrayList<>();
 
     private ImageText experienceBg;
 
@@ -117,7 +119,7 @@ public class PostGameLayout implements GUILayout {
                 0.65f,0.55f,0.4f,0.4f,
                 this.craterRenderer,this,allLayouts.get(InGameScreen.ID)));
 
-        this.xpAmount = new Text(0.5f,-0.71f,"+ XP",0.12f);
+        this.xpAmount = new Text(0.5f,-0.71f,"+ XP",FONT_SIZE);
         this.xpAmount.setColor(black);
 
 
@@ -125,6 +127,14 @@ public class PostGameLayout implements GUILayout {
         craterArt.add(new QuadTexture(context,R.drawable.level_background_crater,-0.55f,-0.45f,1 * LayoutConsts.SCALE_X,1f));
         craterArt.add(new QuadTexture(context,R.drawable.level_background_crater,-0.6f,0.30f,0.45f * LayoutConsts.SCALE_X,0.45f));
         craterArt.add(new QuadTexture(context,R.drawable.level_background_crater,-0.2f,0.05f,0.6f * LayoutConsts.SCALE_X,0.6f));
+
+
+        this.renderables.add(this.background);
+        this.renderables.add(this.experienceBg);
+        this.renderables.add(this.actionBg);
+        this.renderables.add(this.victoryIndicator);
+        this.renderables.addAll(this.clickables);
+        this.renderables.addAll(this.craterArt);
 
     }
 
@@ -159,11 +169,12 @@ public class PostGameLayout implements GUILayout {
             if (craterRenderer.getWorld().hasWonLastLevel()){
                 //-1 because the player just won, so level num was increased, not the best solution
                 int xp = craterRenderer.getWorld().getAmntXpLastLevel();
+                this.xpAmount.updateText(" + 0 XP",FONT_SIZE);
                 new XpGainedAnimation(XpGainedAnimation.DEFAULT_MILLIS,this.xpAmount,xp);
                 this.victoryIndicator.updateText("Victory",victoryIndicator.getFontSize());
             } else {
                 this.xpAmount.setVisibility(true);
-                this.xpAmount.updateText("No XP Gained", xpAmount.getFontSize());
+                this.xpAmount.updateText("No XP Gained", FONT_SIZE);
                 this.victoryIndicator.updateText("Loss",victoryIndicator.getFontSize());
             }
         } else {
@@ -192,13 +203,7 @@ public class PostGameLayout implements GUILayout {
     @Override
     public void render(float[] uMVPMatrix, GuiRenderer renderer, DynamicText textRenderer) {
         if (this.isVisible) {
-            //todo not really going for efficiency here
-            renderer.renderQuad(this.background,uMVPMatrix);
-            renderer.renderQuad(this.experienceBg,uMVPMatrix);
-            renderer.renderQuad(this.actionBg,uMVPMatrix);
-            renderer.renderQuad(this.victoryIndicator,uMVPMatrix);
-            renderer.renderQuads(this.clickables, uMVPMatrix);
-            renderer.renderQuads(this.craterArt,uMVPMatrix);
+            renderer.renderQuads(this.renderables,uMVPMatrix);
             for (int i = 0,size = this.clickables.size();i<size;i++){
                 this.clickables.get(i).renderText(textRenderer,uMVPMatrix);
             }

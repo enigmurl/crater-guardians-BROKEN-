@@ -222,6 +222,11 @@ public class QuadTexture implements VisibilitySwitch {
      * @param mvpMatrix the input matrix 4 by 4
      */
     public void dumpOutputMatrix(float[] dumpMatrix,float[] mvpMatrix){
+        if (! this.isVisible){
+            Matrix.setIdentityM(dumpMatrix,0);
+            //mkae it blank
+            Matrix.scaleM(dumpMatrix,0,0,0,0);
+        }
         Matrix.multiplyMM(dumpMatrix,0,mvpMatrix,0,this.scalarTranslationM,0);
     }
 
@@ -313,7 +318,16 @@ public class QuadTexture implements VisibilitySwitch {
      *
      */
     public static void resetTextures(){
+
         androidToGLTextureMap = new SparseIntArray();
+    }
+
+
+    public static void recycleAll(){
+        int[] allTextures = new int[androidToGLTextureMap.size()];
+        for (int i = 0;i < allTextures.length;i++) allTextures[i] = androidToGLTextureMap.valueAt(i);
+
+        GLES30.glDeleteTextures(allTextures.length,allTextures,0);
     }
 
     @Override

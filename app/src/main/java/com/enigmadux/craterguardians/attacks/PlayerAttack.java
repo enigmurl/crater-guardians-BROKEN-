@@ -17,8 +17,8 @@ public abstract class PlayerAttack extends BaseAttack {
 
 
     //animation spritesheet stuff
-    private static final float FPS = 10;
-    private static final int NUM_FRAMES = 5;
+    private static final float FPS = 22;
+    private static final int NUM_FRAMES = 8;
 
 
     public static final float[] TEXTURE_MAP = new float[] {
@@ -49,27 +49,27 @@ public abstract class PlayerAttack extends BaseAttack {
         super(instanceID, x, y, w, h, angle, speed, length, BaseAttack.PLAYER_ATTACK);
 
         this.damage = damage;
-        SoundLib.playPlayerShootSoundEffect();
-
     }
 
     @Override
     public void collisionCheck(World world) {
         for (int i = 0, size = world.getBlueEnemies().size(); i < size; i++) {
             Enemy blueE = world.getBlueEnemies().getInstanceData().get(i);
-            if (blueE.isVisible() && this.collidesWithEnemy(blueE)){
-                this.onHitEnemy(blueE,world);
+            if (blueE.isVisible() && this.collidesWithEnemy(blueE)) {
+                this.onHitEnemy(blueE, world);
                 if (this.isFinished) return;
             }
         }
 
+
         for (int i = 0, size = world.getOrangeEnemies().size(); i < size; i++) {
             Enemy orangeE = world.getOrangeEnemies().getInstanceData().get(i);
             if (orangeE.isVisible() && this.collidesWithEnemy(orangeE)) {
-                this.onHitEnemy(orangeE,world);
+                this.onHitEnemy(orangeE, world);
                 if (this.isFinished) return;
             }
         }
+
 
         for (int i = 0, size = world.getSpawners().size(); i < size; i++) {
             Spawner s = world.getSpawners().getInstanceData().get(i);
@@ -81,7 +81,6 @@ public abstract class PlayerAttack extends BaseAttack {
     }
 
     void onHitEnemy(Enemy e,World w){
-        SoundLib.playPlayerAttackLandSoundEffect();
         float orgH = e.getHealth();
         e.damage(this.damage);
         float after = e.getHealth();
@@ -91,7 +90,6 @@ public abstract class PlayerAttack extends BaseAttack {
         w.getPlayer().reportDamageDealt(orgH - after, e);
     }
     void onHitSpawner(Spawner s,World w){
-        SoundLib.playSpawnerDamageSoundEffect();
         s.damage(this.damage * this.spawnerDamageMult);
         w.getPlayer().reportDamageDealt(this.damage * this.spawnerDamageMult,s);
     }

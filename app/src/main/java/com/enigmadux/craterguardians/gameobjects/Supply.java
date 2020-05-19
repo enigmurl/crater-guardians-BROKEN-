@@ -58,8 +58,8 @@ public class Supply extends CraterCollectionElem {
         this.deltaX = x;
         this.deltaY = y;
         this.r = r;
-        this.width = r/2;
-        this.height = r/2;
+        this.width = r * 2;
+        this.height = r * 2;
         this.health = health;
 
         this.renderables = new ArrayList<>();
@@ -107,6 +107,7 @@ public class Supply extends CraterCollectionElem {
      * @param damage the amount to decrease the health by
      */
     public void damage(int damage){
+        SoundLib.playSupplyDamaged();
         this.health -= damage;
         if (this.currentShader != null){
             this.currentShader.cancel();
@@ -135,9 +136,7 @@ public class Supply extends CraterCollectionElem {
                 screenShakeAnim = new ScreenShake(1f / world.getSupplies().size(), world);
             }
             world.getSupplies().delete(this);
-            synchronized (World.animationLock) {
-                world.getAnims().add(new DeathAnim(this.getDeltaX(),this.getDeltaY(),2 * this.r,2 * this.r));
-            }
+            world.addAnim(new DeathAnim(this.getDeltaX(),this.getDeltaY(),2 * this.r,2 * this.r));
         }
         this.healthBar.setValue(this.health);
     }

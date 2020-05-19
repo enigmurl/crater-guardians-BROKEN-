@@ -1,5 +1,7 @@
 package com.enigmadux.craterguardians.attacks;
 
+import android.opengl.Matrix;
+
 import com.enigmadux.craterguardians.R;
 import com.enigmadux.craterguardians.spawners.Spawner;
 import com.enigmadux.craterguardians.gamelib.World;
@@ -29,6 +31,11 @@ public class AttackTutorialPlayer extends PlayerAttack {
         super(instanceID, x, y,RADIUS * 2,RADIUS * 2, angle, SPEED, LENGTH,AttackTutorialPlayer.DAMAGE);
     }
 
+    @Override
+    public void updateInstanceTransform(float[] blankInstanceInfo, float[] uMVPMatrix) {
+        super.updateInstanceTransform(blankInstanceInfo, uMVPMatrix);
+        Matrix.rotateM(blankInstanceInfo,0,(float) Math.toDegrees(this.angle),0,0,1);
+    }
 
     @Override
     boolean collidesWithEnemy(Enemy e) {

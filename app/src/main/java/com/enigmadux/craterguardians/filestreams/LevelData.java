@@ -72,12 +72,6 @@ public class LevelData {
             for (int i = 0;i<GameMap.NUM_LEVELS;i++){
                 stdout.print(LevelData.unlockedLevels[i] + " ");
                 stdout.println(LevelData.completedLevels[i] + " ");
-
-                //making sure there is always one available level
-                if (LevelData.completedLevels[i] && i < GameMap.NUM_LEVELS-1){
-                    Log.d("LEVEL DATA","Unlocked level:" + (i+2));
-                    LevelData.unlockedLevels[i+1] = true;
-                }
             }
             stdout.close();
 

@@ -42,7 +42,7 @@ public class ReloadingAmmoBarAnim extends FrameTransitionAnim {
         }
     }
 
-    /** Helper method that helps computes the alpha during the flashing animation: todo make it so values where the reload time is high it does more flashes as to keep each wavelength the same
+    /** Helper method that helps computes the alpha during the flashing animation:
      *
      * @param t amount of time thats passed by (from 0 to 1)
      * @return the alpha value of the ammo bar (from 0 to 1, 0 being completly transparent)
@@ -60,5 +60,13 @@ public class ReloadingAmmoBarAnim extends FrameTransitionAnim {
 
     public boolean isFinished(){
         return finishedMillis > totalMillis;
+    }
+
+    @Override
+    public void cancel() {
+        super.cancel();
+        for (int i = 0;i < ammoBar.getRenderables().size();i++) {
+            ammoBar.getRenderables().get(i).setAlpha(1);
+        }
     }
 }

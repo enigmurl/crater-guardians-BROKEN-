@@ -16,10 +16,9 @@ public class DrawablesLoader {
             R.drawable.button_background,
             R.drawable.character_select_bottom,
             R.drawable.crater_guardians_label,
-            R.drawable.death_animation,
-            R.drawable.enemy1_attack_spritesheet,
-            R.drawable.enemy1_spawner,
-            R.drawable.enemy1_sprite_sheet,
+            R.drawable.death_animation, R.drawable.shoot_animation,R.drawable.evolve_animation,R.drawable.enemy_spawn_animation,
+            R.drawable.enemy_spawner,
+            R.drawable.enemy_strength1,R.drawable.enemy_strength2,R.drawable.enemy_strength3,
             R.drawable.evolve_button,
             R.drawable.flamethrower_attack_spritesheet,
             R.drawable.flamethrower_sprite_sheet_e1,
@@ -32,14 +31,16 @@ public class DrawablesLoader {
             R.drawable.home_button,
             R.drawable.info_button,
             R.drawable.joystick_background,
-            R.drawable.joystick_icon,
-            R.drawable.kaiser_attack_spritesheet,
-            R.drawable.kaiser_info,
+            R.drawable.movement_joystick_icon,
+            R.drawable.attack_joystick_icon,
+            R.drawable.kaiser_attack_spritesheet, R.drawable.fission_attack_spritesheet,R.drawable.magnum_attack_spritesheet,
+            R.drawable.kaiser_info,R.drawable.kaiser_icon,
             R.drawable.kaiser_sprite_sheet_e1,
             R.drawable.kaiser_sprite_sheet_e2,
             R.drawable.kaiser_sprite_sheet_e3,
             R.drawable.kaiser_sprite_sheet_e4,
             R.drawable.kaiser_sprite_sheet_e5,
+            R.drawable.fission_info,R.drawable.skippy_info,R.drawable.magnum_info,R.drawable.blaze_info,
             R.drawable.layout_background,
             R.drawable.level_background_crater,
             R.drawable.level_button_background,
@@ -49,8 +50,8 @@ public class DrawablesLoader {
             R.drawable.music_on_off_button,
             R.drawable.pause_button,
             R.drawable.plateau,
+            R.drawable.player_gun,
             R.drawable.resume_button,
-            R.drawable.ryze_info,
             R.drawable.settings_button,
             R.drawable.shield,
             R.drawable.skippy_attack_spritesheet,
@@ -75,6 +76,10 @@ public class DrawablesLoader {
         QuadTexture.loadAndroidTexturePointer(context,RESOURCES[resourceInd]);
         resourceInd++;
         return false;
+    }
+
+    public static void reset(){
+        resourceInd = 0;
     }
 
 }

@@ -14,13 +14,13 @@ public class DeathAnim extends Animation {
     /** The amount of frames in the animation
      *
      */
-    private static final int NUM_FRAMES = 5;
+    private static final int NUM_FRAMES = 8;
 
 
     /** The amount of millis in the animation
      *
      */
-    private static final long ANIMATION_LENGTH = 1000;
+    private static final long ANIMATION_LENGTH = 200;
 
 
     //current place in animation in milliseconds
@@ -49,7 +49,7 @@ public class DeathAnim extends Animation {
     public void update(World world,long dt) {
         super.update(world,dt);
         this.currentPosition += dt;
-        this.textureDeltaX = MathOps.getTextureBufferTranslationX((int) (this.currentPosition* DeathAnim.NUM_FRAMES/DeathAnim.ANIMATION_LENGTH), DeathAnim.NUM_FRAMES);
+        this.textureDeltaX = MathOps.getTextureBufferTranslationX(Math.min((int) (this.currentPosition* DeathAnim.NUM_FRAMES/DeathAnim.ANIMATION_LENGTH),DeathAnim.NUM_FRAMES-1), DeathAnim.NUM_FRAMES);
     }
 
     /** Sees whether it's finished or not

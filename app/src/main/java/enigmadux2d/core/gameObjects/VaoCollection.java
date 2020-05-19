@@ -114,12 +114,15 @@ public abstract class VaoCollection {
     private int floatsPerInstance;
 
     //because elements can be deleted, we need to map instanceIDs with the corresponding index in the array
-    private int[] indexMap;
+    private volatile int[] indexMap;
     //here are the ids that are already taken, so we can't give them out anymore
-    private boolean[] takenIds;
+    private volatile boolean[] takenIds;
+
 
 
     private float[] nullInstance;
+
+    private int maxInstances;
 
     /** Default Constructor. Note that it assumed that indices, vertices, and texture cords, are all being used.
      * And you must provide them.
@@ -155,6 +158,10 @@ public abstract class VaoCollection {
         this.indexMap = new int[numEntities];
         //here are the ids already taken
         this.takenIds = new boolean[numEntities];
+
+
+        this.maxInstances = numEntities;
+
 
         //first allocate the memory
         ByteBuffer pureByteBuffer = ByteBuffer.allocateDirect(numEntities  * this.floatsPerInstance * Float.SIZE/Byte.SIZE);
@@ -217,10 +224,6 @@ public abstract class VaoCollection {
         //now set up all the data to instancedData, no data is being written, but the "links" are
 
         this.bindInstancedData();
-
-
-
-
     }
 
     /** This where locations in the instanced VBO are "linked" with corresponding positions in the VAO.
@@ -269,7 +272,6 @@ public abstract class VaoCollection {
         GLES30.glBindBuffer(GLES30.GL_ARRAY_BUFFER,this.vboList[this.numVboAssigned]);
 
         //add the empty data
-        Log.e("VAO COLLECTION:", "Pure size: " + this.instancedBufferedData.capacity() + " numFloats: " + numFloats);
         GLES30.glBufferData(
                 this.vboList[this.numVboAssigned],
                 numFloats * Float.SIZE/Byte.SIZE,
@@ -318,11 +320,17 @@ public abstract class VaoCollection {
 
         //link the id with it's position in the array
         this.indexMap[id] = this.numInstances;
+
+        //keep it as null until it updates itself
+        this.updateInstance(id,nullInstance);
+
+
         //one more instance created, and the id is taken
         this.numInstances++;
         this.takenIds[id] = true;
 
-        Log.d("VAO COLECTION:", "num instances: " + this.numInstances + " with ID: " + id);
+
+
 
         return id;
     }
@@ -350,6 +358,7 @@ public abstract class VaoCollection {
         for (int elementID = 0; elementID< this.indexMap.length;elementID++){
             //if the index is greater than the index at the deleted item, shift it down
             if (this.indexMap[elementID] > this.indexMap[instanceId]){
+                this.updateInstance(elementID,nullInstance);
                 this.indexMap[elementID]--;
             }
 
@@ -365,9 +374,10 @@ public abstract class VaoCollection {
      */
     public void clearInstanceData(){
         //reset all taken ids
-        this.takenIds = new boolean[this.takenIds.length];
+        this.takenIds = new boolean[this.maxInstances];
         //reset the index map
-        this.indexMap = new int[this.indexMap.length];
+        this.indexMap = new int[this.maxInstances];
+
 
         //no more instances are alive
         this.numInstances = 0;

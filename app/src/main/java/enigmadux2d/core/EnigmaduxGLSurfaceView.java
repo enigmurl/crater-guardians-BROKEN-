@@ -49,6 +49,9 @@ public abstract class EnigmaduxGLSurfaceView extends GLSurfaceView {
 
     public abstract void onStart();
 
+    public abstract void onDestroy();
+
+
 
 
 }

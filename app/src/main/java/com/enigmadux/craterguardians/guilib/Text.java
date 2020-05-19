@@ -12,7 +12,7 @@ import com.enigmadux.craterguardians.values.LayoutConsts;
  *
  * COMMON DEBUGS:
  * make sure the clickable is viewable (isVisible = true), this is crucial
- * isDown must be handled by the sub class, as in when it's pressed it must become true, todo might want to change this in future
+ * isDown must be handled by the sub class, as in when it's pressed it must become true,
  *
  */
 public class Text implements TextRenderable {

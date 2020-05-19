@@ -4,6 +4,7 @@ import com.enigmadux.craterguardians.spawners.Spawner;
 import com.enigmadux.craterguardians.enemies.Enemy;
 import com.enigmadux.craterguardians.gamelib.CraterCollectionElem;
 import com.enigmadux.craterguardians.gamelib.World;
+import com.enigmadux.craterguardians.util.SoundLib;
 
 public class AttackFission extends PlayerAttack {
     private static final int MAX_LEVEL = 5;
@@ -28,6 +29,7 @@ public class AttackFission extends PlayerAttack {
 
     public AttackFission(int instanceID,float x,float y,float angle,int evolveGen){
         this(instanceID,x,y,MAX_RADIUS[evolveGen],angle,SPEED,DAMAGE[evolveGen],MAX_LEVEL,evolveGen,null);
+        SoundLib.playFissionShoot();
     }
 
     @Override

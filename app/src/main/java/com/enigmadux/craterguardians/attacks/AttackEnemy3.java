@@ -12,7 +12,7 @@ import com.enigmadux.craterguardians.gamelib.World;
  *
  */
 public class AttackEnemy3 extends EnemyAttack {
-    private static final float[] RADIUS =  new float[] {0.2f,0.205f,0.21f,0.215f};
+    public static final float[] RADIUS =  new float[] {0.1f,0.1025f,0.115f,0.1175f};
     public static final float[] LENGTH = new float[] {1,1.5f,2f,2.5f};
     //per second
     //th
@@ -43,11 +43,12 @@ public class AttackEnemy3 extends EnemyAttack {
                 Enemy blueE = world.getBlueEnemies().getInstanceData().get(i);
                 if (blueE instanceof Enemy3) continue;
                 double dist;
-                if (blueE.isVisible() && (dist = Math.hypot(blueE.getDeltaX() - deltaX, blueE.getDeltaY() - deltaY)) <minDist) {
+                if (blueE.isVisible() && (dist = Math.hypot(blueE.getDeltaX() - deltaX, blueE.getDeltaY() - deltaY)) < minDist) {
                     minDist = (float) dist;
                     minE = blueE;
                 }
             }
+
             if (minE != null) {
                 this.angle = MathOps.getAngle((minE.getDeltaX() - deltaX)/minDist, (minE.getDeltaY() - deltaY)/minDist);
             }
@@ -58,11 +59,12 @@ public class AttackEnemy3 extends EnemyAttack {
                 Enemy orangeE = world.getOrangeEnemies().getInstanceData().get(i);
                 if (orangeE instanceof Enemy3) continue;
                 double dist;
-                if (orangeE.isVisible() && (dist = Math.hypot(orangeE.getDeltaX() - deltaX, orangeE.getDeltaY() - deltaY)) <minDist) {
+                if (orangeE.isVisible() && (dist = Math.hypot(orangeE.getDeltaX() - deltaX, orangeE.getDeltaY() - deltaY)) < minDist) {
                     minDist = (float) dist;
                     minE = orangeE;
                 }
             }
+
             if (minE != null) {
                 this.angle = MathOps.getAngle((minE.getDeltaX() - deltaX)/minDist, (minE.getDeltaY() - deltaY)/minDist);
             }
@@ -97,6 +99,7 @@ public class AttackEnemy3 extends EnemyAttack {
                     return;
                 }
             }
+
         } else {
             for (int i = 0, size = world.getOrangeEnemies().size(); i < size; i++) {
                 Enemy orangeE = world.getOrangeEnemies().getInstanceData().get(i);
@@ -107,6 +110,7 @@ public class AttackEnemy3 extends EnemyAttack {
                     return;
                 }
             }
+
         }
 
     }

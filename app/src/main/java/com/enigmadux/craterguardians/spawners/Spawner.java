@@ -31,11 +31,11 @@ public abstract class Spawner extends CraterCollectionElem {
     /** The blue shader
      *
      */
-    private static float[] BLUE_SHADER = new float[] {0.24f,1,0.886f,1f};
+    private static float[] BLUE_SHADER = new float[] {0.24f,1,0.886f,0.5f};
     /** The shader that turns white into orange
      *
      */
-    private static float[] ORANGE_SHADER = new float[] {1,0.701f,0.4f,1f};
+    private static float[] ORANGE_SHADER = new float[] {1,0.701f,0.4f,0.5f};
 
     /** Blue shader of the fuel cells, differs slightly
      *
@@ -202,7 +202,7 @@ public abstract class Spawner extends CraterCollectionElem {
 
 
 
-    /** Updates the spawner, and retunr
+    /** Updates the spawner, and return
      * Instead of spawning a single enemy, sometimes, a wave spawner is more suitable
      *
      * @param dt milliseconds since last call
@@ -210,14 +210,12 @@ public abstract class Spawner extends CraterCollectionElem {
      */
     public void update(long dt,World world){
 
-
-
-        //this.health -= (float) this.healthDisplay.getMaxHitPoints() * dt/this.decayTime;
         this.elapsedTime += dt;
         this.health = this.healthFunction.interpolate((float) (this.elapsedTime));
 
         if (! this.isAlive()){
             world.getSpawners().delete(this);
+            SoundLib.playSpawnerDeathSoundEffect();
             return;
         }
 
@@ -331,7 +329,6 @@ public abstract class Spawner extends CraterCollectionElem {
             } else {
                 lhs = mid;
             }
-            Log.d("SPAWNER","INTERPELOATING MID (x): " + mid + " F(mid) " +  this.healthFunction.interpolate(mid) + " target " + this.health);
         }
 
         if (lhs < elapsedTime){
@@ -341,7 +338,6 @@ public abstract class Spawner extends CraterCollectionElem {
 
 
 
-        Log.d("SPAWNER","took " + damage + " damage, health is now: " + health) ;
 
     }
 

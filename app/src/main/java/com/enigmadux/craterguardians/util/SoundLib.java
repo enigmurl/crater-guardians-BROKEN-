@@ -1,14 +1,16 @@
 package com.enigmadux.craterguardians.util;
 
 import android.content.Context;
+import android.media.AudioManager;
 import android.media.MediaPlayer;
+import android.media.SoundPool;
 import android.util.Log;
 
 import com.enigmadux.craterguardians.R;
+import com.enigmadux.craterguardians.animations.SoundFadeOut;
 
 /** All songs and sound effect sare played here
  *
- * todo: reloading stuff
  * TODO: making it all static is not efficient usage of memory bc all the static variables will never be de assigned
  *
  * @author Manu Bhat
@@ -24,45 +26,50 @@ public class SoundLib {
     /** music played after a loss */
     private static MediaPlayer lossMusic;
 
+
     /** sound effect played when a player kills*/
     private static MediaPlayer playerKillSoundEffect;
     /** sound effect played when a player shoots an attack*/
-    private static MediaPlayer playerShootSoundEffect;
-    /** sound effect played when a player's attack hits an enemy*/
-    private static MediaPlayer playerAttackLandSoundEffect;
+    private static MediaPlayer kaiserShoot;
+    private static MediaPlayer skippyShoot;
+    private static MediaPlayer fissionShoot;
+    private static MediaPlayer flamethrowerShoot;
+    private static MediaPlayer magnumShoot;
+
     /** sound effect played a player is killed*/
     private static MediaPlayer playerDeathSoundEffect;
+    /** sound effect played when an enemy shoots */
+    private static MediaPlayer supplyDamagedSoundEffect;
     /** sound effect played when the shield is spawned*/
     private static MediaPlayer playerSpawnShieldSoundEffect;
     /** sound effect played when an enemy attack is blocked by the shield*/
     private static MediaPlayer playerShieldBlockSoundEffect;
+    /** sound effect played when the player is reloading */
+    private static MediaPlayer reloadingSoundEffect;
     /** sound effect played when a button is selected */
     private static MediaPlayer buttonSelectedSoundEffect;
-    /** sound effect played when a button is released */
-    private static MediaPlayer buttonReleasedSoundEffect;
-    /** sound effect played when the player is damaged by a toxic lake*/
-    private static MediaPlayer toxicLakeTickSoundEffect;
     /** sound effect played when the enemies hit the player*/
-    private static MediaPlayer enemyDamagePlayerSoundEffect;
-    /** sound effect played when the enemies damage the supply*/
-    private static MediaPlayer enemyDamageSupplySoundEffect;
+    private static MediaPlayer playerDamagedSoundEffect;
     /** sound effect played when the enemies destroy a supply*/
     private static MediaPlayer supplyDeathSoundEffect;
-    /** sound effect played when a spawner is damaged */
-    private static MediaPlayer spawnerDamagedSoundEffect;
     /** sound effect played when a spawner is killed*/
     private static MediaPlayer spawnerDeathSoundEffect;
     /** sound effect played during the evolving of a character, it should be the approximate length*/
     private static MediaPlayer evolvingSoundEffect;
     /** sound effect played when xp is gained and that counter thing is shown */
     private static MediaPlayer xpCounterSoundEffect;
-    /** sound effect played when a level select icon is switched */
-    private static MediaPlayer levelSelectTickSoundEffect;
+    private static MediaPlayer levelSelectTickEffect;
 
     /** whether or not the player has the music on*/
     private static boolean playMusic = true;
     /** whether or not the player has the sound effects on*/
     private static boolean playSoundEffects = true;
+
+    private static int numBlaze = 0;
+
+    private static SoundFadeOut flameFadeOut;
+
+    private static SoundPool soundEffects;
 
     /** This binds the raw music to the music and the sound effects
      *
@@ -84,27 +91,80 @@ public class SoundLib {
         SoundLib.victoryMusic = MediaPlayer.create(context,R.raw.victory_music);
         SoundLib.victoryMusic.setLooping(true);
 
-        SoundLib.playerKillSoundEffect = MediaPlayer.create(context,R.raw.player_killed);
-        SoundLib.playerShootSoundEffect = MediaPlayer.create(context,R.raw.player_shoot);
-        SoundLib.playerAttackLandSoundEffect = MediaPlayer.create(context,R.raw.player_attack_land);
-        SoundLib.playerDeathSoundEffect = MediaPlayer.create(context,R.raw.player_death);
-        SoundLib.playerSpawnShieldSoundEffect = MediaPlayer.create(context,R.raw.player_spawn_shield);
-        SoundLib.playerShieldBlockSoundEffect = MediaPlayer.create(context,R.raw.player_shield_block);
-        SoundLib.buttonSelectedSoundEffect = MediaPlayer.create(context,R.raw.button_selected);
-        SoundLib.buttonReleasedSoundEffect = MediaPlayer.create(context,R.raw.button_released);
-        SoundLib.toxicLakeTickSoundEffect = MediaPlayer.create(context,R.raw.toxic_lake_tick);
-        SoundLib.enemyDamagePlayerSoundEffect = MediaPlayer.create(context,R.raw.enemy_damage_player);
-        SoundLib.enemyDamageSupplySoundEffect = MediaPlayer.create(context,R.raw.enemy_damage_supply);
-        SoundLib.supplyDeathSoundEffect = MediaPlayer.create(context,R.raw.supply_death);
-        SoundLib.spawnerDamagedSoundEffect = MediaPlayer.create(context,R.raw.spawner_damaged);
-        SoundLib.spawnerDeathSoundEffect = MediaPlayer.create(context,R.raw.spawner_death);
-        SoundLib.evolvingSoundEffect = MediaPlayer.create(context,R.raw.evolving_soundeffect);
+
+
+        //FINISHED
+        SoundLib.flamethrowerShoot = MediaPlayer.create(context,R.raw.flamethrower_shoot);
+        SoundLib.kaiserShoot = MediaPlayer.create(context,R.raw.kaiser_shoot);
+        SoundLib.fissionShoot = MediaPlayer.create(context,R.raw.fission_shoot);
+        SoundLib.skippyShoot = MediaPlayer.create(context,R.raw.skippy_shoot);
+        SoundLib.magnumShoot = MediaPlayer.create(context,R.raw.shotgunner_shoot);
+
         SoundLib.xpCounterSoundEffect = MediaPlayer.create(context,R.raw.xpcounter_sound_effect);
-        SoundLib.levelSelectTickSoundEffect = MediaPlayer.create(context,R.raw.level_select_tick);
+        SoundLib.spawnerDeathSoundEffect = MediaPlayer.create(context,R.raw.spawner_death);
+        SoundLib.playerDamagedSoundEffect = MediaPlayer.create(context,R.raw.player_damaged);
+        SoundLib.supplyDamagedSoundEffect = MediaPlayer.create(context,R.raw.supply_damaged);
+        SoundLib.playerShieldBlockSoundEffect = MediaPlayer.create(context,R.raw.player_shield_block);
+        SoundLib.playerSpawnShieldSoundEffect = MediaPlayer.create(context,R.raw.player_spawn_shield);
+        SoundLib.supplyDeathSoundEffect = MediaPlayer.create(context,R.raw.supply_death);
+        SoundLib.playerKillSoundEffect = MediaPlayer.create(context,R.raw.enemy_death);
+        SoundLib.playerDeathSoundEffect = MediaPlayer.create(context,R.raw.player_death);
+        SoundLib.reloadingSoundEffect = MediaPlayer.create(context,R.raw.reloading);
+        SoundLib.buttonSelectedSoundEffect = MediaPlayer.create(context,R.raw.button_selected);
+        SoundLib.evolvingSoundEffect = MediaPlayer.create(context,R.raw.evolving_soundeffect);
+        SoundLib.levelSelectTickEffect = MediaPlayer.create(context,R.raw.level_select_tick);
+        numBlaze = 0;
+        soundEffects = new SoundPool(7, AudioManager.STREAM_MUSIC,0);
+
+
+        MediaPlayer.OnSeekCompleteListener onSeekCompleteListener = new MediaPlayer.OnSeekCompleteListener() {
+            @Override
+            public void onSeekComplete(MediaPlayer mp) {
+                Log.d("Sound Lib","Finished Seeking: " + mp.isPlaying());
+                mp.start();
+            }
+        };
+
+        MediaPlayer.OnErrorListener onErrorListener = new MediaPlayer.OnErrorListener() {
+            @Override
+            public boolean onError(MediaPlayer mp, int what, int extra) {
+                Log.d("SOUND LIB","MP: " + mp + " Error: " + what + " Extra:" + extra);
+                return false;
+            }
+        };
+
+
+        //stuff that use seek to
+        SoundLib.fissionShoot.setOnSeekCompleteListener(onSeekCompleteListener);
+        SoundLib.kaiserShoot.setOnSeekCompleteListener(onSeekCompleteListener);
+        SoundLib.skippyShoot.setOnSeekCompleteListener(onSeekCompleteListener);
+        SoundLib.magnumShoot.setOnSeekCompleteListener(onSeekCompleteListener);
+        SoundLib.flamethrowerShoot.setOnSeekCompleteListener(onSeekCompleteListener);
+
+        SoundLib.playerDamagedSoundEffect.setOnSeekCompleteListener(onSeekCompleteListener);
+        SoundLib.buttonSelectedSoundEffect.setOnSeekCompleteListener(onSeekCompleteListener);
+        SoundLib.levelSelectTickEffect.setOnSeekCompleteListener(onSeekCompleteListener);
+
+        //TODO DEBUG
+        SoundLib.fissionShoot.setOnErrorListener(onErrorListener);
+        SoundLib.kaiserShoot.setOnErrorListener(onErrorListener);
+        SoundLib.skippyShoot.setOnErrorListener(onErrorListener);
+        SoundLib.magnumShoot.setOnErrorListener(onErrorListener);
+        SoundLib.flamethrowerShoot.setOnErrorListener(onErrorListener);
+
+        SoundLib.playerDamagedSoundEffect.setOnErrorListener(onErrorListener);
+        SoundLib.buttonSelectedSoundEffect.setOnErrorListener(onErrorListener);
+        SoundLib.levelSelectTickEffect.setOnErrorListener(onErrorListener);
+        SoundLib.levelSelectTickEffect.setOnPreparedListener(new MediaPlayer.OnPreparedListener() {
+            @Override
+            public void onPrepared(MediaPlayer mp) {
+                Log.d("Sound Lib","PREPARED\nPREPARE");
+            }
+        });
     }
 
     /** Pauses all music,
-     * unlike muteAllMedia, the songs do not continue to play FIX THIS IT STILL DOES CONTINUE TO PLAY TODO
+     * unlike muteAllMedia, the songs do not continue to play FIX THIS IT STILL DOES CONTINUE TO PLAY
      *
      */
     public static void pauseAllMedia(){
@@ -113,6 +173,42 @@ public class SoundLib {
             SoundLib.gameMusic.setVolume(0,0);
             SoundLib.victoryMusic.setVolume(0,0);
             SoundLib.lossMusic.setVolume(0,0);
+            numBlaze = 0;
+            flamethrowerShoot.setVolume(0,0);
+        } catch (NullPointerException | IllegalStateException e){
+            Log.d("SOUND_LIB","null pointer",e);
+        }
+    }
+
+    public static void stopAllMedia(){
+        try {
+            SoundLib.lobbyMusic.release();
+            SoundLib.gameMusic.release();
+            SoundLib.victoryMusic.release();
+            SoundLib.lossMusic.release();
+
+            SoundLib.kaiserShoot.release();
+            SoundLib.skippyShoot.release();
+            SoundLib.fissionShoot.release();
+            SoundLib.flamethrowerShoot.release();
+            SoundLib.magnumShoot.release();
+            //MAY CHANGE
+            SoundLib.xpCounterSoundEffect.release();
+            SoundLib.spawnerDeathSoundEffect.release();
+            //FINISHED
+            SoundLib.playerDamagedSoundEffect.release();
+            SoundLib.supplyDamagedSoundEffect.release();
+            SoundLib.playerShieldBlockSoundEffect.release();
+            SoundLib.playerSpawnShieldSoundEffect.release();
+            SoundLib.supplyDeathSoundEffect.release();
+            SoundLib.playerKillSoundEffect .release();
+            SoundLib.playerDeathSoundEffect.release();
+            SoundLib.reloadingSoundEffect.release();
+            SoundLib.buttonSelectedSoundEffect .release();
+            SoundLib.evolvingSoundEffect.release();
+            SoundLib.levelSelectTickEffect.release();
+
+            numBlaze = 0;
         } catch (NullPointerException e){
             Log.d("SOUND_LIB","null pointer",e);
         }
@@ -137,15 +233,21 @@ public class SoundLib {
     }
 
     /** All media (only music for now) is muted, however it keeps playing just at 0 volume
-     * todo do it for everything
      */
     public static void muteAllMedia(){
         SoundLib.playMusic = false;
 
-        SoundLib.lobbyMusic.setVolume(0,0);
-        SoundLib.gameMusic.setVolume(0,0);
-        SoundLib.victoryMusic.setVolume(0,0);
-        SoundLib.lossMusic.setVolume(0,0);
+        try {
+            SoundLib.lobbyMusic.setVolume(0,0);
+            SoundLib.gameMusic.setVolume(0,0);
+            SoundLib.victoryMusic.setVolume(0,0);
+            SoundLib.lossMusic.setVolume(0,0);
+            numBlaze = 0;
+            flamethrowerShoot.setVolume(0,0);
+        } catch (NullPointerException | IllegalStateException e){
+            Log.d("SOUND_LIB","null pointer",e);
+        }
+
     }
 
     /** All media (only music for now) is un muted
@@ -154,10 +256,14 @@ public class SoundLib {
     public static void unMuteAllMedia(){
         SoundLib.playMusic = true;
 
-        SoundLib.lobbyMusic.setVolume(1,1);
-        SoundLib.gameMusic.setVolume(1,1);
-        SoundLib.victoryMusic.setVolume(1,1);
-        SoundLib.lossMusic.setVolume(1,1);
+        try {
+            SoundLib.lobbyMusic.setVolume(1,1);
+            SoundLib.gameMusic.setVolume(1,1);
+            SoundLib.victoryMusic.setVolume(1,1);
+            SoundLib.lossMusic.setVolume(1,1);
+        } catch (NullPointerException | IllegalStateException e){
+            Log.d("SOUND_LIB","null pointer",e);
+        }
     }
 
     /** Sets the state of the lobby music
@@ -202,7 +308,6 @@ public class SoundLib {
         if (state){
             SoundLib.victoryMusic.start();
             if (! SoundLib.playMusic){
-                Log.d("SOUND LIB:","Muting victory: ");
                 SoundLib.muteAllMedia();
                 SoundLib.victoryMusic.setVolume(0,0);
             }
@@ -244,22 +349,94 @@ public class SoundLib {
     /** Plays the sound effect when a player shoots an attack
      *
      */
-    public static void playPlayerShootSoundEffect(){
+    public static void playKaiserShoot(){
         if (! SoundLib.playSoundEffects) return;
 
-        if (! SoundLib.playerShootSoundEffect.isPlaying()) {
-            SoundLib.playerShootSoundEffect.start();
+        if (SoundLib.kaiserShoot.isPlaying()) {
+            SoundLib.kaiserShoot.seekTo(0);
+        } else {
+            SoundLib.kaiserShoot.start();
         }
     }
+
+    /** Plays the sound effect when a player shoots an attack
+     *
+     */
+    public static void playSkippyShoot(){
+        if (! SoundLib.playSoundEffects) return;
+
+        if (SoundLib.skippyShoot.isPlaying()) {
+            SoundLib.skippyShoot.seekTo(0);
+        } else {
+            SoundLib.skippyShoot.start();
+        }
+    }
+
+    /** Plays the sound effect when a player shoots an attack
+     *
+     */
+    public static void playFissionShoot(){
+        if (! SoundLib.playSoundEffects) return;
+
+        if (SoundLib.fissionShoot.isPlaying()) {
+            SoundLib.fissionShoot.seekTo(0);
+        } else {
+            //started also otherwise
+            SoundLib.fissionShoot.start();
+        }
+    }
+
+    /** Plays the sound effect when a player shoots an attack
+     *
+     */
+    public static void playBlazeShoot(){
+        if (! SoundLib.playSoundEffects) return;
+
+
+        if (flameFadeOut != null){
+            flameFadeOut.cancel();
+        }
+        SoundLib.flamethrowerShoot.setVolume(1,1);
+        if (! SoundLib.flamethrowerShoot.isPlaying()) {
+            SoundLib.flamethrowerShoot.seekTo(0);
+        }
+        SoundLib.numBlaze++;
+    }
+    public static void stopBlaze(){
+        numBlaze--;
+        if (numBlaze <= 0){
+            numBlaze = 0;
+            if (flameFadeOut != null){
+                flameFadeOut.cancel();
+            }
+            flameFadeOut = new SoundFadeOut(SoundFadeOut.DEFAULT_MILLIS,flamethrowerShoot);
+
+        }
+    }
+
+    /** Plays the sound effect when a player shoots an attack
+     *
+     */
+    public static void playMagnumShoot(){
+        if (! SoundLib.playSoundEffects) return;
+
+        if (SoundLib.magnumShoot.isPlaying()) {
+           SoundLib.magnumShoot.seekTo(0);
+        } else {
+            SoundLib.magnumShoot.start();
+        }
+    }
+
+
 
     /** Plays the sound effect when a player lands an attack on an enemy or spawner
      *
      */
-    public static void playPlayerAttackLandSoundEffect(){
+    public static void playSupplyDamaged(){
         if (! SoundLib.playSoundEffects) return;
 
-        if (! SoundLib.playerAttackLandSoundEffect.isPlaying()) {
-            SoundLib.playerAttackLandSoundEffect.start();
+        if (! SoundLib.supplyDamagedSoundEffect.isPlaying()) {
+            SoundLib.supplyDamagedSoundEffect.start();
         }
     }
 
@@ -302,54 +479,28 @@ public class SoundLib {
     public static void playButtonSelectedSoundEffect(){
         if (! SoundLib.playSoundEffects) return;
 
-        if (! SoundLib.buttonSelectedSoundEffect.isPlaying()) {
+        if (SoundLib.buttonSelectedSoundEffect.isPlaying()) {
+            SoundLib.buttonSelectedSoundEffect.seekTo(0);
+        } else {
             SoundLib.buttonSelectedSoundEffect.start();
         }
     }
 
-    /** Plays the sound effect when a button is released
-     *
-     */
-    public static void playButtonReleasedSoundEffect(){
-        if (! SoundLib.playSoundEffects) return;
-
-        if (! SoundLib.buttonReleasedSoundEffect.isPlaying()) {
-            SoundLib.buttonReleasedSoundEffect.start();
-        }
-    }
-
-    /** Plays the sound effect when a button is selected (pressed, but not fully released)
-     *
-     */
-    public static void playToxicLakeTickSoundEffect(){
-        if (! SoundLib.playSoundEffects) return;
-
-        if (! SoundLib.toxicLakeTickSoundEffect.isPlaying()) {
-            SoundLib.toxicLakeTickSoundEffect.start();
-        }
-    }
 
     /** Plays the sound effect when a enemy damages the player
      *
      */
-    public static void playEnemyDamagePlayerSoundEffect(){
+    public static void playPlayerDamagedSoundEffect(){
         if (! SoundLib.playSoundEffects) return;
 
-        if (! SoundLib.enemyDamagePlayerSoundEffect.isPlaying()) {
-            SoundLib.enemyDamagePlayerSoundEffect.start();
+        if (SoundLib.playerDamagedSoundEffect.isPlaying()) {
+            SoundLib.playerDamagedSoundEffect.seekTo(0);
+        } else {
+            SoundLib.playerDamagedSoundEffect.start();
         }
+
     }
 
-    /** Plays the sound effect when an enemy damages a supply
-     *
-     */
-    public static void playEnemyDamageSupplySoundEffect(){
-        if (! SoundLib.playSoundEffects) return;
-
-        if (! SoundLib.enemyDamageSupplySoundEffect.isPlaying()) {
-            SoundLib.enemyDamageSupplySoundEffect.start();
-        }
-    }
 
     /** Plays the sound effect when a supply is killed off by enemies
      *
@@ -372,16 +523,17 @@ public class SoundLib {
             SoundLib.evolvingSoundEffect.start();
         }
     }
-
-    /** Plays the sound effect when a spawner is damaged by the player
+    /** Plays the sound effect when a player is currentyl evolving
+     *
      */
-    public static void playSpawnerDamageSoundEffect(){
+    public static void playPlayerReloading(){
         if (! SoundLib.playSoundEffects) return;
 
-        if (! SoundLib.spawnerDamagedSoundEffect.isPlaying()) {
-            SoundLib.spawnerDamagedSoundEffect.start();
+        if (! SoundLib.reloadingSoundEffect.isPlaying()) {
+            SoundLib.reloadingSoundEffect.start();
         }
     }
+
 
     /** Plays the sound effect when a spawner is killed by the player
      */
@@ -401,13 +553,21 @@ public class SoundLib {
             SoundLib.xpCounterSoundEffect.start();
         }
     }
-    /** Plays the sound effect when the level selector is being switched
+
+
+    /** Plays the sound effect when the xp counter is being shown
      */
-    public static void playLevelSelectTickSoundEffect(){
+    public static void playLevelSelectTick(){
         if (! SoundLib.playSoundEffects) return;
 
-        if (! SoundLib.levelSelectTickSoundEffect.isPlaying()) {
-            SoundLib.levelSelectTickSoundEffect.start();
+        Log.d("Sound Lib","Length: " + SoundLib.levelSelectTickEffect.getDuration() +
+                " pos: " + SoundLib.levelSelectTickEffect.getCurrentPosition() +
+                " is playing: " + SoundLib.levelSelectTickEffect.isPlaying());
+        if (SoundLib.levelSelectTickEffect.isPlaying()) {
+            SoundLib.levelSelectTickEffect.pause();
+            SoundLib.levelSelectTickEffect.seekTo(0);
+        } else {
+            SoundLib.levelSelectTickEffect.start();
         }
     }
 
@@ -437,4 +597,5 @@ public class SoundLib {
     public static boolean isPlaySoundEffects() {
         return SoundLib.playSoundEffects;
     }
+
 }

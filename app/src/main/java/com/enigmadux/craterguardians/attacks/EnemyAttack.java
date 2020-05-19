@@ -68,13 +68,10 @@ public abstract class EnemyAttack extends BaseAttack {
 
     void onHitPlayer(Player player){
         player.damage(this.damage);
-        SoundLib.playEnemyDamagePlayerSoundEffect();
     }
 
     void onHitSupply(Supply s){
         s.damage(this.damage);
-        SoundLib.playEnemyDamageSupplySoundEffect();
-
     }
 
     @Override

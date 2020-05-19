@@ -91,7 +91,9 @@ public class EvolveButton extends QuadTexture {
     }
 
     public boolean onHardRelease(MotionEvent e){
-        craterRenderer.getWorld().getPlayer().evolve(craterRenderer.getWorld());
+        synchronized (World.playerLock) {
+            craterRenderer.getWorld().getPlayer().evolve(craterRenderer.getWorld());
+        }
         this.isDown = false;
         int id = e.getPointerId(e.getActionIndex());
         this.joystickLayout.getPointerLocs().remove(id);
@@ -145,7 +147,6 @@ public class EvolveButton extends QuadTexture {
      *
      */
     private void defaultReleaseAction(){
-        SoundLib.playButtonReleasedSoundEffect();
     }
 
     public void update(World world,long dt){

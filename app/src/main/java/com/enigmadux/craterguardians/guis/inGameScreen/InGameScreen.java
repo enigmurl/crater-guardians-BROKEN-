@@ -27,7 +27,7 @@ import enigmadux2d.core.quadRendering.QuadTexture;
 
 /** This is the layout in game that contains the pause button
  *
- * In the future, it may contain the evolve button and joysticks (todo)
+ *
  */
 public class InGameScreen implements GUILayout {
 
@@ -85,9 +85,9 @@ public class InGameScreen implements GUILayout {
         //the pause button);
 
         float x =-1 + 0.15f * LayoutConsts.SCALE_X;
-        pause = new VisibilityInducedButton(context, R.drawable.pause_button,
+        pause = new PauseButton(context,
                 x,0.85f,0.2f,0.2f,
-                null,allLayouts.get(STRINGS.PAUSE_GAME_LAYOUT_ID), false);
+                null,allLayouts.get(STRINGS.PAUSE_GAME_LAYOUT_ID));
         this.clickables.add(pause);
         this.renderables.add(pause);
 

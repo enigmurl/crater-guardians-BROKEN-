@@ -54,16 +54,17 @@ public class ToxicLake extends CraterCollectionElem {
         this.height = 2 * radius;
         this.radius = radius;
 
+        float rotation = (float) (Math.random() * 360);
         //translates to appropriate coordinates
         final float[] translationMatrix = new float[16];
         //scales to appropriate size
         final float[] scalarMatrix = new float[16];
-
         Matrix.setIdentityM(translationMatrix,0);
         Matrix.translateM(translationMatrix,0,this.deltaX,this.deltaY,0);
 
         Matrix.setIdentityM(scalarMatrix,0);
         Matrix.scaleM(scalarMatrix,0,2*radius,2*radius,0);
+        Matrix.rotateM(scalarMatrix,0,rotation,0,0,1);
 
         Matrix.multiplyMM(translationScalarMatrix,0,translationMatrix,0,scalarMatrix,0);
     }
@@ -81,25 +82,26 @@ public class ToxicLake extends CraterCollectionElem {
         }
 
         if (currentMillis == 0) {
-            for (Enemy enemy : world.getBlueEnemies().getInstanceData()){
+            for (Enemy enemy : world.getBlueEnemies().getInstanceData()) {
                 if (enemy == null) continue;
                 if (Math.hypot(enemy.getDeltaX() - this.deltaX, enemy.getDeltaY() - this.deltaY) < this.radius + enemy.getRadius()) {
                     enemy.damage(DAMAGE);
                 }
             }
-            for (Enemy enemy : world.getOrangeEnemies().getInstanceData()){
+
+            for (Enemy enemy : world.getOrangeEnemies().getInstanceData()) {
                 if (enemy == null) continue;
                 if (Math.hypot(enemy.getDeltaX() - this.deltaX, enemy.getDeltaY() - this.deltaY) < this.radius + enemy.getRadius()) {
                     enemy.damage(DAMAGE);
                 }
             }
+
         }
 
         Player player = world.getPlayer();
         if (Math.hypot(player.getDeltaX() - this.deltaX,player.getDeltaY() - this.deltaY) < this.radius + player.getRadius()){
             if (currentMillis == 0) {
                 player.damage(DAMAGE);
-                SoundLib.playToxicLakeTickSoundEffect();
             }
             if (! player.getActiveLakes().contains(this)){
                 player.getActiveLakes().add(this);

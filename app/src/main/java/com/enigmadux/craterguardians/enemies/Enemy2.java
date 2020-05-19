@@ -1,5 +1,6 @@
 package com.enigmadux.craterguardians.enemies;
 
+import com.enigmadux.craterguardians.animations.ShootAnimation;
 import com.enigmadux.craterguardians.attacks.AttackEnemy2;
 import com.enigmadux.craterguardians.util.MathOps;
 import com.enigmadux.craterguardians.gamelib.World;
@@ -22,7 +23,7 @@ public class Enemy2 extends Enemy {
 
     public Enemy2(int instanceID, float x, float y, boolean isBlue,int strength) {
         super(instanceID, x, y, RADIUS, ATTACK_LEN[strength], isBlue,ATTACK_RATE[strength],strength);
-        this.minDist = ATTACK_LEN[strength]/5;
+        this.minDist = GUN_LENGTH * this.height + this.getRadius() * 2.5f;
     }
 
     @Override
@@ -33,9 +34,17 @@ public class Enemy2 extends Enemy {
     @Override
     public void attack(World world, float angle) {
         super.attack(world,angle);
-        int id = world.getEnemyAttacks().createVertexInstance();
-        AttackEnemy2 a = new AttackEnemy2(id,this.getDeltaX(),this.getDeltaY(),angle,strength);
-        world.getEnemyAttacks().addInstance(a);
+
+        float gunTipX = GUN_LENGTH * this.height + AttackEnemy2.RADIUS[strength]+this.getRadius();
+        //don't need h/2 because its in the middle
+        float gunTipY = GUN_OFFSET_Y * this.height;
+        float x = (float) (gunTipX * Math.cos(angle) - Math.sin(angle) * gunTipY);
+        float y = (float) (gunTipX * Math.sin(angle) + Math.cos(angle) * gunTipY);
+        synchronized (World.enemyAttackLock) {
+            int id = world.getEnemyAttacks().createVertexInstance();
+            AttackEnemy2 a = new AttackEnemy2(id,this.getDeltaX() + x,this.getDeltaY() + y,angle,strength);
+            world.getEnemyAttacks().addInstance(a);
+        }
     }
 
     @Override

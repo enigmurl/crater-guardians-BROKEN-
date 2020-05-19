@@ -1,8 +1,10 @@
 package com.enigmadux.craterguardians;
 
+import android.util.Log;
 import android.view.MotionEvent;
 
 import enigmadux2d.core.EnigmaduxGLSurfaceView;
+import enigmadux2d.core.quadRendering.QuadTexture;
 
 
 /** The specific Surface View for the app. Screen Related touch events are handled here
@@ -77,4 +79,20 @@ public class CraterGLSurfaceView extends EnigmaduxGLSurfaceView {
     public void onStop(){
         mRenderer.onStop();
     }
+
+
+    @Override
+    public void onDestroy(){
+        Log.d("MEMORY","STARTING CLEARING");
+        this.queueEvent(new Runnable() {
+            @Override
+            public void run() {
+                QuadTexture.recycleAll();
+                QuadTexture.resetTextures();
+                Log.d("MEMORY","CLEARING: " + Thread.currentThread());
+                mRenderer.onDestroy();
+            }
+        });
+    }
+
 }

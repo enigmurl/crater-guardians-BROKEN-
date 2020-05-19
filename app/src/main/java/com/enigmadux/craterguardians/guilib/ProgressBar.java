@@ -20,8 +20,8 @@ public class ProgressBar implements RenderableCollection {
     static final float MARGIN_PERCENT = 0.1f;
 
 
-    private int maxValue;
-    private int currentValue;
+    int maxValue;
+    int currentValue;
 
     protected ArrayList<QuadTexture> renderables = new ArrayList<>(2);
     //the bar on top of the background

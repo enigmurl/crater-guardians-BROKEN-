@@ -25,7 +25,7 @@ public class Shield extends QuadTexture {
     //the percentage to extend out to
     private static final float SHIELD_EXTRA = 0.4f;
     //an enemy of radius 1, will exert  directional force per second on the player
-    private static final float FORCE_PER_RADIUS = 3f;
+    private static final float FORCE_PER_RADIUS = 1f;
 
 
 

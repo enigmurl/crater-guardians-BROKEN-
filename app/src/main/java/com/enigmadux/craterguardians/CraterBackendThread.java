@@ -1,9 +1,11 @@
 package com.enigmadux.craterguardians;
 
+import android.content.Context;
 import android.util.Log;
 
 import com.enigmadux.craterguardians.animations.TransitionAnim;
 import com.enigmadux.craterguardians.gamelib.World;
+import com.enigmadux.craterguardians.util.SoundLib;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -28,13 +30,17 @@ public class CraterBackendThread extends Thread {
     private long lastMillis;
 
 
+    private boolean hasLoadedSound = false;
+    private Context context;
+
     /** Default constructor
      *
      * @param backend backend object, it's ok if it's null so long as before it starts updating it's set
      */
-    public CraterBackendThread(World backend){
+    public CraterBackendThread(Context context, World backend){
         super();
         this.backend = backend;
+        this.context = context;
 
         this.lastMillis = System.currentTimeMillis();
         if (backend!= null && backend.getEnemyMap() != null) {
@@ -64,12 +70,14 @@ public class CraterBackendThread extends Thread {
         long debugStartMillis = System.currentTimeMillis();
 
         int updateCount = 0;
-        int under60 = 0;
-        List<Long> under60s = new ArrayList<Long>();
 
         while (this.running){
             updateCount++;
 
+            if (! hasLoadedSound){
+                SoundLib.loadMedia(context);
+                this.hasLoadedSound = true;
+            }
 
 
             long currentTime = System.currentTimeMillis();
@@ -88,25 +96,17 @@ public class CraterBackendThread extends Thread {
                 TransitionAnim.updateAnims(System.currentTimeMillis() - lastMillis);
                 if (!gamePaused) {
                     TransitionAnim.updateGameAnims(System.currentTimeMillis() - lastMillis);
-                    this.backend.update(System.currentTimeMillis() - lastMillis);//todo update this value
+                    this.backend.update(System.currentTimeMillis() - lastMillis);
                 }
-            }
-            if (System.currentTimeMillis() - lastMillis  >  1000/60f){
-                under60++;
-                under60s.add((long) (1000f/(System.currentTimeMillis() - lastMillis)));
             }
 
             this.lastMillis = System.currentTimeMillis();
 
             if (System.currentTimeMillis() - debugStartMillis > 10000){
                 Log.d("BACKENDTHREAD:","Frames per second:"  + (1000 * updateCount/(double) (System.currentTimeMillis() - debugStartMillis)));
-                Log.d("BACKENDTHREAD:","percentage under 60:"  + ((float) under60/updateCount));
-                Log.d("BACKENDTHREAD:","under 60s:"  + under60s);
 
                 debugStartMillis = System.currentTimeMillis();
                 updateCount = 0;
-                under60 = 0;
-                under60s.clear();
             }
 
         }
@@ -132,7 +132,9 @@ public class CraterBackendThread extends Thread {
         if (! pausedState){
             this.setAppPaused(false);
         }
-        if (backend!= null && backend.getEnemyMap() != null) this.backend.getEnemyMap().setPaused(gamePaused);
+        if (backend!= null && backend.getEnemyMap() != null){
+            this.backend.getEnemyMap().setPaused(gamePaused);
+        }
     }
 
     public void setAppPaused(boolean pauseState){
@@ -149,5 +151,13 @@ public class CraterBackendThread extends Thread {
      */
     public World getBackend(){
         return this.backend;
+    }
+
+    public boolean isGamePaused(){
+        return gamePaused;
+    }
+
+    public void reloadSounds(){
+        this.hasLoadedSound =false;
     }
 }

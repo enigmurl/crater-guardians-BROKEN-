@@ -135,7 +135,6 @@ public class CharacterSelectLayout implements GUILayout {
             //start at the margin, the (2 - SIDE_MARGINS) is the total width
             //note that there is internal scaling so to combat this we use that as
             float x = -1 + SIDE_MARGINS + ((i*scaleX * (ICON_WIDTH + ICON_MARGINS)) % (2 - 2 * SIDE_MARGINS));
-            Log.d("DEBUG","x: " + x);
             this.clickables.add(
                     new PlayerSelecterIcon(context,player.getPlayerIcon(),
                             x,0.2f,ICON_WIDTH,ICON_WIDTH,
@@ -170,7 +169,7 @@ public class CharacterSelectLayout implements GUILayout {
         this.renderables.addAll(this.clickables);
         for (int i = 0;i<CharacterSelectLayout.CHARACTERS.length;i++){
             Player player = CharacterSelectLayout.CHARACTERS[i];
-            InfoDisplay infoDisplay = new InfoDisplay(context,player,0,0,1,1,false);
+            InfoDisplay infoDisplay = new InfoDisplay(context,player,0,0,1.5f,1.5f,false);
             this.infoDisplays.add(infoDisplay);
             this.clickables.add(infoDisplay);
         }

@@ -1,7 +1,6 @@
 package com.enigmadux.craterguardians.enemies;
 
 import android.opengl.Matrix;
-import android.util.Log;
 
 import com.enigmadux.craterguardians.R;
 import com.enigmadux.craterguardians.animations.DeathAnim;
@@ -17,12 +16,11 @@ import com.enigmadux.craterguardians.gameobjects.ToxicLake;
 import com.enigmadux.craterguardians.util.MathOps;
 import com.enigmadux.craterguardians.gamelib.World;
 import com.enigmadux.craterguardians.gamelib.CraterCollectionElem;
-import com.enigmadux.craterguardians.players.Player;
 import com.enigmadux.craterguardians.util.PairIntFloat;
+import com.enigmadux.craterguardians.util.SoundLib;
 
 import java.util.ArrayList;
 import java.util.LinkedList;
-import java.util.concurrent.TimeUnit;
 
 /** New Enemy
  *
@@ -40,9 +38,9 @@ public abstract class Enemy extends CraterCollectionElem implements Character {
 
     //gives the texture based on strength
     public static int[] STRENGTH_TEXTURES = new int[]{
-            R.drawable.kaiser_sprite_sheet_e1,
-            R.drawable.kaiser_sprite_sheet_e2,
-            R.drawable.kaiser_sprite_sheet_e3,
+            R.drawable.enemy_strength1,
+            R.drawable.enemy_strength2,
+            R.drawable.enemy_strength3,
             R.drawable.kaiser_sprite_sheet_e4,
             R.drawable.kaiser_sprite_sheet_e5
     };
@@ -85,6 +83,13 @@ public abstract class Enemy extends CraterCollectionElem implements Character {
             1/(float) Enemy.FRAMES_PER_ROTATION,1,
     };
 
+    public static final float ASPECT_RATIO = 271f/170f;
+
+
+    static final float GUN_LENGTH = ASPECT_RATIO - 1;
+
+    //
+    static final float GUN_OFFSET_Y =  -34/170f;
 
     /** The radius in openGL terms (half the width, half the height)
      *
@@ -116,9 +121,14 @@ public abstract class Enemy extends CraterCollectionElem implements Character {
 
     //direction we're heading rads
     float rotation = 0;
+    float attackRotation;
+    boolean isAttacking;
+
     private boolean startedPathTraverse;
 
     private boolean spawned = false;
+
+    private boolean egged = false;
 
     //set to true in the spawning animation
     protected boolean isVisible = false;
@@ -166,7 +176,7 @@ public abstract class Enemy extends CraterCollectionElem implements Character {
         this.deltaY = y;
         this.r = r;
 
-        this.width = r*2;
+        this.width = r*2 * ASPECT_RATIO;
         this.height = r*2;
 
         this.isBlue = isBlue;
@@ -176,11 +186,7 @@ public abstract class Enemy extends CraterCollectionElem implements Character {
         this.health = this.getMaxHealth();
 
 
-        if (isBlue){
-            this.setShader(0,0,1,1);
-        } else{
-            this.setShader(1,0,0,1);
-        }
+        this.resetShader();
 
         this.attackRate = milliSeconds;
         this.millisSinceLastAttack = attackRate;
@@ -233,15 +239,17 @@ public abstract class Enemy extends CraterCollectionElem implements Character {
     @Override
     public void updateInstanceTransform(float[] blankInstanceInfo, float[] uMVPMatrix) {
         if (! this.isVisible){
-            Matrix.scaleM(blankInstanceInfo,0,uMVPMatrix,0,0,0,0);
+            Matrix.setIdentityM(blankInstanceInfo,0);
+            Matrix.scaleM(blankInstanceInfo,0,0,0,0);
             return;
         }
-        float r = (float) Math.toDegrees(this.rotation % (2 * Math.PI/NUM_ROTATION_ORIENTATIONS));
+        float r = (float) Math.toDegrees(this.isAttacking ? this.attackRotation : this.rotation % (2 * Math.PI/NUM_ROTATION_ORIENTATIONS));
 
         float hScale = stunnedMillis <= 0 ? 1: STUNNED_SHRINK;
-        Matrix.translateM(blankInstanceInfo,0,uMVPMatrix,0,this.getDeltaX(),this.getDeltaY(),0);
+        //offset for the gun
+        Matrix.translateM(blankInstanceInfo,0,uMVPMatrix,0,this.getDeltaX() +(float) Math.cos(this.isAttacking ? this.attackRotation : this.rotation) * GUN_LENGTH * this.height/2,this.getDeltaY() + (float) Math.sin(this.isAttacking ? this.attackRotation : this.rotation) * GUN_LENGTH * this.height/2,0);
         Matrix.rotateM(blankInstanceInfo,0,r,0,0,1);
-        Matrix.scaleM(blankInstanceInfo,0,2 * this.r * hScale,2 * this.r * hScale,0);
+        Matrix.scaleM(blankInstanceInfo,0,this.width* hScale,this.height * hScale,0);
     }
 
     /** Moves the enemy to a specific position
@@ -259,6 +267,9 @@ public abstract class Enemy extends CraterCollectionElem implements Character {
         this.isVisible = isVisible;
     }
 
+    public void setEgged(boolean egged) {
+        this.egged = egged;
+    }
 
     public void update(long dt, World world){
         if (! this.searchedForPath){
@@ -267,21 +278,23 @@ public abstract class Enemy extends CraterCollectionElem implements Character {
 
         }
         if (! spawned){
-            world.getAnims().add(new EnemySpawn(this,this.getDeltaX(),this.getDeltaY(),this.r * 2,this.r * 2));
+            world.addAnim(new EnemySpawn(this,this.getDeltaX(),this.getDeltaY(),EnemySpawn.SCALE * this.r * 2,EnemySpawn.SCALE * this.r * 2));
             this.spawned = true;
             return;
         }
-        if (! isVisible){
+        if (! isVisible || egged){
             return;
         }
 
+
         if (this.isDead()){
-            world.getAnims().add(new DeathAnim(deltaX,deltaY,this.r * 2,this.r * 2));
+            world.addAnim(new DeathAnim(deltaX,deltaY,this.r * 2,this.r * 2));
             if (this.isBlue){
                 world.getBlueEnemies().delete(this);
             } else {
                 world.getOrangeEnemies().delete(this);
             }
+            SoundLib.playPlayerKillSoundEffect();
             return;
         }
         this.millisSinceLastAttack += dt;
@@ -381,7 +394,7 @@ public abstract class Enemy extends CraterCollectionElem implements Character {
     }
 
     protected void searchPath(World world){
-        PairIntFloat target = this.getNearestTarget(world,true);
+        PairIntFloat target = this.getNearestTarget(world,true, 0);
         world.getEnemyMap().updatePlayerPosition(world.getPlayer());
         world.getEnemyMap().requestPath(this,target.first);
         if (target.first == -1){
@@ -391,20 +404,26 @@ public abstract class Enemy extends CraterCollectionElem implements Character {
     }
 
     protected boolean attemptAttack(World world){
-        PairIntFloat target = this.getNearestTarget(world,false);
+        PairIntFloat target = this.getNearestTarget(world,false, this.minDist);
         int maxIndex = target.first;
         float minDist = target.second;
+
+
         if (minDist <= this.attackLen){
             if (maxIndex == -1){
                 float angle = minDist == 0 ? 0: MathOps.getAngle((world.getPlayer().getDeltaX() - this.getDeltaX())/minDist,(world.getPlayer().getDeltaY() - this.getDeltaY())/minDist);
                 this.attack(world,angle);
+                this.attackRotation = angle;
             } else {
                 Supply s =  world.getSupplies().getInstanceData().get(maxIndex);
                 float angle = minDist == 0 ? 0: MathOps.getAngle((s.getDeltaX() - this.getDeltaX())/minDist,(s.getDeltaY() - this.getDeltaY())/minDist);
                 this.attack(world,angle);
+                this.attackRotation = angle;
             }
+            this.isAttacking = true;
             return true;
         }
+        this.isAttacking = false;
         return false;
     }
 
@@ -487,14 +506,14 @@ public abstract class Enemy extends CraterCollectionElem implements Character {
     }
 
     //gets index of nearest supply, -1 if it's player, along with distance to that
-    public PairIntFloat getNearestTarget(World world,boolean weighted){
+    private PairIntFloat getNearestTarget(World world, boolean weighted, float minDistToConsider){
         int maxIndex = -1;
         float divisor = weighted ? this.getPlayerVsSupplyBias():1;
         float minDist = (float) Math.hypot(this.deltaX - world.getPlayer().getDeltaX(),this.deltaY - world.getPlayer().getDeltaY());
         for (int i = 0,size = world.getSupplies().size();i<size;i++){
             Supply s =  world.getSupplies().getInstanceData().get(i);
             double dist = Math.hypot(s.getDeltaX() - deltaX,s.getDeltaY() - deltaY) * divisor;
-            if (dist < minDist){
+            if (dist < minDist && dist > minDistToConsider){
                 maxIndex = i;
                 minDist = (float) dist;
             }
@@ -536,10 +555,13 @@ public abstract class Enemy extends CraterCollectionElem implements Character {
     public abstract int getMaxHealth();
 
     public void attack(World world,float angle){
-        synchronized (World.animationLock) {
-            ShootAnimation shootAnim = new ShootAnimation(deltaX, deltaY, ShootAnimation.STANDARD_DIMENSIONS, ShootAnimation.STANDARD_DIMENSIONS);
-            world.getAnims().add(shootAnim);
-        }
+        float gunTipX = GUN_LENGTH * this.height + ShootAnimation.STANDARD_DIMENSIONS/2;
+        //don't need h/2 because its in the middle
+        float gunTipY = GUN_OFFSET_Y * this.height;
+        float x = (float) (gunTipX * Math.cos(angle) - Math.sin(angle) * gunTipY);
+        float y = (float) (gunTipX * Math.sin(angle) + Math.cos(angle) * gunTipY);
+        ShootAnimation shootAnim = new ShootAnimation(deltaX + x, deltaY + y, ShootAnimation.STANDARD_DIMENSIONS, ShootAnimation.STANDARD_DIMENSIONS,(float)Math.toDegrees(angle));
+        world.addAnim(shootAnim);
     }
 
     //can be overrided if sub classes want to change (this is multiplier)
@@ -594,9 +616,9 @@ public abstract class Enemy extends CraterCollectionElem implements Character {
 
     public void resetShader(){
         if (isBlue){
-            this.setShader(0,0,1,1);
+            this.setShader(0.5f,0.5f,1,1);
         } else{
-            this.setShader(1,0,0,1);
+            this.setShader(1,0.701f,0.4f,1);
         }
 
     }

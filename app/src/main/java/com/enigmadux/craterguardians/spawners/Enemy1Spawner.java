@@ -59,7 +59,6 @@ public class Enemy1Spawner extends Spawner {
             float x = this.deltaX + (this.width/2 * (cos));
             float y = this.deltaY + (this.height/2 * (sin));
             int id = blueEnemies.getVertexData().addInstance();
-            Log.d("VAO","SPAWNING BLUE " + id);
             blueEnemies.getInstanceData().add(new Enemy1(id,x,y,true,strength));
         }
     }
@@ -72,7 +71,6 @@ public class Enemy1Spawner extends Spawner {
             float x = this.deltaX + (this.width/2 * (cos));
             float y = this.deltaY + (this.height/2 * (sin));
             int id = orangeEnemies.getVertexData().addInstance();
-            Log.d("VAO","SPAWNING ORANGE " + id);
             orangeEnemies.getInstanceData().add(new Enemy1(id,x,y,false,strength));
         }
     }

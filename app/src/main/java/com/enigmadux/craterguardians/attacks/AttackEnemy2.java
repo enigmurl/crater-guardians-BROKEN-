@@ -5,12 +5,12 @@ import com.enigmadux.craterguardians.gameobjects.Supply;
 import com.enigmadux.craterguardians.players.Player;
 
 public class AttackEnemy2 extends EnemyAttack {
-    private static final float[] RADIUS =  new float[] {0.2f,0.205f,0.21f,0.215f};
+    public static final float[] RADIUS =  new float[] {0.1f,0.1025f,0.115f,0.1175f};
     public static final float[] LENGTH = new float[] {2,2.2f,2.4f,2.6f};
     //per second
-    private static final float[] SPEED = new float[] {1.5f,1.55f,1.6f,1.65f};
+    private static final float[] SPEED = new float[] {2.5f,2.55f,2.6f,2.65f};
 
-    private static final int[] DAMAGE = new int[] {5,7,10,14};
+    private static final int[] DAMAGE = new int[] {6,8,11,15};
 
 
     private int strength;

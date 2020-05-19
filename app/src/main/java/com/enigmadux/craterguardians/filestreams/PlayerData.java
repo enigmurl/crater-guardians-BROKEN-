@@ -5,10 +5,10 @@ import android.util.Log;
 
 import com.enigmadux.craterguardians.guilib.MatieralBar;
 import com.enigmadux.craterguardians.players.Fission;
-import com.enigmadux.craterguardians.players.Flamethrower;
+import com.enigmadux.craterguardians.players.Blaze;
 import com.enigmadux.craterguardians.players.Kaiser;
 import com.enigmadux.craterguardians.players.Player;
-import com.enigmadux.craterguardians.players.Shotgunner;
+import com.enigmadux.craterguardians.players.Magnum;
 import com.enigmadux.craterguardians.players.Skippy;
 
 import java.io.IOException;
@@ -18,7 +18,7 @@ import java.util.Scanner;
 
 public class PlayerData {
     //all character classes
-    public static final Player[] CHARACTERS = new Player[] {new Kaiser(0,0),new Skippy(0,0),new Fission(0,0),new Flamethrower(0,0),new Shotgunner(0,0)};
+    public static final Player[] CHARACTERS = new Player[] {new Kaiser(0,0),new Skippy(0,0),new Fission(0,0),new Blaze(0,0),new Magnum(0,0)};
 
     //the path to the player levels + xp file
     private static final String PLAYER_DATA = "player_data";
@@ -65,7 +65,6 @@ public class PlayerData {
 
 
     /** Loads data about the player from a file,
-     * todo it may be possibly be bettter to hardcode this as opposed to using the deprecated newInstance method
      *
      *
      */

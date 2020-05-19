@@ -30,6 +30,6 @@ public class AmmoBar extends ProgressBar {
     @Override
     public void setValue(int newValue) {
         super.setValue(newValue);
-        this.ammos.setCurrentAmount(newValue);
+        this.ammos.setCurrentAmount(Math.min(newValue,maxValue-1));
     }
 }

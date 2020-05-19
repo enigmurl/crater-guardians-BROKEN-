@@ -9,10 +9,11 @@ import com.enigmadux.craterguardians.util.MathOps;
 
 public class EnemySpawn extends Animation {
 
+    public static final float SCALE = 1.6f;
     /** The amount of frames in the animation
      *
      */
-    private static final int NUM_FRAMES = 5;
+    private static final int NUM_FRAMES = 4;
 
 
     /** The amount of millis in the animation
@@ -36,11 +37,11 @@ public class EnemySpawn extends Animation {
      */
     public EnemySpawn(Enemy original,float x, float y, float w, float h){
         //null context bc it isnt needed
-        super(null, R.drawable.death_animation,x,y,w,h);
+        super(null, R.drawable.enemy_spawn_animation,x,y,w,h);
         original.setVisibility(false);
+        original.setEgged(true);
         this.textureW = 1f/NUM_FRAMES;
         this.original = original;
-        Log.d("Enemy","Spawned: " + original.getInstanceID());
     }
 
 
@@ -52,7 +53,13 @@ public class EnemySpawn extends Animation {
     public void update(World world, long dt) {
         super.update(world,dt);
         this.currentPosition += dt;
-        this.textureDeltaX = MathOps.getTextureBufferTranslationX((int) (this.currentPosition* EnemySpawn.NUM_FRAMES/EnemySpawn.ANIMATION_LENGTH), EnemySpawn.NUM_FRAMES);
+
+        int frameNum =Math.min((int) (this.currentPosition* EnemySpawn.NUM_FRAMES/EnemySpawn.ANIMATION_LENGTH),NUM_FRAMES-1);
+        if (frameNum == NUM_FRAMES-1){
+            this.original.setVisibility(true);
+        }
+
+        this.textureDeltaX = MathOps.getTextureBufferTranslationX(frameNum, EnemySpawn.NUM_FRAMES);
     }
 
     /** Sees whether it's finished or not
@@ -66,7 +73,7 @@ public class EnemySpawn extends Animation {
     @Override
     public void finish(World world) {
         original.setVisibility(true);
-        Log.d("Enemy","Finished: " + original.getInstanceID() + " " + original.isVisible());
+        original.setEgged(false);
         super.finish(world);
 
     }

@@ -1,9 +1,5 @@
 package com.enigmadux.craterguardians.animations;
 
-import android.content.Context;
-import android.graphics.Point;
-import android.util.Log;
-
 import com.enigmadux.craterguardians.gamelib.World;
 import com.enigmadux.craterguardians.util.FloatPoint;
 
@@ -24,17 +20,15 @@ public class ScreenShake extends FrameTransitionAnim {
     private int orgSize;
 
 
+    private boolean finished = true;
+
     //private FloatPoint prevNode;
     public ScreenShake(float damagePercent, World world) {
         super((long) (damagePercent * MAX_MILLIS));
 
         this.pointQueue = new LinkedList<>();
         int numPoints = Math.max(1,(int) (this.totalMillis * POINTS_PER_MILLIS));
-        pointQueue.add(new FloatPoint(0,0));
-        for (int i = 0;i < numPoints;i++){
-            pointQueue.add(new FloatPoint(Math.random() * MAX_RADIUS * damagePercent,Math.random() * MAX_RADIUS * damagePercent));
-        }
-        pointQueue.add(new FloatPoint(0,0));
+        this.pointQueue = ScreenShake.getRandomShake(MAX_RADIUS*damagePercent,numPoints, 0, 0);
         orgSize = pointQueue.size();
         this.world  =world;
         this.inGameAnim = true;
@@ -59,13 +53,29 @@ public class ScreenShake extends FrameTransitionAnim {
     @Override
     public void cancel() {
         //CANNOT BE CANCELLED
+        this.finished = true;
     }
 
     @Override
     void finish() {
         super.finish();
         world.setCameraDelta(0,0);
+        this.finished = true;
     }
 
 
+    public static LinkedList<FloatPoint> getRandomShake(float maxRadius, int numPoints, float startX, float startY){
+        LinkedList<FloatPoint> returnList = new LinkedList<>();
+        returnList.add(new FloatPoint(startX,startY));
+        for (int i = 0;i < numPoints;i++){
+            returnList.add(new FloatPoint(Math.random() * maxRadius  + startX,Math.random() * maxRadius + startY));
+        }
+        returnList.add(new FloatPoint(startX,startY));
+        return returnList;
+    }
+
+    @Override
+    public boolean isFinished() {
+        return super.isFinished() || finished;
+    }
 }

@@ -48,6 +48,7 @@ import enigmadux2d.core.shaders.ShaderProgram;
  */
 public class CraterRenderer extends EnigmaduxGLRenderer {
 
+    private static final float LOADING_SCREEN_ASPECT_RATIO = 1006f/564;
     //says how far back the camera is from the view
     public static final float CAMERA_Z = 4f;
 
@@ -94,9 +95,8 @@ public class CraterRenderer extends EnigmaduxGLRenderer {
 
     //todo these are all debug varaibles delete them before releaes
 
-    long debugStartMillis = System.currentTimeMillis();
-    int updateCount = 0;
-    long lastMillis = System.currentTimeMillis();
+    private long debugStartMillis = System.currentTimeMillis();
+    private int updateCount = 0;
 
 
     private World world;
@@ -174,7 +174,14 @@ public class CraterRenderer extends EnigmaduxGLRenderer {
         this.guiRenderer.startRendering();
 
         if (! this.loadingStarted) {
-            this.loadingScreen = new QuadTexture(context,R.drawable.loading_screen,0,0,2,2);
+            final float aspectRatio = LOADING_SCREEN_ASPECT_RATIO * LayoutConsts.SCALE_X;
+            float x1 = 2 * aspectRatio;
+            float y1 = 2;
+            float x2 = 2;
+            float y2 = 2/aspectRatio;
+            float width = (x1 < 2) ? x2 : x1;
+            float height = (x1 < 2) ? y2 : y1;
+            this.loadingScreen = new QuadTexture(context,R.drawable.loading_screen,0,0,width,height);
         }
     }
 
@@ -205,7 +212,7 @@ public class CraterRenderer extends EnigmaduxGLRenderer {
 
 
         if (this.craterBackendThread == null) {
-            this.craterBackendThread = new CraterBackendThread(this.world);
+            this.craterBackendThread = new CraterBackendThread(this.context,this.world);
             this.craterBackendThread.setRunning(true);
             this.craterBackendThread.setGamePaused(true);
             this.craterBackendThread.start();
@@ -256,7 +263,6 @@ public class CraterRenderer extends EnigmaduxGLRenderer {
             Matrix.multiplyMM(vPMatrix,0,orthographicM,0,this.cameraM,0);
 
             this.guiRenderer.renderQuad(this.loadingScreen,this.vPMatrix);
-            this.lastMillis = System.currentTimeMillis();
             renderingThread.step();
             return true;
         }
@@ -277,9 +283,6 @@ public class CraterRenderer extends EnigmaduxGLRenderer {
       */
     @Override
     public void onDrawFrame(GL10 gl) {
-        //Log.d("NumDraws: "," "+ TexturedRect.numDraws);
-        ShaderProgram.NUM_STATE_CHANGES = 0;
-        ShaderProgram.NUM_DRAW_CALLS = 0;
 
         // clear Scree
         this.clearScreen();
@@ -300,10 +303,7 @@ public class CraterRenderer extends EnigmaduxGLRenderer {
 
         this.world.draw(vPMatrix,this.guiMatrix);
 
-        this.lastMillis = System.currentTimeMillis();
         updateCount++;
-
-
 
         if (System.currentTimeMillis() - debugStartMillis > 10000){
             Log.d("FRONTENDTHREAD:","Frames per second:"  + (1000 * updateCount/(double) (System.currentTimeMillis() - debugStartMillis)));
@@ -312,9 +312,6 @@ public class CraterRenderer extends EnigmaduxGLRenderer {
             debugStartMillis = System.currentTimeMillis();
             updateCount = 0;
         }
-
-
-        //Log.d("CRATER RENDERER:","State changes: " + ShaderProgram.NUM_STATE_CHANGES + " draw calls: " + ShaderProgram.NUM_DRAW_CALLS);
     }
 
 
@@ -351,12 +348,16 @@ public class CraterRenderer extends EnigmaduxGLRenderer {
                 this.tutorialData.loadTutorialFile();
                 break;
             case 2:
+                if (this.world != null){
+                    this.world.onDestroy();
+                }
                 this.world = new World(context,this.layoutHashMap);
                 this.craterBackendThread.setBackend(this.world);
                 Log.d("RENDERER","Loading step: 2");
                 break;
             case 3:
                 this.playerData.loadPlayerData();
+                DrawablesLoader.reset();
                 Log.d("RENDERER","Loading step: 3");
                 break;
             case 4:
@@ -372,8 +373,7 @@ public class CraterRenderer extends EnigmaduxGLRenderer {
             case 6:
                 Log.d("RENDERER","Loading step: 6");
 
-                SoundLib.loadMedia(context);
-
+                this.craterBackendThread.reloadSounds();
                 break;
             case 7:
                 this.world.setPlayer(new Kaiser(0,0));
@@ -381,7 +381,6 @@ public class CraterRenderer extends EnigmaduxGLRenderer {
                 break;
             case 8:
                 Log.d("RENDERER","Loading step: 8");
-                //todo, this may cause it to play the music for an enigma second
                 this.settingsData.loadSettingsFile();
                 break;
             case 9:
@@ -501,7 +500,7 @@ public class CraterRenderer extends EnigmaduxGLRenderer {
     }
     void onStart(){
         if (this.craterBackendThread == null || ! this.craterBackendThread.isAlive()) {
-            this.craterBackendThread = new CraterBackendThread(this.world);
+            this.craterBackendThread = new CraterBackendThread(this.context,this.world);
             this.craterBackendThread.setRunning(true);
             this.craterBackendThread.setGamePaused(true);
             this.craterBackendThread.start();
@@ -515,6 +514,13 @@ public class CraterRenderer extends EnigmaduxGLRenderer {
 
     public World getWorld(){
         return this.world;
+    }
+
+
+    public void onDestroy(){
+        if (this.world != null) {
+            this.world.onDestroy();
+        }
     }
 
     private class RenderingThread {

@@ -2,10 +2,12 @@ package com.enigmadux.craterguardians;
 
 
 import android.os.Bundle;
+import android.util.Log;
 
 import com.enigmadux.craterguardians.util.SoundLib;
 
 import enigmadux2d.core.EnigmaduxActivity;
+import enigmadux2d.core.quadRendering.QuadTexture;
 
 /** The Main Activity for this app. It's the entry point to the app.
  *
@@ -67,5 +69,15 @@ public class CraterActivity extends EnigmaduxActivity {
     public void onStop(){
         super.onStop();
         this.enigmaduxGLSurfaceView.onStop();
+        Log.d("CRATER","Stopping Activity");
     }
+
+
+    @Override
+    protected void onDestroy() {
+        SoundLib.stopAllMedia();
+        this.enigmaduxGLSurfaceView.onDestroy();
+        super.onDestroy();
+    }
+
 }

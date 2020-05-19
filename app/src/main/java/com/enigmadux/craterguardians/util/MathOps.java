@@ -232,7 +232,7 @@ public class MathOps {
 
     /** Gets the t value where deltX = t(x10 - x00) + x00 y = t(y10 - y00) + y00 where (deltX,y) is the intersection point of the two lines
      * even if 0<t<1, there may not be an intersection because it may be only on line 1 but not line segment 2, so use the lineIntersectsLineFunction
-     * https://stackoverflow.com/a/1968345/10030086, todo look at "Qwertie"'s optimizations and implement them
+     * https://stackoverflow.com/a/1968345/10030086,
      *
      *
      * @param x00 line 1 point 1 deltX

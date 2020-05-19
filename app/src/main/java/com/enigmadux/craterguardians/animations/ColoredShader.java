@@ -47,7 +47,7 @@ public class ColoredShader extends TransitionAnim {
 
 
 
-    /** Hides the enigmadux component todo, might wanna make it change back to original color
+    /** Hides the enigmadux component
      *
      */
     @Override

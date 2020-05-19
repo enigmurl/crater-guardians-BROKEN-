@@ -6,6 +6,7 @@ import com.enigmadux.craterguardians.animations.RippleAnim;
 import com.enigmadux.craterguardians.spawners.Spawner;
 import com.enigmadux.craterguardians.enemies.Enemy;
 import com.enigmadux.craterguardians.gamelib.World;
+import com.enigmadux.craterguardians.util.SoundLib;
 
 public class AttackSkippy extends PlayerAttack {
     /*Note because the speed reduces over time, we treat the curLength as a sort of "t"*/
@@ -27,6 +28,8 @@ public class AttackSkippy extends PlayerAttack {
     public AttackSkippy(int instanceID, float x, float y, float angle, int evolveGen) {
         super(instanceID, x, y,RADIUS[evolveGen] * 2,RADIUS[evolveGen] * 2, angle, LENGTH[evolveGen]/MILLIS*1000, LENGTH[evolveGen], DAMAGE[evolveGen]);
         this.evolveGen = evolveGen;
+        this.spawnerDamageMult = 0.3f;
+        SoundLib.playSkippyShoot();
     }
 
     @Override
@@ -48,7 +51,7 @@ public class AttackSkippy extends PlayerAttack {
                     attacking = true;
                     completed[i] = true;
                     this.angle += TURN_RATE;
-                    world.getAnims().add(new RippleAnim(deltaX,deltaY,this.width/2));
+                    world.addAnim(new RippleAnim(deltaX,deltaY,this.width/2));
                 }
                 minDiff = ellapsedMillis - HITS[i];
                 if (i == completed.length -1){

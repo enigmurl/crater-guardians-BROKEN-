@@ -1,5 +1,7 @@
 package com.enigmadux.craterguardians.gamelib;
 
+import android.support.annotation.NonNull;
+
 import enigmadux2d.core.gameObjects.VaoCollection;
 
 /** This is the specific VaoCollection, that has the format required for CraterGuardians. That is,
@@ -86,5 +88,12 @@ public class CraterVaoCollection extends VaoCollection {
         this.pushInstancedDataInAttributeList(this.vao[0], this.instancedVbo, CraterVaoCollection.ARGB_SHADER_ATTRIBUTE_SLOT, 4, CraterVaoCollection.FLOATS_PER_ENTITY, 16);
         //texture cord offset
         this.pushInstancedDataInAttributeList(this.vao[0], this.instancedVbo, CraterVaoCollection.DELTA_TEXTURE_COORDINATES_ATTRIBUTE_SLOT, 2, CraterVaoCollection.FLOATS_PER_ENTITY, 20);
+    }
+
+
+    @NonNull
+    @Override
+    public String toString() {
+        return "Crater Vao Collection of " + getNumInstances();
     }
 }

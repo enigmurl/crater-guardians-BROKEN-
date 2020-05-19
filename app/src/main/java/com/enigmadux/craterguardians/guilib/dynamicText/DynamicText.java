@@ -225,12 +225,6 @@ public class DynamicText {
                     this.h
             ));
 
-//            if (charCode == 't' || charCode == 'e' || charCode == 's'){
-//                Log.d("DYNAMIC TEXT",charCode + " is chard code: " +
-//                        "the rectX " + rectX +
-//                        " rectY " + rectY +
-//                        " the offsetY is " + offsetY  + " the rectH " + rectH);
-//            }
 
 
 
@@ -306,16 +300,11 @@ public class DynamicText {
             positions[12*i + 9] = x + w;
             positions[12*i + 10] = y - h;
 
-            if (text.charAt(i) == ' '){
-                Log.d("DYNAMIC TEXT SPACE","X travel: " + dynamicChar.xTravel);
-            }
+
             offsetX += dynamicChar.xTravel;
 
         }
 
-
-        Log.d("DYNAMIC TEXT","Positions: " + Arrays.toString(positions));
-        Log.d("DYNAMIC TEXT","Texture cords: " + Arrays.toString(textureCords));
 
         return new TextMesh(text,positions,textureCords,shader);
     }

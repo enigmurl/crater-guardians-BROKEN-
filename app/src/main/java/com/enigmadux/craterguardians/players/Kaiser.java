@@ -2,7 +2,6 @@ package com.enigmadux.craterguardians.players;
 
 import android.content.Context;
 import android.support.annotation.NonNull;
-import android.util.Log;
 
 import com.enigmadux.craterguardians.attacks.AttackKaiser;
 import com.enigmadux.craterguardians.R;
@@ -12,7 +11,7 @@ import enigmadux2d.core.quadRendering.QuadTexture;
 
 public class Kaiser extends Player {
     private static final int NUM_GENS = 5;
-    private static final int[] EVOLVE_DAMAGE = new int[] {2800,6000,10000,15000,25000};
+    private static final int[] EVOLVE_DAMAGE = new int[] {3500,7000,10000,15000,25000};
 
     private static final float[] SPEED = new float[] {1,1.05f,1.1f,1.15f,1.2f};
     private static final float RADIUS = 0.1f;
@@ -69,9 +68,17 @@ public class Kaiser extends Player {
     @Override
     public void attack(World world,float angle) {
         super.attack(world,angle);
-        int id = world.getPlayerAttacks().createVertexInstance();
-        AttackKaiser a = new AttackKaiser(id,this.getDeltaX(),this.getDeltaY(),angle,this.evolveGen);
-        world.getPlayerAttacks().addInstance(a);
+        float gunTipX = this.getGundx() + this.getGunw()/2;
+        //don't need h/2 because its in the middle
+        float gunTipY = this.getGundy();
+        float x = (float) (gunTipX * Math.cos(angle) - Math.sin(angle) * gunTipY);
+        float y = (float) (gunTipX * Math.sin(angle) + Math.cos(angle) * gunTipY);
+        synchronized (World.playerAttackLock) {
+            int id = world.getPlayerAttacks().createVertexInstance();
+            AttackKaiser a = new AttackKaiser(id,this.getDeltaX() + x,this.getDeltaY() + y,angle,this.evolveGen);
+
+            world.getPlayerAttacks().addInstance(a);
+        }
     }
 
     @Override
@@ -81,7 +88,7 @@ public class Kaiser extends Player {
 
     @Override
     public int getPlayerIcon() {
-        return R.drawable.kaiser_info;
+        return R.drawable.kaiser_icon;
     }
 
     @Override
@@ -114,22 +121,24 @@ public class Kaiser extends Player {
     public void setShader(float r, float b, float g, float a) {
         //technically it only affects the static, but theres only one so the shader will be affect that only
         //TODO make more general solution
-        switch (this.evolveGen) {
-            case 0:
-                e1.setShader(r, b, g, a);
-                break;
-            case 1:
-                e2.setShader(r, b, g, a);
-                break;
-            case 2:
-                e3.setShader(r, b, g, a);
-                break;
-            case 3:
-                e4.setShader(r, b, g, a);
-                break;
-            case 4:
-                e5.setShader(r, b, g, a);
-                break;
+        if (e1 != null && e2 != null && e3 != null && e4 != null && e5 != null) {
+            switch (this.evolveGen) {
+                case 0:
+                    e1.setShader(r, b, g, a);
+                    break;
+                case 1:
+                    e2.setShader(r, b, g, a);
+                    break;
+                case 2:
+                    e3.setShader(r, b, g, a);
+                    break;
+                case 3:
+                    e4.setShader(r, b, g, a);
+                    break;
+                case 4:
+                    e5.setShader(r, b, g, a);
+                    break;
+            }
         }
     }
 
@@ -166,26 +175,45 @@ public class Kaiser extends Player {
     }
 
     private void updateSprite(){
-        switch (this.evolveGen){
-            case 0:
-                this.rotatableEntities.add(e1);
-                break;
-            case 1:
-                this.rotatableEntities.remove(e1);
-                this.rotatableEntities.add(e2);
-                break;
-            case 2:
-                this.rotatableEntities.remove(e2);
-                this.rotatableEntities.add(e3);
-                break;
-            case 3:
-                this.rotatableEntities.remove(e3);
-                this.rotatableEntities.add(e4);
-                break;
-            case 4:
-                this.rotatableEntities.remove(e4);
-                this.rotatableEntities.add(e5);
-                break;
+        if (e1 != null && e2 != null && e3 != null && e4 != null && e5 != null) {
+            switch (this.evolveGen) {
+                case 0:
+                    this.rotatableEntities.add(e1);
+                    break;
+                case 1:
+                    this.rotatableEntities.remove(e1);
+                    this.rotatableEntities.add(e2);
+                    break;
+                case 2:
+                    this.rotatableEntities.remove(e2);
+                    this.rotatableEntities.add(e3);
+                    break;
+                case 3:
+                    this.rotatableEntities.remove(e3);
+                    this.rotatableEntities.add(e4);
+                    break;
+                case 4:
+                    this.rotatableEntities.remove(e4);
+                    this.rotatableEntities.add(e5);
+                    break;
+            }
         }
+    }
+
+    @Override
+    public QuadTexture getGun(Context context) {
+        return new QuadTexture(context,R.drawable.player_gun,this.getGundx(),this.getGundy(),this.getGunw(),this.getGunh());
+    }
+    float getGundx(){
+        return 7 * this.getGunw()/16 + this.getRadius()/(float) Math.sqrt(2);
+    }
+    float getGundy(){
+        return -this.getRadius()/(float) Math.sqrt(2);
+    }
+    float getGunw(){
+        return this.getRadius() * 4;
+    }
+    float getGunh(){
+        return  getRadius();
     }
 }

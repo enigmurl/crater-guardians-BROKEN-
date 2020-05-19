@@ -22,11 +22,11 @@ public class JoystickHelper extends TutorialPauseHelper {
     @Override
     ArrayList<QuadTexture> getScalables(Context context) {
         ArrayList<QuadTexture> scalables = new ArrayList<>();
-        scalables.add(new QuadTexture(context, R.drawable.joystick_icon, DefaultJoyStickLayout.MOVEMENT_JOY_STICK_CENTER[0],
+        scalables.add(new QuadTexture(context, R.drawable.movement_joystick_icon, DefaultJoyStickLayout.MOVEMENT_JOY_STICK_CENTER[0],
                 DefaultJoyStickLayout.MOVEMENT_JOY_STICK_CENTER[1],DefaultJoyStickLayout.JOY_STICK_IMAGE_WIDTH * LayoutConsts.SCALE_X,DefaultJoyStickLayout.JOY_STICK_IMAGE_WIDTH));
-        scalables.add(new QuadTexture(context, R.drawable.joystick_icon, DefaultJoyStickLayout.ATTACK_JOY_STICK_CENTER[0],
+        scalables.add(new QuadTexture(context, R.drawable.attack_joystick_icon, DefaultJoyStickLayout.ATTACK_JOY_STICK_CENTER[0],
                 DefaultJoyStickLayout.ATTACK_JOY_STICK_CENTER[1],DefaultJoyStickLayout.JOY_STICK_IMAGE_WIDTH * LayoutConsts.SCALE_X,DefaultJoyStickLayout.JOY_STICK_IMAGE_WIDTH));
-        scalables.add(new QuadTexture(context, R.drawable.joystick_icon, DefaultJoyStickLayout.SHIELD_JOY_STICK_CENTER[0],
+        scalables.add(new QuadTexture(context, R.drawable.defense_joystick_icon, DefaultJoyStickLayout.SHIELD_JOY_STICK_CENTER[0],
                 DefaultJoyStickLayout.SHIELD_JOY_STICK_CENTER[1],DefaultJoyStickLayout.JOY_STICK_IMAGE_WIDTH * LayoutConsts.SCALE_X,DefaultJoyStickLayout.JOY_STICK_IMAGE_WIDTH));
 
         return scalables;

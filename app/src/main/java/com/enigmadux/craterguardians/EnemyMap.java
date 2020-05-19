@@ -56,7 +56,7 @@ public class EnemyMap extends Thread {
      * @param nodes the current node maps. NOTE, the format is node 0 must be the player spawn, then the supply nodes, WHICH MUST BE CONNECTED TO SOMETHING OTHER THAN THE NODE0
      */
     public EnemyMap (List<Plateau> plateaus, List<ToxicLake> toxicLakes, Node[] nodes){
-        Log.d("Enemy","MAPPING CREATED");
+        Log.d("EnemyMap","MAPPING CREATED");
         this.plateaus = plateaus;
         this.toxicLakes = toxicLakes;
         this.nodeMap = nodes;
@@ -64,12 +64,11 @@ public class EnemyMap extends Thread {
     }
 
     public EnemyMap(EnemyMap org){
-        Log.d("Enemy","MAPPING CREATED");
+        Log.d("EnemyMap","MAPPING CREATED");
         this.plateaus = org.plateaus;
         this.toxicLakes = org.toxicLakes;
         this.nodeMap = org.nodeMap;
         this.enemies = org.enemies;
-        this.running = org.running;
         this.paused = org.paused;
         this.start();
     }
@@ -77,8 +76,6 @@ public class EnemyMap extends Thread {
 
     /** Given a line represented by two nodes, it sees if it's possible to traverse this line without intersecting the plateau
      *
-     * TODO THIS IS NOT PERFECT RN, here are some future stuff to make it better: the penalty for toxic lakes should be added based on intersection length, also for plateaus the lines should
-     *                              be extended so there is "width" paddin on both sides of the line. Additionally look for an optimizatioon for the plateau intersection, 8 checks is too much
      *
      *
      * @param node1 the starting point
@@ -289,10 +286,10 @@ public class EnemyMap extends Thread {
         super.run();
 
         while (running){
-
             if (paused){
                 continue;
             }
+
 
             Entry entry = enemies.poll();
             if (entry != null) {
@@ -305,12 +302,13 @@ public class EnemyMap extends Thread {
             } else {
                 try {
                     Thread.sleep(1000);
-                    Log.d("Enemy", "MAPPING: Is paused: " + paused);
                 } catch (InterruptedException e) {
                     e.printStackTrace();
                 }
             }
         }
+
+
 
         try {
             this.join();
@@ -321,6 +319,7 @@ public class EnemyMap extends Thread {
 
 
     public void endProcess(){
+        Log.d("EnemyMap", "ENDING PROCESS ");
         this.running = false;
     }
 
@@ -328,7 +327,6 @@ public class EnemyMap extends Thread {
 
     public void setPaused(boolean paused){
         this.paused = paused;
-        Log.d("Enemy","MAPPING PAUSED: " + paused);
     }
 
 

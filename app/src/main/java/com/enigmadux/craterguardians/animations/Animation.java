@@ -6,7 +6,7 @@ import com.enigmadux.craterguardians.gamelib.World;
 
 import enigmadux2d.core.quadRendering.QuadTexture;
 
-/** Used to play animations, such as death animations, todo looping animations/ use textures right
+/** Used to play animations, such as death animations,
  *
  * @author Manu Bhat
  * @version BETA
@@ -40,6 +40,6 @@ public abstract class Animation extends QuadTexture {
     public abstract boolean isFinished();
 
     public void finish(World world){
-        world.getAnims().remove(this);
+        world.removeAnim(this);
     }
 }

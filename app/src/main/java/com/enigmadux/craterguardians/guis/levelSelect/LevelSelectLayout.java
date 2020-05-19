@@ -94,13 +94,11 @@ public class LevelSelectLayout implements GUILayout {
 
     private MatieralBar matieralBar;
 
-    private float startX;
     private float cameraX = 1 - SIDE_MARGINS;
 
     private FlingingAnim flingingAnim;
     private VelocityTracker velocityTracker;
 
-    private long prevMillis = System.currentTimeMillis();
 
     /** Default Constructor
      *
@@ -210,10 +208,7 @@ public class LevelSelectLayout implements GUILayout {
 
         if (e.getActionMasked() == MotionEvent.ACTION_DOWN){
             prevX = MathOps.getOpenGLX(e.getRawX());
-            startX = prevX;
             currentID = e.getPointerId(e.getActionIndex());
-            Log.d("Level Select","Started scroll: " + currentID);
-            this.prevMillis = System.currentTimeMillis();
         }
         else if (e.getActionMasked() == MotionEvent.ACTION_MOVE && e.getPointerId(e.getActionIndex()) == currentID){
             float x = MathOps.getOpenGLX(e.getRawX());
@@ -256,6 +251,9 @@ public class LevelSelectLayout implements GUILayout {
             if (this.craterRenderer.getWorld().getPlayer() instanceof TutorialPlayer){
                 this.craterRenderer.getWorld().setPlayer(new Kaiser());
             }
+            int levelNum = craterRenderer.getWorld().getLevelNum() - 1;
+            this.setCameraX( - (-1 +SIDE_MARGINS +  (levelNum*LayoutConsts.SCALE_X * (ICON_WIDTH + ICON_MARGINS)) ));/*% (2 - SIDE_MARGINS)*/;
+
         }
 
         for (int i = 0;i< this.allComponents.size();i++){

@@ -1,14 +1,13 @@
 package com.enigmadux.craterguardians.players;
 
 import android.content.Context;
-import android.graphics.Point;
 import android.opengl.Matrix;
 import android.util.Log;
 
 import com.enigmadux.craterguardians.animations.DeathAnim;
 import com.enigmadux.craterguardians.animations.EvolveAnim;
 import com.enigmadux.craterguardians.animations.ColoredShader;
-import com.enigmadux.craterguardians.animations.ScreenShake;
+import com.enigmadux.craterguardians.animations.GunRecoil;
 import com.enigmadux.craterguardians.animations.ShootAnimation;
 import com.enigmadux.craterguardians.Character;
 import com.enigmadux.craterguardians.gameobjects.Plateau;
@@ -113,10 +112,20 @@ public abstract class Player implements Character {
 
     //what makes it red when players are hit
     private ColoredShader currentShader;
+    private QuadTexture gun;
+
 
     protected Shield currentShield;
 
 
+    private float attackRotation;
+    private float lookRotation;
+
+    private boolean isAttacking;
+
+    private float gunDeltaX;
+    private float gunDeltaY;
+    private GunRecoil gunRecoil;
     /** Default Constructor
      *
      * @param x the center x in openGL terms
@@ -141,6 +150,7 @@ public abstract class Player implements Character {
         this.rotatableEntities.clear();
         this.addStaticEntities(context);
         this.addRotatableEntities(context);
+        this.gun = getGun(context);
     }
 
     public static void loadTexture(Context context){
@@ -153,11 +163,14 @@ public abstract class Player implements Character {
         this.evolveGen = 0;
         this.evolveCharge = 0;
         this.numLoadedAttacks = getMaxAttacks();
+        this.resetShader();
 
+        this.gunDeltaX = gunDeltaY = 0;
 
         this.activeLakes.clear();
         //facing up because
         this.rotation = 90;
+        this.attackRotation = 90;
         if (currentShield != null) this.currentShield.setState(false);
 
 
@@ -165,6 +178,7 @@ public abstract class Player implements Character {
 
     private void startReloading(){
         this.millisTillFinishedReloading = this.getReloadingTime();
+        SoundLib.playPlayerReloading();
     }
 
     private void finishReloading(){
@@ -190,13 +204,20 @@ public abstract class Player implements Character {
      */
     public void draw(float[] mvpMatrix, QuadRenderer quadRenderer){
         if (health > 0) {
+
+            Matrix.setIdentityM(transformMatrix,0);
+            Matrix.translateM(transformMatrix, 0, x + deltaX + gunDeltaX, y + deltaY + gunDeltaY, 0);
+            Matrix.rotateM(transformMatrix,0,this.lookRotation,0,0,1);
+            Matrix.multiplyMM(finalMatrix,0,mvpMatrix,0,transformMatrix,0);
+            quadRenderer.renderQuad(this.gun,finalMatrix);
+
             Matrix.setIdentityM(transformMatrix, 0);
             Matrix.translateM(transformMatrix, 0, x + deltaX, y + deltaY, 0);
             Matrix.multiplyMM(finalMatrix, 0, mvpMatrix, 0, transformMatrix, 0);
             quadRenderer.renderQuads(this.staticEntities,finalMatrix);
 
             Matrix.scaleM(transformMatrix, 0, r * 2, r * 2, 0);
-            Matrix.rotateM(transformMatrix, 0, this.rotation, 0, 0, 1);
+            Matrix.rotateM(transformMatrix, 0,this.lookRotation, 0, 0, 1);
             Matrix.multiplyMM(finalMatrix, 0, mvpMatrix, 0, transformMatrix, 0);
             quadRenderer.renderQuads(this.rotatableEntities, finalMatrix);
         }
@@ -223,10 +244,9 @@ public abstract class Player implements Character {
            plats.get(i).clipCharacterPos(this);
         }
 
-        //similar to Kaiser todo, referencing a static class like our own attribute bc only one max instance is bad solution
+        //similar to Kaiser
         currentShield.setTranslation(deltaX,deltaY);
         currentShield.update(world,dt);
-
     }
 
 
@@ -235,9 +255,8 @@ public abstract class Player implements Character {
     protected void finish(World world){
         SoundLib.playPlayerDeathSoundEffect();
         world.completeLevelLost();
-        synchronized (World.animationLock) {
-            world.getAnims().add(new DeathAnim(this.getDeltaX(),this.getDeltaY(),2 * this.getRadius(),2 * this.getRadius()));
-        }
+
+        world.addAnim(new DeathAnim(this.getDeltaX(),this.getDeltaY(),2 * this.getRadius(),2 * this.getRadius()));
     }
 
 
@@ -252,12 +271,16 @@ public abstract class Player implements Character {
         }
         this.currentShader = new ColoredShader(this, ColoredShader.DEFAULT_LEN, true);
         this.health -= damage;
+        if (damage > 0){
+            SoundLib.playPlayerDamagedSoundEffect();
+        }
 
     }
 
     public void attemptAttack(World world,float cos,float sin){
-        Log.d("PLAYER","Attacking: " + cos + " sin: " + sin);
         float angle = MathOps.getAngle(cos, sin);
+        this.attackRotation = (float) Math.toDegrees(angle);
+        this.lookRotation = attackRotation;
         if (this.millisSinceLastAttack > this.millisBetweenAttacks && this.numLoadedAttacks > 0){
             this.numLoadedAttacks--;
             this.millisSinceLastAttack = 0;
@@ -267,11 +290,19 @@ public abstract class Player implements Character {
         }
     }
 
+    public void setIsAttacking(boolean isAttacking){
+        this.isAttacking = isAttacking;
+    }
+
 
     //in degrees
     public void setRotation(float rotation){
         this.rotation = rotation;
+        if (! this.isAttacking){
+            this.lookRotation = rotation;
+        }
     }
+
 
     public float getDeltaX(){
         return this.deltaX;
@@ -319,14 +350,17 @@ public abstract class Player implements Character {
         }
     }
 
+    public void setGunDelta(float x,float y){
+        this.gunDeltaX = x;
+        this.gunDeltaY = y;
+    }
+
     protected void incrementEvolveGen(World world){
         this.evolveCharge -= NUM_EVOLVE_TICKS;
         this.evolveGen ++;
         this.health = this.getMaxHealth();
         this.numLoadedAttacks = this.getMaxAttacks();
-        synchronized (World.animationLock) {
-            world.getAnims().add(new EvolveAnim(this.getDeltaX(),this.getDeltaY(),2 * this.r,2 * this.r));
-        }
+        world.addAnim(new EvolveAnim(this.getDeltaX(),this.getDeltaY(),2 * this.r,2 * this.r));
     }
 
 
@@ -347,10 +381,19 @@ public abstract class Player implements Character {
 
     //angle is in radians
     void attack(World world,float angle){
-        synchronized (World.animationLock) {
-            ShootAnimation shootAnim = new ShootAnimation(deltaX, deltaY, ShootAnimation.STANDARD_DIMENSIONS, ShootAnimation.STANDARD_DIMENSIONS);
-            world.getAnims().add(shootAnim);
+        float gunTipX = this.getGundx() + this.getGunw()/2 + ShootAnimation.STANDARD_DIMENSIONS/2;
+        //don't need h/2 because its in the middle
+        float gunTipY = this.getGundy();
+        float x = (float) (gunTipX * Math.cos(angle) - Math.sin(angle) * gunTipY);
+        float y = (float) (gunTipX * Math.sin(angle) + Math.cos(angle) * gunTipY);
+        ShootAnimation shootAnim = new ShootAnimation(deltaX + x, deltaY + y, ShootAnimation.STANDARD_DIMENSIONS, ShootAnimation.STANDARD_DIMENSIONS,(float) (Math.toDegrees(angle)));
+        world.addAnim(shootAnim);
+        if (this.gunRecoil == null) {
+            this.gunRecoil = new GunRecoil(GunRecoil.DEFAULT_MILLIS, this, GunRecoil.DEFAULT_LEN, (float) Math.toRadians(this.attackRotation));
+        } else {
+            this.gunRecoil.reset(this,(float) Math.toRadians(this.attackRotation));
         }
+
     }
 
 
@@ -403,7 +446,15 @@ public abstract class Player implements Character {
     //number of attacks
     public abstract int getMaxAttacks();
 
+    public abstract QuadTexture getGun(Context context);
+
     public void resetShader(){
         this.setShader(1,1,1,1);
     }
+
+    abstract float getGundx();
+    abstract float getGundy();
+    abstract float getGunw();
+    abstract float getGunh();
+
 }
