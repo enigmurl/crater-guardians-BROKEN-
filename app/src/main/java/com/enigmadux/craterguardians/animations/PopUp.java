@@ -30,7 +30,6 @@ public class PopUp extends FrameTransitionAnim {
     void finish() {
         super.finish();
         this.quadTexture.setScale(orgW,orgH);
-        Log.d("PopUP","Finished w: " + quadTexture.getW() + " H: " + quadTexture.getH());
 
     }
 

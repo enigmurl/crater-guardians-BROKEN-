@@ -21,8 +21,7 @@ public class DrawablesLoader {
             R.drawable.enemy_strength1,R.drawable.enemy_strength2,R.drawable.enemy_strength3,
             R.drawable.evolve_button,
             R.drawable.flamethrower_attack_spritesheet,
-            R.drawable.flamethrower_sprite_sheet_e1,
-            R.drawable.flamethrower_sprite_sheet_e2,
+            R.drawable.blaze_spritesheet_e1,R.drawable.blaze_spritesheet_e2,R.drawable.blaze_spritesheet_e3,
             R.drawable.gui_background,
             R.drawable.health_bar_icon,
             R.drawable.hitpoints_ammo_bar,
@@ -35,12 +34,12 @@ public class DrawablesLoader {
             R.drawable.attack_joystick_icon,
             R.drawable.kaiser_attack_spritesheet, R.drawable.fission_attack_spritesheet,R.drawable.magnum_attack_spritesheet,
             R.drawable.kaiser_info,R.drawable.kaiser_icon,
-            R.drawable.kaiser_sprite_sheet_e1,
-            R.drawable.kaiser_sprite_sheet_e2,
-            R.drawable.kaiser_sprite_sheet_e3,
-            R.drawable.kaiser_sprite_sheet_e4,
-            R.drawable.kaiser_sprite_sheet_e5,
+            R.drawable.kaiser_sprite_sheet_e1, R.drawable.kaiser_sprite_sheet_e2, R.drawable.kaiser_sprite_sheet_e3,
+            R.drawable.magnum_spritesheet_e1,R.drawable.magnum_spritesheet_e2,R.drawable.magnum_spritesheet_e3,
+            R.drawable.fission_spritesheet_e1,R.drawable.fission_spritesheet_e2,R.drawable.fission_spritesheet_e3,
+            R.drawable.skippy_spritesheet_e1,R.drawable.skippy_spritesheet_e2,R.drawable.skippy_spritesheet_e3,
             R.drawable.fission_info,R.drawable.skippy_info,R.drawable.magnum_info,R.drawable.blaze_info,
+            R.drawable.fission_icon,R.drawable.blaze_info,R.drawable.magnum_icon,
             R.drawable.layout_background,
             R.drawable.level_background_crater,
             R.drawable.level_button_background,
@@ -72,7 +71,7 @@ public class DrawablesLoader {
     //returns whether or not its finished
     public static boolean loadResource(Context context){
         if (resourceInd >= RESOURCES.length) return true;
-        Log.d("Drawable:","Loading: " + resourceInd);
+//        Log.d("Drawable:","Loading: " + resourceInd);
         QuadTexture.loadAndroidTexturePointer(context,RESOURCES[resourceInd]);
         resourceInd++;
         return false;

@@ -70,11 +70,11 @@ public class Skippy extends Player {
 
     @Override
     protected void addRotatableEntities(Context context) {
-        this.e1 = new QuadTexture(context,R.drawable.kaiser_sprite_sheet_e1,0,0,1,1);
-        this.e2 = new QuadTexture(context,R.drawable.kaiser_sprite_sheet_e2,0,0,1,1);
-        this.e3 = new QuadTexture(context,R.drawable.kaiser_sprite_sheet_e3,0,0,1,1);
-        this.e4 = new QuadTexture(context,R.drawable.kaiser_sprite_sheet_e4,0,0,1,1);
-        this.e5 = new QuadTexture(context,R.drawable.kaiser_sprite_sheet_e5,0,0,1,1);
+        this.e1 = new QuadTexture(context,R.drawable.skippy_spritesheet_e1,0,0,1,1);
+        this.e2 = new QuadTexture(context,R.drawable.skippy_spritesheet_e2,0,0,1,1);
+        this.e3 = new QuadTexture(context,R.drawable.skippy_spritesheet_e3,0,0,1,1);
+        this.e4 = new QuadTexture(context,R.drawable.kaiser_sprite_sheet_e3,0,0,1,1);
+        this.e5 = new QuadTexture(context,R.drawable.kaiser_sprite_sheet_e3,0,0,1,1);
     }
 
 
@@ -84,7 +84,7 @@ public class Skippy extends Player {
     }
     @Override
     public int getPlayerIcon() {
-        return R.drawable.skippy_info;
+        return R.drawable.skippy_icon;
     }
 
 

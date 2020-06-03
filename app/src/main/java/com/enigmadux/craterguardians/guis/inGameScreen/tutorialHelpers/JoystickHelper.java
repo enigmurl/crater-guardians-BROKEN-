@@ -16,7 +16,7 @@ public class JoystickHelper extends TutorialPauseHelper {
     private static final long minMillis = 2000;
     private static final long animMillis = 750;
     public JoystickHelper(Context context, CraterBackendThread craterBackendThread) {
-        super(context, craterBackendThread, minMillis, animMillis);
+        super(context, craterBackendThread, minMillis);
     }
 
     @Override
@@ -37,7 +37,7 @@ public class JoystickHelper extends TutorialPauseHelper {
         ArrayList<Text> texts = new ArrayList<>();
         texts.add(new Text(DefaultJoyStickLayout.MOVEMENT_JOY_STICK_CENTER[0],
                 DefaultJoyStickLayout.MOVEMENT_JOY_STICK_CENTER[1] + 0.2f,"Movement Stick",0.1f));
-        texts.add(new Text(DefaultJoyStickLayout.ATTACK_JOY_STICK_CENTER[0],
+        texts.add(new Text(DefaultJoyStickLayout.ATTACK_JOY_STICK_CENTER[0]-0.1f,
                 DefaultJoyStickLayout.ATTACK_JOY_STICK_CENTER[1] + 0.2f,"Attack Stick",0.1f));
         texts.add(new Text(DefaultJoyStickLayout.SHIELD_JOY_STICK_CENTER[0],
                 DefaultJoyStickLayout.SHIELD_JOY_STICK_CENTER[1] -0.2f,"Defense Stick",0.1f));
@@ -45,7 +45,7 @@ public class JoystickHelper extends TutorialPauseHelper {
         float[] red = new float[] {1,0.25f,0.25f,1};
         Text movementSubText = new Text(DefaultJoyStickLayout.MOVEMENT_JOY_STICK_CENTER[0],
                 DefaultJoyStickLayout.MOVEMENT_JOY_STICK_CENTER[1]  + 0.12f,"Drag to move in any direction!",0.05f);
-        Text attackSubText = new Text(DefaultJoyStickLayout.ATTACK_JOY_STICK_CENTER[0],
+        Text attackSubText = new Text(DefaultJoyStickLayout.ATTACK_JOY_STICK_CENTER[0]-0.1f,
                 DefaultJoyStickLayout.ATTACK_JOY_STICK_CENTER[1] + 0.12f,"Drag to shoot  attacks!",0.05f);
         Text shieldSubText = new Text(DefaultJoyStickLayout.SHIELD_JOY_STICK_CENTER[0],
                 DefaultJoyStickLayout.SHIELD_JOY_STICK_CENTER[1]- 0.28f,"Drag to block enemy attacks!",0.05f);

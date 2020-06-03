@@ -24,11 +24,10 @@ public class CubicTester {
                 );
 
 
-
-        assertTrue("x0",3.52f == cubicSolver.interpelate(1.72f));
-        assertTrue("x1",3.2f == cubicSolver.interpelate(-1.36f));
-        assertTrue("x2",1f == cubicSolver.interpelate(-0.5f));
-        assertTrue("x3",2.56f == cubicSolver.interpelate(2.94f));
+        assertEquals("x0", 3.52f, cubicSolver.interpelate(1.72f), 0.0);
+        assertEquals("x1", 3.2f, cubicSolver.interpelate(-1.36f), 0.0);
+        assertEquals("x2", 1f, cubicSolver.interpelate(-0.5f), 0.0);
+        assertEquals("x3", 2.56f, cubicSolver.interpelate(2.94f), 0.0);
         assertTrue("t0",withinRange(1.01446156238f, cubicSolver.interpelate(0)));
         assertTrue("t1",withinRange(-397310.415061f, cubicSolver.interpelate(100)));
 

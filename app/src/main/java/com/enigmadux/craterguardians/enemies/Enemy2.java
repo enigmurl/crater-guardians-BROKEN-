@@ -1,6 +1,7 @@
 package com.enigmadux.craterguardians.enemies;
 
 import com.enigmadux.craterguardians.animations.ShootAnimation;
+import com.enigmadux.craterguardians.attacks.AttackEnemy1;
 import com.enigmadux.craterguardians.attacks.AttackEnemy2;
 import com.enigmadux.craterguardians.util.MathOps;
 import com.enigmadux.craterguardians.gamelib.World;
@@ -23,7 +24,7 @@ public class Enemy2 extends Enemy {
 
     public Enemy2(int instanceID, float x, float y, boolean isBlue,int strength) {
         super(instanceID, x, y, RADIUS, ATTACK_LEN[strength], isBlue,ATTACK_RATE[strength],strength);
-        this.minDist = GUN_LENGTH * this.height + this.getRadius() * 2.5f;
+        this.minDist = Math.min(ATTACK_LEN[strength]-0.05f,GUN_LENGTH * this.height + this.getRadius() * 2.5f);
     }
 
     @Override

@@ -24,7 +24,7 @@ public class TutorialPlayer extends Player {
     //attack details
     private static final long MILLIS_BETWEEN_ATTACKS = 300;
     private static final long RELOADING_MILLIS = 2000;
-    private static final int MAX_ATTACKS = 30;
+    private static final int MAX_ATTACKS = 10;
 
     private static int PLAYER_LEVEL = 0;
 

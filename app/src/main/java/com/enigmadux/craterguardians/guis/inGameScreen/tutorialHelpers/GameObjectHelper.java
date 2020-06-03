@@ -16,7 +16,7 @@ public class GameObjectHelper extends TutorialPauseHelper {
     private static final long minMillis = 2000;
     private static final long animMillis = 750;
     public GameObjectHelper(Context context, CraterBackendThread craterBackendThread) {
-        super(context, craterBackendThread, minMillis, animMillis);
+        super(context, craterBackendThread, minMillis);
     }
 
 

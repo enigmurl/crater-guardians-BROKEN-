@@ -42,7 +42,7 @@ public class SettingsData {
             stdout.close();
 
         } catch (IOException e){
-            Log.d("BACKEND","File write failed",e);
+//            Log.d("BACKEND","File write failed",e);
         }
     }
 
@@ -55,10 +55,10 @@ public class SettingsData {
 
             //first get music on or off
             if (stdin.nextBoolean()){
-                Log.d("SOUND LIB:","settings setting MUSIC STATE: " + true);
+//                Log.d("SOUND LIB:","settings setting MUSIC STATE: " + true);
                 SoundLib.unMuteAllMedia();
             } else {
-                Log.d("SOUND LIB:","settings setting MUSIC STATE: " + false );
+//                Log.d("SOUND LIB:","settings setting MUSIC STATE: " + false );
                 SoundLib.muteAllMedia();
             }
 
@@ -66,7 +66,7 @@ public class SettingsData {
             SoundLib.setPlaySoundEffects(stdin.nextBoolean());
 
         } catch (Exception e) {
-            Log.d("FRONTEND", "Error loading settings file ", e);
+//            Log.d("FRONTEND", "Error loading settings file ", e);
             this.writeSettingsFile();
         }
     }

@@ -97,8 +97,6 @@ public class EvolveButton extends QuadTexture {
         this.isDown = false;
         int id = e.getPointerId(e.getActionIndex());
         this.joystickLayout.getPointerLocs().remove(id);
-        Log.d("EVOLVE", "Attempting evolve");
-        //player.hideAngleAimer();
         return true;
     }
 

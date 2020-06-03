@@ -56,7 +56,6 @@ public class EnemyMap extends Thread {
      * @param nodes the current node maps. NOTE, the format is node 0 must be the player spawn, then the supply nodes, WHICH MUST BE CONNECTED TO SOMETHING OTHER THAN THE NODE0
      */
     public EnemyMap (List<Plateau> plateaus, List<ToxicLake> toxicLakes, Node[] nodes){
-        Log.d("EnemyMap","MAPPING CREATED");
         this.plateaus = plateaus;
         this.toxicLakes = toxicLakes;
         this.nodeMap = nodes;
@@ -64,7 +63,6 @@ public class EnemyMap extends Thread {
     }
 
     public EnemyMap(EnemyMap org){
-        Log.d("EnemyMap","MAPPING CREATED");
         this.plateaus = org.plateaus;
         this.toxicLakes = org.toxicLakes;
         this.nodeMap = org.nodeMap;
@@ -183,7 +181,6 @@ public class EnemyMap extends Thread {
         for (int i = 1;i<this.nodeMap.length;i++){
 
             float weightage = (float) this.isValid(start,nodeMap[i]);
-            //Log.d("ENEMY WEIGHT","weight: " + weightage + " length: "  +this.nodeMap.length);
             if (weightage >= 0){
                 //this seems to be causing problems as it lasts for the a* search even after this one,
                 //so I'm removing it, as i I don't even think a* edges hve to be bi drirectional
@@ -319,7 +316,7 @@ public class EnemyMap extends Thread {
 
 
     public void endProcess(){
-        Log.d("EnemyMap", "ENDING PROCESS ");
+//        Log.d("EnemyMap", "ENDING PROCESS ");
         this.running = false;
     }
 

@@ -257,20 +257,17 @@ public class World {
      *
      */
     public static void loadTextures(Context context){
-        //inputs
-        //characters
         Player.loadTexture(context);
-        //animations
-        //others (lakes + plateaus)
 
     }
 
     public void loadLayouts(){
 
         this.inGameScreen = (InGameScreen) this.guiLayouts.get(InGameScreen.ID);
-        this.inGameScreen.setBattleStartIndicatorVisibility(false);
-        this.inGameScreen.setWinLossVisibility(false);
-
+        if (inGameScreen != null) {
+            this.inGameScreen.setBattleStartIndicatorVisibility(false);
+            this.inGameScreen.setWinLossVisibility(false);
+        }
         this.levelData.loadLevelData();
     }
 
@@ -435,8 +432,12 @@ public class World {
 
             this.meshRenderer.renderCollection(this.playerAttacks.getVertexData());
 
-            this.meshRenderer.renderCollection(this.blueEnemies.getVertexData());
-            this.meshRenderer.renderCollection(this.orangeEnemies.getVertexData());
+            if (blueEnemies.size() > 0) {
+                this.meshRenderer.renderCollection(this.blueEnemies.getVertexData());
+            }
+            if (orangeEnemies.size() > 0) {
+                this.meshRenderer.renderCollection(this.orangeEnemies.getVertexData());
+            }
 
             this.meshRenderer.renderCollection(this.enemyAttacks.getVertexData());
 
@@ -504,7 +505,7 @@ public class World {
     }
 
     public void loadLevel(){
-        Log.d("WORLD","Loading Level : " + levelNum);
+//        Log.d("WORLD","Loading Level : " + levelNum);
         this.reset();
         blueEnemies.loadTexture(context,Enemy.STRENGTH_TEXTURES[Enemy.STRENGTHS[levelNum]]);
         orangeEnemies.loadTexture(context,Enemy.STRENGTH_TEXTURES[Enemy.STRENGTHS[levelNum]]);
@@ -587,9 +588,6 @@ public class World {
         synchronized (blueEnemyLock){
             this.blueEnemies.prepareFrame(parentMatrix);
         }
-        synchronized (orangeEnemyLock){
-            this.orangeEnemies.prepareFrame(parentMatrix);
-        }
         synchronized (enemyAttackLock){
             this.enemyAttacks.prepareFrame(parentMatrix);
         }
@@ -602,11 +600,15 @@ public class World {
         synchronized (spawnerLock){
             this.spawners.prepareFrame(parentMatrix);
         }
+
         synchronized (plateauLock){
             this.plateaus.prepareFrame(parentMatrix);
         }
         synchronized (toxicLakeLock){
             this.toxicLakes.prepareFrame(parentMatrix);
+        }
+        synchronized (orangeEnemyLock){
+            this.orangeEnemies.prepareFrame(parentMatrix);
         }
 
         this.blueEnemies.updateVBO();
@@ -628,7 +630,7 @@ public class World {
     }
 
     private void completeLevelBeaten(){
-        Log.i("BACKEND", "Level " + levelNum + " completed. Loading level " + (levelNum + 1));
+//        Log.i("BACKEND", "Level " + levelNum + " completed. Loading level " + (levelNum + 1));
 
         this.wonLastLevel = true;
         this.mState = World.STATE_POSTGAMEPAUSE;
@@ -651,7 +653,6 @@ public class World {
         SoundLib.setStateVictoryMusic(true);
 
 
-        Log.d("BACKEND","started End game");
         TutorialData.TUTORIAL_ENABLED = false;
 
         this.resetJoySticks();
@@ -712,7 +713,6 @@ public class World {
      *
      */
     public void killEndGamePausePeriod(){
-        Log.d("BACKEND","Killed End game");
 
         this.endGamePauseMillis = 0;
         //this.player.show();
@@ -724,7 +724,6 @@ public class World {
      *
      */
     private void finishEndGamePausePeriod(){
-        Log.d("BACKEND","Finished End game");
         this.endGamePauseMillis = 0;
         this.setState(World.STATE_GUI);
         this.guiLayouts.get(PostGameLayout.ID).setVisibility(true);
@@ -865,6 +864,4 @@ public class World {
             this.animations.clear();
         }
     }
-
-
 }

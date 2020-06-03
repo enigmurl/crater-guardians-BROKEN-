@@ -206,7 +206,6 @@ public class ModelLoader {
         //assigned one more texture so need to keep track
         this.numTexturesAssigned++;
 
-        Log.e("TEXTURE:","Pointer: " + this.textureList[this.numTexturesAssigned-1]);
 
         //return the id that openGL gave us
         //its numTexturesAssigned - 1 because we just post incremented the line before, technically we could just post

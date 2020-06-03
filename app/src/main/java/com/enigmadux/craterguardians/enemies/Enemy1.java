@@ -1,10 +1,9 @@
 package com.enigmadux.craterguardians.enemies;
 
 
-import com.enigmadux.craterguardians.animations.ShootAnimation;
 import com.enigmadux.craterguardians.attacks.AttackEnemy1;
-import com.enigmadux.craterguardians.util.MathOps;
 import com.enigmadux.craterguardians.gamelib.World;
+import com.enigmadux.craterguardians.util.MathOps;
 
 /** Melee range
  *
@@ -18,7 +17,6 @@ public class Enemy1 extends Enemy {
 
     private static final float PLAYER_BIAS = 1.3f;
 
-    private static final float MIN_DIST = 0.4f;
     private static final float SCRAMBLE_DIST = 1f;
 
     private static final int[] HEALTHS = new int[] {50,100,175,250};
@@ -35,7 +33,7 @@ public class Enemy1 extends Enemy {
      */
     public Enemy1(int instanceID, float x, float y, boolean isBlue,int strength) {
         super(instanceID, x, y, RADIUS, AttackEnemy1.LENGTH[strength], isBlue,ATTACK_RATE[strength],strength);
-        this.minDist = GUN_LENGTH * this.height + this.getRadius() * 2.5f;
+        this.minDist = Math.min(AttackEnemy1.LENGTH[strength]-0.05f,GUN_LENGTH * this.height + this.getRadius() * 2.5f);
     }
 
 

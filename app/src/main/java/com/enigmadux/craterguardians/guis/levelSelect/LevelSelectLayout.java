@@ -1,7 +1,6 @@
 package com.enigmadux.craterguardians.guis.levelSelect;
 
 import android.content.Context;
-import android.util.Log;
 import android.view.MotionEvent;
 import android.view.VelocityTracker;
 
@@ -142,7 +141,7 @@ public class LevelSelectLayout implements GUILayout {
                     x,y,ICON_WIDTH,ICON_WIDTH,
                     this,allLayouts.get(InGameScreen.ID),
                     this.craterRenderer,i+1);
-            levelSelector.setCameraX(cameraX);
+            levelSelector.setCameraX(cameraX, true);
             this.levelSelectors.add(levelSelector);
             this.clickables.add(levelSelector);
             this.textRenderables.add(levelSelector);
@@ -175,7 +174,7 @@ public class LevelSelectLayout implements GUILayout {
     public void render(float[] uMVPMatrix, GuiRenderer renderer, DynamicText textRenderer) {
         if (this.isVisible) {
             for (int i = 0,size = this.levelSelectors.size();i<size;i++){
-                this.levelSelectors.get(i).setCameraX(this.cameraX);
+                this.levelSelectors.get(i).setCameraX(this.cameraX, false);
             }
             renderer.renderQuads(this.renderables, uMVPMatrix);
             for (int i = 0,size = this.textRenderables.size();i<size;i++){
@@ -260,7 +259,7 @@ public class LevelSelectLayout implements GUILayout {
             this.allComponents.get(i).setVisibility(visibility);
         }
         for (int i = 0,size = this.levelSelectors.size();i<size;i++){
-            this.levelSelectors.get(i).setCameraX(cameraX);
+            this.levelSelectors.get(i).setCameraX(cameraX, true );
         }
         if (! visibility){
             for (int i = 0; i < matieralBar.getRenderables().size();i++){

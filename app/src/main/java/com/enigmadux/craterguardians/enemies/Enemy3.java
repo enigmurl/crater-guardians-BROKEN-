@@ -197,7 +197,6 @@ public class Enemy3 extends Enemy {
 
     @Override
     protected void searchPath(World world) {
-        //the super class does not decide our path, todo find better solution, we only search for it when needed
     }
 
 

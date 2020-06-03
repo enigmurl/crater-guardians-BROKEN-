@@ -1,7 +1,9 @@
 package com.enigmadux.craterguardians;
 
 import android.content.Context;
+import android.opengl.GLES30;
 import android.util.Log;
+import android.view.Surface;
 
 import com.enigmadux.craterguardians.animations.TransitionAnim;
 import com.enigmadux.craterguardians.gamelib.World;
@@ -9,11 +11,12 @@ import com.enigmadux.craterguardians.util.SoundLib;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 
 public class CraterBackendThread extends Thread {
 
-    //the amount of update calls in a second
-    private static final float UPDATE_RATE = 100;
+    //the amount of update calls in a secon
+    private static final float UPDATE_RATE = 120;
 
     //whether the thread is running, if its ever set to false after started it will be finished
     private boolean running = false;
@@ -42,6 +45,7 @@ public class CraterBackendThread extends Thread {
         this.backend = backend;
         this.context = context;
 
+
         this.lastMillis = System.currentTimeMillis();
         if (backend!= null && backend.getEnemyMap() != null) {
             backend.setEnemyMap(new EnemyMap(backend.getEnemyMap()));
@@ -66,7 +70,6 @@ public class CraterBackendThread extends Thread {
     public void run() {
         super.run();
         this.running = true;
-
         long debugStartMillis = System.currentTimeMillis();
 
         int updateCount = 0;
@@ -79,18 +82,7 @@ public class CraterBackendThread extends Thread {
                 this.hasLoadedSound = true;
             }
 
-
             long currentTime = System.currentTimeMillis();
-
-
-
-            if (currentTime - lastMillis < 1000/CraterBackendThread.UPDATE_RATE) {
-                try {
-                    sleep((long) (1000/CraterBackendThread.UPDATE_RATE) - (currentTime - lastMillis));
-                } catch (InterruptedException e){
-                    //pass
-                }
-            }
 
             if (! appPaused) {
                 TransitionAnim.updateAnims(System.currentTimeMillis() - lastMillis);
@@ -99,16 +91,23 @@ public class CraterBackendThread extends Thread {
                     this.backend.update(System.currentTimeMillis() - lastMillis);
                 }
             }
+            this.lastMillis = currentTime;
 
-            this.lastMillis = System.currentTimeMillis();
+            long delta = System.currentTimeMillis() - currentTime;
+            if (delta < 1000/CraterBackendThread.UPDATE_RATE) {
+                try {
+                    Thread.sleep((long) (1000/CraterBackendThread.UPDATE_RATE) - delta);
+                } catch (InterruptedException e){
+                    //pass
+                }
+            }
 
             if (System.currentTimeMillis() - debugStartMillis > 10000){
-                Log.d("BACKENDTHREAD:","Frames per second:"  + (1000 * updateCount/(double) (System.currentTimeMillis() - debugStartMillis)));
+//                Log.d("BACKENDTHREAD:","Frames per second:"  + (1000 * updateCount/(double) (System.currentTimeMillis() - debugStartMillis)));
 
                 debugStartMillis = System.currentTimeMillis();
                 updateCount = 0;
             }
-
         }
 
     }
@@ -127,7 +126,7 @@ public class CraterBackendThread extends Thread {
      * @param pausedState whether to pause the thread or not
      */
     public void setGamePaused(boolean pausedState){
-        Log.d("Backend Thread","Setting Paused State: "+ pausedState);
+//        Log.d("Backend Thread","Setting Paused State: "+ pausedState);
         this.gamePaused = pausedState;
         if (! pausedState){
             this.setAppPaused(false);
@@ -138,12 +137,16 @@ public class CraterBackendThread extends Thread {
     }
 
     public void setAppPaused(boolean pauseState){
-        Log.d("Backend Thread","Setting APP Paused State: "+ pauseState);
+//        Log.d("Backend Thread","Setting APP Paused State: "+ pauseState);
         this.appPaused = pauseState;
         if (pauseState){
             this.setGamePaused(true);
         }
     }
+
+
+
+
 
     /** Gets the backend object that this thread updates
      *
@@ -160,4 +163,14 @@ public class CraterBackendThread extends Thread {
     public void reloadSounds(){
         this.hasLoadedSound =false;
     }
+
+    public void alertSoundsAlreadyLoaded(){
+        this.hasLoadedSound = true;
+    }
+
+    public boolean hasLoadedSound(){
+        return hasLoadedSound;
+    }
+
+
 }

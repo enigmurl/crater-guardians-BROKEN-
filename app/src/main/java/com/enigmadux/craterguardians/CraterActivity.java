@@ -69,7 +69,7 @@ public class CraterActivity extends EnigmaduxActivity {
     public void onStop(){
         super.onStop();
         this.enigmaduxGLSurfaceView.onStop();
-        Log.d("CRATER","Stopping Activity");
+//        Log.d("CRATER","Stopping Activity");
     }
 
 

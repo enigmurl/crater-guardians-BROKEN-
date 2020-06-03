@@ -85,7 +85,6 @@ public class TextShader extends ShaderProgram {
         this.matrixLocation = this.getUniformLocation(TextShader.MATRIX_KEYWORD);
         //get the shader location
         this.shaderLocation = this.getUniformLocation(TextShader.SHADER_KEYWORD);
-        Log.d("SHADER","Shader loc: " + this.shaderLocation);
     }
 
     /** Writes the texture, and binds it to the shader

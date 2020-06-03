@@ -267,7 +267,6 @@ public class CharacterSelectLayout implements GUILayout {
                 break;
             }
         }
-        Log.d("CHARACTER SELECT","Current Player: "+ newPlayer);
     }
 
     void updatePlayerIcons(){

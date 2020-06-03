@@ -60,8 +60,8 @@ public class Kaiser extends Player {
         this.e1 = new QuadTexture(context,R.drawable.kaiser_sprite_sheet_e1,0,0,1,1);
         this.e2 = new QuadTexture(context,R.drawable.kaiser_sprite_sheet_e2,0,0,1,1);
         this.e3 = new QuadTexture(context,R.drawable.kaiser_sprite_sheet_e3,0,0,1,1);
-        this.e4 = new QuadTexture(context,R.drawable.kaiser_sprite_sheet_e4,0,0,1,1);
-        this.e5 = new QuadTexture(context,R.drawable.kaiser_sprite_sheet_e5,0,0,1,1);
+        this.e4 = new QuadTexture(context,R.drawable.kaiser_sprite_sheet_e3,0,0,1,1);
+        this.e5 = new QuadTexture(context,R.drawable.kaiser_sprite_sheet_e3,0,0,1,1);
     }
 
     //angle is in radians
@@ -120,7 +120,6 @@ public class Kaiser extends Player {
     @Override
     public void setShader(float r, float b, float g, float a) {
         //technically it only affects the static, but theres only one so the shader will be affect that only
-        //TODO make more general solution
         if (e1 != null && e2 != null && e3 != null && e4 != null && e5 != null) {
             switch (this.evolveGen) {
                 case 0:

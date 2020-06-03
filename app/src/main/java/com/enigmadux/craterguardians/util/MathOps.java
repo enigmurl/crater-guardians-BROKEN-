@@ -61,7 +61,6 @@ public class MathOps {
         // Calculate the discriminant.
         float discriminant = B * B - 4 * A * C;
 
-        //Log.d("TAG","disc: " + discriminant);
 
         /*if (discriminant == 0){
             return -B/(2*A) >= 0 && -B/(2* A) <= 1;
@@ -97,8 +96,6 @@ public class MathOps {
 
                 float scaleFactor = (float) Math.sqrt(x * x / (a * a) + y * y / (b * b));
 
-                //Log.d("PLATEAU","t value1 " + tValue1 + " tvalue 2 " + tValue2 + " tangent T " + tangentTValue + " scale " + scaleFactor);
-                //Log.d("PLATEAU","should be 1, is " + (Math.pow(deltX/scaleFactor,2)/(a*a) + Math.pow(y/scaleFactor,2)/(b*b)));
 
                 float dX = (x / scaleFactor) - x;
                 float dY = (y / scaleFactor) - y;

@@ -19,7 +19,6 @@ import enigmadux2d.core.quadRendering.QuadTexture;
 
 public abstract class TutorialPauseHelper extends TransitionAnim implements VisibilitySwitch {
     private static final long FADE_MILLIS = 400;
-    private static final long ANIM_VARIATION = 200;
 
 
     private long DELAY_MILLIS = 16;
@@ -38,10 +37,9 @@ public abstract class TutorialPauseHelper extends TransitionAnim implements Visi
     private long minMillis;
     private long elapsedMillis = 0;
     private long fadeInMillis = 0;
-    private long animMillis;
     //animMillis < minMillis
     private boolean canceled = false;
-    public TutorialPauseHelper(Context context,CraterBackendThread craterBackendThread,long minMillis,long animMillis) {
+    public TutorialPauseHelper(Context context, CraterBackendThread craterBackendThread, long minMillis) {
         this.texts =getTexts(context);
         scalables = getScalables(context);
         allRenderables = new ArrayList<>();
@@ -53,7 +51,6 @@ public abstract class TutorialPauseHelper extends TransitionAnim implements Visi
         this.craterBackendThread = craterBackendThread;
 
         this.minMillis = minMillis;
-        this.animMillis = animMillis;
 
         this.orgWs = new float[scalables.size()];
         this.orgHs = new float[scalables.size()];
@@ -71,7 +68,6 @@ public abstract class TutorialPauseHelper extends TransitionAnim implements Visi
     @Override
     public void setVisibility(boolean visibility) {
         this.isVisible = visibility;
-        Log.d("Wrapper","Showing");
         if (visibility){
             HANDLER.postDelayed(this,DELAY_MILLIS);
         }
@@ -109,7 +105,7 @@ public abstract class TutorialPauseHelper extends TransitionAnim implements Visi
         }
         if (firstTime) {
             for (int i = 0, size = this.scalables.size(); i < size; i++) {
-                new PopUp(this.animMillis +(long) ((ANIM_VARIATION) * (-0.5f + (float) Math.random())), orgWs[i],orgHs[i],this.scalables.get(i), 0);
+                new PopUp(PopUp.DEFAULT_MILLIS, orgWs[i],orgHs[i],this.scalables.get(i), 0);
             }
         }
 

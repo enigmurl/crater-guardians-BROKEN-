@@ -39,7 +39,7 @@ public class TutorialData {
             stdout.close();
 
         } catch (IOException e){
-            Log.d("BACKEND","File write failed",e);
+//            Log.d("BACKEND","File write failed",e);
         }
     }
 
@@ -51,7 +51,7 @@ public class TutorialData {
         try (Scanner stdin = new Scanner(this.context.openFileInput(TutorialData.TUTORIAL))) {
             TUTORIAL_ENABLED = stdin.nextBoolean();
         } catch (Exception e) {
-            Log.d("FRONTEND", "Error loading tutorial file ", e);
+//            Log.d("FRONTEND", "Error loading tutorial file ", e);
             this.writeTutorialFile();
             TUTORIAL_ENABLED = true;
         }

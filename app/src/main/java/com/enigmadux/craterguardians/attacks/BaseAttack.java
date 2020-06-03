@@ -84,7 +84,6 @@ public abstract class BaseAttack extends CraterCollectionElem {
     public void finish(World world){
         if (this.isPlayerAttack){
             world.getPlayerAttacks().delete(this);
-            Log.d("BASE ATTACK","deleted player attack " + this.deltaX + " Y: " + this.deltaY);
         } else {
             world.getEnemyAttacks().delete(this);
         }

@@ -7,7 +7,6 @@ import com.enigmadux.craterguardians.guilib.AmmoBar;
 import com.enigmadux.craterguardians.guilib.HealthBar;
 import com.enigmadux.craterguardians.guilib.ProgressBar;
 import com.enigmadux.craterguardians.guilib.Text;
-import com.enigmadux.craterguardians.guilib.Tileable;
 import com.enigmadux.craterguardians.guis.inGameScreen.defaultJoystickLayout.DefaultJoyStickLayout;
 import com.enigmadux.craterguardians.R;
 import com.enigmadux.craterguardians.values.LayoutConsts;
@@ -19,9 +18,8 @@ import enigmadux2d.core.quadRendering.QuadTexture;
 public class TelemetryHelper extends TutorialPauseHelper {
 
     private static final long minMillis = 2000;
-    private static final long animMillis = 750;
     public TelemetryHelper(Context context, CraterBackendThread craterBackendThread) {
-        super(context, craterBackendThread, minMillis, animMillis);
+        super(context, craterBackendThread, minMillis);
     }
 
     @Override
@@ -30,8 +28,8 @@ public class TelemetryHelper extends TutorialPauseHelper {
                 DefaultJoyStickLayout.EVOLVE_BUTTON_WIDTH * LayoutConsts.SCALE_X,DefaultJoyStickLayout.EVOLVE_BUTTON_WIDTH);
         evolveButton.setShader(0,1,0,1);
 
-        ProgressBar fakeHealthBar = new HealthBar(context,-0.2f,0.5f,1,0.2f,1);
-        ProgressBar attacks = new AmmoBar(context,-0.2f,0f,1,0.2f,10);
+        ProgressBar fakeHealthBar = new HealthBar(context,-0.2f,0.5f,0.8f,0.16f,1);
+        ProgressBar attacks = new AmmoBar(context,-0.2f,0f,0.8f,0.16f,10);
         ArrayList<QuadTexture> scalables = new ArrayList<>(fakeHealthBar.getRenderables());
         scalables.add(evolveButton);
         scalables.addAll(attacks.getRenderables());

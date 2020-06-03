@@ -68,7 +68,6 @@ public class GuiRenderer {
         };
         this.mesh = new GuiMesh(posses);
 
-        Log.d("TEXTURE","id: " + this.mesh.getVaoID());
 
         //initialize the shader
         this.guiShader = new GUIShader(context,vertexShader,fragmentShader);

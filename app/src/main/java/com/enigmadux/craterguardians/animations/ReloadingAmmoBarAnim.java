@@ -17,7 +17,6 @@ public class ReloadingAmmoBarAnim extends FrameTransitionAnim {
         for (int i = 0;i < ammoBar.getRenderables().size();i++) {
             ammoBar.getRenderables().get(i).setAlpha(0);
         }
-        Log.d("Animations:","Reloading (new instance)");
 
         float[] currentShader = ammoBar.getRenderables().get(0).getShader();
         rChannel = currentShader[0];

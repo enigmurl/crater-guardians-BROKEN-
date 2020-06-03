@@ -56,10 +56,10 @@ public class PlayerData {
                 stdout.println(playerClass.getPlayerLevel());
             }
             stdout.close();
-            Log.d("BACKEND","wrote player data");
+//            Log.d("BACKEND","wrote player data");
 
         } catch (IOException e){
-            Log.e("BACKEND","File write failed",e);
+//            Log.e("BACKEND","File write failed",e);
         }
     }
 
@@ -81,10 +81,10 @@ public class PlayerData {
             }
 
         } catch (IOException e) {
-            Log.e("FRONTEND", "Error loading player data file ", e);
+//            Log.e("FRONTEND", "Error loading player data file ", e);
             this.writePlayerData();
         } catch (IllegalAccessException | InstantiationException | ClassNotFoundException e){
-            Log.e("FRONTEND","PlayerData file read failed, most likely corrupted file structure",e);
+//            Log.e("FRONTEND","PlayerData file read failed, most likely corrupted file structure",e);
             this.writePlayerData();
         }
     }

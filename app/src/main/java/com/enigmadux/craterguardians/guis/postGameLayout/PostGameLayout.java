@@ -169,8 +169,13 @@ public class PostGameLayout implements GUILayout {
             if (craterRenderer.getWorld().hasWonLastLevel()){
                 //-1 because the player just won, so level num was increased, not the best solution
                 int xp = craterRenderer.getWorld().getAmntXpLastLevel();
-                this.xpAmount.updateText(" + 0 XP",FONT_SIZE);
-                new XpGainedAnimation(XpGainedAnimation.DEFAULT_MILLIS,this.xpAmount,xp);
+                if (xp > 0) {
+                    this.xpAmount.updateText(" + 0 XP", FONT_SIZE);
+                    new XpGainedAnimation(XpGainedAnimation.DEFAULT_MILLIS, this.xpAmount, xp);
+                } else {
+                    this.xpAmount.setVisibility(true);
+                    this.xpAmount.updateText("No XP Gained", FONT_SIZE);
+                }
                 this.victoryIndicator.updateText("Victory",victoryIndicator.getFontSize());
             } else {
                 this.xpAmount.setVisibility(true);

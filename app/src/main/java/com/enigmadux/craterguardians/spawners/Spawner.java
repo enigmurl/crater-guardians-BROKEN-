@@ -252,21 +252,18 @@ public abstract class Spawner extends CraterCollectionElem {
             if (! Arrays.equals(spawnGlowIndicator.getShader(),BLUE_SHADER)){
                 if (this.expansionAnim != null) this.expansionAnim.cancel();
                 this.expansionAnim = new ExpansionAnim(this.spawnGlowIndicator,ExpansionAnim.DEFAULT_MILLIS,0,0);
-                Log.d("SPAWNER","ID: " + getInstanceID() + " changing to BLUE 1");
             }
             this.spawnGlowIndicator.setShader(BLUE_SHADER[0],BLUE_SHADER[1],BLUE_SHADER[2],BLUE_SHADER[3]);
         } else if (this.elapsedTime < this.orangeEnd){
             if (! Arrays.equals(spawnGlowIndicator.getShader(),ORANGE_SHADER)){
                 if (this.expansionAnim != null) this.expansionAnim.cancel();
                 this.expansionAnim = new ExpansionAnim(this.spawnGlowIndicator,ExpansionAnim.DEFAULT_MILLIS,0,0);
-                Log.d("SPAWNER","ID: " + getInstanceID() + " changing to ORANGE");
             }
             this.spawnGlowIndicator.setShader(ORANGE_SHADER[0],ORANGE_SHADER[1],ORANGE_SHADER[2],ORANGE_SHADER[3]);
         } else {
             if (! Arrays.equals(spawnGlowIndicator.getShader(),BLUE_SHADER)){
                 if (this.expansionAnim != null) this.expansionAnim.cancel();
                 this.expansionAnim = new ExpansionAnim(this.spawnGlowIndicator,ExpansionAnim.DEFAULT_MILLIS,0,0);
-                Log.d("SPAWNER","ID: " + getInstanceID() + " changing to BLUE 2");
             }
             this.spawnGlowIndicator.setShader(BLUE_SHADER[0],BLUE_SHADER[1],BLUE_SHADER[2],BLUE_SHADER[3]);
         }
@@ -314,7 +311,6 @@ public abstract class Spawner extends CraterCollectionElem {
         this.health -= damage;
         //need to find what value this matches too, we basically binary search, until we are close enough
         if (this.health <= 0){
-            SoundLib.playSpawnerDeathSoundEffect();
             this.elapsedTime = blue2End;
             return;
         }
@@ -331,9 +327,6 @@ public abstract class Spawner extends CraterCollectionElem {
             }
         }
 
-        if (lhs < elapsedTime){
-            Log.d("SPAWNERBUG","Function: " + this.healthFunction);
-        }
         this.elapsedTime = (long) lhs;
 
 

@@ -180,7 +180,6 @@ public class HomeScreen implements GUILayout {
 
             //hide the pause button
             this.inGameLayout.setVisibility(false);
-            Log.d("HOME SCREEN","Set visibility");
 
             //if it's tutorial, want to change it to kaiser instead
             if (this.craterRenderer.getWorld().getPlayer() instanceof TutorialPlayer){

@@ -113,7 +113,6 @@ public class GUIShader extends ShaderProgram {
         this.cornerSizeLocation = this.getUniformLocation(GUIShader.CORNER_KEYWORD);
         //get the aspect ratio location
         this.aspectRatio = this.getUniformLocation(GUIShader.ASPECT_KEYWORD);
-        Log.d("SHADER","Shader loc: " + this.shaderLocation + " corner size: " + this.cornerSizeLocation + " aspect ratio "+ aspectRatio);
     }
 
     /** Writes the texture, and binds it to the shader

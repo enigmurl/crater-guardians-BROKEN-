@@ -171,6 +171,7 @@ public abstract class Player implements Character {
         //facing up because
         this.rotation = 90;
         this.attackRotation = 90;
+        this.lookRotation = 90;
         if (currentShield != null) this.currentShield.setState(false);
 
 
@@ -368,7 +369,6 @@ public abstract class Player implements Character {
     protected void addStaticEntities(Context context){
         this.currentShield = shield;
         this.staticEntities.add(currentShield);
-        Log.d("WORLD","Static Entities: " + staticEntities);
     }
 
     public int getHealth(){

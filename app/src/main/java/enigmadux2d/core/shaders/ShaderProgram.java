@@ -292,7 +292,7 @@ public abstract class ShaderProgram {
         if (openGLDump[0] == GLES30.GL_FALSE) {
 
             String shaderTypeString = (shaderType == GLES30.GL_VERTEX_SHADER) ? "VERTEX SHADER " : "FRAGMENT SHADER ";
-            Log.e(ShaderProgram.TAG,shaderTypeString + "NOT COMPILED: error message: " + GLES30.glGetShaderInfoLog(shaderID));
+//            Log.e(ShaderProgram.TAG,shaderTypeString + "NOT COMPILED: error message: " + GLES30.glGetShaderInfoLog(shaderID));
             throw new InvalidShaderCodeException(shaderTypeString + "NOT COMPILED: error message: " + GLES30.glGetShaderInfoLog(shaderID));
         }
 

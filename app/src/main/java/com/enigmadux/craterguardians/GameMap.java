@@ -92,7 +92,7 @@ public class GameMap {
      * Initializes a level, tries to do in same order as drawing as too make it best aligned for the viewer
      */
     public void loadLevel(int levelNum) {
-        Log.d("GAMEMAP:","Loading level:" + levelNum);
+//        Log.d("GAMEMAP:","Loading level:" + levelNum);
         this.levelData.writeLevelFiles();
 
         int fileName;
@@ -198,7 +198,6 @@ public class GameMap {
         int numSpawners = level_data.nextInt();
         synchronized (World.spawnerLock) {
             for (int i = 0; i < numSpawners; i++) {
-                Log.d("SPAWNER","Iteration " + i);
                 float x = level_data.nextFloat();
                 float y = level_data.nextFloat();
                 float w = level_data.nextFloat();
@@ -249,7 +248,7 @@ public class GameMap {
                                 numBlueSpawns,blueSpawnTimes,numOrangeSpawns,orangeSpawnTimes,strength));
                         break;
                     default:
-                        Log.d("GAME MAP","Level: " + levelNum + " incorrect spawner Type of " + type);
+//                        Log.d("GAME MAP","Level: " + levelNum + " incorrect spawner Type of " + type);
                 }
             }
         }
@@ -302,11 +301,10 @@ public class GameMap {
 
         this.craterVisual.setTransform(0,0,this.craterRadius * 2 * CRATER_VISUAL_SCALE,this.craterRadius * 2 * CRATER_VISUAL_SCALE);
 
-        Log.d("GAMEMAP:","finished loading level");
+//        Log.d("GAMEMAP:","finished loading level");
         this.player.setTranslate(spawnLocation[0], spawnLocation[1]);
 
 
-        //Log.d("GAMEMAP", "ENEMYMAP " + enemyMap);
 
     }
 

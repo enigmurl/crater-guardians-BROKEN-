@@ -11,6 +11,8 @@ public class XpGainedAnimation extends FrameTransitionAnim {
     private Text xpDisplay;
     private int xp;
     private float maxSize;
+
+    private boolean playedSound = false;
     public XpGainedAnimation(long millis, Text xpDisplay,int xp) {
         super(millis);
         this.xpDisplay = xpDisplay;
@@ -27,7 +29,10 @@ public class XpGainedAnimation extends FrameTransitionAnim {
         if (finishedMillis < expandingMillis){
             this.xpDisplay.updateText(" + XP",size);
         } else if (finishedMillis < totalMillis - (DEPLATION_PERCENT) * totalMillis){
-            SoundLib.playXpCounterSoundEffect();
+            if (! playedSound) {
+                SoundLib.playXpCounterSoundEffect();
+                playedSound = true;
+            }
             //normalizing to fit the expanidng percenr
             int currentAmount = (int) ((finishedMillis - expandingMillis) * xp / (totalMillis - expandingMillis - (long) ((DEPLATION_PERCENT) * totalMillis)));
             this.xpDisplay.updateText(" + " + currentAmount + " XP",size);

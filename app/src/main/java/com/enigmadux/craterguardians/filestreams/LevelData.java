@@ -51,10 +51,10 @@ public class LevelData {
                 LevelData.completedLevels[i] = stdin.nextBoolean();
             }
         } catch (FileNotFoundException e){
-            Log.e("LEVEL DATA","Error loading data file " ,e);
+//            Log.e("LEVEL DATA","Error loading data file " ,e);
             this.writeLevelFiles();
         } catch (NoSuchElementException e){
-            Log.e("LEVEL DATA","Incorrect file format " ,e);
+//            Log.e("LEVEL DATA","Incorrect file format " ,e);
             this.writeLevelFiles();
         }
 
@@ -76,10 +76,10 @@ public class LevelData {
             stdout.close();
 
         } catch (IOException e){
-            Log.e("LEVEL DATA","File write failed",e);
+//            Log.e("LEVEL DATA","File write failed",e);
         }
 
-        Log.d("LEVEL DATA","completedLEVELs: " + Arrays.toString(LevelData.completedLevels));
+//        Log.d("LEVEL DATA","completedLEVELs: " + Arrays.toString(LevelData.completedLevels));
 
     }
 

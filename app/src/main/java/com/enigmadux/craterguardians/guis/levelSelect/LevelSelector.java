@@ -2,7 +2,6 @@ package com.enigmadux.craterguardians.guis.levelSelect;
 
 
 import android.content.Context;
-import android.util.Log;
 import android.view.MotionEvent;
 
 import com.enigmadux.craterguardians.animations.PopUp;
@@ -198,7 +197,7 @@ public class LevelSelector extends GUIClickable {
         this.scale = w/orgW;
     }
 
-    void setCameraX(float cameraX){
+    void setCameraX(float cameraX, boolean isStartShow){
 
         float orgX = cameraX + startX;
         float x = orgX + (float) (orgX < 0 ? -Math.pow(-orgX,0.75):Math.pow(orgX,0.75));
@@ -208,7 +207,7 @@ public class LevelSelector extends GUIClickable {
             s = 0;
         }
         this.fontScale = s;
-        if (x < 0 != this.x < 0 && this.isVisible){
+        if (x < 0 != this.x < 0 && this.isVisible && ! isStartShow){
             SoundLib.playLevelSelectTick();
         }
 

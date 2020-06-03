@@ -39,8 +39,6 @@ import enigmadux2d.core.EnigmaduxGLRenderer;
 import enigmadux2d.core.quadRendering.GuiRenderer;
 import enigmadux2d.core.quadRendering.QuadTexture;
 
-import enigmadux2d.core.shaders.ShaderProgram;
-
 /** The renderer used to do all the drawing
  *
  * @author Manu Bhat
@@ -93,10 +91,9 @@ public class CraterRenderer extends EnigmaduxGLRenderer {
      *
      */
 
-    //todo these are all debug varaibles delete them before releaes
 
-    private long debugStartMillis = System.currentTimeMillis();
-    private int updateCount = 0;
+    private long lastFrameSessionStart = System.currentTimeMillis();
+    private int updateCountThisFrameSession = 0;
 
 
     private World world;
@@ -135,8 +132,6 @@ public class CraterRenderer extends EnigmaduxGLRenderer {
         this.playerData = new PlayerData(context);
         this.settingsData = new SettingsData(context);
         this.tutorialData = new TutorialData(context);
-
-
     }
 
     /** Used whenever the surface is created(see android documentation for more details)
@@ -146,8 +141,8 @@ public class CraterRenderer extends EnigmaduxGLRenderer {
      */
     @Override
     public void onSurfaceCreated(GL10 gl, EGLConfig config){
-        Log.d("LOADING SCREEN:","Started loading from source ");
-        Log.d("RENDERER","onSurfaceCreated");
+//        Log.d("LOADING SCREEN:","Started loading from source ");
+//        Log.d("RENDERER","onSurfaceCreated");
         super.onSurfaceCreated(gl,config);
 
 
@@ -168,7 +163,6 @@ public class CraterRenderer extends EnigmaduxGLRenderer {
 
         }
 
-        Log.d("GL ERRORS ", "1) Error code; " + GLES30.glGetError());
 
         this.guiRenderer = new GuiRenderer(this.context,R.raw.gui_vertex_shader,R.raw.gui_fragment_shader);
         this.guiRenderer.startRendering();
@@ -194,8 +188,6 @@ public class CraterRenderer extends EnigmaduxGLRenderer {
     @Override
     public void onSurfaceChanged(GL10 gl, int width, int height) {
 
-        Log.d("RENDERER_","dm w " + (this.displayMetrics.widthPixels + this.getNavigationBarHeight()) + " dm h " + this.displayMetrics.heightPixels
-                + " lc w "  +LayoutConsts.SCREEN_WIDTH + " lc h " + LayoutConsts.SCREEN_HEIGHT);
 
 
         if(height == 0) { 						//Prevent A Divide By Zero By
@@ -208,7 +200,6 @@ public class CraterRenderer extends EnigmaduxGLRenderer {
 
         //Calculate The Aspect Ratio Of The Window
         Matrix.orthoM(orthographicM,0,-CAMERA_Z,CAMERA_Z,-CAMERA_Z* height/width,CAMERA_Z * height/width,0.2f,5f);
-        Log.d("RENDERER","dimensions " + width + " H "  + height);
 
 
         if (this.craterBackendThread == null) {
@@ -220,7 +211,6 @@ public class CraterRenderer extends EnigmaduxGLRenderer {
 
 
 
-        Log.d("RENDERER","started backend thread");
 
 
     }
@@ -253,7 +243,7 @@ public class CraterRenderer extends EnigmaduxGLRenderer {
         if (! this.loadingStarted){
             renderingThread = new RenderingThread();
             this.loadingStarted = true;
-            Log.d("LOADING SCREEN:","Started rendering");
+//            Log.d("LOADING SCREEN:","Started rendering");
         }
         //if it hasn't completed, draw the loading screen
         if (! this.loadingCompleted){
@@ -303,14 +293,13 @@ public class CraterRenderer extends EnigmaduxGLRenderer {
 
         this.world.draw(vPMatrix,this.guiMatrix);
 
-        updateCount++;
+        updateCountThisFrameSession++;
 
-        if (System.currentTimeMillis() - debugStartMillis > 10000){
-            Log.d("FRONTENDTHREAD:","Frames per second:"  + (1000 * updateCount/(double) (System.currentTimeMillis() - debugStartMillis)));
-            Log.d("FRONTENDTHREAD:","Total Time:"  + ((System.currentTimeMillis() - debugStartMillis)/this.updateCount));
+        if (System.currentTimeMillis() - lastFrameSessionStart > 10000){
+//            Log.d("FRONTENDTHREAD:","Frames per second:"  + (1000 * updateCountThisFrameSession /(double) (System.currentTimeMillis() - lastFrameSessionStart)));
 
-            debugStartMillis = System.currentTimeMillis();
-            updateCount = 0;
+            lastFrameSessionStart = System.currentTimeMillis();
+            updateCountThisFrameSession = 0;
         }
     }
 
@@ -340,12 +329,13 @@ public class CraterRenderer extends EnigmaduxGLRenderer {
         }
         switch (step) {
             case 0:
-                Log.d("RENDERER","Loading step: 0");
+//                Log.d("RENDERER","Loading step: 0");
                 QuadTexture.resetTextures();
                 break;
             case 1:
-                Log.d("RENDERER","Loading step: 1");
+//                Log.d("RENDERER","Loading step: 1");
                 this.tutorialData.loadTutorialFile();
+                this.craterBackendThread.reloadSounds();
                 break;
             case 2:
                 if (this.world != null){
@@ -353,38 +343,36 @@ public class CraterRenderer extends EnigmaduxGLRenderer {
                 }
                 this.world = new World(context,this.layoutHashMap);
                 this.craterBackendThread.setBackend(this.world);
-                Log.d("RENDERER","Loading step: 2");
+//                Log.d("RENDERER","Loading step: 2");
                 break;
             case 3:
                 this.playerData.loadPlayerData();
                 DrawablesLoader.reset();
-                Log.d("RENDERER","Loading step: 3");
+//                Log.d("RENDERER","Loading step: 3");
                 break;
             case 4:
                 if (DrawablesLoader.loadResource(context)){
                     return true;
                 }
-                Log.d("RENDERER","Loading step: 4");
+//                Log.d("RENDERER","Loading step: 4");
                 return false;
             case 5:
                 World.loadTextures(context);
-                Log.d("RENDERER","Loading step: 5");
+//                Log.d("RENDERER","Loading step: 5");
                 break;
             case 6:
-                Log.d("RENDERER","Loading step: 6");
-
-                this.craterBackendThread.reloadSounds();
+//                Log.d("RENDERER","Loading step: 6");
                 break;
             case 7:
                 this.world.setPlayer(new Kaiser(0,0));
-                Log.d("RENDERER","Loading step: 7");
+//                Log.d("RENDERER","Loading step: 7");
                 break;
             case 8:
-                Log.d("RENDERER","Loading step: 8");
+//                Log.d("RENDERER","Loading step: 8");
                 this.settingsData.loadSettingsFile();
                 break;
             case 9:
-                Log.d("RENDERER","Loading step: 9");
+//                Log.d("RENDERER","Loading step: 9");
                 ArrayList<GUILayout> layouts = new ArrayList<>();
                 HomeScreen homeScreen = new HomeScreen(this);
                 SettingsScreen settingsScreen = new SettingsScreen(this.settingsData);
@@ -422,7 +410,6 @@ public class CraterRenderer extends EnigmaduxGLRenderer {
                     this.world.setPlayer(new TutorialPlayer());
                     //important this is first, because internally, it may be set
                     //to false later on
-                    Log.d("RENDERER","Tutorial Enabled");
                     this.craterBackendThread.setGamePaused(false);
                     //non positives = tutorial
                     this.world.setLevelNum(0);
@@ -491,6 +478,7 @@ public class CraterRenderer extends EnigmaduxGLRenderer {
 
     void onStop(){
         try {
+
             this.craterBackendThread.setRunning(false);
             this.craterBackendThread.join();
             if (world != null && world.getEnemyMap() != null) this.world.getEnemyMap().endProcess();
@@ -500,11 +488,14 @@ public class CraterRenderer extends EnigmaduxGLRenderer {
     }
     void onStart(){
         if (this.craterBackendThread == null || ! this.craterBackendThread.isAlive()) {
+            boolean music = this.craterBackendThread != null && this.craterBackendThread.hasLoadedSound();
             this.craterBackendThread = new CraterBackendThread(this.context,this.world);
+            if (music){
+                this.craterBackendThread.alertSoundsAlreadyLoaded();
+            }
             this.craterBackendThread.setRunning(true);
             this.craterBackendThread.setGamePaused(true);
             this.craterBackendThread.start();
-            //if (world!= null && world.getEnemyMap() != null) this.world.getEnemyMap().start();
         }
     }
 

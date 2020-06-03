@@ -303,7 +303,7 @@ public abstract class VaoCollection {
         try {
             System.arraycopy(instanceData, 0, this.instancedData, offset, this.floatsPerInstance);
         } catch (Exception e){
-            Log.d("VAO COLLECITON","ARRAY OUT OF BOUNDS ID " + instanceId +  " offset: " + offset + " ids: " + Arrays.toString(this.indexMap),e);
+//            Log.d("VAO COLLECITON","ARRAY OUT OF BOUNDS ID " + instanceId +  " offset: " + offset + " ids: " + Arrays.toString(this.indexMap),e);
         }
 
     }
@@ -377,6 +377,8 @@ public abstract class VaoCollection {
         this.takenIds = new boolean[this.maxInstances];
         //reset the index map
         this.indexMap = new int[this.maxInstances];
+
+        Arrays.fill(this.instancedData,0);
 
 
         //no more instances are alive

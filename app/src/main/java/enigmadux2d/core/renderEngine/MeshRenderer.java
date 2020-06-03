@@ -13,7 +13,7 @@ import enigmadux2d.core.shaders.DefaultShader;
 import enigmadux2d.core.shaders.ShaderProgram;
 
 
-/** This draws a mesh to the screen. Todo need to upgrade this
+/** This draws a mesh to the screen.
  *
  * @author Manu Bhat
  * @version BETA

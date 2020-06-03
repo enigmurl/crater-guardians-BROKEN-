@@ -29,7 +29,6 @@ public class AttackMagnum extends PlayerAttack {
         this.evolveGen = evolveGen;
         this.hits = new HashSet<>();
         this.spawnerDamageMult = SPAWNER_MULT;
-        SoundLib.playMagnumShoot();
     }
 
 

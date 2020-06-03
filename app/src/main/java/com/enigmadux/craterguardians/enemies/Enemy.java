@@ -1,6 +1,7 @@
 package com.enigmadux.craterguardians.enemies;
 
 import android.opengl.Matrix;
+import android.util.Log;
 
 import com.enigmadux.craterguardians.R;
 import com.enigmadux.craterguardians.animations.DeathAnim;
@@ -41,8 +42,8 @@ public abstract class Enemy extends CraterCollectionElem implements Character {
             R.drawable.enemy_strength1,
             R.drawable.enemy_strength2,
             R.drawable.enemy_strength3,
-            R.drawable.kaiser_sprite_sheet_e4,
-            R.drawable.kaiser_sprite_sheet_e5
+            R.drawable.enemy_strength3,
+            R.drawable.enemy_strength3
     };
 
 
@@ -287,7 +288,9 @@ public abstract class Enemy extends CraterCollectionElem implements Character {
         }
 
 
+
         if (this.isDead()){
+
             world.addAnim(new DeathAnim(deltaX,deltaY,this.r * 2,this.r * 2));
             if (this.isBlue){
                 world.getBlueEnemies().delete(this);
@@ -326,7 +329,6 @@ public abstract class Enemy extends CraterCollectionElem implements Character {
         this.setFrame(this.rotation);
     }
 
-    //todo OPTIMIZE
     private void scramble(World world, long dt){
         //first call
         if (! scrambling){
@@ -404,9 +406,15 @@ public abstract class Enemy extends CraterCollectionElem implements Character {
     }
 
     protected boolean attemptAttack(World world){
-        PairIntFloat target = this.getNearestTarget(world,false, this.minDist);
+        PairIntFloat target = this.getNearestTarget(world,false, this.minDist * 0.9f);
         int maxIndex = target.first;
         float minDist = target.second;
+
+        if (maxIndex == -1 && minDist > this.minDist * 0.9f){
+            target = this.getNearestTarget(world,false, 0);
+            maxIndex = target.first;
+            minDist = target.second;
+        }
 
 
         if (minDist <= this.attackLen){
@@ -422,6 +430,8 @@ public abstract class Enemy extends CraterCollectionElem implements Character {
             }
             this.isAttacking = true;
             return true;
+        } else if (this.currentPath != null && this.currentPath.size() == 1 && this.currentPath.peek() != null){
+            this.searchPath(world);
         }
         this.isAttacking = false;
         return false;
@@ -476,6 +486,9 @@ public abstract class Enemy extends CraterCollectionElem implements Character {
 
         if (currentPath == null || currentPath.size() > 1 || travelLen > minDist){
             this.translateFromPos((float) Math.cos(rotation) * clippedLength,(float) Math.sin(rotation) * clippedLength);
+        } else if (travelLen < minDist * 0.95f) {
+            this.translateFromPos(-(float) Math.cos(rotation) * clippedLength,-(float) Math.sin(rotation) * clippedLength);
+
         }
         this.velocityX = (this.getDeltaX() - startX) * 1000/dt;
         this.velocityY = (this.getDeltaY() - startY) * 1000/dt;
