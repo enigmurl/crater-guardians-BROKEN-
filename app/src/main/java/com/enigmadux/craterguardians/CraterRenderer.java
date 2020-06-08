@@ -1,8 +1,5 @@
 package com.enigmadux.craterguardians;
 
-import javax.microedition.khronos.egl.EGLConfig;
-import javax.microedition.khronos.opengles.GL10;
-
 import android.content.Context;
 import android.opengl.GLES30;
 import android.opengl.Matrix;
@@ -15,6 +12,9 @@ import android.view.WindowManager;
 import com.enigmadux.craterguardians.filestreams.PlayerData;
 import com.enigmadux.craterguardians.filestreams.SettingsData;
 import com.enigmadux.craterguardians.filestreams.TutorialData;
+import com.enigmadux.craterguardians.gamelib.DrawablesLoader;
+import com.enigmadux.craterguardians.gamelib.GUIDataWrapper;
+import com.enigmadux.craterguardians.gamelib.World;
 import com.enigmadux.craterguardians.guilib.GUILayout;
 import com.enigmadux.craterguardians.guis.characterSelect.CharacterSelectLayout;
 import com.enigmadux.craterguardians.guis.homeScreen.HomeScreen;
@@ -23,17 +23,17 @@ import com.enigmadux.craterguardians.guis.levelSelect.LevelSelectLayout;
 import com.enigmadux.craterguardians.guis.pauseGameScreen.PauseGameLayout;
 import com.enigmadux.craterguardians.guis.postGameLayout.PostGameLayout;
 import com.enigmadux.craterguardians.guis.settingsScreen.SettingsScreen;
-import com.enigmadux.craterguardians.gamelib.GUIDataWrapper;
 import com.enigmadux.craterguardians.players.Kaiser;
 import com.enigmadux.craterguardians.players.Player;
 import com.enigmadux.craterguardians.players.TutorialPlayer;
 import com.enigmadux.craterguardians.util.SoundLib;
 import com.enigmadux.craterguardians.values.LayoutConsts;
-import com.enigmadux.craterguardians.gamelib.DrawablesLoader;
-import com.enigmadux.craterguardians.gamelib.World;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+
+import javax.microedition.khronos.egl.EGLConfig;
+import javax.microedition.khronos.opengles.GL10;
 
 import enigmadux2d.core.EnigmaduxGLRenderer;
 import enigmadux2d.core.quadRendering.GuiRenderer;
@@ -143,39 +143,43 @@ public class CraterRenderer extends EnigmaduxGLRenderer {
     public void onSurfaceCreated(GL10 gl, EGLConfig config){
 //        Log.d("LOADING SCREEN:","Started loading from source ");
 //        Log.d("RENDERER","onSurfaceCreated");
-        super.onSurfaceCreated(gl,config);
+        try {
+            super.onSurfaceCreated(gl, config);
 
 
-        final WindowManager w = (WindowManager) context.getSystemService(Context.WINDOW_SERVICE);
-        final Display d = w.getDefaultDisplay();
-        displayMetrics = new DisplayMetrics();
-        d.getMetrics(displayMetrics);
+            final WindowManager w = (WindowManager) context.getSystemService(Context.WINDOW_SERVICE);
+            final Display d = w.getDefaultDisplay();
+            displayMetrics = new DisplayMetrics();
+            d.getMetrics(displayMetrics);
 
-        LayoutConsts.SCREEN_WIDTH = displayMetrics.widthPixels + this.getNavigationBarHeight();
-        LayoutConsts.SCREEN_HEIGHT = displayMetrics.heightPixels;
+            LayoutConsts.SCREEN_WIDTH = displayMetrics.widthPixels + this.getNavigationBarHeight();
+            LayoutConsts.SCREEN_HEIGHT = displayMetrics.heightPixels;
 
-        LayoutConsts.SCALE_X = 1;
-        LayoutConsts.SCALE_Y = 1;
-        if (LayoutConsts.SCREEN_WIDTH > LayoutConsts.SCREEN_HEIGHT){
-            LayoutConsts.SCALE_X = (float) (LayoutConsts.SCREEN_HEIGHT )/ (LayoutConsts.SCREEN_WIDTH);
-        } else {
-            LayoutConsts.SCALE_Y = (float) (LayoutConsts.SCREEN_WIDTH)/LayoutConsts.SCREEN_HEIGHT;
+            LayoutConsts.SCALE_X = 1;
+            LayoutConsts.SCALE_Y = 1;
+            if (LayoutConsts.SCREEN_WIDTH > LayoutConsts.SCREEN_HEIGHT) {
+                LayoutConsts.SCALE_X = (float) (LayoutConsts.SCREEN_HEIGHT) / (LayoutConsts.SCREEN_WIDTH);
+            } else {
+                LayoutConsts.SCALE_Y = (float) (LayoutConsts.SCREEN_WIDTH) / LayoutConsts.SCREEN_HEIGHT;
 
-        }
+            }
 
 
-        this.guiRenderer = new GuiRenderer(this.context,R.raw.gui_vertex_shader,R.raw.gui_fragment_shader);
-        this.guiRenderer.startRendering();
+            this.guiRenderer = new GuiRenderer(this.context, R.raw.gui_vertex_shader, R.raw.gui_fragment_shader);
+            this.guiRenderer.startRendering();
 
-        if (! this.loadingStarted) {
-            final float aspectRatio = LOADING_SCREEN_ASPECT_RATIO * LayoutConsts.SCALE_X;
-            float x1 = 2 * aspectRatio;
-            float y1 = 2;
-            float x2 = 2;
-            float y2 = 2/aspectRatio;
-            float width = (x1 < 2) ? x2 : x1;
-            float height = (x1 < 2) ? y2 : y1;
-            this.loadingScreen = new QuadTexture(context,R.drawable.loading_screen,0,0,width,height);
+            if (!this.loadingStarted) {
+                final float aspectRatio = LOADING_SCREEN_ASPECT_RATIO * LayoutConsts.SCALE_X;
+                float x1 = 2 * aspectRatio;
+                float y1 = 2;
+                float x2 = 2;
+                float y2 = 2 / aspectRatio;
+                float width = (x1 < 2) ? x2 : x1;
+                float height = (x1 < 2) ? y2 : y1;
+                this.loadingScreen = new QuadTexture(context, R.drawable.loading_screen, 0, 0, width, height);
+            }
+        } catch (Exception e){
+            Log.d("Exception","On Surface Created Failed",e);
         }
     }
 
@@ -187,32 +191,28 @@ public class CraterRenderer extends EnigmaduxGLRenderer {
      */
     @Override
     public void onSurfaceChanged(GL10 gl, int width, int height) {
+        try {
+            if (height == 0) {                        //Prevent A Divide By Zero By
+                height = 1;                        //Making Height Equal One
+            }
+
+            GLES30.glViewport(0, 0, width, height);    //Reset The Current Viewport
 
 
+            //Calculate The Aspect Ratio Of The Window
+            Matrix.orthoM(orthographicM, 0, -CAMERA_Z, CAMERA_Z, -CAMERA_Z * height / width, CAMERA_Z * height / width, 0.2f, 5f);
 
-        if(height == 0) { 						//Prevent A Divide By Zero By
-            height = 1; 						//Making Height Equal One
+
+            if (this.craterBackendThread == null) {
+                this.craterBackendThread = new CraterBackendThread(this.context, this.world);
+                this.craterBackendThread.setRunning(true);
+                this.craterBackendThread.setGamePaused(true);
+                this.craterBackendThread.start();
+            }
+        } catch (Exception e){
+            Log.d("Exception","On Surface Changed Failed",e);
+
         }
-
-
-        GLES30.glViewport(0, 0, width, height); 	//Reset The Current Viewport
-
-
-        //Calculate The Aspect Ratio Of The Window
-        Matrix.orthoM(orthographicM,0,-CAMERA_Z,CAMERA_Z,-CAMERA_Z* height/width,CAMERA_Z * height/width,0.2f,5f);
-
-
-        if (this.craterBackendThread == null) {
-            this.craterBackendThread = new CraterBackendThread(this.context,this.world);
-            this.craterBackendThread.setRunning(true);
-            this.craterBackendThread.setGamePaused(true);
-            this.craterBackendThread.start();
-        }
-
-
-
-
-
     }
 
 
@@ -273,33 +273,37 @@ public class CraterRenderer extends EnigmaduxGLRenderer {
       */
     @Override
     public void onDrawFrame(GL10 gl) {
+        try {
+            // clear Scree
+            this.clearScreen();
 
-        // clear Scree
-        this.clearScreen();
-
-        //if loading hasn't rendered return
-        if (this.renderLoadingScreen()) return;
+            //if loading hasn't rendered return
+            if (this.renderLoadingScreen()) return;
 
 
-        if ((this.world.getCurrentGameState() != World.STATE_GUI)) {
-            Matrix.setIdentityM(this.cameraM,0);
-            Matrix.scaleM(this.cameraM,0,this.world.getCameraZoom(),this.world.getCameraZoom(),1);
-            Matrix.multiplyMM(vPMatrix,0,orthographicM,0,this.cameraM,0);   //this.world.draw(vPMatrix);
-        }
-        //draws all on screen components
-        Matrix.setLookAtM(this.cameraM, 0, 0, 0, 1, 0, 0, 0, 0, 1f, 0);
-        Matrix.scaleM(this.cameraM, 0, CAMERA_Z, CAMERA_Z * LayoutConsts.SCREEN_HEIGHT / LayoutConsts.SCREEN_WIDTH, 0);//too offset the orthographic projection for areas where it isnt needed
-        Matrix.multiplyMM(this.guiMatrix,0,orthographicM,0,this.cameraM,0);
+            if ((this.world.getCurrentGameState() != World.STATE_GUI)) {
+                Matrix.setIdentityM(this.cameraM, 0);
+                Matrix.scaleM(this.cameraM, 0, this.world.getCameraZoom(), this.world.getCameraZoom(), 1);
+                Matrix.multiplyMM(vPMatrix, 0, orthographicM, 0, this.cameraM, 0);   //this.world.draw(vPMatrix);
+            }
+            //draws all on screen components
+            Matrix.setLookAtM(this.cameraM, 0, 0, 0, 1, 0, 0, 0, 0, 1f, 0);
+            Matrix.scaleM(this.cameraM, 0, CAMERA_Z, CAMERA_Z * LayoutConsts.SCREEN_HEIGHT / LayoutConsts.SCREEN_WIDTH, 0);//too offset the orthographic projection for areas where it isnt needed
+            Matrix.multiplyMM(this.guiMatrix, 0, orthographicM, 0, this.cameraM, 0);
 
-        this.world.draw(vPMatrix,this.guiMatrix);
+            this.world.draw(vPMatrix, this.guiMatrix);
 
-        updateCountThisFrameSession++;
+            updateCountThisFrameSession++;
 
-        if (System.currentTimeMillis() - lastFrameSessionStart > 10000){
+            if (System.currentTimeMillis() - lastFrameSessionStart > 10000) {
 //            Log.d("FRONTENDTHREAD:","Frames per second:"  + (1000 * updateCountThisFrameSession /(double) (System.currentTimeMillis() - lastFrameSessionStart)));
 
-            lastFrameSessionStart = System.currentTimeMillis();
-            updateCountThisFrameSession = 0;
+                lastFrameSessionStart = System.currentTimeMillis();
+                updateCountThisFrameSession = 0;
+            }
+        } catch (Exception e){
+            Log.d("Exception","On Draw Frame Failed",e);
+
         }
     }
 
@@ -351,11 +355,8 @@ public class CraterRenderer extends EnigmaduxGLRenderer {
 //                Log.d("RENDERER","Loading step: 3");
                 break;
             case 4:
-                if (DrawablesLoader.loadResource(context)){
-                    return true;
-                }
+                return DrawablesLoader.loadResource(context);
 //                Log.d("RENDERER","Loading step: 4");
-                return false;
             case 5:
                 World.loadTextures(context);
 //                Log.d("RENDERER","Loading step: 5");

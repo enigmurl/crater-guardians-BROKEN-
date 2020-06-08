@@ -2,12 +2,10 @@ package com.enigmadux.craterguardians;
 
 import android.util.Log;
 
-
 import com.enigmadux.craterguardians.enemies.Enemy;
 import com.enigmadux.craterguardians.gameobjects.Plateau;
 import com.enigmadux.craterguardians.gameobjects.ToxicLake;
 import com.enigmadux.craterguardians.players.Player;
-import com.enigmadux.craterguardians.util.FloatPoint;
 import com.enigmadux.craterguardians.util.MathOps;
 
 import java.util.ArrayList;
@@ -287,21 +285,24 @@ public class EnemyMap extends Thread {
                 continue;
             }
 
-
-            Entry entry = enemies.poll();
-            if (entry != null) {
-                Enemy e = entry.e;
-                LinkedList<Node> path;
-                synchronized (LOCK) {
-                    path = this.nextStepMap(e.getDeltaX(), e.getDeltaY(), entry.supplyIndex);
+            try {
+                Entry entry = enemies.poll();
+                if (entry != null) {
+                    Enemy e = entry.e;
+                    LinkedList<Node> path;
+                    synchronized (LOCK) {
+                        path = this.nextStepMap(e.getDeltaX(), e.getDeltaY(), entry.supplyIndex);
+                    }
+                    e.setPath(path);
+                } else {
+                    try {
+                        Thread.sleep(1000);
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
+                    }
                 }
-                e.setPath(path);
-            } else {
-                try {
-                    Thread.sleep(1000);
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
-                }
+            } catch (Exception e){
+                Log.d("Exception","Enemy Map failed",e);
             }
         }
 

@@ -1,7 +1,6 @@
 package com.enigmadux.craterguardians.gamelib;
 
 import android.content.Context;
-import android.util.Log;
 
 import com.enigmadux.craterguardians.R;
 
@@ -16,6 +15,7 @@ public class DrawablesLoader {
             R.drawable.button_background,
             R.drawable.character_select_bottom,
             R.drawable.crater_guardians_label,
+            R.drawable.credits,
             R.drawable.death_animation, R.drawable.shoot_animation,R.drawable.evolve_animation,R.drawable.enemy_spawn_animation,
             R.drawable.enemy_spawner,
             R.drawable.enemy_strength1,R.drawable.enemy_strength2,R.drawable.enemy_strength3,

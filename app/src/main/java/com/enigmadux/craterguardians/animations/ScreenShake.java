@@ -37,7 +37,7 @@ public class ScreenShake extends FrameTransitionAnim {
     }
 
     @Override
-    void step() {
+    protected void step() {
         int index = Math.min((int) (finishedMillis * (orgSize-1)/totalMillis),orgSize - 2) + 1;
         //todod this is inefficient linked List O(N) get
         float denom = (totalMillis/(float) (orgSize - 1));
@@ -57,7 +57,7 @@ public class ScreenShake extends FrameTransitionAnim {
     }
 
     @Override
-    void finish() {
+    protected void finish() {
         super.finish();
         world.setCameraDelta(0,0);
         this.finished = true;

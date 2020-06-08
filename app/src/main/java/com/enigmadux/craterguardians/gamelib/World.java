@@ -2,32 +2,31 @@ package com.enigmadux.craterguardians.gamelib;
 
 import android.content.Context;
 import android.opengl.Matrix;
-import android.util.Log;
 
+import com.enigmadux.craterguardians.CraterRenderer;
+import com.enigmadux.craterguardians.EnemyMap;
+import com.enigmadux.craterguardians.GameMap;
+import com.enigmadux.craterguardians.R;
 import com.enigmadux.craterguardians.animations.Animation;
 import com.enigmadux.craterguardians.animations.TransitionAnim;
 import com.enigmadux.craterguardians.attacks.BaseAttack;
 import com.enigmadux.craterguardians.attacks.EnemyAttack;
 import com.enigmadux.craterguardians.attacks.PlayerAttack;
-import com.enigmadux.craterguardians.CraterRenderer;
-import com.enigmadux.craterguardians.EnemyMap;
+import com.enigmadux.craterguardians.enemies.Enemy;
+import com.enigmadux.craterguardians.enemies.Enemy1;
 import com.enigmadux.craterguardians.filestreams.LevelData;
 import com.enigmadux.craterguardians.filestreams.PlayerData;
 import com.enigmadux.craterguardians.filestreams.TutorialData;
+import com.enigmadux.craterguardians.gameobjects.Plateau;
+import com.enigmadux.craterguardians.gameobjects.Supply;
+import com.enigmadux.craterguardians.gameobjects.ToxicLake;
 import com.enigmadux.craterguardians.guilib.GUILayout;
 import com.enigmadux.craterguardians.guilib.dynamicText.DynamicText;
 import com.enigmadux.craterguardians.guis.inGameScreen.InGameScreen;
 import com.enigmadux.craterguardians.guis.pauseGameScreen.PauseGameLayout;
 import com.enigmadux.craterguardians.guis.postGameLayout.PostGameLayout;
-import com.enigmadux.craterguardians.GameMap;
-import com.enigmadux.craterguardians.gameobjects.Plateau;
-import com.enigmadux.craterguardians.gameobjects.Supply;
-import com.enigmadux.craterguardians.gameobjects.ToxicLake;
-import com.enigmadux.craterguardians.R;
-import com.enigmadux.craterguardians.spawners.Spawner;
-import com.enigmadux.craterguardians.enemies.Enemy;
-import com.enigmadux.craterguardians.enemies.Enemy1;
 import com.enigmadux.craterguardians.players.Player;
+import com.enigmadux.craterguardians.spawners.Spawner;
 import com.enigmadux.craterguardians.util.MathOps;
 import com.enigmadux.craterguardians.util.SoundLib;
 import com.enigmadux.craterguardians.values.LayoutConsts;
@@ -670,6 +669,8 @@ public class World {
         SoundLib.setStateGameMusic(false);
         SoundLib.setStateLossMusic(true);
         this.resetJoySticks();
+
+
     }
 
     /** During the PRe game zoom period there is some extended zoom that has to be applied
@@ -822,7 +823,7 @@ public class World {
         this.cameraDeltaY = dY;
     }
     private static int getXpGainPerLevel(int level, boolean alreadyCompleted){
-        double exp = alreadyCompleted ? 0.4 : 1.45;
+        double exp = alreadyCompleted ? 0.8 : 1.45;
         return (int) (World.XP_GAIN_PER_LEVEL * Math.pow(level,exp));
     }
 

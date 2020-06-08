@@ -26,7 +26,7 @@ public class ZoomFadeIn extends FrameTransitionAnim {
 
 
     @Override
-    void step() {
+    protected void step() {
         float t = 1 - (float)(millisLeft)/totalMillis;
         float scale = getScale(t);
         original.setScale(orgW * scale,orgH * scale);
@@ -34,7 +34,7 @@ public class ZoomFadeIn extends FrameTransitionAnim {
     }
 
     @Override
-    void finish() {
+    protected void finish() {
         super.finish();
         original.setVisibility(false);
         original.setScale(orgW,orgH);

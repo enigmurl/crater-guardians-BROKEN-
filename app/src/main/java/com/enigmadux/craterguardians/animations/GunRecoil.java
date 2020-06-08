@@ -19,7 +19,7 @@ public class GunRecoil extends FrameTransitionAnim {
     }
 
     @Override
-    void step() {
+    protected void step() {
         float t  =  (float) finishedMillis/totalMillis;
         float curLen = this.length * (-(2 * t - 1) * (2 * t - 1) + 1);
 
@@ -27,7 +27,7 @@ public class GunRecoil extends FrameTransitionAnim {
     }
 
     @Override
-    void finish() {
+    protected void finish() {
         super.finish();
         this.player.setGunDelta(0,0);
     }

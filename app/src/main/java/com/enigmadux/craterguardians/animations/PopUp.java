@@ -1,11 +1,9 @@
 package com.enigmadux.craterguardians.animations;
 
-import android.util.Log;
-
 import enigmadux2d.core.quadRendering.QuadTexture;
 
 public class PopUp extends FrameTransitionAnim {
-    public static final long DEFAULT_MILLIS = 450;
+    public static final long DEFAULT_MILLIS = 250;
     private QuadTexture quadTexture;
 
     private float orgW;
@@ -20,14 +18,14 @@ public class PopUp extends FrameTransitionAnim {
     }
 
     @Override
-    void step() {
+    protected void step() {
         float scale =this.getScale(Math.min(finishedMillis,totalMillis)/(float) totalMillis);
         this.quadTexture.setScale(scale * orgW,scale * orgH);
 
     }
 
     @Override
-    void finish() {
+    protected void finish() {
         super.finish();
         this.quadTexture.setScale(orgW,orgH);
 

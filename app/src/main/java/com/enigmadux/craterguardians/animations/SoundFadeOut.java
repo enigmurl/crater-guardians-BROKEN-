@@ -12,12 +12,12 @@ public class SoundFadeOut extends FrameTransitionAnim {
     }
 
     @Override
-    void step() {
+    protected void step() {
         this.mediaPlayer.setVolume(1 - (float) finishedMillis/totalMillis,1 - (float) finishedMillis/totalMillis);
     }
 
     @Override
-    void finish() {
+    protected void finish() {
         super.finish();
         mediaPlayer.setVolume(0,0);
         if (mediaPlayer.isPlaying()) {

@@ -19,12 +19,12 @@ public class ShieldSpawner extends FrameTransitionAnim {
 
 
     @Override
-    void step() {
+    protected void step() {
         s.setRadius(orgR * finishedMillis/totalMillis);
     }
 
     @Override
-    void finish() {
+    protected void finish() {
         super.finish();
         s.setRadius(orgR);
     }

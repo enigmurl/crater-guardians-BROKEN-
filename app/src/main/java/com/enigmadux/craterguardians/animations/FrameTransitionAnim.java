@@ -1,7 +1,7 @@
 package com.enigmadux.craterguardians.animations;
 
 public abstract class FrameTransitionAnim extends TransitionAnim {
-    static final long DELAY_MILLIS = 1000L/120L;
+    protected static final long DELAY_MILLIS = 1000L/120L;
 
     protected long millisLeft;
     protected long totalMillis;
@@ -12,19 +12,19 @@ public abstract class FrameTransitionAnim extends TransitionAnim {
 
     private long deltaTime;
     boolean inGameAnim = false;
-    FrameTransitionAnim(long millis){
+    protected FrameTransitionAnim(long millis){
         finishedMillis = 0;
         totalMillis = millisLeft= millis;
 
     }
-    void start(){
+    protected void start(){
         if (inGameAnim) {
             GAME_HANDLER.postDelayed(this, 0);
         } else {
             HANDLER.postDelayed(this,0);
         }
     }
-    void start(long delay){
+    protected void start(long delay){
         if (inGameAnim) {
             GAME_HANDLER.postDelayed(this, delay);
         } else {
@@ -57,13 +57,13 @@ public abstract class FrameTransitionAnim extends TransitionAnim {
 
     }
 
-    public void setDeltaTime(long deltaTime){
+    void setDeltaTime(long deltaTime){
         this.deltaTime = deltaTime;
     }
 
-    abstract void step();
+    protected abstract void step();
 
-    void finish(){
+    protected void finish(){
         this.finished = true;
     }
     public void cancel(){

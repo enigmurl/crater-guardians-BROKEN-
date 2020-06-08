@@ -31,6 +31,7 @@ public abstract class EnigmaduxGLSurfaceView extends GLSurfaceView {
         //fix for error No Config chosen, but I don't know what this does.
         //super.setEGLConfigChooser(8 , 8, 8, 8, 16, 0);
         this.setRenderer();
+
     }
 
     /** Sets the renderer by initializing it. A method may not really be necessary, but for now.

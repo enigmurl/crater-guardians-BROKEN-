@@ -23,7 +23,7 @@ public class XpGainedAnimation extends FrameTransitionAnim {
     }
 
     @Override
-    void step() {
+    protected void step() {
         long expandingMillis = (long) (EXPANDING_PERCENT * totalMillis);
         float size = maxSize * getScale((float) finishedMillis/totalMillis);
         if (finishedMillis < expandingMillis){
@@ -44,7 +44,7 @@ public class XpGainedAnimation extends FrameTransitionAnim {
     }
 
     @Override
-    void finish() {
+    protected void finish() {
         super.finish();
         float size = maxSize;
         this.xpDisplay.updateText(" + " + xp + " XP",size);

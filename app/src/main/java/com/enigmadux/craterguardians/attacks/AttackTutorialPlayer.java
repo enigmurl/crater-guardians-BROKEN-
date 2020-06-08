@@ -3,9 +3,10 @@ package com.enigmadux.craterguardians.attacks;
 import android.opengl.Matrix;
 
 import com.enigmadux.craterguardians.R;
-import com.enigmadux.craterguardians.spawners.Spawner;
-import com.enigmadux.craterguardians.gamelib.World;
 import com.enigmadux.craterguardians.enemies.Enemy;
+import com.enigmadux.craterguardians.gamelib.World;
+import com.enigmadux.craterguardians.spawners.Spawner;
+import com.enigmadux.craterguardians.util.SoundLib;
 
 
 public class AttackTutorialPlayer extends PlayerAttack {
@@ -29,6 +30,7 @@ public class AttackTutorialPlayer extends PlayerAttack {
      */
     public AttackTutorialPlayer(int instanceID, float x, float y, float angle) {
         super(instanceID, x, y,RADIUS * 2,RADIUS * 2, angle, SPEED, LENGTH,AttackTutorialPlayer.DAMAGE);
+        SoundLib.playKaiserShoot();
     }
 
     @Override

@@ -3,6 +3,7 @@ package com.enigmadux.craterguardians.guis.settingsScreen;
 import android.content.Context;
 import android.view.MotionEvent;
 
+import com.enigmadux.craterguardians.R;
 import com.enigmadux.craterguardians.filestreams.SettingsData;
 import com.enigmadux.craterguardians.guilib.GUIClickable;
 import com.enigmadux.craterguardians.guilib.GUILayout;
@@ -13,7 +14,6 @@ import com.enigmadux.craterguardians.guilib.VisibilityInducedButton;
 import com.enigmadux.craterguardians.guilib.VisibilitySwitch;
 import com.enigmadux.craterguardians.guilib.dynamicText.DynamicText;
 import com.enigmadux.craterguardians.guis.homeScreen.HomeScreen;
-import com.enigmadux.craterguardians.R;
 import com.enigmadux.craterguardians.values.LayoutConsts;
 import com.enigmadux.craterguardians.values.STRINGS;
 
@@ -61,6 +61,12 @@ public class SettingsScreen implements GUILayout {
     private MatieralBar matieralBar;
 
 
+    private Credits credits;
+    private CreditsUpdater creditsUpdater;
+
+
+
+
     /** Default Constructor
      *
      * @param settingsData a SettingsData object, so updated settings can
@@ -81,6 +87,9 @@ public class SettingsScreen implements GUILayout {
     @Override
     public void loadComponents(Context context, HashMap<String,GUILayout> allLayouts){
 
+        credits = new Credits(context);
+        credits.setVisibility(false);
+
         ImageText title = new ImageText(context,R.drawable.layout_background,0f,0.85f,1,0.25f,true);
         ImageText musicText =new ImageText(context,R.drawable.button_background,-0.5f,-0.05f,1.5f,1.5f,true);
         ImageText soundText =new ImageText(context,R.drawable.button_background,0.5f,-0.05f,1.5f,1.5f,true);
@@ -96,6 +105,11 @@ public class SettingsScreen implements GUILayout {
         title.updateText("Settings",0.1f);
 
         this.renderables.add(new QuadTexture(context,R.drawable.gui_background,0,0,2,2));
+
+        CreditsButton creditsButton = new CreditsButton(context,this);
+        this.clickables.add(creditsButton);
+
+
         this.textRenderables.add(title);
         this.textRenderables.add(musicText);
         this.textRenderables.add(soundText);
@@ -124,8 +138,11 @@ public class SettingsScreen implements GUILayout {
                 0.5f,-0.25f,0.75f,0.75f,
                 this.settingsData));
 
+
+
         this.renderables.addAll(clickables);
 
+        this.allComponents.add(this.credits);
         this.allComponents.addAll(clickables);
         allComponents.addAll(textRenderables);
 
@@ -143,6 +160,9 @@ public class SettingsScreen implements GUILayout {
             for (int i = 0, size = this.textRenderables.size(); i<size; i++){
                 this.textRenderables.get(i).renderText(textRenderer,uMVPMatrix);
             }
+            if (credits.isVisible()){
+                renderer.renderQuad(credits,uMVPMatrix);
+            }
         }
     }
 
@@ -155,6 +175,12 @@ public class SettingsScreen implements GUILayout {
     @Override
     public boolean onTouch(MotionEvent e) {
         if (! this.isVisible) return false;
+        if (credits.isVisible()){
+            if (e.getActionMasked() == MotionEvent.ACTION_UP) {
+                this.creditsUpdater.cancel();
+            }
+            return true;
+        }
 
         for (int i = this.clickables.size()-1;i>= 0;i--){
             if (this.clickables.get(i).onTouch(e)) return true;
@@ -170,6 +196,9 @@ public class SettingsScreen implements GUILayout {
     public void setVisibility(boolean visibility) {
 
         for (int i = this.allComponents.size()-1;i>= 0;i--){
+            if (this.allComponents.get(i) == this.credits && visibility){
+                continue;
+            }
             this.allComponents.get(i).setVisibility(visibility);
         }
         if (! visibility){
@@ -183,5 +212,9 @@ public class SettingsScreen implements GUILayout {
     @Override
     public boolean isVisible() {
         return isVisible;
+    }
+
+    void startCredits(){
+        this.creditsUpdater = new CreditsUpdater(credits);
     }
 }

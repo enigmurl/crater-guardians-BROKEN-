@@ -41,7 +41,7 @@ public class ExpansionAnim extends FrameTransitionAnim {
     }
 
     @Override
-    void step() {
+    protected void step() {
         float wid = ((float) millisLeft/totalMillis) * (minWidth - maxWidth) + maxWidth;
         float hgt = ((float) millisLeft/totalMillis) * (minHeight - maxHeight) + maxHeight;
 
@@ -49,7 +49,7 @@ public class ExpansionAnim extends FrameTransitionAnim {
     }
 
     @Override
-    void finish() {
+    protected void finish() {
         super.finish();
         this.quadTexture.setScale(maxWidth,maxHeight);
     }

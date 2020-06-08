@@ -32,13 +32,13 @@ public class ButtonScalingAnim extends FrameTransitionAnim {
 
 
     @Override
-    void finish() {
+    protected void finish() {
         super.finish();
         this.quadTexture.setScale(endS);
     }
 
     @Override
-    void step() {
+    protected void step() {
         float s = ((float) millisLeft/totalMillis) * (startS - endS) + endS;
         this.quadTexture.setScale(s);
     }

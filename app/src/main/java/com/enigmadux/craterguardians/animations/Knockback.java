@@ -50,7 +50,7 @@ public class Knockback extends FrameTransitionAnim {
     }
 
     @Override
-    void step() {
+    protected void step() {
 
         this.enemy.translateFromPos(DELAY_MILLIS * deltaX/totalMillis,DELAY_MILLIS * deltaY/totalMillis);
     }

@@ -22,7 +22,7 @@ public class FlingingAnim extends FrameTransitionAnim {
     }
 
     @Override
-    void step() {
+    protected void step() {
         this.velocity *= (1 - FRICTION * DELAY_MILLIS/1000);
         if (Math.abs(this.velocity) < MIN_VELOCITY){
             this.cancel();

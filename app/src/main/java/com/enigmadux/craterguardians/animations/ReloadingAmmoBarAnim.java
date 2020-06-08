@@ -1,7 +1,5 @@
 package com.enigmadux.craterguardians.animations;
 
-import android.util.Log;
-
 import com.enigmadux.craterguardians.guilib.ProgressBar;
 
 public class ReloadingAmmoBarAnim extends FrameTransitionAnim {
@@ -27,14 +25,14 @@ public class ReloadingAmmoBarAnim extends FrameTransitionAnim {
     }
 
     @Override
-    void step() {
+    protected void step() {
         for (int i = 0;i < ammoBar.getRenderables().size();i++) {
             ammoBar.getRenderables().get(i).setAlpha(getAmmoBarAlpha((float) (finishedMillis)/totalMillis));
         }
     }
 
     @Override
-    void finish() {
+    protected void finish() {
         super.finish();
         for (int i = 0;i < ammoBar.getRenderables().size();i++) {
             ammoBar.getRenderables().get(i).setShader(rChannel,gChannel,bChannel,(float) (finishedMillis)/totalMillis);

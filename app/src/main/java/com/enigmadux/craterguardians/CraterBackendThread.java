@@ -1,17 +1,11 @@
 package com.enigmadux.craterguardians;
 
 import android.content.Context;
-import android.opengl.GLES30;
 import android.util.Log;
-import android.view.Surface;
 
 import com.enigmadux.craterguardians.animations.TransitionAnim;
 import com.enigmadux.craterguardians.gamelib.World;
 import com.enigmadux.craterguardians.util.SoundLib;
-
-import java.util.ArrayList;
-import java.util.List;
-import java.util.concurrent.TimeUnit;
 
 public class CraterBackendThread extends Thread {
 
@@ -85,10 +79,14 @@ public class CraterBackendThread extends Thread {
             long currentTime = System.currentTimeMillis();
 
             if (! appPaused) {
-                TransitionAnim.updateAnims(System.currentTimeMillis() - lastMillis);
-                if (!gamePaused) {
-                    TransitionAnim.updateGameAnims(System.currentTimeMillis() - lastMillis);
-                    this.backend.update(System.currentTimeMillis() - lastMillis);
+                try {
+                    TransitionAnim.updateAnims(System.currentTimeMillis() - lastMillis);
+                    if (!gamePaused) {
+                        TransitionAnim.updateGameAnims(System.currentTimeMillis() - lastMillis);
+                        this.backend.update(System.currentTimeMillis() - lastMillis);
+                    }
+                } catch (Exception e){
+                    Log.d("Exception","Update Failed",e);
                 }
             }
             this.lastMillis = currentTime;

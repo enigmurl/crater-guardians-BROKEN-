@@ -7,7 +7,6 @@ import android.util.Log;
 import com.enigmadux.craterguardians.util.SoundLib;
 
 import enigmadux2d.core.EnigmaduxActivity;
-import enigmadux2d.core.quadRendering.QuadTexture;
 
 /** The Main Activity for this app. It's the entry point to the app.
  *
@@ -22,12 +21,16 @@ public class CraterActivity extends EnigmaduxActivity {
      */
     @Override
     public void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
+        try {
+            super.onCreate(savedInstanceState);
 
-        // Create a GLSurfaceView instance and set it
-        // as the ContentView for this Activity
-        enigmaduxGLSurfaceView = new CraterGLSurfaceView(this);
-        setContentView(enigmaduxGLSurfaceView);
+            // Create a GLSurfaceView instance and set it
+            // as the ContentView for this Activity
+            enigmaduxGLSurfaceView = new CraterGLSurfaceView(this);
+            setContentView(enigmaduxGLSurfaceView);
+        } catch (Exception e){
+            Log.d("Exception","On Create Failed:" + e);
+        }
 
 
     }
@@ -37,9 +40,13 @@ public class CraterActivity extends EnigmaduxActivity {
      */
     @Override
     public void onPause(){
-        super.onPause();
-        this.enigmaduxGLSurfaceView.onPause();
-        SoundLib.pauseAllMedia();
+        try {
+            super.onPause();
+            this.enigmaduxGLSurfaceView.onPause();
+            SoundLib.pauseAllMedia();
+        } catch (Exception e){
+            Log.d("Exception","Pause Failed",e);
+        }
     }
 
 
@@ -48,18 +55,25 @@ public class CraterActivity extends EnigmaduxActivity {
      */
     @Override
     public void onResume(){
-        super.onResume();
-        this.enigmaduxGLSurfaceView.onResume();
-        SoundLib.resumeAllMedia();
+        try {
+            super.onResume();
+            this.enigmaduxGLSurfaceView.onResume();
+            SoundLib.resumeAllMedia();
+        } catch (Exception e){
+            Log.d("Exception","Resume Failed",e);
+        }
     }
     /** Loads all media
      *
      */
     @Override
     public void onStart(){
-        super.onStart();
-        this.enigmaduxGLSurfaceView.onStart();
-
+        try {
+            super.onStart();
+            this.enigmaduxGLSurfaceView.onStart();
+        } catch (Exception e){
+            Log.d("Exception","Start Failed",e);
+        }
     }
 
     /** called whenever app is exited, but still in memory
@@ -67,17 +81,25 @@ public class CraterActivity extends EnigmaduxActivity {
      */
     @Override
     public void onStop(){
-        super.onStop();
-        this.enigmaduxGLSurfaceView.onStop();
+        try {
+            super.onStop();
+            this.enigmaduxGLSurfaceView.onStop();
+        } catch (Exception e){
+            Log.d("Exception","Stop Failed",e);
+        }
 //        Log.d("CRATER","Stopping Activity");
     }
 
 
     @Override
     protected void onDestroy() {
-        SoundLib.stopAllMedia();
-        this.enigmaduxGLSurfaceView.onDestroy();
-        super.onDestroy();
+        try {
+            SoundLib.stopAllMedia();
+            this.enigmaduxGLSurfaceView.onDestroy();
+            super.onDestroy();
+        } catch (Exception e){
+            Log.d("Exception","Destroy Failed",e);
+        }
     }
 
 }

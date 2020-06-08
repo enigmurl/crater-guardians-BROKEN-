@@ -87,10 +87,14 @@ public class CraterGLSurfaceView extends EnigmaduxGLSurfaceView {
         this.queueEvent(new Runnable() {
             @Override
             public void run() {
-                QuadTexture.recycleAll();
-                QuadTexture.resetTextures();
+                try {
+                    QuadTexture.recycleAll();
+                    QuadTexture.resetTextures();
 //                Log.d("MEMORY","CLEARING: " + Thread.currentThread());
-                mRenderer.onDestroy();
+                    mRenderer.onDestroy();
+                } catch (Exception e){
+                    Log.d("Exception"," GL SURFACE VIEW Failed",e);
+                }
             }
         });
     }
