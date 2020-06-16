@@ -310,7 +310,7 @@ public class EnemyMap extends Thread {
 
         try {
             this.join();
-        } catch (InterruptedException e) {
+        } catch (Exception e) {
             e.printStackTrace();
         }
     }

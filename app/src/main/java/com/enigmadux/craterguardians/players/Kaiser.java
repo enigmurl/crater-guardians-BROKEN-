@@ -1,7 +1,6 @@
 package com.enigmadux.craterguardians.players;
 
 import android.content.Context;
-import android.support.annotation.NonNull;
 
 import com.enigmadux.craterguardians.attacks.AttackKaiser;
 import com.enigmadux.craterguardians.R;
@@ -161,7 +160,6 @@ public class Kaiser extends Player {
         return Math.min(NUM_GENS,2 + PLAYER_LEVEL/10);
     }
 
-    @NonNull
     @Override
     public String toString() {
         return "Kaiser";

@@ -115,7 +115,7 @@ public class DefaultShader extends ShaderProgram {
      * @param textureID the id of the texture to write
      */
     public void writeTexture(int textureID){
-        super.writeTexture(this.textureLocation,textureID);
+        super.writeTexture(textureID);
     }
 
     /** Updates the uniform shader variable

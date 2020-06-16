@@ -2,11 +2,8 @@ package enigmadux2d.core.shaders;
 
 import android.content.Context;
 import android.opengl.GLES30;
-import android.util.Log;
 
 import java.util.Scanner;
-
-import enigmadux2d.core.renderEngine.ModelLoader;
 
 /** This tells openGL how to render fragments and vertices
  *
@@ -170,17 +167,16 @@ public abstract class ShaderProgram {
 
     /** Writes a texture to a uniform variable
      *
-     * @param location this is where the value will be written to (use getUniformLocation to find the int)
      * @param textureID this is the id of texture, not the actual texture itself. OpenGL should've given you
      *                  the textureID
      */
-    protected void writeTexture(int location,int textureID){
+    protected void writeTexture(int textureID){
         //first set the texture port to 0
         GLES30.glActiveTexture(GLES30.GL_TEXTURE0);
         //bind the texture with the port
         GLES30.glBindTexture(GLES30.GL_TEXTURE_2D,textureID);
         //not completely sure what this does (or even if it works?)
-        GLES30.glUniform1i(location, 0);
+//        GLES30.glUniform1i(location, 0);
 
 
     }

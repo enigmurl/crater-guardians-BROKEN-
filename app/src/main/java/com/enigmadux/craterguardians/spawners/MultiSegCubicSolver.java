@@ -1,6 +1,5 @@
 package com.enigmadux.craterguardians.spawners;
 
-import android.support.annotation.NonNull;
 
 import java.util.Arrays;
 
@@ -36,7 +35,6 @@ public class MultiSegCubicSolver {
         return -1;
     }
 
-    @NonNull
     @Override
     public String toString() {
         return Arrays.toString(data);

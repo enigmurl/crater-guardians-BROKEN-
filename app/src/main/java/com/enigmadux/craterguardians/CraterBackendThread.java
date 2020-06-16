@@ -71,9 +71,13 @@ public class CraterBackendThread extends Thread {
         while (this.running){
             updateCount++;
 
-            if (! hasLoadedSound){
-                SoundLib.loadMedia(context);
-                this.hasLoadedSound = true;
+            try {
+                if (!hasLoadedSound) {
+                    SoundLib.loadMedia(context);
+                    this.hasLoadedSound = true;
+                }
+            } catch (Exception e){
+                Log.d("Exception","Sound Load Failed",e);
             }
 
             long currentTime = System.currentTimeMillis();
@@ -95,7 +99,7 @@ public class CraterBackendThread extends Thread {
             if (delta < 1000/CraterBackendThread.UPDATE_RATE) {
                 try {
                     Thread.sleep((long) (1000/CraterBackendThread.UPDATE_RATE) - delta);
-                } catch (InterruptedException e){
+                } catch (Exception e){
                     //pass
                 }
             }

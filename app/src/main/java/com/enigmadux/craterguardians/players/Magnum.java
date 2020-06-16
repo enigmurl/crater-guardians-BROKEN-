@@ -1,7 +1,6 @@
 package com.enigmadux.craterguardians.players;
 
 import android.content.Context;
-import android.support.annotation.NonNull;
 
 import com.enigmadux.craterguardians.attacks.AttackMagnum;
 import com.enigmadux.craterguardians.R;
@@ -191,7 +190,6 @@ public class Magnum extends Player {
 
 
 
-    @NonNull
     @Override
     public String toString() {
         return "Magnum";

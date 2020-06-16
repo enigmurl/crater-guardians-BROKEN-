@@ -1,6 +1,5 @@
 package com.enigmadux.craterguardians.gamelib;
 
-import android.support.annotation.NonNull;
 
 import enigmadux2d.core.gameObjects.CollectionElem;
 
@@ -134,7 +133,6 @@ public abstract class CraterCollectionElem extends CollectionElem {
         this.shader = new float[]{1,1,1,1};
     }
 
-    @NonNull
     @Override
     public String toString() {
         return "ID : " + getInstanceID();

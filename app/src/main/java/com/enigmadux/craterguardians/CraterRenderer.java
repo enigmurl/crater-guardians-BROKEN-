@@ -23,6 +23,7 @@ import com.enigmadux.craterguardians.guis.levelSelect.LevelSelectLayout;
 import com.enigmadux.craterguardians.guis.pauseGameScreen.PauseGameLayout;
 import com.enigmadux.craterguardians.guis.postGameLayout.PostGameLayout;
 import com.enigmadux.craterguardians.guis.settingsScreen.SettingsScreen;
+import com.enigmadux.craterguardians.loading.Loader;
 import com.enigmadux.craterguardians.players.Kaiser;
 import com.enigmadux.craterguardians.players.Player;
 import com.enigmadux.craterguardians.players.TutorialPlayer;
@@ -38,6 +39,7 @@ import javax.microedition.khronos.opengles.GL10;
 import enigmadux2d.core.EnigmaduxGLRenderer;
 import enigmadux2d.core.quadRendering.GuiRenderer;
 import enigmadux2d.core.quadRendering.QuadTexture;
+import enigmadux2d.core.renderEngine.LoadingRenderer;
 
 /** The renderer used to do all the drawing
  *
@@ -446,8 +448,12 @@ public class CraterRenderer extends EnigmaduxGLRenderer {
      * @return whether or not you are interested in the rest of that event (everything from ACTION_DOWN to ACTION_UP or ACTION_CANCEL) (true means interested, false means not, other views get to read the event)
      */
     public boolean onTouch(MotionEvent e){
-        if (this.guiData != null) {
-            this.guiData.onTouch(e);
+        try {
+            if (this.guiData != null) {
+                this.guiData.onTouch(e);
+            }
+        } catch (Exception e1){
+            Log.d("EXCEPTION","Motion Event Failed: " + e1);
         }
 
         return true;
@@ -533,5 +539,25 @@ public class CraterRenderer extends EnigmaduxGLRenderer {
         }
     }
 
+    private class CraterLoader extends Loader{
+
+        //put some blank steps before so gl can keep the screen blank
+        private int PADDING_STEPS = 5;
+        //step number
+        private int step = -PADDING_STEPS;
+        public CraterLoader(LoadingRenderer loadingRenderer) {
+            super(loadingRenderer);
+        }
+
+        @Override
+        public boolean load(Context context) {
+            super.load(context);
+            if (loadNonBeginningTextures(this.step)) {
+                this.step++;
+                return true;
+            }
+            return false;
+        }
+    }
 
 }

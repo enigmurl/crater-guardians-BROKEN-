@@ -1,7 +1,6 @@
 package com.enigmadux.craterguardians.players;
 
 import android.content.Context;
-import android.support.annotation.NonNull;
 
 import com.enigmadux.craterguardians.attacks.AttackBlaze;
 import com.enigmadux.craterguardians.R;
@@ -191,8 +190,6 @@ public class Blaze extends Player {
         }
     }
 
-
-    @NonNull
     @Override
     public String toString() {
         return "Blaze";

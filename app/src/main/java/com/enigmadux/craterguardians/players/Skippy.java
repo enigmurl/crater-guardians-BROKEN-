@@ -1,7 +1,6 @@
 package com.enigmadux.craterguardians.players;
 
 import android.content.Context;
-import android.support.annotation.NonNull;
 import android.util.Log;
 
 import com.enigmadux.craterguardians.attacks.AttackSkippy;
@@ -190,8 +189,6 @@ public class Skippy extends Player {
         }
     }
 
-
-    @NonNull
     @Override
     public String toString() {
         return "Skippy";

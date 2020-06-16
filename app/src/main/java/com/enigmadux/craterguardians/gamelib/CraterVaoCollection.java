@@ -1,6 +1,5 @@
 package com.enigmadux.craterguardians.gamelib;
 
-import android.support.annotation.NonNull;
 
 import enigmadux2d.core.gameObjects.VaoCollection;
 
@@ -91,7 +90,7 @@ public class CraterVaoCollection extends VaoCollection {
     }
 
 
-    @NonNull
+
     @Override
     public String toString() {
         return "Crater Vao Collection of " + getNumInstances();

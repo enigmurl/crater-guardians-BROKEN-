@@ -2,11 +2,8 @@ package enigmadux2d.core.shaders;
 
 import android.content.Context;
 import android.opengl.GLES30;
-import android.util.Log;
 
 import java.nio.FloatBuffer;
-
-import enigmadux2d.core.quadRendering.QuadMesh;
 
 /** A shader for text
  * @author Manu Bhat
@@ -92,7 +89,7 @@ public class TextShader extends ShaderProgram {
      * @param textureID the id of the texture that openGL gave, (it will dump it to an int[])
      */
     public void writeTexture(int textureID) {
-        super.writeTexture(this.textureLocation, textureID);
+        super.writeTexture(textureID);
     }
 
     /** Writes the mvpMatrix,which transforms the vertices
